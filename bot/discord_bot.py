@@ -1,8 +1,9 @@
-import discord
-from database.database_access import *
 import asyncio
-import configparser
-import math
+
+import discord
+
+from database.database_access import *
+
 
 class D_client(discord.Client):
     def __init__(self, config_file):
@@ -147,6 +148,10 @@ class D_client(discord.Client):
             tmp_test = self.m_systems.systems_in_range(system_1, 8)
             for i in tmp_test:
                 print(i)
+
+    async def command_about(self, message):
+        await message.channel.send(
+            'eve-insight an EVE Online Discord Helper Bot\nhttps://github.com/Nathan-LS/EVE-Insight')
     async def on_message(self, message):
         if message.author == self.user:
             return
@@ -157,7 +162,7 @@ class D_client(discord.Client):
         elif message.content.startswith('!npc'):
             await self.command_npc(message)
         elif message.content.startswith('!about'):
-            await message.channel.send('eve-insight an EVE Online Discord Helper Bot\nhttps://github.com/')
+            await self.command_about(message)
     @staticmethod
     def bot_run():
         config_file = configparser.ConfigParser()
