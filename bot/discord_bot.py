@@ -114,12 +114,15 @@ class D_client(discord.Client):
                     if float(val["JDC4"]) > ly_range:
                         in_range[key].insert(0, "JDC4")
                     else:
-                        out_range[str(key) +" JDC4"] = str("{} mid".format(int(math.ceil(ly_range/float((val["JDC4"]))))))
+                        out_range[str(key) + " JDC4"] = str(
+                            "{} mid".format(int(math.floor(ly_range / float((val["JDC4"]))))))
                 else:
-                    out_range[str(key) + " JDC5"] = str("{} mid".format(int(math.ceil(ly_range/float((val["JDC5"]))))))
-                    out_range[str(key) + " JDC4"] = str("{} mid".format(int(math.ceil(ly_range/float((val["JDC4"]))))))
+                    out_range[str(key) + " JDC5"] = str(
+                        "{} mid".format(int(math.floor(ly_range / float((val["JDC5"]))))))
+                    out_range[str(key) + " JDC4"] = str(
+                        "{} mid".format(int(math.floor(ly_range / float((val["JDC4"]))))))
             resp_message = "{}\n{}->{} ({} lys)\n".format(message.author.mention, system_1["system_name"],
-                                                        system_2["system_name"], ly_range)
+                                                          system_2["system_name"], str(round(ly_range, 3)))
             resp_message += ("====in range====\n")
             for key, val in in_range.items():
                 line = str(key + ": ")
