@@ -88,8 +88,9 @@ class pve_stats(object):
             raise TypeError
         self.systems = systems_l
 
-        self.expires = datetime.datetime.utcnow()
-        self.last_updated = datetime.datetime.utcnow()
+        self.expires = None
+        self.last_updated = None
+        self.initial_times()
 
         self.endpoint_system_kills = "https://esi.tech.ccp.is/latest/universe/system_kills/?datasource=tranquility"
         self.thread_pve_pull_run = True
@@ -106,8 +107,7 @@ class pve_stats(object):
                 print("Got system kills\nRequest Date: {}\nLast Updated: {}\nExpires: {}".format(request_date_accessed,
                                                                                                  request_lu,
                                                                                                  request_expires))
-                self.expires = request_expires
-                if datetime.datetime.utcnow() > request_expires:
+                if datetime.datetime.utcnow() > self.expires:
                     try:
                         connection = mysql.connector.connect(**self.systems.con_.config())
                         cursor = connection.cursor()
@@ -126,6 +126,7 @@ class pve_stats(object):
                                 [request_lu, id, 0, 0, 0])
                         connection.commit()
                         self.last_updated = request_lu
+                        self.expires = request_expires
                     except mysql.connector.IntegrityError as ex:
                         print(ex)
                         if connection:
@@ -157,6 +158,27 @@ class pve_stats(object):
                 time.sleep(10)
                 api_import()
 
+    def initial_times(self):
+        try:
+            connection = mysql.connector.connect(**self.systems.con_.config())
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(
+                "SELECT * FROM api_raw_system_kills WHERE last_modified=(SELECT MAX(last_modified) FROM api_raw_system_kills)")
+            result = cursor.fetchone()
+            if result is None:
+                self.last_updated = datetime.datetime.utcnow()
+                self.expires = datetime.datetime.utcnow()
+            else:
+                self.last_updated = result['last_modified']
+                self.expires = result['expires']
+        except Exception as ex:
+            print(ex)
+            if connection:
+                connection.rollback()
+                connection.close()
+        finally:
+            if connection:
+                connection.close()
     def start_api_pull_thread(self):
         thread_1 = threading.Thread(target=self.thread_pve_pull)
         thread_1.start()
