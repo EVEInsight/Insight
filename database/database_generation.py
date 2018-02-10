@@ -1,23 +1,27 @@
+import time
+from multiprocessing.dummy import Pool as ThreadPool
+
 import mysql.connector
 import requests
-from multiprocessing.dummy import Pool as ThreadPool
+
 from database.database_connection import *
-import time
 
 
 class db_systems(object):
     """creates and imports system data if it does not yet exist"""
-    def __init__(self, con, skip_import=False):
+
+    def __init__(self, con, args):
         if not con.test_connection():
             raise ConnectionError
         self.con_ = con
+        self.arguments = args
         self.endpoint_system_list = "https://esi.tech.ccp.is/latest/universe/systems/?datasource=tranquility"
         self.endpoint_system_info = "https://esi.tech.ccp.is/latest/universe/systems/{}/?datasource=tranquility&language=en-us"
         self.endpoint_constellation_list = "https://esi.tech.ccp.is/latest/universe/constellations/?datasource=tranquility"
         self.endpoint_constellation_info = "https://esi.tech.ccp.is/latest/universe/constellations/{}/?datasource=tranquility&language=en-us"
         self.endpoint_region_list = "https://esi.tech.ccp.is/latest/universe/regions/?datasource=tranquility"
         self.endpoint_region_info = "https://esi.tech.ccp.is/latest/universe/regions/{}/?datasource=tranquility&language=en-us"
-        if not skip_import:
+        if not self.arguments.skip_gen:
             self.create_tables()
             self.import_system_ids()
             self.import_constellation_ids()

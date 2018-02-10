@@ -6,12 +6,13 @@ from database.database_access import *
 
 
 class D_client(discord.Client):
-    def __init__(self, config_file):
+    def __init__(self, cf_file, args):
         super().__init__()
-        self.config = config_file
-        self.db_c = db_con("config.ini")
-        self.m_systems = fa_systems(self.db_c)
-        self.cap_info = cap_info()
+        self.config_file = cf_file
+        self.arguments = args
+        self.db_c = db_con(cf_file=self.config_file, args=args)
+        self.m_systems = fa_systems(self.db_c, args=args)
+        self.cap_info = cap_info(cf_info=self.config_file, args=args)
         #self.channel_man = channel_manager()
 
         self.dotlan_url_range = "http://evemaps.dotlan.net/range/{},5/{}"
@@ -167,8 +168,7 @@ class D_client(discord.Client):
         elif message.content.startswith('!about'):
             await self.command_about(message)
     @staticmethod
-    def bot_run():
-        config_file = configparser.ConfigParser()
-        config_file.read("config.ini")
-        client = D_client(config_file)
-        client.run(config_file["discord"]["token"])
+    def bot_run(cf_file, args):
+        config_file = cf_file
+        client = D_client(config_file, args)
+        client.run(config_file["discord"]["token"], cf_file=config_file)

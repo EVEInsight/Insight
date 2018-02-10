@@ -1,17 +1,17 @@
 import mysql.connector
-import configparser
 
 
 class db_con(object):
     """Config and testing for a MySQL connection"""
-    def __init__(self,cf_file):
-        config_file = configparser.ConfigParser()
-        config_file.read(cf_file)
-        self.db_config = {'host': config_file["database"]["host"],
-                          'port': config_file["database"]["port"],
-                          'database': config_file["database"]["db"],
-                          'user': config_file["database"]["user"],
-                          'password': config_file["database"]["pass"]
+
+    def __init__(self, cf_file, args):
+        self.config_file = cf_file
+        self.arguments = args
+        self.db_config = {'host': self.config_file["database"]["host"],
+                          'port': self.config_file["database"]["port"],
+                          'database': self.config_file["database"]["db"],
+                          'user': self.config_file["database"]["user"],
+                          'password': self.config_file["database"]["pass"]
                           }
 
     def test_connection(self):
