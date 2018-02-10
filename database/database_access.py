@@ -1,4 +1,7 @@
+import datetime
+import json
 import math
+import threading
 
 import mysql.connector
 
@@ -17,6 +20,8 @@ class fa_systems(object):
 
         self.build_system_list()
 
+        self.pve_stats = pve_stats(self)
+
     def build_system_list(self):
         connection = mysql.connector.connect(**self.con_.config())
         cursor = connection.cursor(dictionary=True)
@@ -24,6 +29,7 @@ class fa_systems(object):
         self.system_list = cursor.fetchall()
         if connection:
             connection.close()
+        print("Loaded system table with {} systems".format(len(self.system_list)))
 
     def display(self):
         for i in self.system_list:
@@ -74,3 +80,83 @@ class cap_info(object):
                 "Blops": {"JDC4": self.config_file["eve_settings"]["blops_range_4"],
                           "JDC5": self.config_file["eve_settings"]["blops_range_5"]}
                 }
+
+
+class pve_stats(object):
+    def __init__(self, systems_l):
+        if not isinstance(systems_l, fa_systems):
+            raise TypeError
+        self.systems = systems_l
+
+        self.expires = datetime.datetime.utcnow()
+        self.last_updated = datetime.datetime.utcnow()
+
+        self.endpoint_system_kills = "https://esi.tech.ccp.is/latest/universe/system_kills/?datasource=tranquility"
+        self.thread_pve_pull_run = True
+        self.start_api_pull_thread()
+
+    def thread_pve_pull(self):
+        def api_import():
+            resp = requests.get(self.endpoint_system_kills, verify=True, timeout=10)
+            system_ids_master = [i["system_id"] for i in self.systems.system_list]
+            if resp.status_code == 200:
+                request_expires = datetime.datetime.strptime(resp.headers['Expires'], '%a, %d %b %Y %H:%M:%S %Z')
+                request_lu = datetime.datetime.strptime(resp.headers['Last-Modified'], '%a, %d %b %Y %H:%M:%S %Z')
+                request_date_accessed = datetime.datetime.strptime(resp.headers['Date'], '%a, %d %b %Y %H:%M:%S %Z')
+                print("Got system kills\nRequest Date: {}\nLast Updated: {}\nExpires: {}".format(request_date_accessed,
+                                                                                                 request_lu,
+                                                                                                 request_expires))
+                self.expires = request_expires
+                if datetime.datetime.utcnow() > request_expires:
+                    try:
+                        connection = mysql.connector.connect(**self.systems.con_.config())
+                        cursor = connection.cursor()
+                        cursor.execute(
+                            "INSERT INTO api_raw_system_kills(last_modified,expires,retrieval,raw_json) VALUES (%s,%s,%s,%s)",
+                            [request_lu, request_expires, request_date_accessed, json.dumps(resp.json())])
+                        system_ids_nonzero = []
+                        for i in resp.json():
+                            cursor.execute(
+                                "INSERT INTO pve_stats(date,system_fk,ship_kills,npc_kills,pod_kills) VALUES (%s,%s,%s,%s,%s)",
+                                [request_lu, i['system_id'], i['ship_kills'], i['npc_kills'], i['pod_kills']])
+                            system_ids_nonzero.append(i['system_id'])
+                        for id in (list(set(system_ids_master) - set(system_ids_nonzero))):
+                            cursor.execute(
+                                "INSERT INTO pve_stats(date,system_fk,ship_kills,npc_kills,pod_kills) VALUES (%s,%s,%s,%s,%s)",
+                                [request_lu, id, 0, 0, 0])
+                        connection.commit()
+                        self.last_updated = request_lu
+                    except mysql.connector.IntegrityError as ex:
+                        print(ex)
+                        if connection:
+                            connection.rollback()
+                            connection.close()
+                    except Exception as ex:
+                        print(ex)
+                        if connection:
+                            connection.rollback()
+                            connection.close()
+                        raise mysql.connector.DatabaseError
+                    finally:
+                        if connection:
+                            connection.close()
+            else:
+                sleep_time = 500
+                raise ConnectionError(
+                    "API ERROR: System kills returned {} -Waiting {}s before requesting api again".format(
+                        resp.status_code, sleep_time))
+                time.sleep(sleep_time)
+
+        while self.thread_pve_pull_run:
+            try:
+                dif = ((self.expires - datetime.datetime.utcnow()).total_seconds())
+                print("System kills API import thread sleeping for {}s {} is next update".format(dif, self.expires))
+                time.sleep(dif)
+                api_import()
+            except ValueError:
+                time.sleep(10)
+                api_import()
+
+    def start_api_pull_thread(self):
+        thread_1 = threading.Thread(target=self.thread_pve_pull)
+        thread_1.start()

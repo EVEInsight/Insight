@@ -60,6 +60,21 @@ class db_systems(object):
                 "security_class VARCHAR(5) DEFAULT NULL,"
                 "constellation_id_fk INT DEFAULT NULL,"
                 "FOREIGN KEY (constellation_id_fk) REFERENCES constellations(constellation_id))")
+            cursor.execute(
+                "CREATE TABLE IF NOT EXISTS  api_raw_system_kills("
+                "last_modified TIMESTAMP PRIMARY KEY NOT NULL ,"
+                "expires TIMESTAMP NOT NULL,"
+                "retrieval TIMESTAMP NOT NULL,"
+                "raw_json LONGTEXT)")
+            cursor.execute(
+                "CREATE TABLE IF NOT EXISTS  pve_stats("
+                "date TIMESTAMP NOT NULL ,"
+                "system_fk INT NOT NULL,"
+                "ship_kills INT NOT NULL,"
+                "npc_kills INT NOT NULL,"
+                "pod_kills INT NOT NULL,"
+                "PRIMARY KEY(date,system_fk),"
+                "FOREIGN KEY (system_fk) REFERENCES systems(system_id))")
             connection.commit()
         except Exception as ex:
             print(ex)
