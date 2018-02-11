@@ -62,7 +62,7 @@ class cap_info(object):
     def make_search_cap_type(self):
         return{
              "Avatar" : ["titans", "avatar", "erebus", "ragnarok", "levi", "leviathan", "tities", "vanquisher", "komodo", "bus", "tits"],
-            "Aeon":["scs", "supercarriers", "supercaps", "nyx", "hel", "wyvern", "aeon", "Vendetta"],
+            "Aeon": ["scs", "supers", "supercarriers", "supercaps", "nyx", "hel", "wyvern", "aeon", "Vendetta"],
             "Revelation": ["dreads", "dreadnoughts", "revelation", "moros", "naglfar", "phoenix"],
             "Archon": ["carriers", "faxs", "faxes" "archon", "thanatos", "nidhougor", "chimera", "apostle", "lif", "minokawa", "ninazu"],
             "Redeemer": ["blops", "bs", "blackops", "redeemer", "sin", "panther", "widow", "marshal"],
