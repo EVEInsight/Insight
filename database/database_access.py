@@ -83,6 +83,21 @@ class cap_info(object):
                           "JDC5": self.config_file["eve_settings"]["blops_range_5"]}
                 }
 
+    def return_jump_range(self, ship):
+        if ship == "Avatar":
+            return float(self.config_file["eve_settings"]["titan_range_5"])
+        elif ship == "Aeon":
+            return float(self.config_file["eve_settings"]["super_range_5"])
+        elif ship == "Archon":
+            return float(self.config_file["eve_settings"]["carrier_range_5"])
+        elif ship == "Revelation":
+            return float(self.config_file["eve_settings"]["dread_range_5"])
+        elif ship == "Redeemer":
+            return float(self.config_file["eve_settings"]["blops_range_5"])
+        elif ship == "Ark":
+            return float(self.config_file["eve_settings"]["jf_range_5"])
+        else:  # todo add rorqual jump range info
+            return None
 
 class pve_stats(object):
     def __init__(self, systems_l):

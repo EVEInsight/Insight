@@ -174,11 +174,52 @@ class D_client(discord.Client):
                     kills_delta['time1'], kills_delta['time0'],
                     last_update,
                     next_update))
-        # else:
-        # system_1 = await self.select_system(self.m_systems.find(items[0]), message, items[0])
-        # tmp_test = self.m_systems.systems_in_range(system_1, 8)
-        # for i in tmp_test:
-        #     print(i)
+
+    async def command_radar(self, message):
+        # todo change name of function
+        command_rem = (str(message.content).replace("!radar", ''))
+        items = []
+        for i in command_rem.split():
+            items.append(i)
+        if len(items) == 0:
+            pass
+            # todo usage
+        elif len(items) == 2:
+            systems_list = []
+            system_1 = await self.select_system(self.m_systems.find(items[0]), message, items[0])
+            ship_type = await self.lookup_ship(message, items[1])
+            jump_range = self.cap_info.return_jump_range(ship=ship_type)
+            next_update = round(
+                ((self.m_systems.pve_stats.expires - datetime.datetime.utcnow()).total_seconds() / 60), 1)
+            last_update = round(
+                ((datetime.datetime.utcnow() - self.m_systems.pve_stats.last_updated).total_seconds() / 60), 1)
+            tmp_test = self.m_systems.systems_in_range(system_1, jump_range)
+            for i in tmp_test:
+                systems_list.append({'system_name': i['system_name'],
+                                     'npc': self.m_systems.pve_stats.npc_kills_last_hour(i)['npc_kills'],
+                                     'delta': self.m_systems.pve_stats.npc_delta(i)['npc_kills']})
+            systems_list.sort(key=lambda k: k['npc'], reverse=True)
+
+            header = str(
+                "{}\nSystems by Highest NPC Kills and delta in range of {}({})({} lys)".format(message.author.mention,
+                                                                                               system_1['system_name'],
+                                                                                               system_1['region_name'],
+                                                                                               jump_range))
+            header_2 = str("\n{} systems as of: {} minutes ago\nNext update in: {} minutes\n"
+                           "======systems==========\n".format(len(systems_list),
+                                                              last_update,
+                                                              next_update))
+            body = str("")
+            for i in systems_list:
+                body += str(i['system_name'] + " {} ({:+})\n".format(i['npc'], i['delta']))
+
+            text = (header + header_2 + body)
+            n = 1999
+            for i in ([text[i:i + n] for i in range(0, len(text), n)]):  # todo add custom length
+                await message.channel.send(i)
+        else:
+            pass  # todo else
+
 
     async def command_help(self, message):
         await message.channel.send('{}\n'
@@ -208,6 +249,8 @@ class D_client(discord.Client):
             await self.command_hit(message)
         elif message.content.startswith('!npc'):
             await self.command_npc(message)
+        elif message.content.startswith('!radar'):
+            await self.command_radar(message)
         elif message.content.startswith('!help'):
             await self.command_help(message)
         elif message.content.startswith('!about'):
