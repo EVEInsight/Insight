@@ -11,7 +11,7 @@ class D_client(discord.Client):
         self.config_file = cf_file
         self.arguments = args
         self.db_c = db_con(cf_file=self.config_file, args=args)
-        self.m_systems = fa_systems(self.db_c, args=args)
+        self.m_systems = fa_systems(self.db_c, cf_file=self.config_file, args=args)
         self.cap_info = cap_info(cf_info=self.config_file, args=args)
         #self.channel_man = channel_manager()
 
@@ -42,7 +42,8 @@ class D_client(discord.Client):
                 count += 1
                 systems += (str("{}. {} ({})\n").format(count, i["system_name"], i["region_name"]))
             with message.channel.typing():
-                await message.channel.send("{}\nMultiple systems found matching \"{}\" \nPlease select one by entering it's number\nex type \"1\" to select the first result:\n\n{}".format(
+                await message.channel.send(
+                    "{}\nMultiple systems found matching \"{}\" \n\nPlease select one by entering it's number\nex type \"1\" to select the first result:\n\n{}".format(
                                               message.author.mention, original_lookup, systems))
             def select_system_check(m):
                 return m.author == message.author
@@ -91,7 +92,8 @@ class D_client(discord.Client):
             ship_class_1 = await self.lookup_ship(message, items[2])
             await message.channel.send("{}\n{}".format(
                                           message.author.mention, self.dotlan_url_jplanner.format(ship_class_1, system_1["system_name"], system_2["system_name"])))
-    async def command_hit(self,message):
+
+    async def command_hit(self, message):
         command_rem = (str(message.content).replace("!hit", ''))
         items = []
         for i in command_rem.split():
@@ -137,22 +139,63 @@ class D_client(discord.Client):
                 resp_message += (line + "\n")
             await message.channel.send(resp_message)
 
-    async def command_npc(self,message):
+    async def command_npc(self, message):
         command_rem = (str(message.content).replace("!npc", ''))
         items = []
         for i in command_rem.split():
             items.append(i)
-        if len(items) <= 1:
+        if len(items) == 0:
             pass
             # command usage
-        elif len(items) == 1:
-            pass
         else:
-            system_1 = await self.select_system(self.m_systems.find(items[0]), message, items[0])
-            tmp_test = self.m_systems.systems_in_range(system_1, 8)
-            for i in tmp_test:
-                print(i)
+            for i in items:
+                system_1 = await self.select_system(self.m_systems.find(i), message, i)
+                kills_last = self.m_systems.pve_stats.npc_kills_last_hour(system_1)
+                kills_delta = self.m_systems.pve_stats.npc_delta(system_1)
+                next_update = round(
+                    ((self.m_systems.pve_stats.expires - datetime.datetime.utcnow()).total_seconds() / 60), 1)
+                last_update = round(
+                    ((datetime.datetime.utcnow() - self.m_systems.pve_stats.last_updated).total_seconds() / 60), 1)
 
+                npc = str("{:<11} {:<5} ({:+})\n".format("NPC Kills:", kills_last['npc_kills'],
+                                                         kills_delta['npc_kills']))
+                ship = str("{:<12} {:<5} ({:+})\n".format("Ship Kills:", kills_last['ship_kills'],
+                                                          kills_delta['ship_kills']))
+                pod = str("{:<12} {:<5} ({:+})\n".format("Pod Kills:", kills_last['pod_kills'],
+                                                         kills_delta['pod_kills']))
+                print(str(npc + ship + pod))
+                await message.channel.send("{}\nSystem: {} ({})\n\n"
+                                           "{}\n"
+                                           "Delta: {}   ->   {}\n"
+                                           "Last Update: {} minutes ago\n"
+                                           "Next Update: {} minutes\n".format(
+                    message.author.mention, system_1['system_name'], system_1['region_name'],
+                    str(npc + ship + pod),
+                    kills_delta['time1'], kills_delta['time0'],
+                    last_update,
+                    next_update))
+        # else:
+        # system_1 = await self.select_system(self.m_systems.find(items[0]), message, items[0])
+        # tmp_test = self.m_systems.systems_in_range(system_1, 8)
+        # for i in tmp_test:
+        #     print(i)
+
+    async def command_help(self, message):
+        await message.channel.send('{}\n'
+                                   'This bot watches for commands starting with "!"\n\n'
+                                   'Available commands:\n\n'
+                                   '"!range" \tprovides Dotlan range and jump route maps\n\n'
+                                   'Usage:\n'
+                                   '"!range system_a ship_type"\n'
+                                   '"!range system_a system_b ship_type"\n\n\n'
+                                   '"!hit" \tlists ships within jump range of a system, if out of range prints the required # mids\n\n'
+                                   'Usage:\n'
+                                   '"!hit system_a system_b"\n\n\n'
+                                   '"!npc" \tLists npc, ship, pod kills and delta for the system.\nNote: Multiple systems can be looked up at once, just seperate system names by spaces.\n\n'
+                                   'Usage:\n'
+                                   '"!npc system_a ...."\n\n\n'
+                                   .format(message.author.mention)
+                                   )
     async def command_about(self, message):
         await message.channel.send(
             'eve-insight an EVE Online Discord Helper Bot\nhttps://github.com/Nathan-LS/EVE-Insight')
@@ -165,6 +208,8 @@ class D_client(discord.Client):
             await self.command_hit(message)
         elif message.content.startswith('!npc'):
             await self.command_npc(message)
+        elif message.content.startswith('!help'):
+            await self.command_help(message)
         elif message.content.startswith('!about'):
             await self.command_about(message)
     @staticmethod
