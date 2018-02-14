@@ -1,4 +1,5 @@
 import asyncio
+import random
 
 import discord
 
@@ -17,6 +18,8 @@ class D_client(discord.Client):
 
         self.dotlan_url_range = "http://evemaps.dotlan.net/range/{},5/{}"
         self.dotlan_url_jplanner = "http://evemaps.dotlan.net/jump/{},555/{}:{}"
+
+        self.import_vars()
     async def on_ready(self):
         print('Logged in as')
         print(self.user.name)
@@ -66,10 +69,7 @@ class D_client(discord.Client):
                 message.author.mention, original_lookup))
         raise KeyError("ship not found")
     async def command_range(self, message):
-        command_rem = (str(message.content).replace("!range", ''))
-        items = []
-        for i in command_rem.split():
-            items.append(i)
+        items = (str(message.content).split()[1:])
         if len(items) == 0:
             await message.channel.send("{}\n!range\nUsage:\n"
                                        "Generates links to dotlan with the selected system and shiptypes. JDC 5 is assumed.\n"
@@ -94,10 +94,7 @@ class D_client(discord.Client):
                                           message.author.mention, self.dotlan_url_jplanner.format(ship_class_1, system_1["system_name"], system_2["system_name"])))
 
     async def command_hit(self, message):
-        command_rem = (str(message.content).replace("!hit", ''))
-        items = []
-        for i in command_rem.split():
-            items.append(i)
+        items = (str(message.content).split()[1:])
         if len(items) <= 1:
             await message.channel.send("{}\n!inrange\nUsage:\n"
                                        "Determines ship classes capable of reaching system_2 from system_1\n"
@@ -140,10 +137,7 @@ class D_client(discord.Client):
             await message.channel.send(resp_message)
 
     async def command_npc(self, message):
-        command_rem = (str(message.content).replace("!npc", ''))
-        items = []
-        for i in command_rem.split():
-            items.append(i)
+        items = (str(message.content).split()[1:])
         if len(items) == 0:
             pass
             # command usage
@@ -177,10 +171,7 @@ class D_client(discord.Client):
 
     async def command_radar(self, message):
         # todo change name of function
-        command_rem = (str(message.content).replace("!radar", ''))
-        items = []
-        for i in command_rem.split():
-            items.append(i)
+        items = (str(message.content).split()[1:])
         if len(items) == 0:
             pass
             # todo usage
@@ -240,21 +231,44 @@ class D_client(discord.Client):
     async def command_about(self, message):
         await message.channel.send(
             'eve-insight an EVE Online Discord Helper Bot\nhttps://github.com/Nathan-LS/EVE-Insight')
+
+    async def command_mball(self, message):
+        items = ['test', 'np', 'testin']
+        await message.channel.send("{}\n{}".format(message.author.mention, random.choice(self.mball_responses)))
+
+    async def lookup_command(self, message, command_list):
+        return any((message.lower()).startswith(i.lower()) for i in command_list)
+
+    def populate_commands(self, config_param):
+        return [i for i in self.config_file["discord_bot"][config_param].split('\n')]
+
+    def import_vars(self):
+        self.range_command_lookup = self.populate_commands('command_range')
+        self.hit_command_lookup = self.populate_commands('command_hit')
+        self.npc_command_lookup = self.populate_commands('command_npc')
+        self.radar_command_lookup = self.populate_commands('command_radar')
+        self.help_command_lookup = self.populate_commands('command_help')
+        self.about_command_lookup = self.populate_commands('command_about')
+        self.mball_command_lookup = self.populate_commands('command_mball')
+
+        self.mball_responses = self.populate_commands('responses_mball')
     async def on_message(self, message):
         if message.author == self.user:
             return
-        if message.content.startswith('!range'):
+        if await self.lookup_command(message.content, self.range_command_lookup):
             await self.command_range(message)
-        elif message.content.startswith('!hit'):
+        elif await self.lookup_command(message.content, self.hit_command_lookup):
             await self.command_hit(message)
-        elif message.content.startswith('!npc'):
+        elif await self.lookup_command(message.content, self.npc_command_lookup):
             await self.command_npc(message)
-        elif message.content.startswith('!radar'):
+        elif await self.lookup_command(message.content, self.radar_command_lookup):
             await self.command_radar(message)
-        elif message.content.startswith('!help'):
+        elif await self.lookup_command(message.content, self.help_command_lookup):
             await self.command_help(message)
-        elif message.content.startswith('!about'):
+        elif await self.lookup_command(message.content, self.about_command_lookup):
             await self.command_about(message)
+        elif await self.lookup_command(message.content, self.mball_command_lookup):
+            await self.command_mball(message)
     @staticmethod
     def bot_run(cf_file, args):
         config_file = cf_file
