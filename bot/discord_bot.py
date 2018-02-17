@@ -1,4 +1,5 @@
 import asyncio
+import difflib
 import random
 
 import discord
@@ -232,43 +233,58 @@ class D_client(discord.Client):
         await message.channel.send(
             'eve-insight an EVE Online Discord Helper Bot\nhttps://github.com/Nathan-LS/EVE-Insight')
 
+    async def command_not_found(self, message):
+        similar_commands = await self.most_similar_word(str(message.content), self.any_command)
+        other_commands_str = "Did you mean?\n"
+        if len(similar_commands) == 0:
+            other_commands_str = ""
+        else:
+            for i in similar_commands:
+                other_commands_str += str('"' + i + '" \n')
+        await message.channel.send('{}\nThe command: "{}" was not found.\n{}\n'
+                                   'Type "!commands" or "!help" to see a list of commands or for more help with this application\n'
+                                   ''.format(message.author.mention, message.content, other_commands_str))
+
     async def command_mball(self, message):
-        items = ['test', 'np', 'testin']
         await message.channel.send("{}\n{}".format(message.author.mention, random.choice(self.mball_responses)))
 
+    async def most_similar_word(self, word, lookup_list):
+        return difflib.get_close_matches(word, lookup_list)
     async def lookup_command(self, message, command_list):
         return any((message.lower()).startswith(i.lower()) for i in command_list)
 
-    def populate_commands(self, config_param):
-        return [i for i in self.config_file["discord_bot"][config_param].split('\n')]
-
+    def populate_commands(self):
+        self.commands_all = {}
+        self.any_command = []
+        for key, val in self.config_file.items('discord_bot_commands'):
+            self.commands_all[key] = [i for i in val.split('\n')]
+        for item in self.commands_all.values():
+            for i in item:
+                self.any_command.append(i)
     def import_vars(self):
-        self.range_command_lookup = self.populate_commands('command_range')
-        self.hit_command_lookup = self.populate_commands('command_hit')
-        self.npc_command_lookup = self.populate_commands('command_npc')
-        self.radar_command_lookup = self.populate_commands('command_radar')
-        self.help_command_lookup = self.populate_commands('command_help')
-        self.about_command_lookup = self.populate_commands('command_about')
-        self.mball_command_lookup = self.populate_commands('command_mball')
-
-        self.mball_responses = self.populate_commands('responses_mball')
+        self.populate_commands()
+        self.mball_responses = [i for i in self.config_file["discord_bot"]['responses_mball'].split('\n')]
     async def on_message(self, message):
         if message.author == self.user:
             return
-        if await self.lookup_command(message.content, self.range_command_lookup):
+        if await self.lookup_command(message.content, self.commands_all['command_range']):
             await self.command_range(message)
-        elif await self.lookup_command(message.content, self.hit_command_lookup):
+        elif await self.lookup_command(message.content, self.commands_all['command_hit']):
             await self.command_hit(message)
-        elif await self.lookup_command(message.content, self.npc_command_lookup):
+        elif await self.lookup_command(message.content, self.commands_all['command_npc']):
             await self.command_npc(message)
-        elif await self.lookup_command(message.content, self.radar_command_lookup):
+        elif await self.lookup_command(message.content, self.commands_all['command_radar']):
             await self.command_radar(message)
-        elif await self.lookup_command(message.content, self.help_command_lookup):
+        elif await self.lookup_command(message.content, self.commands_all['command_help']):
             await self.command_help(message)
-        elif await self.lookup_command(message.content, self.about_command_lookup):
+        elif await self.lookup_command(message.content, self.commands_all['command_about']):
             await self.command_about(message)
-        elif await self.lookup_command(message.content, self.mball_command_lookup):
+        elif await self.lookup_command(message.content, self.commands_all['command_mball']):
             await self.command_mball(message)
+        elif await self.lookup_command(message.content, self.commands_all['command_allelse']):
+            await self.command_not_found(message)
+        else:
+            return
     @staticmethod
     def bot_run(cf_file, args):
         config_file = cf_file
