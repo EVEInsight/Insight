@@ -2,6 +2,7 @@ import datetime
 import json
 import math
 import threading
+import traceback
 
 import mysql.connector
 
@@ -16,7 +17,7 @@ class fa_systems(object):
         self.con_ = con
         self.config_file = cf_file
         self.arguments = args
-        self.db_systems = db_systems(con, args=self.arguments)  # database instance
+        self.db_systems = db_systems(con=con, cf_file=cf_file, args=self.arguments)  # database instance
         self.system_list = []
 
         self.build_system_list()
@@ -98,6 +99,7 @@ class cap_info(object):
             return float(self.config_file["eve_settings"]["jf_range_5"])
         else:  # todo add rorqual jump range info
             return None
+
 
 class pve_stats(object):
     def __init__(self, systems_l):
@@ -206,9 +208,19 @@ class pve_stats(object):
             if connection:
                 connection.close()
 
+    def thread_watcher(self):
+        while self.thread_pve_pull_run:
+            if not self.thread_pull.is_alive():
+                print("PvE stats thread is not alive, restarting it!")
+                self.start_api_pull_thread()
+            time.sleep(int(self.systems.config_file['thread_pve_pull']['thread_watcher_check_interval']))
     def start_api_pull_thread(self):
-        thread_1 = threading.Thread(target=self.thread_pve_pull)
-        thread_1.start()
+        self.thread_pull = threading.Thread(target=self.thread_pve_pull)
+        self.thread_pull.start()
+
+    def start_thread_watcher(self):
+        self.thread_watcher = threading.Thread(target=self.thread_watcher)
+        self.thread_watcher.start()
 
     def npc_kills_last_hour(self, system):
         result = {}
@@ -251,3 +263,407 @@ class pve_stats(object):
             if connection:
                 connection.close()
             return result_d
+
+
+class zk_thread(object):
+    def __init__(self, con, cf_info, args):
+        self.con_ = con
+        self.config_file = cf_info
+        self.arguments = args
+        self.en_updates = EntityUpdates(con=con, cf_info=cf_info, args=args)
+
+        self.zk_stream_url = str("https://redisq.zkillboard.com/listen.php?queueID={}".format(
+            self.config_file['thread_zKill_pull']['zkill_unique_identifier']))
+        self.thread_zk_run = True
+
+        if not self.arguments.disable_zKill:
+            self.start_zk_pull_thread()
+            self.start_thread_watcher()
+
+    def thread_zk_pull(self):
+        def api_pull():
+            try:
+                resp = requests.get(self.zk_stream_url, verify=True,
+                                    timeout=int(self.config_file['thread_zKill_pull']['timeout']))
+                if resp.status_code == 200:
+                    if (resp.json()['package'] == None):
+                        time.sleep(int(self.config_file['thread_zKill_pull']['delay_when_no_kills']))
+                    else:
+                        insert_killmail(resp.json()['package'])
+                else:
+                    print("zk non 200 error code {}".format(resp.status_code))
+                    time.sleep(int(self.config_file['thread_zKill_pull']['delay_between_non200_response']))
+            except requests.exceptions.RequestException as ex:
+                print(ex)
+                time.sleep(int(self.config_file['thread_zKill_pull']['delay_between_response_exception_api']))
+
+        def db_insert_header(data, cur):
+            insert = {}
+            insert['killmail_id'] = data['killmail']['killmail_id']
+            insert['killmail_time'] = data['killmail']['killmail_time']
+            insert['system_id'] = data['killmail']['solar_system_id']
+            insert['fittedValue'] = data['zkb']['fittedValue']
+            insert['totalValue'] = data['zkb']['totalValue']
+            cur.execute(
+                "INSERT INTO `zk_kills` (`killmail_id`, `killmail_time`, `system_id`, `fittedValue`, `totalValue`) VALUES (%s,%s,%s,%s,%s);",
+                [insert['killmail_id'], insert['killmail_time'], insert['system_id'], insert['fittedValue'],
+                 insert['totalValue']])
+
+        def db_insert_involved(data, kill_id, cur, victim=False):
+            insert = {}
+            insert['kill_id'] = kill_id
+            if 'character_id' in data:
+                insert['character_id'] = data['character_id']
+            if 'corporation_id' in data:
+                insert['corporation_id'] = data['corporation_id']
+            if 'alliance_id' in data:
+                insert['alliance_id'] = data['alliance_id']
+            if 'faction_id' in data:
+                insert['faction_id'] = data['faction_id']
+
+            if 'damage_done' in data:
+                insert['damage'] = data['damage_done']
+            elif 'damage_taken' in data:
+                insert['damage'] = data['damage_taken']
+
+            if 'ship_type_id' in data:
+                insert['ship_type_id'] = data['ship_type_id']
+            if 'weapon_type_id' in data:
+                insert['weapon_type_id'] = data['weapon_type_id']
+            if 'final_blow' in data:
+                insert['is_final_blow'] = data['final_blow']
+            insert['is_victim'] = victim
+
+            cur.execute("INSERT INTO zk_involved(%s) VALUES (%s)" % (
+                ",".join(insert.keys()), ",".join(str(x) for x in insert.values())))
+
+        def insert_killmail(package):
+            try:
+                connection = mysql.connector.connect(**self.con_.config())
+                cursor = connection.cursor(dictionary=True)
+                kill_id = package['killmail']['killmail_id']
+                db_insert_header(package, cursor)
+                db_insert_involved(package['killmail']['victim'], kill_id, cursor, victim=True)
+                for i in package['killmail']['attackers']:
+                    db_insert_involved(i, kill_id, cursor)
+                connection.commit()
+            except Exception as ex:
+                print(ex)
+                if connection:
+                    connection.rollback()
+                    connection.close()
+            finally:
+                if connection:
+                    connection.close()
+
+        while self.thread_zk_run:
+            api_pull()
+            time.sleep(int(self.config_file['thread_zKill_pull']['delay_between_successful_pulls']))
+
+    def thread_watcher(self):
+        while self.thread_zk_run:
+            if not self.thread_pull.is_alive():
+                print("zk pull thread is not alive, restarting it!")
+                self.start_zk_pull_thread()
+            time.sleep(int(self.config_file['thread_zKill_pull']['thread_watcher_check_interval']))
+
+    def start_zk_pull_thread(self):
+        print("Starting zKill API pulling thread")
+        self.thread_pull = threading.Thread(target=self.thread_zk_pull)
+        self.thread_pull.start()
+
+    def start_thread_watcher(self):
+        self.thread_watcher = threading.Thread(target=self.thread_watcher)
+        self.thread_watcher.start()
+
+    def pilot_name_to_ships(self, pilot_name):
+        result = None
+        try:
+            connection = mysql.connector.connect(**self.con_.config())
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM pilots_to_kms WHERE pilot_name = %s ORDER BY killmail_time DESC LIMIT 1;",
+                           [str(pilot_name)])
+            result = cursor.fetchone()
+        except Exception as ex:
+            print(ex)
+            if connection:
+                connection.rollback()
+                connection.close()
+        finally:
+            if connection:
+                connection.close()
+            return result
+
+
+class EntityUpdates(object):
+    def __init__(self, con, cf_info, args):
+        self.con_ = con
+        self.config_file = cf_info
+        self.arguments = args
+
+        self.thread_Updates_run = True
+        if not self.arguments.disable_EntityUpdates:
+            self.start_update_threads()
+            self.start_thread_watcher()
+
+    def api_pilot_thread(self):
+        def insert_data(pilot_id, resp):
+            try:
+                connection = mysql.connector.connect(**self.con_.config())
+                cursor = connection.cursor(dictionary=True)
+                sql = "UPDATE pilots SET {} WHERE pilot_id=%s".format(', '.join('{}=%s'.format(key) for key in resp))
+                cursor.execute(sql, [str(i) for i in resp.values()] + [pilot_id])
+                connection.commit()
+            except Exception as ex:
+                print(ex)
+                if connection:
+                    connection.rollback()
+                    connection.close()
+            finally:
+                if connection:
+                    connection.close()
+
+        def api_pull(val):
+            try:
+                resp = requests.get(
+                    "https://esi.tech.ccp.is/latest/characters/{}/?datasource=tranquility".format(val['pilot_id']),
+                    verify=True,
+                    timeout=int(self.config_file['thread_EntityUpdates']['api_request_timeout']))
+                if resp.status_code == 200:
+                    insert = {}
+                    insert['pilot_name'] = resp.json()['name']
+                    insert['corporation_id'] = resp.json()['corporation_id']
+                    insert['pilot_birthday'] = resp.json()['birthday']
+                    insert['gender'] = resp.json()['gender']
+                    insert['race_id'] = resp.json()['race_id']
+                    insert['bloodline_id'] = resp.json()['bloodline_id']
+
+                    if 'description' in resp.json():
+                        insert['pilot_description'] = resp.json()['description']
+                    if 'ancestry_id' in resp.json():
+                        insert['ancestry_id'] = resp.json()['ancestry_id']
+                    if 'security_status' in resp.json():
+                        insert['security_status'] = resp.json()['security_status']
+                    if 'faction_id' in resp.json():
+                        insert['faction_id'] = resp.json()['faction_id']
+
+                    insert_data(val['pilot_id'], insert)
+                else:
+                    print("api_pilot_thread non 200 error code {} on pilot_id: {}".format(resp.status_code,
+                                                                                          val['pilot_id']))
+            except requests.exceptions.RequestException as ex:
+                print(ex)
+
+        def findValsUpdate():
+            connection = mysql.connector.connect(**self.con_.config())
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM pilots WHERE pilots.pilot_name IS NULL;")
+            vals = cursor.fetchall()
+            connection.close()
+            return vals
+
+        while self.thread_Updates_run:
+            pool = ThreadPool(int(self.config_file['thread_EntityUpdates']['threads_per_pool']))
+            try:
+                updateIDs = findValsUpdate()
+                pool.map(api_pull, updateIDs)
+                pool.close()
+                pool.join()
+                if len(updateIDs) != 0:
+                    print("Updated pilot information for {} pilots".format(len(updateIDs)))
+                time.sleep(int(self.config_file['thread_EntityUpdates']['pool_secondsWaitAfterSuccessful_Pull']))
+            except:
+                traceback.print_exc()
+                pool.close()
+                pool.join()
+                time.sleep(int(self.config_file['thread_EntityUpdates']['pool_secondsWaitAfterException_Pull']))
+                exit()
+
+    def api_corp_thread(self):
+        def insert_data(corp_id, resp):
+            try:
+                connection = mysql.connector.connect(**self.con_.config())
+                cursor = connection.cursor(dictionary=True)
+                sql = "UPDATE corps SET {} WHERE corp_id=%s".format(', '.join('{}=%s'.format(key) for key in resp))
+                cursor.execute(sql, [str(i) for i in resp.values()] + [corp_id])
+                connection.commit()
+            except Exception as ex:
+                print(ex)
+                if connection:
+                    connection.rollback()
+                    connection.close()
+            finally:
+                if connection:
+                    connection.close()
+
+        def api_pull(val):
+            try:
+                resp = requests.get(
+                    "https://esi.tech.ccp.is/latest/corporations/{}/?datasource=tranquility".format(val['corp_id']),
+                    verify=True,
+                    timeout=int(self.config_file['thread_EntityUpdates']['api_request_timeout']))
+                if resp.status_code == 200:
+                    insert = {}
+                    insert['corp_name'] = resp.json()['name']
+                    insert['corp_ticker'] = resp.json()['ticker']
+                    insert['member_count'] = resp.json()['member_count']
+                    insert['ceo_id'] = resp.json()['ceo_id']
+                    insert['tax_rate'] = resp.json()['tax_rate']
+                    insert['creator_id'] = resp.json()['creator_id']
+
+                    if 'alliance_id' in resp.json():
+                        insert['alliance_id'] = resp.json()['alliance_id']
+                    if 'description' in resp.json():
+                        insert['description'] = resp.json()['description']
+                    if 'date_founded' in resp.json():
+                        insert['date_founded'] = resp.json()['date_founded']
+                    if 'url' in resp.json():
+                        insert['url'] = resp.json()['url']
+                    if 'faction_id' in resp.json():
+                        insert['faction_id'] = resp.json()['faction_id']
+                    if 'home_station_id' in resp.json():
+                        insert['home_station_id'] = resp.json()['home_station_id']
+                    if 'shares' in resp.json():
+                        insert['shares'] = resp.json()['shares']
+
+                    insert_data(val['corp_id'], insert)
+                else:
+                    print(
+                        "api_corp_thread non 200 error code {} on corp_id: {}".format(resp.status_code, val['corp_id']))
+            except requests.exceptions.RequestException as ex:
+                print(ex)
+
+        def findValsUpdate():
+            connection = mysql.connector.connect(**self.con_.config())
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM corps WHERE corps.corp_name IS NULL;")
+            vals = cursor.fetchall()
+            connection.close()
+            return vals
+
+        while self.thread_Updates_run:
+            pool = ThreadPool(int(self.config_file['thread_EntityUpdates']['threads_per_pool']))
+            try:
+                updateIDs = findValsUpdate()
+                pool.map(api_pull, updateIDs)
+                pool.close()
+                pool.join()
+                if len(updateIDs) != 0:
+                    print("Updated corp information for {} corps".format(len(updateIDs)))
+                time.sleep(int(self.config_file['thread_EntityUpdates']['pool_secondsWaitAfterSuccessful_Pull']))
+            except:
+                traceback.print_exc()
+                pool.close()
+                pool.join()
+                time.sleep(int(self.config_file['thread_EntityUpdates']['pool_secondsWaitAfterException_Pull']))
+                exit()
+
+    def api_alliance_thread(self):
+        def insert_data(alliance_id, resp):
+            try:
+                connection = mysql.connector.connect(**self.con_.config())
+                cursor = connection.cursor(dictionary=True)
+                sql = "UPDATE alliances SET {} WHERE alliance_id=%s".format(
+                    ', '.join('{}=%s'.format(key) for key in resp))
+                cursor.execute(sql, [str(i) for i in resp.values()] + [alliance_id])
+                connection.commit()
+            except Exception as ex:
+                print(ex)
+                if connection:
+                    connection.rollback()
+                    connection.close()
+            finally:
+                if connection:
+                    connection.close()
+
+        def api_pull(val):
+            try:
+                resp = requests.get(
+                    "https://esi.tech.ccp.is/latest/alliances/{}/?datasource=tranquility".format(val['alliance_id']),
+                    verify=True,
+                    timeout=int(self.config_file['thread_EntityUpdates']['api_request_timeout']))
+                if resp.status_code == 200:
+                    insert = {}
+                    insert['alliance_name'] = resp.json()['name']
+                    insert['creator_id'] = resp.json()['creator_id']
+                    insert['creator_corporation_id'] = resp.json()['creator_corporation_id']
+                    insert['ticker'] = resp.json()['ticker']
+                    insert['date_founded'] = resp.json()['date_founded']
+
+                    if 'faction_id' in resp.json():
+                        insert['faction_id'] = resp.json()['faction_id']
+                    if 'executor_corporation_id' in resp.json():
+                        insert['executor_corporation_id'] = resp.json()['executor_corporation_id']
+
+                    insert_data(val['alliance_id'], insert)
+                else:
+                    print("api_alliance_thread non 200 error code {} on alliance_id".format(resp.status_code,
+                                                                                            val['alliance_id']))
+            except requests.exceptions.RequestException as ex:
+                print(ex)
+
+        def findValsUpdate():
+            connection = mysql.connector.connect(**self.con_.config())
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM alliances WHERE alliances.alliance_name IS NULL;")
+            vals = cursor.fetchall()
+            connection.close()
+            return vals
+
+        while self.thread_Updates_run:
+            pool = ThreadPool(int(self.config_file['thread_EntityUpdates']['threads_per_pool']))
+            try:
+                updateIDs = findValsUpdate()
+                pool.map(api_pull, updateIDs)
+                pool.close()
+                pool.join()
+                if len(updateIDs) != 0:
+                    print("Updated alliance information for {} alliances".format(len(updateIDs)))
+                time.sleep(int(self.config_file['thread_EntityUpdates']['pool_secondsWaitAfterSuccessful_Pull']))
+            except:
+                traceback.print_exc()
+                pool.close()
+                pool.join()
+                time.sleep(int(self.config_file['thread_EntityUpdates']['pool_secondsWaitAfterException_Pull']))
+                exit()
+
+    def thread_watcher(self):
+        while self.thread_Updates_run:
+            if not self.pilot_info_thread.is_alive():
+                print("Pilots thread is not alive, restarting it!")
+                self.pilot_info_thread.join()
+                self.start_pilot_thread()
+            if not self.corp_info_thread.is_alive():
+                print("Corps thread is not alive, restarting it!")
+                self.corp_info_thread.join()
+                self.start_corps_thread()
+            if not self.alliance_info_thread.is_alive():
+                print("Alliances thread is not alive, restarting it!")
+                self.alliance_info_thread.join()
+                self.start_alliances_thread()
+            time.sleep(int(self.config_file['thread_EntityUpdates']['thread_watcher_check_interval']))
+
+    def start_pilot_thread(self):
+        self.pilot_info_thread = threading.Thread(target=self.api_pilot_thread)
+        print("Starting pilot updates thread")
+        self.pilot_info_thread.start()
+
+    def start_corps_thread(self):
+        self.corp_info_thread = threading.Thread(target=self.api_corp_thread)
+        print("Starting corp updates thread")
+        self.corp_info_thread.start()
+
+    def start_alliances_thread(self):
+        self.alliance_info_thread = threading.Thread(target=self.api_alliance_thread)
+        print("Starting alliance updates thread")
+        self.alliance_info_thread.start()
+
+    def start_update_threads(self):
+        self.start_pilot_thread()
+        self.start_corps_thread()
+        self.start_alliances_thread()
+
+    def start_thread_watcher(self):
+        self.thread_watcher = threading.Thread(target=self.thread_watcher)
+        print("Starting EntityUpdate thread watcher")
+        self.thread_watcher.start()

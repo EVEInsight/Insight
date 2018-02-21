@@ -10,79 +10,43 @@ from database.database_connection import *
 class db_systems(object):
     """creates and imports system data if it does not yet exist"""
 
-    def __init__(self, con, args):
+    def __init__(self, con, cf_file, args):
         if not con.test_connection():
             raise ConnectionError
         self.con_ = con
         self.arguments = args
+        self.config_file = cf_file
         self.endpoint_system_list = "https://esi.tech.ccp.is/latest/universe/systems/?datasource=tranquility"
         self.endpoint_system_info = "https://esi.tech.ccp.is/latest/universe/systems/{}/?datasource=tranquility&language=en-us"
         self.endpoint_constellation_list = "https://esi.tech.ccp.is/latest/universe/constellations/?datasource=tranquility"
         self.endpoint_constellation_info = "https://esi.tech.ccp.is/latest/universe/constellations/{}/?datasource=tranquility&language=en-us"
         self.endpoint_region_list = "https://esi.tech.ccp.is/latest/universe/regions/?datasource=tranquility"
         self.endpoint_region_info = "https://esi.tech.ccp.is/latest/universe/regions/{}/?datasource=tranquility&language=en-us"
+        self.endpoint_category_list = "https://esi.tech.ccp.is/latest/universe/categories/?datasource=tranquility"
+        self.endpoint_item_groups_list = "https://esi.tech.ccp.is/latest/universe/groups/?datasource=tranquility"
+        self.endpoint_group_info = "https://esi.tech.ccp.is/latest/universe/groups/{}/?datasource=tranquility&language=en-us"
+        self.endpoint_category_info = "https://esi.tech.ccp.is/latest/universe/categories/{}/?datasource=tranquility&language=en-us"
+        self.endpoint_type_info = "https://esi.tech.ccp.is/latest/universe/types/{}/?datasource=tranquility&language=en-us"
+
         if not self.arguments.skip_gen:
             self.create_tables()
             self.import_system_ids()
             self.import_constellation_ids()
             self.import_region_ids()
+
             self.import_region_info()
             self.import_constellation_info()
             self.import_system_info()
 
+            self.import_item_category_ids()
+            # self.import_item_group_ids()
+            self.import_item_category_info()
+            self.import_item_group_info()
+            self.import_type_ship_info()
+
     def create_tables(self):
-        try:
-            connection = mysql.connector.connect(**self.con_.config())
-            cursor = connection.cursor()
-            cursor.execute(
-                "CREATE TABLE IF NOT EXISTS regions("
-                "region_id INT PRIMARY KEY NOT NULL,"
-                "region_name VARCHAR(32) DEFAULT NULL,"
-                "region_desc TEXT DEFAULT NULL)")
-            cursor.execute(
-                "CREATE TABLE IF NOT EXISTS  constellations("
-                "constellation_id INT PRIMARY KEY NOT NULL,"
-                "constellation_name VARCHAR(32) DEFAULT NULL,"
-                "c_pos_x DOUBLE PRECISION DEFAULT NULL,"
-                "c_pos_y DOUBLE PRECISION DEFAULT NULL,"
-                "c_pos_z DOUBLE PRECISION DEFAULT NULL,"
-                "region_id_fk INT DEFAULT NULL,"
-                "FOREIGN KEY (region_id_fk) REFERENCES regions(region_id))")
-            cursor.execute(
-                "CREATE TABLE IF NOT EXISTS  systems("
-                "system_id INT PRIMARY KEY NOT NULL,"
-                "system_name VARCHAR(32) DEFAULT NULL,"
-                "star_id INT DEFAULT NULL,"
-                "s_pos_x DOUBLE PRECISION DEFAULT NULL,"
-                "s_pos_y DOUBLE PRECISION DEFAULT NULL,"
-                "s_pos_z DOUBLE PRECISION DEFAULT NULL,"
-                "security_status FLOAT(5) DEFAULT NULL, "
-                "security_class VARCHAR(5) DEFAULT NULL,"
-                "constellation_id_fk INT DEFAULT NULL,"
-                "FOREIGN KEY (constellation_id_fk) REFERENCES constellations(constellation_id))")
-            cursor.execute(
-                "CREATE TABLE IF NOT EXISTS  api_raw_system_kills("
-                "last_modified TIMESTAMP PRIMARY KEY NOT NULL ,"
-                "expires TIMESTAMP NOT NULL,"
-                "retrieval TIMESTAMP NOT NULL,"
-                "raw_json LONGTEXT)")
-            cursor.execute(
-                "CREATE TABLE IF NOT EXISTS  pve_stats("
-                "date TIMESTAMP NOT NULL ,"
-                "system_fk INT NOT NULL,"
-                "ship_kills INT NOT NULL,"
-                "npc_kills INT NOT NULL,"
-                "pod_kills INT NOT NULL,"
-                "PRIMARY KEY(date,system_fk),"
-                "FOREIGN KEY (system_fk) REFERENCES systems(system_id))")
-            connection.commit()
-        except Exception as ex:
-            print(ex)
-            if connection:
-                connection.rollback()
-        finally:
-            if connection:
-                connection.close()
+        print(
+            "The application no longer handles creation of database tables. Please use your MySQL client to import the SQL Schema located under /SQL/InitialCreation.sql")
 
     def import_system_ids(self):
         resp = requests.get(self.endpoint_system_list, verify=True, timeout=10)
@@ -153,7 +117,7 @@ class db_systems(object):
         else:
             raise ConnectionError("API ERROR: db_systems.import_region_ids api returned:{}".format(resp.status_code))
 
-    def import_system_info_api(self,system):
+    def import_system_info_api(self, system):
         try:
             resp = requests.get(self.endpoint_system_info.format(system["system_id"]), verify=True, timeout=10)
             if resp.status_code == 200:
@@ -185,7 +149,7 @@ class db_systems(object):
                 "SELECT * FROM systems WHERE system_name IS NULL")
             system_list = cursor.fetchall()
             print("Downloading system info for {} systems from CCP API, this can take a few minutes".format(len(system_list)))
-            pool = ThreadPool(4)
+            pool = ThreadPool(int(self.config_file['api_import']['threads']))
             pool.map(self.import_system_info_api,system_list)
             pool.close()
             pool.join()
@@ -229,7 +193,7 @@ class db_systems(object):
                 "SELECT * FROM constellations WHERE constellation_name IS NULL")
             constellation_list = cursor.fetchall()
             print("Downloading constellation info for {} constellations from CCP API, this can take a few minutes".format(len(constellation_list)))
-            pool = ThreadPool(4)
+            pool = ThreadPool(int(self.config_file['api_import']['threads']))
             pool.map(self.import_constellation_info_api, constellation_list)
             pool.close()
             pool.join()
@@ -273,12 +237,208 @@ class db_systems(object):
                 "SELECT * FROM regions WHERE region_name IS NULL")
             region_list = cursor.fetchall()
             print("Downloading region info for {} region from CCP API, this can take a few minutes".format(len(region_list)))
-            pool = ThreadPool(4)
+            pool = ThreadPool(int(self.config_file['api_import']['threads']))
             pool.map(self.import_region_info_api, region_list)
             pool.close()
             pool.join()
             for i in region_list:
                 cursor.execute("REPLACE INTO regions(%s) VALUES (%s)" % (",".join(i.keys()), ",".join(str(x) for x in i.values())))
+                print("Imported: {}".format(i))
+            connection.commit()
+        except Exception as ex:
+            print(ex)
+            if connection:
+                connection.rollback()
+                connection.close()
+            raise mysql.connector.DatabaseError
+        finally:
+            if connection:
+                connection.close()
+
+    def import_item_category_ids(self):
+        resp = requests.get(self.endpoint_category_list, verify=True, timeout=10)
+        if resp.status_code == 200:
+            print("Got the item category list")
+            try:  # populate table with ids
+                connection = mysql.connector.connect(**self.con_.config())
+                cursor = connection.cursor()
+                for id in resp.json():
+                    cursor.execute("INSERT IGNORE INTO item_category(category_id) VALUES (%s)",
+                                   [id])
+                connection.commit()
+            except Exception as ex:
+                print(ex)
+                if connection:
+                    connection.rollback()
+                    connection.close()
+                raise mysql.connector.DatabaseError
+            finally:
+                if connection:
+                    connection.close()
+        else:
+            raise ConnectionError("API ERROR: db_systems item_category_list api returned:{}".format(resp.status_code))
+
+    # def import_item_group_ids(self):
+    #     resp = requests.get(self.endpoint_item_groups_list, verify=True, timeout=10)
+    #     if resp.status_code == 200:
+    #         print("Got the item group list")
+    #         try:  # populate table with ids
+    #             connection = mysql.connector.connect(**self.con_.config())
+    #             cursor = connection.cursor()
+    #             for id in resp.json():
+    #                 cursor.execute("INSERT IGNORE INTO item_groups(group_id) VALUES (%s)",
+    #                                [id])
+    #             connection.commit()
+    #         except Exception as ex:
+    #             print(ex)
+    #             if connection:
+    #                 connection.rollback()
+    #                 connection.close()
+    #             raise mysql.connector.DatabaseError
+    #         finally:
+    #             if connection:
+    #                 connection.close()
+    #     else:
+    #         raise ConnectionError("API ERROR: db_systems item_group_list api returned:{}".format(resp.status_code))
+
+    def import_item_category_info(self):
+        def importFromAPI(item):
+            try:
+                resp = requests.get(self.endpoint_category_info.format(item["category_id"]), verify=True, timeout=10)
+                if resp.status_code == 200:
+                    item['category_name'] = "\"{}\"".format(resp.json()["name"])
+                    item['category_published'] = resp.json()['published']
+                    item['groups'] = resp.json()['groups']
+                elif resp.status_code == 404:
+                    raise KeyError(
+                        "API returned 404 on category_id: {}\nCheck to make sure this entry still exists or if the database is corrupted.".format(
+                            item["category_id"]))
+                else:
+                    raise ConnectionError("api category_id info call got: {} from api".format(resp.status_code))
+            except requests.exceptions.Timeout:
+                print("API Timeout occurred, will retry")
+                time.sleep(5)
+                importFromAPI(item)
+
+        try:
+            connection = mysql.connector.connect(**self.con_.config())
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(
+                "SELECT * FROM item_category WHERE category_name IS NULL")
+            to_update = cursor.fetchall()
+            print("Downloading item category info for {} groups from CCP API, this can take a few minutes".format(
+                len(to_update)))
+            pool = ThreadPool(int(self.config_file['api_import']['threads']))
+            pool.map(importFromAPI, to_update)
+            pool.close()
+            pool.join()
+            for i in to_update:
+                groups_c = i['groups']
+                del i['groups']
+                cursor.execute("REPLACE INTO item_category(%s) VALUES (%s)" % (
+                    ",".join(i.keys()), ",".join(str(x) for x in i.values())))
+                for val in groups_c:
+                    cursor.execute("INSERT IGNORE item_groups(group_id, item_category_fk) VALUES (%s,%s)",
+                                   [val, i['category_id']])
+                print("Imported: {}".format(i))
+            connection.commit()
+        except Exception as ex:
+            print(ex)
+            if connection:
+                connection.rollback()
+                connection.close()
+            raise mysql.connector.DatabaseError
+        finally:
+            if connection:
+                connection.close()
+
+    def import_item_group_info(self):
+        def importFromAPI(item):
+            try:
+                resp = requests.get(self.endpoint_group_info.format(item["group_id"]), verify=True, timeout=10)
+                if resp.status_code == 200:
+                    item['group_name'] = "\"{}\"".format(resp.json()["name"])
+                    item['published'] = resp.json()['published']
+                    item['item_category_fk'] = resp.json()['category_id']
+                    item['types'] = resp.json()['types']
+                elif resp.status_code == 404:
+                    raise KeyError(
+                        "API returned 404 on group id: {}\nCheck to make sure this entry still exists or if the database is corrupted.".format(
+                            item["group_id"]))
+                else:
+                    raise ConnectionError("api group id info call got: {} from api".format(resp.status_code))
+            except requests.exceptions.Timeout:
+                print("API Timeout occurred, will retry")
+                time.sleep(5)
+                importFromAPI(item)
+
+        try:
+            connection = mysql.connector.connect(**self.con_.config())
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(
+                "SELECT * FROM item_groups WHERE group_name IS NULL")
+            to_update = cursor.fetchall()
+            print("Downloading item group info for {} groups from CCP API, this can take a few minutes".format(
+                len(to_update)))
+            pool = ThreadPool(int(self.config_file['api_import']['threads']))
+            pool.map(importFromAPI, to_update)
+            pool.close()
+            pool.join()
+            for i in to_update:
+                types_c = i['types']
+                del i['types']
+                cursor.execute("REPLACE INTO item_groups(%s) VALUES (%s)" % (
+                    ",".join(i.keys()), ",".join(str(x) for x in i.values())))
+                for val in types_c:
+                    cursor.execute("INSERT IGNORE item_types(type_id, group_id_fk) VALUES (%s,%s)",
+                                   [val, i['group_id']])
+                print("Imported: {}".format(i))
+            connection.commit()
+        except Exception as ex:
+            print(ex)
+            if connection:
+                connection.rollback()
+                connection.close()
+            raise mysql.connector.DatabaseError
+        finally:
+            if connection:
+                connection.close()
+
+    def import_type_ship_info(self):
+        def importFromAPI(item):
+            try:
+                resp = requests.get(self.endpoint_type_info.format(item["type_id"]), verify=True, timeout=10)
+                if resp.status_code == 200:
+                    item['type_name'] = "\"{}\"".format(resp.json()['name'])
+                    item['type_published'] = resp.json()['published']
+                    # item['type_description'] = str(resp.json()['description']) #todo fix import error for description
+                    item['group_id_fk'] = resp.json()['group_id']
+                elif resp.status_code == 404:
+                    raise KeyError(
+                        "API returned 404 on import_type_ship_info id: {}\nCheck to make sure this entry still exists or if the database is corrupted.".format(
+                            item["type_id"]))
+                else:
+                    raise ConnectionError(
+                        "api import_type_ship_info info call got: {} from api".format(resp.status_code))
+            except requests.exceptions.Timeout:
+                print("API Timeout occurred, will retry")
+                time.sleep(5)
+                importFromAPI(item)
+
+        try:
+            connection = mysql.connector.connect(**self.con_.config())
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(
+                "SELECT type_id FROM ships WHERE type_name IS NULL")
+            to_update = cursor.fetchall()
+            print("Downloading ship info for {} types from CCP API, this can take a few minutes".format(len(to_update)))
+            pool = ThreadPool(int(self.config_file['api_import']['threads']))
+            pool.map(importFromAPI, to_update)
+            pool.close()
+            pool.join()
+            for i in to_update:
+                cursor.execute("REPLACE INTO item_types(%s) VALUES (%s)" % (
+                    ",".join(i.keys()), ",".join(str(x) for x in i.values())))
                 print("Imported: {}".format(i))
             connection.commit()
         except Exception as ex:

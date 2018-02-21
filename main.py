@@ -13,6 +13,14 @@ def main():
                         help="skips re-downloading of api data and database import/updates of api",
                         action='store_true',
                         default=False)
+    parser.add_argument("--disable_zKill", "-d_zk",
+                        help="Disables the zKill API pulling thread operation",
+                        action='store_true',
+                        default=False)
+    parser.add_argument("--disable_EntityUpdates", "-d_EU",
+                        help="Disables the EntityUpdates API pulling thread operation",
+                        action='store_true',
+                        default=False)
     args = parser.parse_args()
 
     config_file = configparser.ConfigParser()

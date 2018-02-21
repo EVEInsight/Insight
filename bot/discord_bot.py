@@ -1,6 +1,8 @@
 import asyncio
 import difflib
+import itertools
 import random
+from operator import itemgetter
 
 import discord
 
@@ -12,9 +14,10 @@ class D_client(discord.Client):
         super().__init__()
         self.config_file = cf_file
         self.arguments = args
-        self.db_c = db_con(cf_file=self.config_file, args=args)
-        self.m_systems = fa_systems(self.db_c, cf_file=self.config_file, args=args)
-        self.cap_info = cap_info(cf_info=self.config_file, args=args)
+        self.db_c = db_con(cf_file=cf_file, args=args)
+        self.m_systems = fa_systems(con=self.db_c, cf_file=cf_file, args=args)
+        self.cap_info = cap_info(cf_info=cf_file, args=args)
+        self.zk = zk_thread(con=self.db_c, cf_info=cf_file, args=args)
         #self.channel_man = channel_manager()
 
         self.dotlan_url_range = "http://evemaps.dotlan.net/range/{},5/{}"
@@ -26,11 +29,6 @@ class D_client(discord.Client):
         print(self.user.name)
         print(self.user.id)
         print('------')
-
-    # async def send_message(self,message,channel_id):
-    #     await self.wait_until_ready()
-    #     print("p send message")
-
 
     async def select_system(self, system_dict, message, original_lookup):
         if len(system_dict) == 0:
@@ -62,6 +60,7 @@ class D_client(discord.Client):
                     raise KeyError("wrong index select")
                 else:
                     return(system_dict[int(resp.content)-1])
+
     async def lookup_ship(self,message, original_lookup):
         for key, val in self.cap_info.search_cap_type.items():
             if any([s.lower().startswith(original_lookup.lower()) for s in val]):
@@ -69,6 +68,7 @@ class D_client(discord.Client):
         await message.channel.send("{}\nI could not find the shiptype \"{}\"\nPlease try again".format(
                 message.author.mention, original_lookup))
         raise KeyError("ship not found")
+
     async def command_range(self, message):
         items = (str(message.content).split()[1:])
         if len(items) == 0:
@@ -212,7 +212,6 @@ class D_client(discord.Client):
         else:
             pass  # todo else
 
-
     async def command_help(self, message):
         await message.channel.send('{}\n'
                                    'This bot watches for commands starting with "!"\n\n'
@@ -229,6 +228,7 @@ class D_client(discord.Client):
                                    '"!npc system_a ...."\n\n\n'
                                    .format(message.author.mention)
                                    )
+
     async def command_about(self, message):
         await message.channel.send(
             'eve-insight an EVE Online Discord Helper Bot\nhttps://github.com/Nathan-LS/EVE-Insight')
@@ -248,8 +248,114 @@ class D_client(discord.Client):
     async def command_mball(self, message):
         await message.channel.send("{}\n{}".format(message.author.mention, random.choice(self.mball_responses)))
 
+    async def command_ships(self, message):
+        def sortAndGroup(raw_data, id=None, name=None, ticker=None):
+            return_list = []
+            group_key = itemgetter(id, name, ticker)
+            sorted_group = {k: list(v) for k, v in itertools.groupby(sorted(raw_data, key=group_key), key=group_key)}
+            for key, val in sorted_group.items():
+                temp_dict = {str(id): key[0], str(name): key[1], str(ticker): key[2], 'total_pilots': len(val),
+                             'ships': []}
+                unknown_ships = {'name': 'unknown', 'alive_total': len(val), 'dead_total': 0, 'total': 0}
+
+                pilotsFlyingRecentShip = [pilot for pilot in val if
+                                          pilot.get('killmail_time') > datetime.datetime.utcnow() - datetime.timedelta(
+                                              minutes=90) or pilot.get('is_super') == 1]
+                unknown_ships['alive_total'] -= len(pilotsFlyingRecentShip)
+
+                temp_ships_used = {k: list(v) for k, v in
+                                   itertools.groupby(sorted(pilotsFlyingRecentShip, key=itemgetter('ship_name')),
+                                                     key=itemgetter('ship_name'))}
+                for ship_name, pilots_flying in temp_ships_used.items():
+                    ship_to_append = dict(name=ship_name,
+                                          dead_total=sum((1 for k in pilots_flying if k.get('is_victim') == 1)))
+                    ship_to_append['alive_total'] = len(pilots_flying) - ship_to_append['dead_total']
+                    ship_to_append['total'] = ship_to_append['dead_total'] + ship_to_append['alive_total']
+                    temp_dict['ships'].append(ship_to_append)
+                temp_dict['ships'] = sorted(temp_dict['ships'], key=itemgetter('alive_total'), reverse=True)
+
+                unknown_ships['total'] = unknown_ships['dead_total'] + unknown_ships['alive_total']
+                if unknown_ships['total'] != 0:
+                    temp_dict['ships'].append(unknown_ships)
+                return_list.append(temp_dict)
+            return_list = sorted(return_list, key=itemgetter('total_pilots'), reverse=True)
+            return (return_list)
+
+        try:
+            items = (str(message.content).split(None, 1)[1])
+        except IndexError:
+            await message.channel.send(
+                '{}\nYou must provide a copy paste of local to view ship types.\nUsage: "!ships CTRL-V"'.format(
+                    message.author.mention))
+            return
+        by_alliance = []
+        by_corp = []
+        by_pilot = []
+        char_not_found = []
+        for i in items.split('\n'):
+            resp = self.zk.pilot_name_to_ships(i)
+            if resp is None:
+                char_not_found.append(i)
+            elif resp['alliance_id'] is not None:
+                by_alliance.append(resp)
+            else:
+                by_corp.append(resp)
+        total_count = int(len(by_alliance) + len(by_corp) + len(by_pilot) + len(char_not_found))
+
+        embed = discord.Embed(title="Local Scan of {} pilots".format(total_count), colour=discord.Colour(0x182649),
+                              description="Showing pilots grouped by alliance/corp and ship count based on"
+                                          " activity in the last 90 minutes\nCould not find details for {} pilots. "
+                                          "This means they were not on a recorded "
+                                          "killmail recently".format(len(char_not_found)))
+        embed.set_author(name="Page (1/1)", icon_url="https://cdn.discordapp.com/embed/avatars/0.png")
+        # embed.set_footer(text="footer", icon_url="https://cdn.discordapp.com/embed/avatars/0.png") #todo change footer
+        embed.add_field(name="**(corp/alliance name)<tkr> count**",
+                        value="```css\n{:<12} {:<12}{:>3}({:})\n\n.```".format(' ', 'ship', 'alive',
+                                                                               'dead'))  # todo clean header
+        for i in sortAndGroup(by_alliance, id='alliance_id', name='alliance_name', ticker='alliance_ticker'):
+            field_name = "**{al_name}<{al_ticker}> {al_t}**".format(al_name=i['alliance_name'],
+                                                                    al_ticker=i['alliance_ticker'],
+                                                                    al_t=str(i['total_pilots']))
+            field_value = ""
+            for ship_types in i['ships']:
+                raw_str = str("{space:<12} {ship:<12}{alive_t:>3} ({dead_t:-})".format(space=' ',
+                                                                                       ship=ship_types['name'],
+                                                                                       alive_t=str(
+                                                                                           ship_types['alive_total']),
+                                                                                       dead_t=-1 * int(ship_types[
+                                                                                                           'dead_total'])))  # todo fix negative ship loss
+                format_css = "```css\n{}```"
+                format_http = "```HTTP\n{}```"
+                if ship_types['name'] == "unknown":
+                    field_value += str(format_http.format(raw_str))
+                else:
+                    field_value += str(format_css.format(raw_str))
+            embed.add_field(name=field_name, value=field_value, inline=False)
+        for i in sortAndGroup(by_corp, id='corporation_id', name='corp_name', ticker='corp_ticker'):
+            field_name = "**{al_name}<{al_ticker}> {al_t}**".format(al_name=i['corp_name'],
+                                                                    al_ticker=i['corp_ticker'],
+                                                                    al_t=str(i['total_pilots']))
+            field_value = ""
+            for ship_types in i['ships']:
+                raw_str = str("{space:<12} {ship:<12}{alive_t:>3} ({dead_t:-})".format(space=' ',
+                                                                                       ship=ship_types['name'],
+                                                                                       alive_t=str(
+                                                                                           ship_types['alive_total']),
+                                                                                       dead_t=-1 * int(ship_types[
+                                                                                                           'dead_total'])))  # todo fix negative ship loss
+                format_css = "```css\n{}```"
+                format_http = "```HTTP\n{}```"
+                if ship_types['name'] == "unknown":
+                    field_value += str(format_http.format(raw_str))
+                else:
+                    field_value += str(format_css.format(raw_str))
+            embed.add_field(name=field_name, value=field_value, inline=False)
+
+        await message.channel.send("{}".format(message.author.mention), embed=embed)
+
     async def most_similar_word(self, word, lookup_list):
         return difflib.get_close_matches(word, lookup_list)
+
     async def lookup_command(self, message, command_list):
         return any((message.lower()).startswith(i.lower()) for i in command_list)
 
@@ -281,6 +387,8 @@ class D_client(discord.Client):
             await self.command_about(message)
         elif await self.lookup_command(message.content, self.commands_all['command_mball']):
             await self.command_mball(message)
+        elif await self.lookup_command(message.content, self.commands_all['command_ships']):
+            await self.command_ships(message)
         elif await self.lookup_command(message.content, self.commands_all['command_allelse']):
             await self.command_not_found(message)
         else:
