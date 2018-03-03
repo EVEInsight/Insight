@@ -71,7 +71,7 @@ class EntityFeed(object):
         if await self.client.lookup_command(sub_command, self.client.commands_all['subc_enfeed_addentity']):
             await self.command_addEntity(d_message, sub_command)
         elif await self.client.lookup_command(sub_command, self.client.commands_all['command_allelse']):
-            await self.client.command_not_found(sub_command)  # todo custom fix
+            await self.client.command_not_found(d_message)  # todo custom fix
         else:
             return
 

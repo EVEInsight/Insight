@@ -176,6 +176,7 @@ class d_channel(object):
                                             'running\n"!csettings !enfeed !reset"')
                 else:
                     await EntityFeed.createNewFeed(self)
+                    self.setup()  # reload after creating new feed
             else:
                 await d_message.channel.send('{}\nThere is no entity killfeed tracker configured for this channel.\n'
                                              'If you wish to create one, type "!csettings '
