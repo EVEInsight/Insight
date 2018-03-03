@@ -9,8 +9,6 @@ class db_systems(object):
     """creates and imports system data if it does not yet exist"""
 
     def __init__(self, con, cf_file, args):
-        if not con.test_connection():
-            raise ConnectionError
         self.con_ = con
         self.arguments = args
         self.config_file = cf_file
