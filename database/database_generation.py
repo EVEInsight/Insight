@@ -4,8 +4,6 @@ from multiprocessing.dummy import Pool as ThreadPool
 import mysql.connector
 import requests
 
-from database.database_connection import *
-
 
 class db_systems(object):
     """creates and imports system data if it does not yet exist"""

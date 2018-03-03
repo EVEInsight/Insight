@@ -1,12 +1,19 @@
 import asyncio
+import datetime
 import difflib
 import itertools
+import math
 import random
 from operator import itemgetter
 
 import discord
 
-from database.database_access import *
+from access.EntityUpdates import EntityUpdates
+from access.cap_info import cap_info
+from access.systems.systems import fa_systems
+from access.zk import zk_thread
+from bot.channel_manager.channel_manager import channel_manager
+from database.database_connection import db_con
 
 
 class D_client(discord.Client):
@@ -18,7 +25,9 @@ class D_client(discord.Client):
         self.m_systems = fa_systems(con=self.db_c, cf_file=cf_file, args=args)
         self.cap_info = cap_info(cf_info=cf_file, args=args)
         self.zk = zk_thread(con=self.db_c, cf_info=cf_file, args=args)
-        #self.channel_man = channel_manager()
+        self.en_updates = EntityUpdates(con=self.db_c, cf_info=cf_file, args=args)
+
+        self.channel_manager = channel_manager(con=self.db_c, cf_info=cf_file, args=args, discord_client=self)
 
         self.dotlan_url_range = "http://evemaps.dotlan.net/range/{},5/{}"
         self.dotlan_url_jplanner = "http://evemaps.dotlan.net/jump/{},555/{}:{}"
@@ -60,6 +69,38 @@ class D_client(discord.Client):
                     raise KeyError("wrong index select")
                 else:
                     return(system_dict[int(resp.content)-1])
+
+    async def select_entity(self, entity_dict, message, original_lookup):
+        # if len(entity_dict) == 0:
+        #     await message.channel.send("{}\nI could not find the alliance \"{}\"\nPlease try a different alliance".format(
+        #         message.author.mention, original_lookup))
+        #     raise KeyError("unable to find alliance")
+        # elif len(entity_dict) == 1:
+        #     return entity_dict[0]
+        # else:
+        #     systems = str("")
+        #     count = 0
+        #     for i in entity_dict:
+        #         count += 1
+        #         systems += (str("{}. {} ({})\n").format(count, i["system_name"], i["region_name"]))
+        #     with message.channel.typing():
+        #         await message.channel.send(
+        #             "{}\nMultiple alliances found matching \"{}\" \n\nPlease select one by entering it's number\nex type \"1\" to select the first result:\n\n{}".format(
+        #                                       message.author.mention, original_lookup, systems))
+        #     def select_system_check(m):
+        #         return m.author == message.author
+        #     try:
+        #         resp = await self.wait_for('message', timeout=10, check=select_system_check)
+        #     except asyncio.TimeoutError:
+        #         await message.channel.send("{}\nSorry, but you took to long to respond".format(message.author.mention))
+        #         raise TimeoutError("response timeout")
+        #     else:
+        #         if int(resp.content) > count or int(resp.content) <= 0:
+        #             await message.channel.send("{}\n\"{}\" index is out of range, please select a number between 1 and {}".format(message.author.mention,str(resp.content), str(count)))
+        #             raise KeyError("wrong index select")
+        #         else:
+        #             return(entity_dict[int(resp.content)-1])
+        print(entity_dict)
 
     async def lookup_ship(self,message, original_lookup):
         for key, val in self.cap_info.search_cap_type.items():
@@ -355,7 +396,6 @@ class D_client(discord.Client):
 
     async def most_similar_word(self, word, lookup_list):
         return difflib.get_close_matches(word, lookup_list)
-
     async def lookup_command(self, message, command_list):
         return any((message.lower()).startswith(i.lower()) for i in command_list)
 
@@ -367,9 +407,11 @@ class D_client(discord.Client):
         for item in self.commands_all.values():
             for i in item:
                 self.any_command.append(i)
+
     def import_vars(self):
         self.populate_commands()
         self.mball_responses = [i for i in self.config_file["discord_bot"]['responses_mball'].split('\n')]
+
     async def on_message(self, message):
         if message.author == self.user:
             return
@@ -389,10 +431,13 @@ class D_client(discord.Client):
             await self.command_mball(message)
         elif await self.lookup_command(message.content, self.commands_all['command_ships']):
             await self.command_ships(message)
+        elif await self.lookup_command(message.content, self.commands_all['command_channel_settings']):
+            await self.channel_manager.command_to_channel(message)
         elif await self.lookup_command(message.content, self.commands_all['command_allelse']):
             await self.command_not_found(message)
         else:
             return
+
     @staticmethod
     def bot_run(cf_file, args):
         config_file = cf_file
