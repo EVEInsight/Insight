@@ -282,18 +282,18 @@ class EntityUpdates(object):
     def find(self, search_string):
         try:
             matches = {'pilots': None, 'corps': None, 'alliances': None}
-            search_s = str(search_string + "%")
+            search_s = str(str(search_string) + "%")
             connection = mysql.connector.connect(**self.con_.config())
             cursor = connection.cursor(dictionary=True)
-            cursor.execute("SELECT * FROM `pilots` WHERE `pilot_name` LIKE %s;",
-                           [search_s])
-            matches['pilots'] = cursor.fetchall()
-            cursor.execute("SELECT * FROM `corps` WHERE `corp_name` LIKE %s;",
-                           [search_s])
-            matches['corps'] = cursor.fetchall()
             cursor.execute("SELECT * FROM `alliances` WHERE `alliance_name` LIKE %s;",
                            [search_s])
             matches['alliances'] = cursor.fetchall()
+            cursor.execute("SELECT * FROM `corps` WHERE `corp_name` LIKE %s;",
+                           [search_s])
+            matches['corps'] = cursor.fetchall()
+            cursor.execute("SELECT * FROM `pilots` WHERE `pilot_name` LIKE %s;",
+                           [search_s])
+            matches['pilots'] = cursor.fetchall()
         except Exception as ex:
             print(ex)
             if connection:

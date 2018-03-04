@@ -71,36 +71,70 @@ class D_client(discord.Client):
                     return(system_dict[int(resp.content)-1])
 
     async def select_entity(self, entity_dict, message, original_lookup):
-        # if len(entity_dict) == 0:
-        #     await message.channel.send("{}\nI could not find the alliance \"{}\"\nPlease try a different alliance".format(
-        #         message.author.mention, original_lookup))
-        #     raise KeyError("unable to find alliance")
-        # elif len(entity_dict) == 1:
-        #     return entity_dict[0]
-        # else:
-        #     systems = str("")
-        #     count = 0
-        #     for i in entity_dict:
-        #         count += 1
-        #         systems += (str("{}. {} ({})\n").format(count, i["system_name"], i["region_name"]))
-        #     with message.channel.typing():
-        #         await message.channel.send(
-        #             "{}\nMultiple alliances found matching \"{}\" \n\nPlease select one by entering it's number\nex type \"1\" to select the first result:\n\n{}".format(
-        #                                       message.author.mention, original_lookup, systems))
-        #     def select_system_check(m):
-        #         return m.author == message.author
-        #     try:
-        #         resp = await self.wait_for('message', timeout=10, check=select_system_check)
-        #     except asyncio.TimeoutError:
-        #         await message.channel.send("{}\nSorry, but you took to long to respond".format(message.author.mention))
-        #         raise TimeoutError("response timeout")
-        #     else:
-        #         if int(resp.content) > count or int(resp.content) <= 0:
-        #             await message.channel.send("{}\n\"{}\" index is out of range, please select a number between 1 and {}".format(message.author.mention,str(resp.content), str(count)))
-        #             raise KeyError("wrong index select")
-        #         else:
-        #             return(entity_dict[int(resp.content)-1])
-        print(entity_dict)
+        def same_author(m):
+            return m.author == message.author
+
+        return_dict = {'pilots': None, 'corps': None, 'alliances': None}
+        index_list = []
+
+        def append_retrun_dict_at_index(index):
+            if index_list[index][0] == "alliances":
+                return_dict['alliances'] = [index_list[index][1]]
+            elif index_list[index][0] == "corps":
+                return_dict['corps'] = [index_list[index][1]]
+            elif index_list[index][0] == "pilots":
+                return_dict['pilots'] = [index_list[index][1]]
+
+        for key, val in entity_dict.items():
+            for v in val:
+                index_list.append((key, v))
+        if len(index_list) == 0:
+            await message.channel.send("{}\nI could not find any entities matching \"{}\"\nPlease try again".format(
+                message.author.mention, original_lookup))
+            raise KeyError("unable to find entity")  # todo more elegant solution to exiting?
+        elif len(index_list) == 1:
+            append_retrun_dict_at_index(0)
+            return (return_dict)
+        else:
+            embed = discord.Embed(title='Found {} entities matching "{}"'.format(str(len(index_list)), original_lookup),
+                                  colour=discord.Colour(0x182649),
+                                  description='Select an entity by entering an index number.\nExample enter "1" to select the first entity\n\n')
+            pilots_s = ""
+            corps_s = ""
+            alliances_s = ""
+            index_count_label = 1
+            for item in index_list:
+                if item[0] == 'alliances':
+                    alliances_s += str("**{:<4}**{}<{}>\n".format(str(index_count_label), item[1]['alliance_name'],
+                                                                  item[1]['ticker']))
+                elif item[0] == 'corps':
+                    corps_s += str("**{:<4}**{}<{}>\n".format(str(index_count_label), item[1]['corp_name'],
+                                                              item[1]['corp_ticker']))
+                elif item[0] == 'pilots':
+                    pilots_s += str("**{:<4}**{}\n".format(str(index_count_label), item[1]['pilot_name']))
+                index_count_label += 1
+            if len(pilots_s) > 1:
+                embed.add_field(name="**Pilots**", value=pilots_s, inline=False)
+            if len(corps_s) > 1:
+                embed.add_field(name="**Corps**", value=corps_s, inline=False)
+            if len(alliances_s) > 1:
+                embed.add_field(name="**Alliances**", value=alliances_s, inline=False)
+            with message.channel.typing():
+                await message.channel.send("{}".format(message.author.mention), embed=embed)
+            try:
+                resp = await self.wait_for('message', timeout=30, check=same_author)
+            except asyncio.TimeoutError:
+                await message.channel.send("{}\nSorry, but you took to long to respond".format(message.author.mention))
+                raise TimeoutError("response timeout")
+            else:
+                if int(resp.content) >= index_count_label or int(resp.content) <= 0:
+                    await message.channel.send(
+                        "{}\n\"{}\" index is out of range, please select a number between 1 and {}".format(
+                            message.author.mention, str(resp.content), str(index_count_label - 1)))
+                    raise KeyError("wrong index select")
+                else:
+                    append_retrun_dict_at_index(int(int(resp.content) - 1))
+                    return (return_dict)
 
     async def lookup_ship(self,message, original_lookup):
         for key, val in self.cap_info.search_cap_type.items():
