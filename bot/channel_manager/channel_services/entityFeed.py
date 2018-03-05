@@ -66,7 +66,7 @@ class EntityFeed(object):
 
         def ignore(km):
             if km['ship_group_id'] == 29:
-                if km['totalValue'] > km['pod_isk_floor']:
+                if km['totalValue'] < km['pod_isk_floor']:
                     return True
             elif km['ship_category_id'] == 22 and km['ignore_deployable'] == 1:
                 return True
