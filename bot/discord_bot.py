@@ -27,7 +27,8 @@ class D_client(discord.Client):
         self.zk = zk_thread(con=self.db_c, cf_info=cf_file, args=args)
         self.en_updates = EntityUpdates(con=self.db_c, cf_info=cf_file, args=args)
 
-        self.channel_manager = channel_manager(con=self.db_c, cf_info=cf_file, args=args, discord_client=self)
+        if not self.arguments.disable_channels:
+            self.channel_manager = channel_manager(con=self.db_c, cf_info=cf_file, args=args, discord_client=self)
 
         self.dotlan_url_range = "http://evemaps.dotlan.net/range/{},5/{}"
         self.dotlan_url_jplanner = "http://evemaps.dotlan.net/jump/{},555/{}:{}"

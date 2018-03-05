@@ -21,6 +21,10 @@ def main():
                         help="Disables the EntityUpdates API pulling thread operation",
                         action='store_true',
                         default=False)
+    parser.add_argument("--disable_channels", "-d_ch",
+                        help="Disables the channel feeds process",
+                        action='store_true',
+                        default=False)
     args = parser.parse_args()
 
     config_file = configparser.ConfigParser()

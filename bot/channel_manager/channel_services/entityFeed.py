@@ -33,6 +33,7 @@ class EntityFeed(object):
         self.load_vars()
         self.run_flag = True
         self.killQueue = queue.Queue()
+        self.postedQueue = queue.Queue()
         self.start_threads()
 
         # if self.c_vars['display_statusOnStart']: #todo status add
@@ -63,32 +64,56 @@ class EntityFeed(object):
             with self.killQueue.mutex:
                 return val in self.killQueue.queue
 
-        while self.run_flag:
+        def ignore(km):
+            if km['ship_group_id'] == 29:
+                if km['totalValue'] > km['pod_isk_floor']:
+                    return True
+            elif km['ship_category_id'] == 22 and km['ignore_deployable'] == 1:
+                return True
+            elif km['ship_category_id'] == 65 and km['ignore_citadel'] == 1:
+                return True
+            else:
+                return False
+
+        def add_toPost():
             try:
                 connection = mysql.connector.connect(**self.con_.config())
                 cursor = connection.cursor(dictionary=True)
-                cursor.execute('SELECT * FROM discord_EntityFeed_tracking AS tr '
-                               'INNER JOIN allInvolved_combinedVictim AS i ON (tr.alliance_tracking IS NOT NULL AND i.involved_alliance_id = tr.alliance_tracking) '
-                               'OR (tr.corp_tracking IS NOT NULL AND i.involved_corp_id = tr.corp_tracking) '
-                               'OR (tr.pilot_tracking IS NOT NULL AND i.involved_pilot_id = tr.pilot_tracking) '
-                               'WHERE EntityFeed_fk = (%s) '
-                               'AND NOT (i.ship_group_id=29 AND (`totalValue` < `pod_isk_floor`)) '
-                               'AND NOT (i.ship_category_id=22 AND tr.ignore_deployable) '
-                               'AND NOT (i.ship_category_id=65 AND tr.ignore_citadel) '
-                               'AND NOT (NOT tr.show_loses AND ((tr.alliance_tracking IS NOT NULL AND tr.alliance_tracking = i.alliance_id) OR (tr.corp_tracking IS NOT NULL AND tr.corp_tracking = i.corp_id) OR (tr.pilot_tracking IS NOT NULL AND tr.pilot_tracking = i.pilot_id))) '
-                               'AND NOT (NOT tr.show_kills AND ((tr.alliance_tracking IS NOT NULL AND tr.alliance_tracking != i.alliance_id) OR (tr.corp_tracking IS NOT NULL AND tr.corp_tracking != i.corp_id) OR (tr.pilot_tracking IS NOT NULL AND tr.pilot_tracking != i.pilot_id))) '
-                               'AND NOT EXISTS (SELECT * FROM discord_EntityFeed_posted h WHERE h.EntityFeed_posted_to = tr.EntityFeed_fk AND h.kill_id_posted = i.kill_id) '
-                               'GROUP BY i.kill_id '
-                               'ORDER BY kill_time ASC;', [self.channel.id])
+                cursor.execute(
+                    'SELECT * FROM(SELECT * FROM(SELECT kd.*FROM(SELECT inv_tr.kill_id FROM zk_involved AS inv_tr, discord_EntityFeed_tracking AS tr WHERE EntityFeed_fk = (%s) AND ((tr.alliance_tracking IS NOT NULL AND inv_tr.alliance_id <=> tr.alliance_tracking) OR (tr.corp_tracking IS NOT NULL AND inv_tr.corporation_id <=> tr.corp_tracking) OR (tr.pilot_tracking IS NOT NULL AND inv_tr.character_id <=> tr.pilot_tracking)) GROUP BY inv_tr.kill_id )AS involved_in INNER JOIN kill_id_victimFB AS kd ON involved_in.kill_id = kd.kill_id )AS i INNER JOIN discord_EntityFeed_tracking AS tr ON tr.EntityFeed_fk = (%s) ) final WHERE NOT (NOT final.show_loses AND ((final.alliance_tracking IS NOT NULL AND final.alliance_tracking <=> final.alliance_id) OR (final.corp_tracking IS NOT NULL AND final.corp_tracking <=> final.corp_id) OR (final.pilot_tracking IS NOT NULL AND final.pilot_tracking <=> final.pilot_id))) AND NOT (NOT final.show_kills AND ((final.alliance_tracking IS NOT NULL AND !(final.alliance_tracking <=> final.alliance_id)) OR (final.corp_tracking IS NOT NULL AND !(final.corp_tracking <=> final.corp_id)) OR (final.pilot_tracking IS NOT NULL AND !(final.pilot_tracking <=> final.pilot_id)))) AND NOT EXISTS (SELECT kill_id_posted FROM discord_EntityFeed_posted h WHERE h.EntityFeed_posted_to = (%s) AND h.kill_id_posted = final.kill_id)',
+                    [self.channel.id, self.channel.id, self.channel.id])  # todo fix
                 for item in cursor.fetchall():
-                    if not exists_in_q(item):
+                    if ignore(item):
+                        self.postedQueue.queue.append(item)
+                    elif not exists_in_q(item):
                         self.killQueue.queue.append(item)
             except Exception as ex:
                 print(ex)
             finally:
                 if connection:
                     connection.close()
-                time.sleep(15)
+
+        def registerPosted():
+            try:
+                connection = mysql.connector.connect(**self.con_.config())
+                cursor = connection.cursor(dictionary=True)
+                while not self.postedQueue.empty():
+                    km_item = self.postedQueue.queue.pop()
+                    cursor.execute(
+                        "INSERT IGNORE INTO `discord_EntityFeed_posted`(EntityFeed_posted_to,kill_id_posted,posted_date) VALUES (%s,%s,%s)",
+                        [self.channel.id, km_item['kill_id'], datetime.datetime.utcnow()])
+                connection.commit()
+            except Exception as ex:
+                print(ex)
+                if connection:
+                    connection.rollback()
+            finally:
+                if connection:
+                    connection.close()
+        while self.run_flag:
+            add_toPost()
+            registerPosted()
+            time.sleep(20)
 
     async def async_loop(self):
         def isk_lost_format(val):
@@ -178,23 +203,7 @@ class EntityFeed(object):
                             value=field_dsc,
                             inline=False)
             await self.channel.send(content=mention_everyone, embed=embed)
-            db_posted_log(item['kill_id'])
-
-        def db_posted_log(kill_id):
-            try:
-                connection = mysql.connector.connect(**self.con_.config())
-                cursor = connection.cursor(dictionary=True)
-                cursor.execute(
-                    "INSERT IGNORE INTO `discord_EntityFeed_posted`(EntityFeed_posted_to,kill_id_posted,posted_date) VALUES (%s,%s,%s)",
-                    [self.channel.id, kill_id, datetime.datetime.utcnow()])
-                connection.commit()
-            except Exception as ex:
-                print(ex)
-                if connection:
-                    connection.rollback()
-            finally:
-                if connection:
-                    connection.close()
+            self.postedQueue.queue.append(item)
 
         while self.run_flag:
             while not self.killQueue.empty():
