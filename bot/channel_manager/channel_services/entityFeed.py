@@ -28,16 +28,18 @@ class EntityFeed(object):
         self.setup()
 
     def setup(self):
-        self.tracking = None
         self.e_vars = {}
+        self.run_flag = False
+        self.no_tracking_target = True
         self.load_vars()
-        self.run_flag = True
         self.killQueue = queue.Queue()
         self.postedQueue = queue.Queue()
         self.start_threads()
 
-        # if self.c_vars['display_statusOnStart']: #todo status add
-        #     self.client.loop.create_task(self.command_status())
+        if not self.run_flag and not self.no_tracking_target:
+            self.client.loop.create_task(self.channel.send(
+                'This is an active entityFeed channel with a tracked target however the feed is paused.\nIf you wish to resume it run "!csettings !enfeed !start"'))
+
 
     def load_vars(self):
         try:
@@ -46,6 +48,13 @@ class EntityFeed(object):
             cursor.execute("SELECT * FROM `discord_EntityFeed` WHERE `EntityFeed_channel` = %s;",
                            [self.channel.id])
             self.e_vars = cursor.fetchone()
+            self.run_flag = bool(self.e_vars['is_running'])
+            cursor.execute("SELECT * FROM `discord_EntityFeed_tracking` WHERE `EntityFeed_fk` = %s;",
+                           [self.channel.id])
+            if cursor.fetchone() == None:
+                self.no_tracking_target = True
+            else:
+                self.no_tracking_target = False
         except Exception as ex:
             print(ex)
             traceback.print_exc()
@@ -56,15 +65,37 @@ class EntityFeed(object):
             if connection:
                 connection.close()
 
+    async def command_saveVars(self):
+        self.e_vars['is_running'] = int(self.run_flag)
+        try:
+            connection = mysql.connector.connect(**self.con_.config())
+            cursor = connection.cursor(dictionary=True)
+            sql = "UPDATE discord_EntityFeed SET {} WHERE EntityFeed_channel=%s".format(
+                ', '.join('{}=%s'.format(key) for key in self.e_vars))
+            cursor.execute(sql, [str(i) for i in self.e_vars.values()] + [self.e_vars['EntityFeed_channel']])
+            connection.commit()
+        except Exception as ex:
+            print(ex)
+            await self.channel.send(
+                "Something went wrong when attempting to save EntityFeed variables. Channel variables were not saved.\nCheck that MySQL is correctly running and configured and try again.")
+            if connection:
+                connection.rollback()
+        finally:
+            if connection:
+                connection.close()
+
     def watcher(self):
         pass
 
     def enqueue_loop(self):
         def exists_in_q(val):
             with self.killQueue.mutex:
-                return val in self.killQueue.queue
+                in_kq = val in self.killQueue.queue
+            with self.postedQueue.mutex:
+                in_pq = val in self.postedQueue.queue
+            return (in_kq or in_pq)
 
-        def ignore(km):
+        def ignore(km):  # ignore conditions instead of doing everything in sql
             if km['ship_group_id'] == 29:
                 if km['totalValue'] < km['pod_isk_floor']:
                     return True
@@ -72,6 +103,23 @@ class EntityFeed(object):
                 return True
             elif km['ship_category_id'] == 65 and km['ignore_citadel'] == 1:
                 return True
+            elif km['show_loses'] == 0:
+                if km['alliance_tracking'] == km['alliance_id']:
+                    return True
+                if km['corp_tracking'] == km['corp_id']:
+                    return True
+                if km['pilot_tracking'] == km['pilot_id']:
+                    return True
+            elif km['show_kills'] == 0:
+                if km['alliance_tracking'] is not None:  # null safe compare
+                    if km['alliance_tracking'] != km['alliance_id']:
+                        return True
+                elif km['corp_tracking'] is not None:  # null safe compare
+                    if km['corp_tracking'] != km['corp_id']:
+                        return True
+                elif km['pilot_tracking'] is not None:  # null safe compare
+                    if km['pilot_tracking'] != km['pilot_id']:
+                        return True
             else:
                 return False
 
@@ -80,12 +128,14 @@ class EntityFeed(object):
                 connection = mysql.connector.connect(**self.con_.config())
                 cursor = connection.cursor(dictionary=True)
                 cursor.execute(
-                    'SELECT * FROM(SELECT * FROM(SELECT kd.*FROM(SELECT inv_tr.kill_id FROM zk_involved AS inv_tr, discord_EntityFeed_tracking AS tr WHERE EntityFeed_fk = (%s) AND ((tr.alliance_tracking IS NOT NULL AND inv_tr.alliance_id <=> tr.alliance_tracking) OR (tr.corp_tracking IS NOT NULL AND inv_tr.corporation_id <=> tr.corp_tracking) OR (tr.pilot_tracking IS NOT NULL AND inv_tr.character_id <=> tr.pilot_tracking)) GROUP BY inv_tr.kill_id )AS involved_in INNER JOIN kill_id_victimFB AS kd ON involved_in.kill_id = kd.kill_id )AS i INNER JOIN discord_EntityFeed_tracking AS tr ON tr.EntityFeed_fk = (%s) ) final WHERE NOT (NOT final.show_loses AND ((final.alliance_tracking IS NOT NULL AND final.alliance_tracking <=> final.alliance_id) OR (final.corp_tracking IS NOT NULL AND final.corp_tracking <=> final.corp_id) OR (final.pilot_tracking IS NOT NULL AND final.pilot_tracking <=> final.pilot_id))) AND NOT (NOT final.show_kills AND ((final.alliance_tracking IS NOT NULL AND !(final.alliance_tracking <=> final.alliance_id)) OR (final.corp_tracking IS NOT NULL AND !(final.corp_tracking <=> final.corp_id)) OR (final.pilot_tracking IS NOT NULL AND !(final.pilot_tracking <=> final.pilot_id)))) AND NOT EXISTS (SELECT kill_id_posted FROM discord_EntityFeed_posted h WHERE h.EntityFeed_posted_to = (%s) AND h.kill_id_posted = final.kill_id)',
-                    [self.channel.id, self.channel.id, self.channel.id])  # todo fix
+                    'SELECT details.*, tracking_config.* FROM ( SELECT * FROM ( SELECT inv_tr.kill_id, tr.EntityFeed_fk from zk_involved as inv_tr, discord_EntityFeed_tracking as tr WHERE EntityFeed_fk = (%s) AND ((tr.alliance_tracking IS NOT NULL AND inv_tr.alliance_id <=> tr.alliance_tracking) or (tr.corp_tracking IS NOT NULL AND inv_tr.corporation_id <=> tr.corp_tracking) or (tr.pilot_tracking IS NOT NULL AND inv_tr.character_id <=> tr.pilot_tracking)) GROUP BY inv_tr.kill_id )inv_in left outer join discord_EntityFeed_posted as post ON inv_in.kill_id = post.kill_id_posted AND post.EntityFeed_posted_to = inv_in.EntityFeed_fk WHERE kill_id_posted iS NULL )final inner join kill_id_victimFB as details on final.kill_id=details.kill_id INNER JOIN discord_EntityFeed_tracking as tracking_config on final.EntityFeed_fk = tracking_config.EntityFeed_fk;',
+                    [self.channel.id])  # SelectUnpostedKillWithDetails.sql
                 for item in cursor.fetchall():
                     if ignore(item):
                         self.postedQueue.queue.append(item)
-                    elif not exists_in_q(item):
+                    elif exists_in_q(item):
+                        self.postedQueue.queue.append(item)
+                    else:
                         self.killQueue.queue.append(item)
             except Exception as ex:
                 print(ex)
@@ -98,10 +148,9 @@ class EntityFeed(object):
                 connection = mysql.connector.connect(**self.con_.config())
                 cursor = connection.cursor(dictionary=True)
                 while not self.postedQueue.empty():
-                    km_item = self.postedQueue.queue.pop()
                     cursor.execute(
                         "INSERT IGNORE INTO `discord_EntityFeed_posted`(EntityFeed_posted_to,kill_id_posted,posted_date) VALUES (%s,%s,%s)",
-                        [self.channel.id, km_item['kill_id'], datetime.datetime.utcnow()])
+                        [self.channel.id, self.postedQueue.queue.pop()['kill_id'], datetime.datetime.utcnow()])
                 connection.commit()
             except Exception as ex:
                 print(ex)
@@ -206,17 +255,24 @@ class EntityFeed(object):
             self.postedQueue.queue.append(item)
 
         while self.run_flag:
-            while not self.killQueue.empty():
+            while not self.killQueue.empty() and self.run_flag:
                 await send_message(self.killQueue.queue.pop())
                 await asyncio.sleep(5)
             await asyncio.sleep(10)
 
     def start_threads(self):
-        self.thread_watcher = threading.Thread(target=self.watcher)
-        self.thread_watcher.start()
-        self.enqueue_bg = threading.Thread(target=self.enqueue_loop)
-        self.enqueue_bg.start()
-        self.dequeue_bg = self.client.loop.create_task(self.async_loop())
+        if not self.no_tracking_target:
+            self.thread_watcher = threading.Thread(target=self.watcher)
+            self.thread_watcher.start()
+            self.enqueue_bg = threading.Thread(target=self.enqueue_loop)
+            self.enqueue_bg.start()
+            self.dequeue_bg = self.client.loop.create_task(self.async_loop())
+        else:
+            self.client.loop.create_task(self.channel.send('\n\nThere are currently no tracked entities '
+                                                           'set for this channel. \nYou must create a tracking '
+                                                           'target by running "!csettings !enfeed !add_entity"\nIf '
+                                                           'you created an entityFeed in this channel by error, run the'
+                                                           ' command "!csettings !reset" to remove this message'))
 
     async def command_addEntity(self, d_message, message):
         def is_author(m):
@@ -233,6 +289,7 @@ class EntityFeed(object):
                 connection.commit()
                 await self.channel.send(
                     "Successfully added a new entity to tracking!\nYou should start seeing feed activity!")
+                await self.command_start()
             except Exception as ex:
                 print(ex)
                 if connection:
@@ -468,12 +525,37 @@ class EntityFeed(object):
 
         await prompts()
 
+    async def command_start(self):
+        if self.run_flag == True:
+            await self.channel.send(
+                'The entityFeed is already running. If you wish to pause it run\n"!csettings !enfeed !stop"')
+        else:
+            self.run_flag = True
+            await self.command_saveVars()
+            await self.channel.send(
+                'The entityFeed is now running. If you wish to pause it run\n"!csettings !enfeed !stop" ')
+            self.setup()
+
+    async def command_stop(self):
+        if self.run_flag == False:
+            await self.channel.send(
+                'The entityFeed is already paused. If you wish to start it run\n"!csettings !enfeed !start"')
+        else:
+            self.run_flag = False
+            await self.command_saveVars()
+            await self.channel.send(
+                'The entityFeed is paused. If you wish to start it run\n"!csettings !enfeed !start" ')
+            self.setup()
     async def listen_command(self, d_message, message):
         sub_command = ' '.join((str(message).split()[1:]))
         if d_message.author == self.client.user:
             return
         if await self.client.lookup_command(sub_command, self.client.commands_all['subc_enfeed_addentity']):
             await self.command_addEntity(d_message, sub_command)
+        elif await self.client.lookup_command(sub_command, self.client.commands_all['subc_start']):
+            await self.command_start()
+        elif await self.client.lookup_command(sub_command, self.client.commands_all['subc_stop']):
+            await self.command_stop()
         elif await self.client.lookup_command(sub_command, self.client.commands_all['command_allelse']):
             await self.client.command_not_found(d_message)  # todo fix partial commands
         else:
