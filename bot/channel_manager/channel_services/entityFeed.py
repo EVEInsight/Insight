@@ -99,18 +99,18 @@ class EntityFeed(object):
             if km['ship_group_id'] == 29:
                 if km['totalValue'] < km['pod_isk_floor']:
                     return True
-            elif km['ship_category_id'] == 22 and km['ignore_deployable'] == 1:
+            if km['ship_category_id'] == 22 and km['ignore_deployable'] == 1:
                 return True
-            elif km['ship_category_id'] == 65 and km['ignore_citadel'] == 1:
+            if km['ship_category_id'] == 65 and km['ignore_citadel'] == 1:
                 return True
-            elif km['show_loses'] == 0:
+            if km['show_loses'] == 0:
                 if km['alliance_tracking'] == km['alliance_id']:
                     return True
                 if km['corp_tracking'] == km['corp_id']:
                     return True
                 if km['pilot_tracking'] == km['pilot_id']:
                     return True
-            elif km['show_kills'] == 0:
+            if km['show_kills'] == 0:
                 if km['alliance_tracking'] is not None:  # null safe compare
                     if km['alliance_tracking'] != km['alliance_id']:
                         return True
