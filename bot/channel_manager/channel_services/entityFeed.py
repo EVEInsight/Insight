@@ -210,36 +210,47 @@ class EntityFeed(object):
                 author_icon_url = "https://imageserver.eveonline.com/Corporation/{}_128.png".format(item['corp_id'])
             minutes_ago = round(
                 ((datetime.datetime.utcnow() - item['kill_time']).total_seconds() / 60), 1)
-            field_dsc = '```\nName:{p:<10}{p_name}\n' \
+            field_dsc = '[```\nName:{p:<10}{p_name}\n' \
                         'Corp:{p:<10}{corp_name}<{corp_ticker}>\n' \
                         'Alliance:{p:<6}{alliance_name}<{alliance_ticker}>\n' \
                         'Damage Taken:{p:<2}{damage_taken}\n' \
                         'Involved:{p:<6}{inv}\n' \
                         'ISK Lost:{p:<6}{isk_loss}\n' \
-                        'Time:{p:<10}{min_ago} m/ago```\n' \
-                        'https://zkillboard.com/kill/{kill_id}/'.format(p=' ', kill_id=item['kill_id'],
-                                                                        p_name=item['pilot_name'],
-                                                                        corp_name=item['corp_name'],
-                                                                        corp_ticker=item['corp_ticker'],
-                                                                        alliance_name=item['alliance_name'],
-                                                                        alliance_ticker=item['alliance_ticker'],
-                                                                        damage_taken=item['damage_taken'],
-                                                                        inv=item['total_involved'],
-                                                                        isk_loss=isk_lost_format(item['totalValue']),
-                                                                        min_ago=str(minutes_ago))
+                        'Time:{p:<10}{min_ago} m/ago```](https://zkillboard.com/kill/{kill_id}/)' \
+                        '**https://zkillboard.com/kill/{kill_id}/**'.format(p=' ', kill_id=item['kill_id'],
+                                                                            p_name=item['pilot_name'],
+                                                                            corp_name=item['corp_name'],
+                                                                            corp_ticker=item['corp_ticker'],
+                                                                            alliance_name=item['alliance_name'],
+                                                                            alliance_ticker=item['alliance_ticker'],
+                                                                            damage_taken=item['damage_taken'],
+                                                                            inv=item['total_involved'],
+                                                                            isk_loss=isk_lost_format(item['totalValue']),
+                                                                            min_ago=str(minutes_ago), )
             embed = discord.Embed(title="```\n```", colour=discord.Colour(sidebar_color),
                                   url="https://zkillboard.com/kill/{}/".format(item['kill_id']),
                                   description='**{ship_name}** destroyed in **[{system_name}]'
-                                              '(https://zkillboard.com/system/{system_id}/)** ({region_name})\n\n'
-                                              '**[{pilot_name}](https://zkillboard.com/character/{pilot_id}/)** '
-                                              '**({corp_name})** lost their **{ship_name}** worth **{loss_value}** '
-                                              'ISK to **{total_involved}** pilots **{minutes_ago}** minutes ago.'
+                                              '(http://evemaps.dotlan.net/system/{system_name}/)** ({region_name})\n\n'
+                                              '***[{pilot_name}](https://zkillboard.com/character/{pilot_id}/) '
+                                              '({corp_name}){allianceT}** lost their **{ship_name}** to **[{fb_name}](https://zkillboard.com/character/{fb_id}/)'
+                                              '({fb_corp}){fb_allianceT}** flying in a **{fb_ship}** {inv_count}*\n\n'
                                   .format(ship_name=item['ship_name'], system_name=item['system_name'],
-                                          system_id=item['system_id'],
                                           region_name=item['region_name'], pilot_name=item['pilot_name'],
                                           pilot_id=item['pilot_id'], corp_name=item['corp_name'],
-                                          loss_value=isk_lost_format(item['totalValue']),
-                                          total_involved=item['total_involved'], minutes_ago=str(minutes_ago)),
+                                          allianceT=(str('<' + str(item['alliance_ticker']) + '>') if item[
+                                                                                                          'alliance_ticker'] is not None else str(
+                                              "")),
+                                          fb_corp_id=item['fb_corp_id'],
+                                          fb_name=item['fb_pilot_name'], fb_id=item['fb_pilot_id'],
+                                          fb_corp=item['fb_corp_name'],
+                                          fb_allianceT=(str('<' + str(item['fb_alliance_ticker']) + '>') if item[
+                                                                                                                'fb_alliance_ticker'] is not None else str(
+                                              "")),
+                                          fb_ship=item['fb_ship_name'],
+                                          inv_count=(str("and " + str(
+                                              "**" + str(item['total_involved'] - 1) + "**") + " others.") if item[
+                                                                                                                  'total_involved'] > 1 else str(
+                                              "solo."))),
                                   timestamp=item['kill_time'])
             embed.set_image(url="https://imageserver.eveonline.com/Render/{}_128.png".format(str(item['ship_id'])))
             embed.set_thumbnail(
