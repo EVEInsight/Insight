@@ -120,6 +120,8 @@ class EntityFeed(object):
                 elif km['pilot_tracking'] is not None:  # null safe compare
                     if km['pilot_tracking'] != km['pilot_id']:
                         return True
+            if km['kill_time'] < (datetime.datetime.utcnow() - datetime.timedelta(minutes=90)):
+                return True
             else:
                 return False
 
@@ -131,12 +133,13 @@ class EntityFeed(object):
                     'SELECT details.*, tracking_config.* FROM ( SELECT * FROM ( SELECT inv_tr.kill_id, tr.EntityFeed_fk from zk_involved as inv_tr, discord_EntityFeed_tracking as tr WHERE EntityFeed_fk = (%s) AND ((tr.alliance_tracking IS NOT NULL AND inv_tr.alliance_id <=> tr.alliance_tracking) or (tr.corp_tracking IS NOT NULL AND inv_tr.corporation_id <=> tr.corp_tracking) or (tr.pilot_tracking IS NOT NULL AND inv_tr.character_id <=> tr.pilot_tracking)) GROUP BY inv_tr.kill_id )inv_in left outer join discord_EntityFeed_posted as post ON inv_in.kill_id = post.kill_id_posted AND post.EntityFeed_posted_to = inv_in.EntityFeed_fk WHERE kill_id_posted iS NULL )final inner join kill_id_victimFB as details on final.kill_id=details.kill_id INNER JOIN discord_EntityFeed_tracking as tracking_config on final.EntityFeed_fk = tracking_config.EntityFeed_fk;',
                     [self.channel.id])  # SelectUnpostedKillWithDetails.sql
                 for item in cursor.fetchall():
-                    if ignore(item):
-                        self.postedQueue.queue.append(item)
-                    elif exists_in_q(item):
-                        self.postedQueue.queue.append(item)
-                    else:
-                        self.killQueue.queue.append(item)
+                    if not self.killQueue.full() and not self.postedQueue.full():
+                        if ignore(item):
+                            self.postedQueue.queue.append(item)
+                        elif exists_in_q(item):
+                            self.postedQueue.queue.append(item)
+                        else:
+                            self.killQueue.queue.append(item)
             except Exception as ex:
                 print(ex)
             finally:

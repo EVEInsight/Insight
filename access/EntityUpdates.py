@@ -50,7 +50,8 @@ class EntityUpdates(object):
                     insert['bloodline_id'] = resp.json()['bloodline_id']
 
                     if 'description' in resp.json():
-                        insert['pilot_description'] = resp.json()['description']
+                        insert['pilot_description'] = (resp.json()['description'].encode('utf-8', 'ignore')).decode(
+                            'utf-8', 'ignore')
                     if 'ancestry_id' in resp.json():
                         insert['ancestry_id'] = resp.json()['ancestry_id']
                     if 'security_status' in resp.json():
@@ -125,7 +126,8 @@ class EntityUpdates(object):
                     if 'alliance_id' in resp.json():
                         insert['alliance_id'] = resp.json()['alliance_id']
                     if 'description' in resp.json():
-                        insert['description'] = resp.json()['description']
+                        insert['description'] = (resp.json()['description'].encode('utf-8', 'ignore')).decode('utf-8',
+                                                                                                              'ignore')
                     if 'date_founded' in resp.json():
                         insert['date_founded'] = resp.json()['date_founded']
                     if 'url' in resp.json():
