@@ -165,7 +165,7 @@ class EntityFeed(object):
         while self.run_flag:
             add_toPost()
             registerPosted()
-            time.sleep(20)
+            time.sleep(5)
 
     async def async_loop(self):
         def isk_lost_format(val):
@@ -213,14 +213,24 @@ class EntityFeed(object):
                 author_icon_url = "https://imageserver.eveonline.com/Corporation/{}_128.png".format(item['corp_id'])
             minutes_ago = round(
                 ((datetime.datetime.utcnow() - item['kill_time']).total_seconds() / 60), 1)
-            field_dsc = '[```\nName:{p:<10}{p_name}\n' \
-                        'Corp:{p:<10}{corp_name}<{corp_ticker}>\n' \
-                        'Alliance:{p:<6}{alliance_name}<{alliance_ticker}>\n' \
-                        'Damage Taken:{p:<2}{damage_taken}\n' \
-                        'Involved:{p:<6}{inv}\n' \
-                        'ISK Lost:{p:<6}{isk_loss}\n' \
-                        'Time:{p:<10}{min_ago} m/ago```](https://zkillboard.com/kill/{kill_id}/)' \
-                        '**https://zkillboard.com/kill/{kill_id}/**'.format(p=' ', kill_id=item['kill_id'],
+            field_dsc = '[```{Ship:<14}{p_ship}\n' \
+                        '{Name:<14}{p_name}\n' \
+                        '{Corp:<14}{corp_name}<{corp_ticker}>\n' \
+                        '{Alliance:<14}{alliance_name}<{alliance_ticker}>\n' \
+                        '{Damage_Taken:<14}{damage_taken}\n' \
+                        '{Involved:<14}{inv}\n' \
+                        '{ISK_Lost:<14}{isk_loss}\n' \
+                        '{Time:<14}{min_ago} m/ago```](https://zkillboard.com/kill/{kill_id}/)' \
+                        '**https://zkillboard.com/kill/{kill_id}/**'.format(Ship="Ship:",
+                                                                            p_ship=item['ship_name'],
+                                                                            Name="Name:",
+                                                                            Corp="Corp:",
+                                                                            Damage_Taken="Damage Taken:",
+                                                                            Involved="Involved:",
+                                                                            ISK_Lost="ISK Lost:",
+                                                                            Time="Time:",
+                                                                            Alliance="Alliance:",
+                                                                            kill_id=item['kill_id'],
                                                                             p_name=item['pilot_name'],
                                                                             corp_name=item['corp_name'],
                                                                             corp_ticker=item['corp_ticker'],
@@ -230,7 +240,7 @@ class EntityFeed(object):
                                                                             inv=item['total_involved'],
                                                                             isk_loss=isk_lost_format(item['totalValue']),
                                                                             min_ago=str(minutes_ago), )
-            embed = discord.Embed(title="```\n```", colour=discord.Colour(sidebar_color),
+            embed = discord.Embed(title=" ", colour=discord.Colour(sidebar_color),
                                   url="https://zkillboard.com/kill/{}/".format(item['kill_id']),
                                   description='**{ship_name}** destroyed in **[{system_name}]'
                                               '(http://evemaps.dotlan.net/system/{system_name}/)** ({region_name})\n\n'
@@ -265,14 +275,17 @@ class EntityFeed(object):
             embed.add_field(name="**Details**",
                             value=field_dsc,
                             inline=False)
-            await self.channel.send(content=mention_everyone, embed=embed)
-            self.postedQueue.queue.append(item)
+            try:
+                await self.channel.send(content=mention_everyone, embed=embed)
+                self.postedQueue.queue.append(item)
+            except discord.Forbidden as ex:
+                await self.command_lock()  # disable the thread to save resources if we cant post to it
 
         while self.run_flag:
             while not self.killQueue.empty() and self.run_flag:
                 await send_message(self.killQueue.queue.pop())
                 await asyncio.sleep(5)
-            await asyncio.sleep(10)
+            await asyncio.sleep(1)
 
     def start_threads(self):
         if not self.no_tracking_target:
@@ -560,6 +573,10 @@ class EntityFeed(object):
             await self.channel.send(
                 'The entityFeed is paused. If you wish to start it run\n"!csettings !enfeed !start" ')
             self.setup()
+
+    async def command_lock(self):
+        """lock the channel threads on an exception"""
+        self.run_flag = False
     async def listen_command(self, d_message, message):
         sub_command = ' '.join((str(message).split()[1:]))
         if d_message.author == self.client.user:
