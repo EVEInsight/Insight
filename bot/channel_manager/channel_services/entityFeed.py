@@ -130,16 +130,24 @@ class EntityFeed(object):
                 connection = mysql.connector.connect(**self.con_.config())
                 cursor = connection.cursor(dictionary=True)
                 cursor.execute(
-                    'SELECT details.*, tracking_config.* FROM ( SELECT * FROM ( SELECT inv_tr.kill_id, tr.EntityFeed_fk from zk_involved as inv_tr, discord_EntityFeed_tracking as tr WHERE EntityFeed_fk = (%s) AND ((tr.alliance_tracking IS NOT NULL AND inv_tr.alliance_id <=> tr.alliance_tracking) or (tr.corp_tracking IS NOT NULL AND inv_tr.corporation_id <=> tr.corp_tracking) or (tr.pilot_tracking IS NOT NULL AND inv_tr.character_id <=> tr.pilot_tracking)) GROUP BY inv_tr.kill_id )inv_in left outer join discord_EntityFeed_posted as post ON inv_in.kill_id = post.kill_id_posted AND post.EntityFeed_posted_to = inv_in.EntityFeed_fk WHERE kill_id_posted iS NULL )final inner join kill_id_victimFB as details on final.kill_id=details.kill_id INNER JOIN discord_EntityFeed_tracking as tracking_config on final.EntityFeed_fk = tracking_config.EntityFeed_fk;',
-                    [self.channel.id])  # SelectUnpostedKillWithDetails.sql
-                for item in cursor.fetchall():
-                    if not self.killQueue.full() and not self.postedQueue.full():
-                        if ignore(item):
-                            self.postedQueue.queue.append(item)
-                        elif exists_in_q(item):
-                            self.postedQueue.queue.append(item)
-                        else:
-                            self.killQueue.queue.append(item)
+                    'SELECT killmail_id AS kill_id FROM ( SELECT k.killmail_id FROM zk_involved AS inv INNER JOIN zk_kills AS k ON inv.kill_id = k.killmail_id INNER JOIN discord_EntityFeed_tracking AS tr ON (%s) = tr.EntityFeed_fk WHERE ((tr.alliance_tracking IS NOT NULL AND inv.alliance_id <=> tr.alliance_tracking) OR (tr.corp_tracking IS NOT NULL AND inv.corporation_id <=> tr.corp_tracking) OR (tr.pilot_tracking IS NOT NULL AND inv.character_id <=> tr.pilot_tracking)) AND k.killmail_time > (UTC_TIMESTAMP() - INTERVAL 120 MINUTE) GROUP BY inv.kill_id ) AS kills LEFT OUTER JOIN ( SELECT k.killmail_id AS kill_posted FROM discord_EntityFeed_posted AS post INNER JOIN zk_kills AS k ON post.kill_id_posted = k.killmail_id WHERE EntityFeed_posted_to = (%s) AND  k.killmail_time > (UTC_TIMESTAMP() - INTERVAL 120 MINUTE) ) AS posted ON kills.killmail_id = posted.kill_posted WHERE kill_posted IS NULL ',
+                    [self.channel.id, self.channel.id])  # SelectUnpostedKillWithDetails.sql
+                kill_ids = cursor.fetchall()
+                for id in kill_ids:
+                    cursor.execute(
+                        'SELECT * FROM kill_id_victimFB INNER JOIN discord_EntityFeed_tracking on (%s) = EntityFeed_fk WHERE kill_id = (%s);',
+                        [self.channel.id, id['kill_id']])
+                    kill_details = cursor.fetchone()
+                    if kill_details is not None:
+                        if not self.killQueue.full() and not self.postedQueue.full():
+                            if ignore(kill_details):
+                                self.postedQueue.queue.append(kill_details)
+                            elif exists_in_q(kill_details):
+                                self.postedQueue.queue.append(kill_details)
+                            else:
+                                self.killQueue.queue.append(kill_details)
+                    else:
+                        print("found an invalid kill id on EntityThread: {}".format(str(id)))
             except Exception as ex:
                 print(ex)
             finally:
