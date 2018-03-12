@@ -4,6 +4,7 @@ import traceback
 import mysql.connector
 
 import bot.channel_manager.channel_manager
+from bot.channel_manager.channel_services.capRadar import capRadar
 from bot.channel_manager.channel_services.entityFeed import EntityFeed
 
 
@@ -25,11 +26,21 @@ class d_channel(object):
 
     def setup(self):
         self.c_vars = {}
-        self.enFeed = self.load_enFeed()
+        self.Feed = self.load_feed()
         self.db_create_channel()
         self.load_vars()
         if self.c_vars['display_statusOnStart']:
             self.client.loop.create_task(self.command_status())
+
+    def load_feed(self):
+        Feed = self.load_enFeed()
+        if isinstance(Feed, EntityFeed):
+            return Feed
+        Feed = self.load_capRadar()
+        if isinstance(Feed, capRadar):
+            return Feed
+
+        return None
 
     def db_create_channel(self):
         try:
@@ -50,17 +61,15 @@ class d_channel(object):
                 connection.close()
 
     def load_enFeed(self):
-        enFeed = None
+        Feed = None
         try:
             connection = mysql.connector.connect(**self.con_.config())
             cursor = connection.cursor(dictionary=True)
             cursor.execute("SELECT * FROM `discord_EntityFeed` WHERE `EntityFeed_channel` = %s;",
                            [self.channel.id])
             resp = cursor.fetchone()
-            if resp is None:
-                enFeed = None
-            else:
-                enFeed = EntityFeed(self)
+            if resp is not None:
+                Feed = EntityFeed(self)
         except Exception as ex:
             print(ex)
             traceback.print_exc()
@@ -70,7 +79,28 @@ class d_channel(object):
         finally:
             if connection:
                 connection.close()
-            return enFeed
+            return Feed
+
+    def load_capRadar(self):
+        Feed = None
+        try:
+            connection = mysql.connector.connect(**self.con_.config())
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM `discord_CapRadar` WHERE `channel` = %s;",
+                           [self.channel.id])
+            resp = cursor.fetchone()
+            if resp is not None:
+                Feed = capRadar(self)
+        except Exception as ex:
+            print(ex)
+            traceback.print_exc()
+            if connection:
+                connection.rollback()
+            raise mysql.connector.DatabaseError
+        finally:
+            if connection:
+                connection.close()
+            return Feed
 
     def load_vars(self):
         try:
@@ -164,23 +194,40 @@ class d_channel(object):
                 await self.channel.send(
                     'Error: You must enter "reset" to reset the channel. Channel settings remain unchanged.')
 
-    async def command_to_entityFeed(self, d_message, message_str):
+    async def command_to_Feed(self, d_message, message_str):
         sub_command = ' '.join((str(message_str).split()[1:]))
-        if isinstance(self.enFeed, EntityFeed):
-            await self.enFeed.listen_command(d_message, message_str)
-        else:
-            if await self.client.lookup_command(sub_command, self.client.commands_all['subc_enfeed_create']):
-                if self.enFeed is not None:
-                    await self.channel.send('Error: An EntityFeed already exists for this channel.\nYou can '
-                                            'delete the currently running EntityFeed by '
-                                            'running\n"!csettings !enfeed !reset"')
+        if await self.client.lookup_command(sub_command, self.client.commands_all['subc_create']):
+            if await self.client.lookup_command(message_str, self.client.commands_all['subc_channel_entity']):
+                if self.Feed is not None:
+                    await self.channel.send(
+                        'Error: A feed of type "{}" exists for this channel. \n\nYou may have only one feed of any type per channel. '
+                        'If you wish to change the feed in this channel you can '
+                        'delete the currently running feed by '
+                        'running\n"!csettings !reset" and then create a new one'.format(
+                            str(self.Feed.__class__.__name__)))
                 else:
-                    await EntityFeed.createNewFeed(self)
+                    await EntityFeed.createNewFeed(self, d_message)
                     self.setup()  # reload after creating new feed
-            else:
-                await d_message.channel.send('{}\nThere is no entity killfeed tracker configured for this channel.\n'
-                                             'If you wish to create one, type "!csettings '
-                                             '!entityFeed !create'.format(d_message.author.mention))
+            elif await self.client.lookup_command(message_str, self.client.commands_all['subc_channel_capradar']):
+                if self.Feed is not None:
+                    await self.channel.send(
+                        'Error: A feed of type "{}" exists for this channel. \n\nYou may have only one feed of any type per channel. '
+                        'If you wish to change the feed in this channel you can '
+                        'delete the currently running feed by '
+                        'running\n"!csettings !reset" and then create a new one'.format(
+                            str(self.Feed.__class__.__name__)))
+                else:
+                    await capRadar.createNewFeed(self, d_message)
+                    self.setup()  # reload after creating new feed
+        elif isinstance(self.Feed, EntityFeed):
+            await self.Feed.listen_command(d_message, message_str)
+        elif isinstance(self.Feed, capRadar):
+            await self.Feed.listen_command(d_message, message_str)
+        else:
+            if self.Feed is None:
+                await self.channel.send(
+                    'No feeds exist for this channel. You can create a feed by running one the following commands depending on the feed you want:\n\n'
+                    '"!csettings !enFeed !create"\n"!csettings !capRadar !create"')
 
     async def listen_command(self, message):
         sub_command = ' '.join((str(message.content).split()[1:]))
@@ -194,8 +241,9 @@ class d_channel(object):
             await self.command_ChangeStatus(message, sub_command)
         elif await self.client.lookup_command(sub_command, self.client.commands_all['subc_channel_reset']):
             await self.command_reset(message, sub_command)
-        elif await self.client.lookup_command(sub_command, self.client.commands_all['subc_channel_entity']):
-            await self.command_to_entityFeed(message, sub_command)
+        elif await self.client.lookup_command(sub_command, (
+                self.client.commands_all['subc_channel_entity'] + self.client.commands_all['subc_channel_capradar'])):
+            await self.command_to_Feed(message, sub_command)
         elif await self.client.lookup_command(message.content, self.client.commands_all['command_allelse']):
             await self.client.command_not_found(message)  # todo custom fix
         else:

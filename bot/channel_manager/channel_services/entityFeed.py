@@ -1,45 +1,9 @@
-import asyncio
-import datetime
-import queue
-import threading
-import time
-import traceback
-
-import discord
-import mysql.connector
-
-import bot.channel_manager.channel
+from bot.channel_manager.channel_services.feedService import *
 
 
-class EntityFeed(object):
+class EntityFeed(feedService):
     def __init__(self, channel_ob):  # todo add discord channel check
-        if not isinstance(channel_ob, bot.channel_manager.channel.d_channel):
-            exit()
-
-        # object instances
-        self.manager = channel_ob.manager
-        self.channel = channel_ob.channel
-        self.con_ = self.manager.con_
-        self.config_file = self.manager.config_file
-        self.arguments = self.manager.arguments
-        self.client = self.manager.client
-
-        # vars
-        self.setup()
-
-    def setup(self):
-        self.e_vars = {}
-        self.run_flag = False
-        self.no_tracking_target = True
-        self.load_vars()
-        self.killQueue = queue.Queue()
-        self.postedQueue = queue.Queue()
-        self.start_threads()
-
-        if not self.run_flag and not self.no_tracking_target:
-            self.client.loop.create_task(self.channel.send(
-                'This is an active entityFeed channel with a tracked target however the feed is paused.\nIf you wish to resume it run "!csettings !enfeed !start"'))
-
+        super(EntityFeed, self).__init__(channel_ob=channel_ob)
 
     def load_vars(self):
         try:
@@ -47,8 +11,8 @@ class EntityFeed(object):
             cursor = connection.cursor(dictionary=True)
             cursor.execute("SELECT * FROM `discord_EntityFeed` WHERE `EntityFeed_channel` = %s;",
                            [self.channel.id])
-            self.e_vars = cursor.fetchone()
-            self.run_flag = bool(self.e_vars['is_running'])
+            self.feedConfig = cursor.fetchone()
+            self.run_flag = bool(self.feedConfig['is_running'])
             cursor.execute("SELECT * FROM `discord_EntityFeed_tracking` WHERE `EntityFeed_fk` = %s;",
                            [self.channel.id])
             if cursor.fetchone() == None:
@@ -64,28 +28,6 @@ class EntityFeed(object):
         finally:
             if connection:
                 connection.close()
-
-    async def command_saveVars(self):
-        self.e_vars['is_running'] = int(self.run_flag)
-        try:
-            connection = mysql.connector.connect(**self.con_.config())
-            cursor = connection.cursor(dictionary=True)
-            sql = "UPDATE discord_EntityFeed SET {} WHERE EntityFeed_channel=%s".format(
-                ', '.join('{}=%s'.format(key) for key in self.e_vars))
-            cursor.execute(sql, [str(i) for i in self.e_vars.values()] + [self.e_vars['EntityFeed_channel']])
-            connection.commit()
-        except Exception as ex:
-            print(ex)
-            await self.channel.send(
-                "Something went wrong when attempting to save EntityFeed variables. Channel variables were not saved.\nCheck that MySQL is correctly running and configured and try again.")
-            if connection:
-                connection.rollback()
-        finally:
-            if connection:
-                connection.close()
-
-    def watcher(self):
-        pass
 
     def enqueue_loop(self):
         def exists_in_q(val):
@@ -294,20 +236,6 @@ class EntityFeed(object):
                 await send_message(self.killQueue.queue.pop())
                 await asyncio.sleep(5)
             await asyncio.sleep(1)
-
-    def start_threads(self):
-        if not self.no_tracking_target:
-            self.thread_watcher = threading.Thread(target=self.watcher)
-            self.thread_watcher.start()
-            self.enqueue_bg = threading.Thread(target=self.enqueue_loop)
-            self.enqueue_bg.start()
-            self.dequeue_bg = self.client.loop.create_task(self.async_loop())
-        else:
-            self.client.loop.create_task(self.channel.send('\n\nThere are currently no tracked entities '
-                                                           'set for this channel. \nYou must create a tracking '
-                                                           'target by running "!csettings !enfeed !add_entity"\nIf '
-                                                           'you created an entityFeed in this channel by error, run the'
-                                                           ' command "!csettings !reset" to remove this message'))
 
     async def command_addEntity(self, d_message, message):
         def is_author(m):
@@ -560,31 +488,6 @@ class EntityFeed(object):
 
         await prompts()
 
-    async def command_start(self):
-        if self.run_flag == True:
-            await self.channel.send(
-                'The entityFeed is already running. If you wish to pause it run\n"!csettings !enfeed !stop"')
-        else:
-            self.run_flag = True
-            await self.command_saveVars()
-            await self.channel.send(
-                'The entityFeed is now running. If you wish to pause it run\n"!csettings !enfeed !stop" ')
-            self.setup()
-
-    async def command_stop(self):
-        if self.run_flag == False:
-            await self.channel.send(
-                'The entityFeed is already paused. If you wish to start it run\n"!csettings !enfeed !start"')
-        else:
-            self.run_flag = False
-            await self.command_saveVars()
-            await self.channel.send(
-                'The entityFeed is paused. If you wish to start it run\n"!csettings !enfeed !start" ')
-            self.setup()
-
-    async def command_lock(self):
-        """lock the channel threads on an exception"""
-        self.run_flag = False
     async def listen_command(self, d_message, message):
         sub_command = ' '.join((str(message).split()[1:]))
         if d_message.author == self.client.user:
@@ -600,8 +503,14 @@ class EntityFeed(object):
         else:
             return
 
+    def sql_saveVars(self):
+        return {'table': 'discord_EntityFeed', 'col': 'EntityFeed_channel'}
+
+    def feedCommand(self):
+        return str((self.client.commands_all['subc_channel_entity'])[0])
+
     @staticmethod
-    async def createNewFeed(channel_ob):
+    async def createNewFeed(channel_ob, d_message):
         if not isinstance(channel_ob, bot.channel_manager.channel.d_channel):
             exit()
         else:
