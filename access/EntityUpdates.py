@@ -1,8 +1,7 @@
 import threading
 import traceback
-
 import mysql.connector
-
+import threading
 from database.database_generation import *
 
 
@@ -17,7 +16,63 @@ class EntityUpdates(object):
             self.start_update_threads()
             self.start_thread_watcher()
 
-    def api_pilot_thread(self):
+        self.alliance_lock = threading.Lock()
+        self.corp_lock = threading.Lock()
+        self.pilot_lock = threading.Lock()
+
+    def searchAdd(self, search_str):
+        def insert_ids():
+            try:
+                connection = mysql.connector.connect(**self.con_.config())
+                cursor = connection.cursor(dictionary=True)
+                for id in pilot_ids:
+                    cursor.execute('INSERT IGNORE INTO `pilots`(`pilot_id`) VALUES (%s);',
+                                   [id])
+                for id in corp_ids:
+                    cursor.execute('INSERT IGNORE INTO `corps`(`corp_id`) VALUES (%s);',
+                                   [id])
+                for id in alliance_ids:
+                    cursor.execute('INSERT IGNORE INTO `alliances`(`alliance_id`) VALUES (%s);',
+                                   [id])
+                connection.commit()
+            except Exception as ex:
+                print(ex)
+                if connection:
+                    connection.rollback()
+                    connection.close()
+            finally:
+                if connection:
+                    connection.close()
+
+        try:
+            search_str = str(search_str).replace(' ', '%20')
+            resp = requests.get(
+                "https://esi.tech.ccp.is/latest/search/?categories=alliance,character,corporation&datasource=tranquility&language=en-us&search={}&strict=false".format(
+                    search_str),
+                verify=True,
+                timeout=int(self.config_file['thread_EntityUpdates']['api_request_timeout']))
+            if resp.status_code == 200:
+                resp = resp.json()
+                pilot_ids = []
+                corp_ids = []
+                alliance_ids = []
+                if 'character' in resp:
+                    for i in resp['character']:
+                        pilot_ids.append(i)
+                if 'corporation' in resp:
+                    for i in resp['corporation']:
+                        corp_ids.append(i)
+                if 'alliance' in resp:
+                    for i in resp['alliance']:
+                        alliance_ids.append(i)
+                insert_ids()
+                self.api_alliance_task()
+                self.api_corp_task()
+                self.api_pilot_task()
+        except requests.exceptions.RequestException as ex:
+            print(ex)
+
+    def api_pilot_task(self):
         def insert_data(pilot_id, resp):
             try:
                 connection = mysql.connector.connect(**self.con_.config())
@@ -74,24 +129,31 @@ class EntityUpdates(object):
             connection.close()
             return vals
 
-        while self.thread_Updates_run:
-            pool = ThreadPool(int(self.config_file['thread_EntityUpdates']['threads_per_pool']))
-            try:
+        pool = ThreadPool(int(self.config_file['thread_EntityUpdates']['threads_per_pool']))
+        try:
+            with self.pilot_lock:
                 updateIDs = findValsUpdate()
                 pool.map(api_pull, updateIDs)
                 pool.close()
                 pool.join()
                 if len(updateIDs) != 0:
                     print("Updated pilot information for {} pilots".format(len(updateIDs)))
-                time.sleep(int(self.config_file['thread_EntityUpdates']['pool_secondsWaitAfterSuccessful_Pull']))
-            except:
-                traceback.print_exc()
-                pool.close()
-                pool.join()
-                time.sleep(int(self.config_file['thread_EntityUpdates']['pool_secondsWaitAfterException_Pull']))
-                exit()
+        except:
+            traceback.print_exc()
+            pool.close()
+            pool.join()
+            exit()
 
-    def api_corp_thread(self):
+    def api_pilot_thread(self):
+        while self.thread_Updates_run:
+            try:
+                self.api_pilot_task()
+                time.sleep(int(self.config_file['thread_EntityUpdates']['pool_secondsWaitAfterSuccessful_Pull']))
+            except Exception as ex:
+                print(ex)
+                time.sleep(int(self.config_file['thread_EntityUpdates']['pool_secondsWaitAfterException_Pull']))
+
+    def api_corp_task(self):
         def insert_data(corp_id, resp):
             try:
                 connection = mysql.connector.connect(**self.con_.config())
@@ -154,24 +216,31 @@ class EntityUpdates(object):
             connection.close()
             return vals
 
-        while self.thread_Updates_run:
-            pool = ThreadPool(int(self.config_file['thread_EntityUpdates']['threads_per_pool']))
-            try:
+        pool = ThreadPool(int(self.config_file['thread_EntityUpdates']['threads_per_pool']))
+        try:
+            with self.corp_lock:
                 updateIDs = findValsUpdate()
                 pool.map(api_pull, updateIDs)
                 pool.close()
                 pool.join()
                 if len(updateIDs) != 0:
                     print("Updated corp information for {} corps".format(len(updateIDs)))
-                time.sleep(int(self.config_file['thread_EntityUpdates']['pool_secondsWaitAfterSuccessful_Pull']))
-            except:
-                traceback.print_exc()
-                pool.close()
-                pool.join()
-                time.sleep(int(self.config_file['thread_EntityUpdates']['pool_secondsWaitAfterException_Pull']))
-                exit()
+        except:
+            traceback.print_exc()
+            pool.close()
+            pool.join()
+            exit()
 
-    def api_alliance_thread(self):
+    def api_corp_thread(self):
+        while self.thread_Updates_run:
+            try:
+                self.api_corp_task()
+                time.sleep(int(self.config_file['thread_EntityUpdates']['pool_secondsWaitAfterSuccessful_Pull']))
+            except Exception as ex:
+                print(ex)
+                time.sleep(int(self.config_file['thread_EntityUpdates']['pool_secondsWaitAfterException_Pull']))
+
+    def api_alliance_task(self, ):
         def insert_data(alliance_id, resp):
             try:
                 connection = mysql.connector.connect(**self.con_.config())
@@ -223,22 +292,29 @@ class EntityUpdates(object):
             connection.close()
             return vals
 
-        while self.thread_Updates_run:
-            pool = ThreadPool(int(self.config_file['thread_EntityUpdates']['threads_per_pool']))
-            try:
+        pool = ThreadPool(int(self.config_file['thread_EntityUpdates']['threads_per_pool']))
+        try:
+            with self.alliance_lock:
                 updateIDs = findValsUpdate()
                 pool.map(api_pull, updateIDs)
                 pool.close()
                 pool.join()
                 if len(updateIDs) != 0:
                     print("Updated alliance information for {} alliances".format(len(updateIDs)))
+        except:
+            traceback.print_exc()
+            pool.close()
+            pool.join()
+            exit()
+
+    def api_alliance_thread(self):
+        while self.thread_Updates_run:
+            try:
+                self.api_alliance_task()
                 time.sleep(int(self.config_file['thread_EntityUpdates']['pool_secondsWaitAfterSuccessful_Pull']))
-            except:
-                traceback.print_exc()
-                pool.close()
-                pool.join()
+            except Exception as ex:
+                print(ex)
                 time.sleep(int(self.config_file['thread_EntityUpdates']['pool_secondsWaitAfterException_Pull']))
-                exit()
 
     def thread_watcher(self):
         while self.thread_Updates_run:
@@ -281,10 +357,13 @@ class EntityUpdates(object):
         print("Starting EntityUpdate thread watcher")
         self.thread_watcher.start()
 
-    def find(self, search_string):
+    def find(self, search_string, exact=False):
         try:
             matches = {'pilots': None, 'corps': None, 'alliances': None}
-            search_s = str(str(search_string) + "%")
+            if not exact:
+                search_s = str(str(search_string) + "%")
+            else:
+                search_s = str(search_string)
             connection = mysql.connector.connect(**self.con_.config())
             cursor = connection.cursor(dictionary=True)
             cursor.execute("SELECT * FROM `alliances` WHERE `alliance_name` LIKE %s;",

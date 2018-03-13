@@ -71,7 +71,7 @@ class D_client(discord.Client):
                 else:
                     return(system_dict[int(resp.content)-1])
 
-    async def select_entity(self, entity_dict, message, original_lookup):
+    async def select_entity(self, entity_dict, message, original_lookup, dont_retry=False, exact_match=False):
         def same_author(m):
             return m.author == message.author
 
@@ -89,7 +89,11 @@ class D_client(discord.Client):
         for key, val in entity_dict.items():
             for v in val:
                 index_list.append((key, v))
-        if len(index_list) == 0:
+        if len(index_list) == 0 and not dont_retry:
+            self.en_updates.searchAdd(str(original_lookup))
+            return await self.select_entity(self.en_updates.find(original_lookup, exact=exact_match), message,
+                                            original_lookup, dont_retry=True)
+        elif len(index_list) == 0 and dont_retry:
             await message.channel.send("{}\nI could not find any entities matching \"{}\"\nPlease try again".format(
                 message.author.mention, original_lookup))
             raise KeyError("unable to find entity")  # todo more elegant solution to exiting?

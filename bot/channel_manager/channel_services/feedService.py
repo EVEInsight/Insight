@@ -147,3 +147,29 @@ class feedService(metaclass=ABCMeta):
     @abstractmethod
     async def createNewFeed(channel_ob, d_message):
         pass
+
+    @staticmethod
+    async def ask_question(question, d_message, client, timeout=30):
+        if not isinstance(client, discord.Client):
+            exit("channel must be of type bot.channel_manager.channel.d_channel")
+        if not isinstance(question, str):
+            exit("question must be of type str")
+        if not isinstance(d_message, discord.Message):
+            exit("d_message must be of type discord.MessageType")
+        if not isinstance(timeout, int):
+            exit("timeout must be of type int")
+
+        def is_author(m):
+            return m.author == d_message.author
+
+        async def timeout_message(d_message):
+            await d_message.channel.send(
+                "{}\nSorry, but you took to long to respond".format(d_message.author.mention))
+            raise asyncio.TimeoutError("Waiting for user response timeout")
+
+        with d_message.channel.typing():
+            await d_message.channel.send('{}'.format(question))
+        try:
+            return await client.wait_for('message', timeout=timeout, check=is_author)
+        except asyncio.TimeoutError:
+            await timeout_message(d_message)
