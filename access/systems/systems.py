@@ -34,7 +34,16 @@ class fa_systems(object):
         for i in self.system_list:
             print(i)
 
-    def ly_range(self, sys1, sys2):
+    def system_by_id(self, id):
+        for system in self.system_list:
+            if id == system['system_id']:
+                return system
+
+    def ly_range(self, sys1, sys2, id_only_mode=False):
+        """determines ly range between two systems given system id from database"""
+        if id_only_mode:
+            sys1 = self.system_by_id(sys1)
+            sys2 = self.system_by_id(sys2)
         x1 = sys1["s_pos_x"]
         x2 = sys2["s_pos_x"]
         y1 = sys1["s_pos_y"]

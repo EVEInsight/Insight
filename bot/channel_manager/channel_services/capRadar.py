@@ -51,10 +51,66 @@ class capRadar(feedService):
                 connection.close()
 
     def enqueue_loop(self):
-        raise NotImplementedError
+        def exists_in_q(val):
+            with self.killQueue.mutex:
+                in_kq = val in self.killQueue.queue
+            with self.postedQueue.mutex:
+                in_pq = val in self.postedQueue.queue
+            return (in_kq or in_pq)
+
+        def ignore(km):  # ignore conditions instead of doing everything in sql
+            raise NotImplementedError
+
+        def add_toPost():
+            try:
+                connection = mysql.connector.connect(**self.con_.config())
+                cursor = connection.cursor(dictionary=True)
+                cursor.execute(
+                    'SELECT kill_id, system_id FROM kills_inv_SuperOrCap120M AS all_k LEFT OUTER JOIN discord_CapRadar_posted AS posted ON all_k.kill_id = posted.kill_id_posted AND (%s) = posted.CapRadar_posted_to WHERE kill_id_posted IS NULL;',
+                    [self.channel.id])  # SelectUnpostedKillWithDetails.sql
+                kills_all = cursor.fetchall()
+                kills_inRange = []
+                for id in kills_all:
+                    if self.client.m_systems.ly_range(self.feedConfig['system_base'], id['system_id'],
+                                                      id_only_mode=True) > self.feedConfig['maxLY_fromBase']:
+                        self.postedQueue.append(id)
+            except Exception as ex:
+                print(ex)
+            finally:
+                if connection:
+                    connection.close()
+
+        def registerPosted():
+            try:
+                connection = mysql.connector.connect(**self.con_.config())
+                cursor = connection.cursor(dictionary=True)
+                while not self.postedQueue.empty():
+                    cursor.execute(
+                        "INSERT IGNORE INTO `discord_CapRadar_posted`(CapRadar_posted_to,kill_id_posted,posted_date) VALUES (%s,%s,%s)",
+                        [self.channel.id, self.postedQueue.queue.pop()['kill_id'], datetime.datetime.utcnow()])
+                connection.commit()
+            except Exception as ex:
+                print(ex)
+                if connection:
+                    connection.rollback()
+            finally:
+                if connection:
+                    connection.close()
+
+        while self.run_flag:
+            add_toPost()
+            registerPosted()
+            time.sleep(5)
 
     async def async_loop(self):
-        raise NotImplementedError
+        async def send_message(item):
+            pass
+
+        while self.run_flag:
+            while not self.killQueue.empty() and self.run_flag:
+                await send_message(self.killQueue.queue.pop())
+                await asyncio.sleep(5)
+            await asyncio.sleep(1)
 
     async def command_ignore(self, d_message):
 
