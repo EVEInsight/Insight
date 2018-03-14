@@ -300,8 +300,7 @@ class EntityFeed(feedService):
                     "{}\nSorry, but you took to long to respond".format(d_message.author.mention))
                 return
             else:
-                entity_select = await self.client.select_entity(self.client.en_updates.find(author_answer.content),
-                                                                d_message, author_answer.content)
+                entity_select = await self.client.select_entity(d_message, author_answer.content, exact_match=False)
                 find_id_and_db_key(entity_select, db_insert_tracking)
             with d_message.channel.typing():
                 await d_message.channel.send(

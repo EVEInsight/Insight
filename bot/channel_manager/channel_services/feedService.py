@@ -15,10 +15,8 @@ from abc import ABCMeta, abstractmethod
 
 class feedService(metaclass=ABCMeta):
     def __init__(self, channel_ob):  # todo add discord channel check
-        if not isinstance(channel_ob, bot.channel_manager.channel.d_channel):
-            exit()
-        if not isinstance(self, feedService):  # cant instantiate superclass
-            exit()
+        assert (isinstance(channel_ob, bot.channel_manager.channel.d_channel))
+        assert (self != feedService)  # cant instantiate superclass
 
         # object instances
         self.manager = channel_ob.manager
@@ -149,15 +147,11 @@ class feedService(metaclass=ABCMeta):
         pass
 
     @staticmethod
-    async def ask_question(question, d_message, client, timeout=30):
-        if not isinstance(client, discord.Client):
-            exit("channel must be of type bot.channel_manager.channel.d_channel")
-        if not isinstance(question, str):
-            exit("question must be of type str")
-        if not isinstance(d_message, discord.Message):
-            exit("d_message must be of type discord.MessageType")
-        if not isinstance(timeout, int):
-            exit("timeout must be of type int")
+    async def ask_question(question, d_message, client, timeout=30, embed=None):
+        assert (isinstance(client, discord.Client))
+        assert (isinstance(question, str))
+        assert (isinstance(d_message, discord.Message))
+        assert (isinstance(timeout, int))
 
         def is_author(m):
             return m.author == d_message.author
@@ -168,7 +162,7 @@ class feedService(metaclass=ABCMeta):
             raise asyncio.TimeoutError("Waiting for user response timeout")
 
         with d_message.channel.typing():
-            await d_message.channel.send('{}'.format(question))
+            await d_message.channel.send('{}'.format(question), embed=embed)
         try:
             return await client.wait_for('message', timeout=timeout, check=is_author)
         except asyncio.TimeoutError:

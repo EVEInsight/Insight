@@ -6,6 +6,7 @@ class capRadar(feedService):
         super(capRadar, self).__init__(channel_ob=channel_ob)
 
     def load_vars(self):
+        self.load_ignores()
         try:
             connection = mysql.connector.connect(**self.con_.config())
             cursor = connection.cursor(dictionary=True)
@@ -25,29 +26,134 @@ class capRadar(feedService):
             if connection:
                 connection.close()
 
+    def load_ignores(self):
+        self.ignores = {'pilots': [], 'corps': [], 'alliances': []}
+        try:
+            connection = mysql.connector.connect(**self.con_.config())
+            cursor = connection.cursor()
+            cursor.execute("SELECT pilot_id FROM `discord_CapRadar_ignore_pilots` WHERE `channel_cr` = %s;",
+                           [self.channel.id])
+            self.ignores['pilots'] = cursor.fetchall()
+            cursor.execute("SELECT corp_id FROM `discord_CapRadar_ignore_corps` WHERE `channel_cr` = %s;",
+                           [self.channel.id])
+            self.ignores['corps'] = cursor.fetchall()
+            cursor.execute("SELECT alliance_id FROM `discord_CapRadar_ignore_alliances` WHERE `channel_cr` = %s;",
+                           [self.channel.id])
+            self.ignores['alliances'] = cursor.fetchall()
+        except Exception as ex:
+            print(ex)
+            traceback.print_exc()
+            if connection:
+                connection.rollback()
+            raise mysql.connector.DatabaseError
+        finally:
+            if connection:
+                connection.close()
+
     def enqueue_loop(self):
         raise NotImplementedError
 
     async def async_loop(self):
         raise NotImplementedError
 
-    async def command_ignore(self, d_message, sub_command):
-        question = str("This tool will assist in adding ignored entities to your capRadar.\n\n"
-                       "How this works:\n"
-                       "Entities can include alliances, corps, or pilots. If the capRadar feed detects a"
-                       " capital that is on your ignore list, it will not be posted to channel.\n"
-                       "If capRadar detects a killmail that involves both ignored entities and non-ignored entites in capitals"
-                       "it will still post the kill and information about the non-ignored parties.\n\n"
-                       "How do I import?\n\nMost often you will want to ignore blues from your alliance or corp standings.")
-        response = await self.ask_question(question, d_message, self.client)
-        items = str(response.content)
-        for i in items.split('\n'):
+    async def command_ignore(self, d_message):
+
+        async def insert_ignores(selected_items, overwrite=False):
             try:
-                entity_select = await self.client.select_entity(self.client.en_updates.find(i, exact=True),
-                                                                d_message, i, exact_match=True)
-                print(entity_select)
-            except KeyError:
-                pass
+                connection = mysql.connector.connect(**self.con_.config())
+                cursor = connection.cursor(dictionary=True)
+                if overwrite:
+                    cursor.execute("DELETE FROM `discord_CapRadar_ignore_pilots` WHERE channel_cr = (%s)",
+                                   [self.channel.id])
+                    cursor.execute("DELETE FROM `discord_CapRadar_ignore_corps` WHERE channel_cr = (%s)",
+                                   [self.channel.id])
+                    cursor.execute("DELETE FROM `discord_CapRadar_ignore_alliances` WHERE channel_cr = (%s)",
+                                   [self.channel.id])
+                for id in selected_items['pilots']:
+                    cursor.execute(
+                        "INSERT IGNORE INTO discord_CapRadar_ignore_pilots(channel_cr,pilot_id) VALUES(%s,%s)",
+                        [self.channel.id, id['pilot_id']])
+                for id in selected_items['corps']:
+                    cursor.execute("INSERT IGNORE INTO discord_CapRadar_ignore_corps(channel_cr,corp_id) VALUES(%s,%s)",
+                                   [self.channel.id, id['corp_id']])
+                for id in selected_items['alliances']:
+                    cursor.execute(
+                        "INSERT IGNORE INTO discord_CapRadar_ignore_alliances(channel_cr,alliance_id) VALUES(%s,%s)",
+                        [self.channel.id, id['alliance_id']])
+                connection.commit()
+                await self.channel.send(
+                    'Successfully saved the ignore list. You can view currently ignored targets for this channel by running\n\n'
+                    '"!csettings !capRadar !viewIgnore"')
+            except Exception as ex:
+                print(ex)
+                traceback.print_exc()
+                if connection:
+                    connection.rollback()
+                raise mysql.connector.DatabaseError
+            finally:
+                if connection:
+                    connection.close()
+
+        async def prompt():
+            question = str("This tool will assist in adding ignored entities to your capRadar.\n\n"
+                           "How this works:\n"
+                           "Entities can include alliances, corps, or pilots. If the capRadar feed detects a"
+                           " capital that is on your ignore list, it will not be posted to channel.\n"
+                           "If capRadar detects a killmail that involves both ignored entities and non-ignored entites in capitals"
+                           "it will still post the kill and information about the non-ignored parties.\n\n"
+                           "How do I import?\n\nMost often you will want to ignore blues from your alliance or corp standings.")
+            response = await self.ask_question(question, d_message, self.client)
+            items = str(response.content)
+            entities = [i for i in items.split('\n')]
+            exact_match = True if len(entities) >= 5 else False
+            selected_items = {'pilots': [], 'corps': [], 'alliances': []}
+            for i in entities:
+                try:
+                    entity_select = await self.client.select_entity(d_message, i, exact_match=exact_match)
+                    for key, val in entity_select.items():
+                        if val is not None:
+                            for item in val:
+                                selected_items[key].append(item)
+                except:
+                    pass
+            embed = discord.Embed(title='Selected to ignore',
+                                  colour=discord.Colour(0x182649),
+                                  description='These are the currently selected entities to be added to the capRadar ignore lists.')
+            pilots_s = ''
+            corps_s = ''
+            alliances_s = ''
+            for p in selected_items['pilots']:
+                pilots_s += str(p['pilot_name'] + '\n')
+            for c in selected_items['corps']:
+                corps_s += str(c['corp_name'] + '<{}>\n'.format(c['corp_ticker']))
+            for a in selected_items['alliances']:
+                alliances_s += str(a['alliance_name'] + '<{}>\n'.format(a['ticker']))
+            if len(pilots_s) > 1:
+                embed.add_field(name="**Pilots**", value=pilots_s, inline=False)
+            if len(corps_s) > 1:
+                embed.add_field(name="**Corps**", value=corps_s, inline=False)
+            if len(alliances_s) > 1:
+                embed.add_field(name="**Alliances**", value=alliances_s, inline=False)
+            embed.add_field(name="Accept or Decline Changes",
+                            value="\n\n**To confirm these changes please enter\n\n0 - Discard Changes\n\n"
+                                  "1 - Accept and add to existing ignore list (previously added ignores will still be in effect)\n\n"
+                                  "2 - Accept and overwrite/delete existing ignores (previously added ignores will be deleted and replaced)**",
+                            inline=False)
+            answer = await self.ask_question("{}".format(d_message.author.mention), d_message, self.client, embed=embed,
+                                             timeout=90)
+
+            if str(answer.content) == "2" or str(answer.content) == "overwrite":  # todo better matching
+                await insert_ignores(selected_items, overwrite=True)
+            elif str(answer.content) == "1" or str(answer.content) == "yes":  # todo better matching
+                await insert_ignores(selected_items, overwrite=False)
+            elif str(answer.content) == "0" or str(answer.content) == "no":
+                await self.channel.send("{}\nNo changes have been made".format(d_message.author.mention))
+            else:
+                await self.channel.send(
+                    'Error: You must select either "0" to decline or "1" to accept.\n\nNo changes have been made')
+
+        await prompt()
+        self.load_ignores()
 
     async def listen_command(self, d_message, message):
         sub_command = ' '.join((str(message).split()[1:]))

@@ -71,13 +71,13 @@ class D_client(discord.Client):
                 else:
                     return(system_dict[int(resp.content)-1])
 
-    async def select_entity(self, entity_dict, message, original_lookup, dont_retry=False, exact_match=False):
+    async def select_entity(self, message, original_lookup, dont_retry=False, exact_match=False):
         def same_author(m):
             return m.author == message.author
 
         return_dict = {'pilots': None, 'corps': None, 'alliances': None}
         index_list = []
-
+        entity_dict = self.en_updates.find(original_lookup, exact=exact_match)
         def append_retrun_dict_at_index(index):
             if index_list[index][0] == "alliances":
                 return_dict['alliances'] = [index_list[index][1]]
@@ -91,10 +91,9 @@ class D_client(discord.Client):
                 index_list.append((key, v))
         if len(index_list) == 0 and not dont_retry:
             self.en_updates.searchAdd(str(original_lookup))
-            return await self.select_entity(self.en_updates.find(original_lookup, exact=exact_match), message,
-                                            original_lookup, dont_retry=True)
+            return await self.select_entity(message, original_lookup, dont_retry=True, exact_match=exact_match)
         elif len(index_list) == 0 and dont_retry:
-            await message.channel.send("{}\nI could not find any entities matching \"{}\"\nPlease try again".format(
+            await message.channel.send("{}\nI could not find any entities matching \"{}\"\n".format(
                 message.author.mention, original_lookup))
             raise KeyError("unable to find entity")  # todo more elegant solution to exiting?
         elif len(index_list) == 1:
