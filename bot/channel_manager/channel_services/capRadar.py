@@ -58,6 +58,9 @@ class capRadar(feedService):
                 in_pq = val in self.postedQueue.queue
             return (in_kq or in_pq)
 
+        def ignore_parse(km):
+            raise NotImplementedError
+
         def ignore(km):  # ignore conditions instead of doing everything in sql
             raise NotImplementedError
 
@@ -67,13 +70,25 @@ class capRadar(feedService):
                 cursor = connection.cursor(dictionary=True)
                 cursor.execute(
                     'SELECT kill_id, system_id FROM kills_inv_SuperOrCap120M AS all_k LEFT OUTER JOIN discord_CapRadar_posted AS posted ON all_k.kill_id = posted.kill_id_posted AND (%s) = posted.CapRadar_posted_to WHERE kill_id_posted IS NULL;',
-                    [self.channel.id])  # SelectUnpostedKillWithDetails.sql
+                    [self.channel.id])
                 kills_all = cursor.fetchall()
                 kills_inRange = []
                 for id in kills_all:
                     if self.client.m_systems.ly_range(self.feedConfig['system_base'], id['system_id'],
                                                       id_only_mode=True) > self.feedConfig['maxLY_fromBase']:
                         self.postedQueue.append(id)
+                    else:
+                        kills_inRange.append(id)
+                for id in kills_inRange:
+                    km = {'target': None, 'attackers': []}
+                    cursor.execute(
+                        'SELECT * FROM `zk_involved` INNER JOIN item_types on ship_type_id = item_types.type_id INNER JOIN item_groups on group_id_fk = group_id WHERE kill_id = (%s) and ( group_id <=> 659 or group_id <=> 30 or group_id <=> 485 or group_id <=> 547 or group_id <=> 1538 or group_id <=> 883 or group_id <=> 898) AND NOT is_victim;',
+                        id['kill_id'])
+                    km['attackers'] = cursor.fetchall()
+                    cursor.execute('SELECT * FROM `kill_id_victimFB` WHERE 	kill_id = (%s)',
+                                   id['kill_id'])
+                    km['target'] = cursor.fetchone()
+                    km = ignore_parse(km)
             except Exception as ex:
                 print(ex)
             finally:
