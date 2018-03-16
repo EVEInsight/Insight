@@ -53,16 +53,32 @@ class capRadar(feedService):
     def enqueue_loop(self):
         def exists_in_q(val):
             with self.killQueue.mutex:
-                in_kq = val in self.killQueue.queue
+                kq = list(self.killQueue.queue)
             with self.postedQueue.mutex:
-                in_pq = val in self.postedQueue.queue
-            return (in_kq or in_pq)
+                pq = list(self.postedQueue.queue)
+
+            if val['kill_id'] in [i['kill_id'] for i in kq]:
+                return True
+            elif val['kill_id'] in [i['kill_id'] for i in pq]:
+                return True
+            else:
+                return False
 
         def ignore_parse(km):
-            raise NotImplementedError
-
-        def ignore(km):  # ignore conditions instead of doing everything in sql
-            raise NotImplementedError
+            attackers = []
+            for a in km['attackers']:
+                if a['alliance_id'] in self.ignores['alliances'] or a['corp_id'] in self.ignores['corps'] or a[
+                    'pilot_id'] in self.ignores['pilots']:
+                    continue
+                if self.feedConfig['track_supers'] == 0 and a['group_id'] in self.config_file['super_group_ids']:
+                    continue
+                if self.feedConfig['track_capitals'] == 0 and a['group_id'] in self.config_file['capital_group_ids']:
+                    continue
+                if self.feedConfig['track_blops'] == 0 and a['group_id'] in self.config_file['blops_group_ids']:
+                    continue
+                attackers.append(a)
+            km['attackers'] = attackers
+            return km
 
         def add_toPost():
             try:
@@ -72,23 +88,29 @@ class capRadar(feedService):
                     'SELECT kill_id, system_id FROM kills_inv_SuperOrCap120M AS all_k LEFT OUTER JOIN discord_CapRadar_posted AS posted ON all_k.kill_id = posted.kill_id_posted AND (%s) = posted.CapRadar_posted_to WHERE kill_id_posted IS NULL;',
                     [self.channel.id])
                 kills_all = cursor.fetchall()
-                kills_inRange = []
                 for id in kills_all:
+                    km = {'kill_id': id['kill_id'], 'target': None, 'attackers': []}
                     if self.client.m_systems.ly_range(self.feedConfig['system_base'], id['system_id'],
                                                       id_only_mode=True) > self.feedConfig['maxLY_fromBase']:
-                        self.postedQueue.append(id)
+                        self.postedQueue.queue.append(km)
+                        continue
+                    elif exists_in_q(km):
+                        self.postedQueue.queue.append(km)
+                        continue
                     else:
-                        kills_inRange.append(id)
-                for id in kills_inRange:
-                    km = {'target': None, 'attackers': []}
-                    cursor.execute(
-                        'SELECT * FROM `zk_involved` INNER JOIN item_types on ship_type_id = item_types.type_id INNER JOIN item_groups on group_id_fk = group_id WHERE kill_id = (%s) and ( group_id <=> 659 or group_id <=> 30 or group_id <=> 485 or group_id <=> 547 or group_id <=> 1538 or group_id <=> 883 or group_id <=> 898) AND NOT is_victim;',
-                        id['kill_id'])
-                    km['attackers'] = cursor.fetchall()
-                    cursor.execute('SELECT * FROM `kill_id_victimFB` WHERE 	kill_id = (%s)',
-                                   id['kill_id'])
-                    km['target'] = cursor.fetchone()
-                    km = ignore_parse(km)
+                        cursor.execute(
+                            'SELECT pilot_id, pilot_name, corp_id, corp_name, corp_ticker, iv.alliance_id, alliance_name, ticker AS alliance_ticker, type_id AS ship_id, type_name AS ship_name, group_id, group_name FROM zk_involved AS iv INNER JOIN item_types ON iv.ship_type_id = item_types.type_id INNER JOIN item_groups ON item_types.group_id_fk = item_groups.group_id INNER JOIN item_category ON item_groups.item_category_fk = item_category.category_id INNER JOIN zk_kills AS k ON iv.kill_id = k.killmail_id INNER JOIN systems AS sy ON k.system_id = sy.system_id INNER JOIN constellations AS con ON sy.constellation_id_fk = con.constellation_id INNER JOIN regions AS rg ON con.region_id_fk = rg.region_id LEFT JOIN pilots ON iv.character_id = pilots.pilot_id LEFT JOIN corps ON iv.corporation_id = corps.corp_id LEFT JOIN alliances ON iv.alliance_id = alliances.alliance_id WHERE kill_id = (%s) AND ( group_id <=> 659 OR group_id <=> 30 OR group_id <=> 485 OR group_id <=> 547 OR group_id <=> 1538 OR group_id <=> 883 OR group_id <=> 898) AND NOT is_victim;',
+                            [id['kill_id']])
+                        km['attackers'] = cursor.fetchall()
+                        cursor.execute('SELECT * FROM `kill_id_victimFB` WHERE 	kill_id = (%s)',
+                                       [id['kill_id']])
+                        km['target'] = cursor.fetchone()
+                        km = ignore_parse(km)
+                        if len(km['attackers']) == 0:
+                            self.postedQueue.queue.append(km)
+                            continue
+                        else:
+                            self.killQueue.queue.append(km)
             except Exception as ex:
                 print(ex)
             finally:
@@ -119,8 +141,8 @@ class capRadar(feedService):
 
     async def async_loop(self):
         async def send_message(item):
-            pass
-
+            await self.channel.send('https://zkillboard.com/kill/{}/'.format(item['kill_id']))
+            self.postedQueue.queue.append(item)
         while self.run_flag:
             while not self.killQueue.empty() and self.run_flag:
                 await send_message(self.killQueue.queue.pop())
