@@ -12,13 +12,14 @@ class EntityUpdates(object):
         self.arguments = args
 
         self.thread_Updates_run = True
-        if not self.arguments.disable_EntityUpdates:
-            self.start_update_threads()
-            self.start_thread_watcher()
 
         self.alliance_lock = threading.Lock()
         self.corp_lock = threading.Lock()
         self.pilot_lock = threading.Lock()
+
+        if not self.arguments.disable_EntityUpdates:
+            self.start_update_threads()
+            self.start_thread_watcher()
 
     def searchAdd(self, search_str):
         def insert_ids():
