@@ -238,7 +238,7 @@ class d_channel(object):
         sub_command = ' '.join((str(message.content).split()[1:]))
         if message.author == self.client.user:
             return
-        if await self.client.lookup_command(sub_command, self.client.commands_all['subc_channel_status']):
+        if await self.client.lookup_command(sub_command, self.client.commands_all['subc_status']):
             await self.command_status()
         elif await self.client.lookup_command(sub_command, self.client.commands_all['subc_channel_save']):
             await self.command_saveVars()

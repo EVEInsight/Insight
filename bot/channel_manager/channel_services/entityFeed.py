@@ -496,6 +496,8 @@ class EntityFeed(feedService):
             return
         if await self.client.lookup_command(sub_command, self.client.commands_all['subc_enfeed_addentity']):
             await self.command_addEntity(d_message, sub_command)
+        elif await self.client.lookup_command(sub_command, self.client.commands_all['subc_status']):
+            await self.command_status()
         elif await self.client.lookup_command(sub_command, self.client.commands_all['subc_start']):
             await self.command_start()
         elif await self.client.lookup_command(sub_command, self.client.commands_all['subc_stop']):

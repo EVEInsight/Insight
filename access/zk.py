@@ -1,7 +1,7 @@
 import threading
-
+import random
 import mysql.connector
-
+import string
 from database.database_generation import *
 
 
@@ -11,13 +11,25 @@ class zk_thread(object):
         self.config_file = cf_info
         self.arguments = args
 
-        self.zk_stream_url = str("https://redisq.zkillboard.com/listen.php?queueID={}".format(
-            self.config_file['thread_zKill_pull']['zkill_unique_identifier']))
+        self.identifier = str(self.generate_identifier())
+        self.zk_stream_url = str("https://redisq.zkillboard.com/listen.php?queueID={}?ttw=1".format(self.identifier))
         self.thread_zk_run = True
 
         if not self.arguments.disable_zKill:
             self.start_zk_pull_thread()
             self.start_thread_watcher()
+
+    def generate_identifier(self):
+        filename = 'zk_identifier.txt'  # move zk_identifier from config file to auto generated and unique
+        try:
+            with open(filename, 'r') as f:
+                text = f.read()
+                return text
+        except FileNotFoundError:
+            with open(filename, 'w') as f:
+                random_s = ''.join(random.choice(string.ascii_lowercase) for x in range(8))
+                f.write(random_s)
+                return random_s
 
     def thread_zk_pull(self):
         def api_pull():
@@ -29,6 +41,7 @@ class zk_thread(object):
                         time.sleep(int(self.config_file['thread_zKill_pull']['delay_when_no_kills']))
                     else:
                         insert_killmail(resp.json()['package'])
+                        time.sleep(int(self.config_file['thread_zKill_pull']['delay_between_successful_pulls']))
                 else:
                     print("zk non 200 error code {}".format(resp.status_code))
                     time.sleep(int(self.config_file['thread_zKill_pull']['delay_between_non200_response']))
@@ -97,7 +110,6 @@ class zk_thread(object):
 
         while self.thread_zk_run:
             api_pull()
-            time.sleep(int(self.config_file['thread_zKill_pull']['delay_between_successful_pulls']))
 
     def thread_watcher(self):
         while self.thread_zk_run:
@@ -107,7 +119,7 @@ class zk_thread(object):
             time.sleep(int(self.config_file['thread_zKill_pull']['thread_watcher_check_interval']))
 
     def start_zk_pull_thread(self):
-        print("Starting zKill API pulling thread")
+        print("Starting zKill API pulling thread with identifier: '{}'".format(self.identifier))
         self.thread_pull = threading.Thread(target=self.thread_zk_pull)
         self.thread_pull.start()
 

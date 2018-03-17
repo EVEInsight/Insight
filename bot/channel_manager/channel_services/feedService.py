@@ -121,6 +121,13 @@ class feedService(metaclass=ABCMeta):
                                                                                                 self.feedCommand()))
             self.setup()
 
+    async def command_status(self, additional_text=""):
+        items = "{} configuration settings\n\n\n".format(self.feedName())
+        for key, val in self.feedConfig.items():
+            items += str('{}    =   {}\n'.format(key, val))
+        items += str(additional_text)
+        await self.channel.send(items)
+
     async def command_lock(self):
         """lock the channel threads on an exception"""
         self.run_flag = False

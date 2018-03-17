@@ -83,11 +83,14 @@ class capRadar(feedService):
                 km['highest_groupName'] = attackers[0]['group_name']
                 km['highest_shipID'] = attackers[0]['ship_id']
                 if self.cap_info.is_super(attackers[0]['group_id']):
-                    km['mention'] = self.feedConfig['super_notification']
+                    km['mention'] = self.feedConfig['super_notification'] if self.feedConfig[
+                                                                                 'super_notification'] != "disabled" else ""
                 elif self.cap_info.is_capital(attackers[0]['group_id']):
-                    km['mention'] = self.feedConfig['capital_notification']
+                    km['mention'] = self.feedConfig['capital_notification'] if self.feedConfig[
+                                                                                   'capital_notification'] != "disabled" else ""
                 elif self.cap_info.is_blops(attackers[0]['group_id']):
-                    km['mention'] = self.feedConfig['blops_notification']
+                    km['mention'] = self.feedConfig['blops_notification'] if self.feedConfig[
+                                                                                 'blops_notification'] != "disabled" else ""
                 else:
                     km['mention'] = None
             km['attackers'] = attackers
@@ -374,6 +377,7 @@ class capRadar(feedService):
             self.feedConfig = config
             await self.command_saveVars()
             self.load_vars()
+            await d_message.channel.send("Successfully modified the configuration for this capradar feed!")
 
     async def command_syncIgnore(self, d_message):
         def fetch_channels():
@@ -462,12 +466,23 @@ class capRadar(feedService):
             await d_message.channel.send(
                 "Something went wrong when attempting to select an index\nError raised: {}".format(ex))
 
+    async def command_status(self):
+        text = "\n\nIgnore lists contain: {} pilots, {} corps, and {} alliances".format(
+            str(len(self.ignores['pilots'])),
+            str(len(
+                self.ignores['corps'])),
+            str(len(
+                self.ignores['alliances'])))
+        await super(capRadar, self).command_status(additional_text=text)
+
     async def listen_command(self, d_message, message):
         sub_command = ' '.join((str(message).split()[1:]))
         if d_message.author == self.client.user:
             return
         if await self.client.lookup_command(sub_command, self.client.commands_all['subc_ignore']):
             await self.command_ignore(d_message)
+        elif await self.client.lookup_command(sub_command, self.client.commands_all['subc_status']):
+            await self.command_status()
         elif await self.client.lookup_command(sub_command, self.client.commands_all['subc_start']):
             await self.command_start()
         elif await self.client.lookup_command(sub_command, self.client.commands_all['subc_stop']):
@@ -538,8 +553,9 @@ class capRadar(feedService):
     async def ask_settings(ch, d_message):
         """prompts user for settings and returns a dictionary for setting insertion into the database"""
         async def prompt():
-            db_insert_tracking = {'channel': ch.channel.id, 'super_notification': "", 'capital_notification': "",
-                                  'blops_notification': ""}
+            db_insert_tracking = {'channel': ch.channel.id, 'super_notification': "disabled",
+                                  'capital_notification': "disabled",
+                                  'blops_notification': "disabled"}
             system_name = None
             question = str("{}\nThis tool will assist in setting up a capRadar feed.\n\n"
                     "The capRadar alerts you of capital, super, and black ops activity within jump range of a specified system.\n\n"
@@ -553,11 +569,16 @@ class capRadar(feedService):
 
             question = str(
                 '{}\nPlease specify the maximum capital jump range you wish to track capitals in LYs from your base system. Kills outside of this jump range will not be posted to the channel.\n\n'
-                'Example: If you wish to only show capitals active within black ops direct jump range of your base system you would enter "8"\n\n\nMax Radar Range in LYs: '.format(
+                'Example: If you wish to only show capitals active within black ops direct jump range of your base system you would enter "8"\n\n\nIf you wish to track all activity in K-Space'
+                'regardless of range from your base system enter "0".\n\nMax Radar Range in LYs: '.format(
                     d_message.author.mention))
             author_answer = await capRadar.ask_question(question, d_message, ch.client)
             try:
-                db_insert_tracking['maxLY_fromBase'] = float(author_answer.content)
+                num = float(author_answer.content)
+                if num == 0:
+                    db_insert_tracking['maxLY_fromBase'] = 1000
+                else:
+                    db_insert_tracking['maxLY_fromBase'] = num
             except ValueError:
                 raise Exception("{} is not a number".format(author_answer.content))
 
@@ -677,20 +698,14 @@ class capRadar(feedService):
                 str("Track Blops (blops battleships): {}".format(
                     str("True" if db_insert_tracking['track_blops'] == 1 else "False"))))
             statement_list.append(
-                str("Notification method on super activity: {}".format(str(
-                    "disabled" if db_insert_tracking['super_notification'] == "" else str(db_insert_tracking[
-                                                                                              'super_notification']).strip(
-                        '@')))))
+                str("Notification method on super activity: {}".format(
+                    str(db_insert_tracking['super_notification']).strip('@'))))
             statement_list.append(
-                str("Notification method on capital activity: {}".format(str(
-                    "disabled" if db_insert_tracking['capital_notification'] == "" else str(db_insert_tracking[
-                                                                                                'capital_notification']).strip(
-                        '@')))))
+                str("Notification method on capital activity: {}".format(
+                    str(db_insert_tracking['capital_notification']).strip('@'))))
             statement_list.append(
-                str("Notification method on black ops battleship activity: {}".format(str(
-                    "disabled" if db_insert_tracking['blops_notification'] == "" else str(db_insert_tracking[
-                                                                                              'blops_notification']).strip(
-                        '@')))))
+                str("Notification method on black ops battleship activity: {}".format(
+                    str(db_insert_tracking['blops_notification']).strip('@'))))
             st_str = ""
             for i in statement_list:
                 st_str += str(i + '\n')

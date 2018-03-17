@@ -434,6 +434,7 @@ class D_client(discord.Client):
 
     async def most_similar_word(self, word, lookup_list):
         return difflib.get_close_matches(word, lookup_list)
+
     async def lookup_command(self, message, command_list):
         return any((message.lower()).startswith(i.lower()) for i in command_list)
 
@@ -480,4 +481,4 @@ class D_client(discord.Client):
     def bot_run(cf_file, args):
         config_file = cf_file
         client = D_client(config_file, args)
-        client.run(config_file["discord"]["token"], cf_file=config_file)
+        client.run(config_file["discord"]["token"])
