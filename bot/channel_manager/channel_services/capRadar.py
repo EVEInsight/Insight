@@ -181,7 +181,7 @@ class capRadar(feedService):
             str_tDesc = "**{v_s}** destroyed in [**{sN}**]({dl_l})({rN}) **{mago}** minutes ago.\n\n*Involving **[{me_n}]({p_l})({me_c}){me_ali}** in **{me_sN}** {inv}*".format(
                 v_s=item['target']['ship_name'],
                 sN=item['target']['system_name'],
-                dl_l="http://evemaps.dotlan.net/system/{}".format(target['system_name']),
+                dl_l="http://evemaps.dotlan.net/system/{}".format(str(target['system_name']).replace(' ', '_')),
                 rN=item['target']['region_name'],
                 mago=m_ago,
                 me_n=me_inv['pilot_name'],
@@ -210,7 +210,7 @@ class capRadar(feedService):
                 no_mids="{} mids".format(str(mids)) if mids != 0 else "direct range",
                 dl_link="http://evemaps.dotlan.net/jump/Aeon,555/{b_s}:{t_s}".format(
                     b_s=self.base_system['system_name'],
-                    t_s=target['system_name']
+                    t_s=str(target['system_name']).replace(' ', '_')
                 )
             )
             mids = int(math.floor(item['ly_range'] / float((self.config_file['eve_settings']['carrier_range_5']))))
@@ -219,7 +219,7 @@ class capRadar(feedService):
                 no_mids="{} mids".format(str(mids)) if mids != 0 else "direct range",
                 dl_link="http://evemaps.dotlan.net/jump/Archon,555/{b_s}:{t_s}".format(
                     b_s=self.base_system['system_name'],
-                    t_s=target['system_name']
+                    t_s=str(target['system_name']).replace(' ', '_')
                 )
             )
             mids = int(math.floor(item['ly_range'] / float((self.config_file['eve_settings']['blops_range_5']))))
@@ -228,7 +228,7 @@ class capRadar(feedService):
                 no_mids="{} mids".format(str(mids)) if mids != 0 else "direct range",
                 dl_link="http://evemaps.dotlan.net/jump/Redeemer,555/{b_s}:{t_s}".format(
                     b_s=self.base_system['system_name'],
-                    t_s=target['system_name']
+                    t_s=str(target['system_name']).replace(' ', '_')
                 )
             )
             gates = None  # todo gate counter
@@ -237,7 +237,7 @@ class capRadar(feedService):
                 # no_mids="{} mids".format(str(mids)) if mids != 0 else "direct range",
                 dl_link="http://evemaps.dotlan.net/route/{b_s}:{t_s}".format(
                     b_s=self.base_system['system_name'],
-                    t_s=target['system_name']
+                    t_s=str(target['system_name']).replace(' ', '_')
                 )
             )
             dr_str += "\n**{}**".format(kill_url)

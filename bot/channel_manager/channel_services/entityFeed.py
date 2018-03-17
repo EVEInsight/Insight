@@ -233,7 +233,10 @@ class EntityFeed(feedService):
 
         while self.run_flag:
             while not self.killQueue.empty() and self.run_flag:
-                await send_message(self.killQueue.queue.pop())
+                try:
+                    await send_message(self.killQueue.queue.pop())
+                except Exception as ex:
+                    print(ex)
                 await asyncio.sleep(5)
             await asyncio.sleep(1)
 
