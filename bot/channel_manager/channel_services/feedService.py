@@ -20,7 +20,8 @@ class feedService(metaclass=ABCMeta):
 
         # object instances
         self.manager = channel_ob.manager
-        self.channel = channel_ob.channel
+        self.channel = channel_ob.channel  # discord object
+        self.channel_managed = channel_ob  # channel settings object
         self.con_ = self.manager.con_
         self.config_file = self.manager.config_file
         self.arguments = self.manager.arguments
@@ -46,7 +47,7 @@ class feedService(metaclass=ABCMeta):
 
     @abstractmethod
     def load_vars(self):
-        pass
+        raise NotImplementedError
 
     async def command_saveVars(self):
         self.feedConfig['is_running'] = int(self.run_flag)
@@ -127,7 +128,7 @@ class feedService(metaclass=ABCMeta):
     @abstractmethod
     async def listen_command(self, d_message, message):
         """listen command must override with specific command paths for type of feed"""
-        pass
+        raise NotImplementedError
 
     def feedName(self):
         """Returns the name of the feed or object name"""

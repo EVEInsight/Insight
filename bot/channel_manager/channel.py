@@ -26,9 +26,9 @@ class d_channel(object):
 
     def setup(self):
         self.c_vars = {}
-        self.Feed = self.load_feed()
         self.db_create_channel()
         self.load_vars()
+        self.Feed = self.load_feed()
         if self.c_vars['display_statusOnStart']:
             self.client.loop.create_task(self.command_status())
 
@@ -46,10 +46,15 @@ class d_channel(object):
         try:
             connection = mysql.connector.connect(**self.con_.config())
             cursor = connection.cursor(dictionary=True)
-            cursor.execute("INSERT IGNORE INTO `discord_channels` (`channel_id`) VALUES (%s);",
-                           [self.channel.id])
-            cursor.execute("UPDATE `discord_channels` SET `channel_name` = %s WHERE `channel_id` = %s",
-                           [self.channel.name, self.channel.id])
+            cursor.execute("INSERT IGNORE INTO `discord_servers` (`server_id` , `server_name`) VALUES (%s, %s);",
+                           [self.channel.guild.id, self.channel.guild.name])
+            cursor.execute("UPDATE `discord_servers` SET `server_name` = %s WHERE `server_id` = %s;",
+                           [self.channel.guild.id, self.channel.guild.name])
+            cursor.execute("INSERT IGNORE INTO `discord_channels` (`channel_id`,`server_id`) VALUES (%s,%s);",
+                           [self.channel.id, self.channel.guild.id])
+            cursor.execute(
+                "UPDATE `discord_channels` SET `channel_name` = %s, `server_id` = %s WHERE `channel_id` = %s;",
+                [self.channel.name, self.channel.guild.id, self.channel.id])
             connection.commit()
         except Exception as ex:
             print(ex)

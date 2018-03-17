@@ -153,7 +153,7 @@ class capRadar(feedService):
         while self.run_flag:
             add_toPost()
             registerPosted()
-            time.sleep(5)
+            time.sleep(15)
 
     async def async_loop(self):
         async def send_message(item):
@@ -171,7 +171,7 @@ class capRadar(feedService):
                 b_s=self.base_system['system_name'],
             )
             str_content = "{m} {gName} activity in {sName}({rName}) {ly_r:.2f} LYs from {b_s} {mago} m/ago".format(
-                m=str(item['mention'] if item['mention'] is not None else ""),
+                m=str(item['mention']),
                 gName=item['highest_groupName'],
                 sName=item['target']['system_name'],
                 rName=item['target']['region_name'],
@@ -364,6 +364,104 @@ class capRadar(feedService):
         await prompt()
         self.load_ignores()
 
+    async def command_modifyVars(self, d_message):
+        await d_message.channel.send('{}\nThis tool will let you modify settings such as base system, ranges, and more.'
+                                     '\n\nIf you have ignore lists created for this '
+                                     'capRadar feed they will not be affected by these modification actions.'.format(
+            d_message.author.mention))
+        config = await capRadar.createNewFeed(self.channel_managed, d_message, modify_existing=True)
+        if config is not None:
+            self.feedConfig = config
+            await self.command_saveVars()
+            self.load_vars()
+
+    async def command_syncIgnore(self, d_message):
+        def fetch_channels():
+            try:
+                channels = []
+                connection = mysql.connector.connect(**self.con_.config())
+                cursor = connection.cursor(dictionary=True)
+                cursor.execute(
+                    'SELECT dc.channel_id,dc.channel_name FROM discord_CapRadar AS cr INNER JOIN discord_channels AS dc ON cr.channel = dc.channel_id INNER JOIN discord_servers AS ds ON dc.server_id = ds.server_id WHERE dc.server_id = (%s) AND dc.channel_id != (%s);',
+                    [self.channel.guild.id, self.channel.id])
+                channels = cursor.fetchall()
+            except Exception as ex:
+                print(ex)
+                traceback.print_exc()
+                if connection:
+                    connection.rollback()
+            finally:
+                if connection:
+                    connection.close()
+                return channels
+
+        def load_import(ch_id):
+            p_counter = 0
+            c_counter = 0
+            a_counter = 0
+            try:
+                connection = mysql.connector.connect(**self.con_.config())
+                cursor = connection.cursor(dictionary=True)
+                cursor.execute('DELETE FROM discord_CapRadar_ignore_alliances WHERE channel_cr = (%s);',
+                               [self.channel.id])
+                cursor.execute('DELETE FROM discord_CapRadar_ignore_corps WHERE channel_cr = (%s);',
+                               [self.channel.id])
+                cursor.execute('DELETE FROM discord_CapRadar_ignore_pilots WHERE channel_cr = (%s);',
+                               [self.channel.id])
+                cursor.execute('SELECT alliance_id FROM discord_CapRadar_ignore_alliances WHERE channel_cr = (%s);',
+                               [ch_id])
+                import_alliances = [i['alliance_id'] for i in cursor.fetchall()]
+                cursor.execute('SELECT corp_id FROM discord_CapRadar_ignore_corps WHERE channel_cr = (%s);',
+                               [ch_id])
+                import_corps = [i['corp_id'] for i in cursor.fetchall()]
+                cursor.execute('SELECT pilot_id FROM discord_CapRadar_ignore_pilots WHERE channel_cr = (%s);',
+                               [ch_id])
+                import_pilots = [i['pilot_id'] for i in cursor.fetchall()]
+                for a in import_alliances:
+                    cursor.execute(
+                        'INSERT IGNORE INTO discord_CapRadar_ignore_alliances(channel_cr,alliance_id) VALUES(%s,%s)',
+                        [self.channel.id, a])
+                    a_counter += 1
+                for c in import_corps:
+                    cursor.execute('INSERT IGNORE INTO discord_CapRadar_ignore_corps(channel_cr,corp_id) VALUES(%s,%s)',
+                                   [self.channel.id, c])
+                    c_counter += 1
+                for p in import_pilots:
+                    cursor.execute(
+                        'INSERT IGNORE INTO discord_CapRadar_ignore_pilots(channel_cr,pilot_id) VALUES(%s,%s)',
+                        [self.channel.id, p])
+                    p_counter += 1
+                connection.commit()
+            except Exception as ex:
+                print(ex)
+                traceback.print_exc()
+                if connection:
+                    connection.rollback()
+            finally:
+                if connection:
+                    connection.close()
+                return (p_counter, c_counter, a_counter)
+
+        ch_options = "This tool copies ignore lists from other capRadar feed on this server\n\n" \
+                     "Note: Syncing ignores with another channel will overwrite any ignores you have set for this channel, replacing them with the synced ignores.\n\n" \
+                     "Select a number corresponding to the channel you wish to copy/import ignore lists from:\n\n\n"
+        channels = fetch_channels()
+        index = 0
+        for i in channels:
+            ch_options += "{id} -- {name}\n".format(id=str(index), name=i['channel_name'])
+        resp = await capRadar.ask_question(ch_options, d_message, self.client, timeout=45)
+        try:
+            select = (channels[int(resp.content)])['channel_id']
+            vals = load_import(select)
+            self.load_ignores()
+            await d_message.channel.send('Successfully imported {} pilots, {} corps, and {} alliances.\n\nNote:\n'
+                                         'If you modify ignore lists in the channel you imported from you must run'
+                                         ' "!csettings !capradar !sync" again in this channel to match the master channel.'.format(
+                vals[0], vals[1], vals[2]))
+        except Exception as ex:
+            await d_message.channel.send(
+                "Something went wrong when attempting to select an index\nError raised: {}".format(ex))
+
     async def listen_command(self, d_message, message):
         sub_command = ' '.join((str(message).split()[1:]))
         if d_message.author == self.client.user:
@@ -374,6 +472,10 @@ class capRadar(feedService):
             await self.command_start()
         elif await self.client.lookup_command(sub_command, self.client.commands_all['subc_stop']):
             await self.command_stop()
+        elif await self.client.lookup_command(sub_command, self.client.commands_all['subc_modify']):
+            await self.command_modifyVars(d_message)
+        elif await self.client.lookup_command(sub_command, self.client.commands_all['subc_channel_sync']):
+            await self.command_syncIgnore(d_message)
         elif await self.client.lookup_command(sub_command, self.client.commands_all['command_allelse']):
             await self.client.command_not_found(d_message)  # todo fix partial commands
         else:
@@ -386,7 +488,7 @@ class capRadar(feedService):
         return str((self.client.commands_all['subc_channel_capradar'])[0])
 
     @staticmethod
-    async def createNewFeed(channel_ob, d_message):
+    async def createNewFeed(channel_ob, d_message, modify_existing=False):
         """prompts and inserts settings before creating the object as object is loaded from database"""
 
         def insert_db(item):
@@ -412,22 +514,32 @@ class capRadar(feedService):
         else:
             try:
                 insert = (await capRadar.ask_settings(channel_ob, d_message))
-                insert_db(insert)
-                await channel_ob.channel.send('Successfully created a new radar feed in this channel.\n'
-                                              'You will now see active targets according to your specified settings.\n\n'
-                                              'You should now run the command "!csettings !capRadar !ignore" to import an ignore list.\n'
-                                              'The ignore list allows your capRadar feed to ignore friendly targets while showing only the hostile ones.')
+                if modify_existing:
+                    return insert
+                else:
+                    insert_db(insert)
+                    await channel_ob.channel.send('Successfully created a new radar feed in this channel.\n'
+                                                  'You will now see active targets according to your specified settings.\n\n'
+                                                  'You should now run the command "!csettings !capRadar !ignore" to import an ignore list.\n'
+                                                  'The ignore list allows your capRadar feed to ignore friendly targets while showing only the hostile ones.')
             except Exception as ex:
                 print(ex)
-                await channel_ob.channel.send(
-                    'Something went wrong when attempting to create a new capRadar Feed\nException raised: "{}"'.format(
-                        str(ex)))
+                if modify_existing:
+                    await channel_ob.channel.send(
+                        'Something went wrong when attempting to modify the capRadar Feed\nException raised: "{}"'.format(
+                            str(ex)))
+                    return None
+                else:
+                    await channel_ob.channel.send(
+                        'Something went wrong when attempting to create a new capRadar Feed\nException raised: "{}"'.format(
+                            str(ex)))
 
     @staticmethod
     async def ask_settings(ch, d_message):
         """prompts user for settings and returns a dictionary for setting insertion into the database"""
         async def prompt():
-            db_insert_tracking = {'channel': ch.channel.id}
+            db_insert_tracking = {'channel': ch.channel.id, 'super_notification': "", 'capital_notification': "",
+                                  'blops_notification': ""}
             system_name = None
             question = str("{}\nThis tool will assist in setting up a capRadar feed.\n\n"
                     "The capRadar alerts you of capital, super, and black ops activity within jump range of a specified system.\n\n"
@@ -566,17 +678,17 @@ class capRadar(feedService):
                     str("True" if db_insert_tracking['track_blops'] == 1 else "False"))))
             statement_list.append(
                 str("Notification method on super activity: {}".format(str(
-                    "disabled" if 'super_notification' not in db_insert_tracking else str(db_insert_tracking[
+                    "disabled" if db_insert_tracking['super_notification'] == "" else str(db_insert_tracking[
                                                                                               'super_notification']).strip(
                         '@')))))
             statement_list.append(
                 str("Notification method on capital activity: {}".format(str(
-                    "disabled" if 'capital_notification' not in db_insert_tracking else str(db_insert_tracking[
+                    "disabled" if db_insert_tracking['capital_notification'] == "" else str(db_insert_tracking[
                                                                                                 'capital_notification']).strip(
                         '@')))))
             statement_list.append(
                 str("Notification method on black ops battleship activity: {}".format(str(
-                    "disabled" if 'blops_notification' not in db_insert_tracking else str(db_insert_tracking[
+                    "disabled" if db_insert_tracking['blops_notification'] == "" else str(db_insert_tracking[
                                                                                               'blops_notification']).strip(
                         '@')))))
             st_str = ""
