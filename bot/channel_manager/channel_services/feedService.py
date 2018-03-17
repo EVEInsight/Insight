@@ -4,7 +4,7 @@ import queue
 import threading
 import time
 import traceback
-
+import math
 import discord
 import mysql.connector
 
@@ -25,6 +25,7 @@ class feedService(metaclass=ABCMeta):
         self.config_file = self.manager.config_file
         self.arguments = self.manager.arguments
         self.client = self.manager.client
+        self.cap_info = self.client.cap_info
 
         # vars
         self.setup()

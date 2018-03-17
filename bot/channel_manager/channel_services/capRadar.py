@@ -16,6 +16,7 @@ class capRadar(feedService):
             if self.feedConfig is not None:
                 self.run_flag = bool(self.feedConfig['is_running'])
                 self.no_tracking_target = False
+                self.base_system = self.client.m_systems.system_by_id(self.feedConfig['system_base'])
         except Exception as ex:
             print(ex)
             traceback.print_exc()
@@ -30,16 +31,16 @@ class capRadar(feedService):
         self.ignores = {'pilots': [], 'corps': [], 'alliances': []}
         try:
             connection = mysql.connector.connect(**self.con_.config())
-            cursor = connection.cursor()
+            cursor = connection.cursor(dictionary=True)
             cursor.execute("SELECT pilot_id FROM `discord_CapRadar_ignore_pilots` WHERE `channel_cr` = %s;",
                            [self.channel.id])
-            self.ignores['pilots'] = cursor.fetchall()
+            self.ignores['pilots'] = [i["pilot_id"] for i in cursor.fetchall()]
             cursor.execute("SELECT corp_id FROM `discord_CapRadar_ignore_corps` WHERE `channel_cr` = %s;",
                            [self.channel.id])
-            self.ignores['corps'] = cursor.fetchall()
+            self.ignores['corps'] = [i["corp_id"] for i in cursor.fetchall()]
             cursor.execute("SELECT alliance_id FROM `discord_CapRadar_ignore_alliances` WHERE `channel_cr` = %s;",
                            [self.channel.id])
-            self.ignores['alliances'] = cursor.fetchall()
+            self.ignores['alliances'] = [i["alliance_id"] for i in cursor.fetchall()]
         except Exception as ex:
             print(ex)
             traceback.print_exc()
@@ -70,13 +71,25 @@ class capRadar(feedService):
                 if a['alliance_id'] in self.ignores['alliances'] or a['corp_id'] in self.ignores['corps'] or a[
                     'pilot_id'] in self.ignores['pilots']:
                     continue
-                if self.feedConfig['track_supers'] == 0 and a['group_id'] in self.config_file['super_group_ids']:
+                if self.feedConfig['track_supers'] == 0 and self.cap_info.is_super(a['group_id']):
                     continue
-                if self.feedConfig['track_capitals'] == 0 and a['group_id'] in self.config_file['capital_group_ids']:
+                if self.feedConfig['track_capitals'] == 0 and self.cap_info.is_capital(a['group_id']):
                     continue
-                if self.feedConfig['track_blops'] == 0 and a['group_id'] in self.config_file['blops_group_ids']:
+                if self.feedConfig['track_blops'] == 0 and self.cap_info.is_blops(a['group_id']):
                     continue
                 attackers.append(a)
+            attackers.sort(key=lambda at: self.cap_info.groups_by_value().index(at['group_id']))
+            if len(attackers) != 0:
+                km['highest_groupName'] = attackers[0]['group_name']
+                km['highest_shipID'] = attackers[0]['ship_id']
+                if self.cap_info.is_super(attackers[0]['group_id']):
+                    km['mention'] = self.feedConfig['super_notification']
+                elif self.cap_info.is_capital(attackers[0]['group_id']):
+                    km['mention'] = self.feedConfig['capital_notification']
+                elif self.cap_info.is_blops(attackers[0]['group_id']):
+                    km['mention'] = self.feedConfig['blops_notification']
+                else:
+                    km['mention'] = None
             km['attackers'] = attackers
             return km
 
@@ -89,9 +102,12 @@ class capRadar(feedService):
                     [self.channel.id])
                 kills_all = cursor.fetchall()
                 for id in kills_all:
-                    km = {'kill_id': id['kill_id'], 'target': None, 'attackers': []}
-                    if self.client.m_systems.ly_range(self.feedConfig['system_base'], id['system_id'],
-                                                      id_only_mode=True) > self.feedConfig['maxLY_fromBase']:
+                    km = {'kill_id': id['kill_id'],
+                          'ly_range': self.client.m_systems.ly_range(self.feedConfig['system_base'], id['system_id'],
+                                                                     id_only_mode=True), 'target': None,
+                          'attackers': [], 'mention': None,
+                          'highest_groupName': None, 'highest_shipID': None}
+                    if km['ly_range'] > self.feedConfig['maxLY_fromBase']:
                         self.postedQueue.queue.append(km)
                         continue
                     elif exists_in_q(km):
@@ -141,11 +157,116 @@ class capRadar(feedService):
 
     async def async_loop(self):
         async def send_message(item):
-            await self.channel.send('https://zkillboard.com/kill/{}/'.format(item['kill_id']))
-            self.postedQueue.queue.append(item)
+            me_inv = item['attackers'][0]  # most expensive involved attacker by ship
+            target = item['target']
+            m_ago = str(round(((datetime.datetime.utcnow() - target['kill_time']).total_seconds() / 60), 1))
+            kill_id = item['kill_id']
+            kill_url = "https://zkillboard.com/kill/{}/".format(str(kill_id))
+            link_aliCorp = "https://imageserver.eveonline.com/Alliance/{}_128.png".format(me_inv['alliance_id']) if \
+            me_inv['alliance_id'] is not None else "https://imageserver.eveonline.com/Corporation/{}_128.png".format(
+                me_inv['corp_id'])
+            str_An = "{gName} activity {ly:.2f} LYs away from {b_s}".format(
+                gName=item['highest_groupName'],
+                ly=item['ly_range'],
+                b_s=self.base_system['system_name'],
+            )
+            str_content = "{m} {gName} activity in {sName}({rName}) {ly_r:.2f} LYs from {b_s} {mago} m/ago".format(
+                m=str(item['mention'] if item['mention'] is not None else ""),
+                gName=item['highest_groupName'],
+                sName=item['target']['system_name'],
+                rName=item['target']['region_name'],
+                ly_r=(item['ly_range']),
+                b_s=self.base_system['system_name'],
+                mago=m_ago)
+            str_tDesc = "**{v_s}** destroyed in [**{sN}**]({dl_l})({rN}) **{mago}** minutes ago.\n\n*Involving **[{me_n}]({p_l})({me_c}){me_ali}** in **{me_sN}** {inv}*".format(
+                v_s=item['target']['ship_name'],
+                sN=item['target']['system_name'],
+                dl_l="http://evemaps.dotlan.net/system/{}".format(target['system_name']),
+                rN=item['target']['region_name'],
+                mago=m_ago,
+                me_n=me_inv['pilot_name'],
+                p_l="https://zkillboard.com/character/{}/".format(me_inv['pilot_id']),
+                me_c=me_inv['corp_name'],
+                me_ali=str("<{}>".format(me_inv['alliance_ticker'])) if me_inv['alliance_ticker'] is not None else " ",
+                me_sN=me_inv['ship_name'],
+                inv="flying **solo.**" if target['total_involved'] == 1 else "and **{}** others".format(
+                    str(target['total_involved'] - 1))
+            )
+            inv_ship_t = "{} of {} attackers flying in tracked ships".format(str(len(item['attackers'])),
+                                                                             str(target['total_involved']))
+            ships_count = {}
+            for ship_inv in item['attackers']:
+                if ship_inv['ship_name'] not in ships_count:
+                    ships_count[ship_inv['ship_name']] = 1
+                else:
+                    ships_count[ship_inv['ship_name']] += 1
+            ship_str = ""
+            for ship, count in ships_count.items():
+                ship_str += "{s:<20} {c}\n".format(s=ship, c=str(count))
+            dr_str = ""
+            mids = int(math.floor(item['ly_range'] / float((self.config_file['eve_settings']['super_range_5']))))
+            dr_str += "[```{type:<20} {no_mids}```]({dl_link})".format(
+                type="Titans/Supers",
+                no_mids="{} mids".format(str(mids)) if mids != 0 else "direct range",
+                dl_link="http://evemaps.dotlan.net/jump/Aeon,555/{b_s}:{t_s}".format(
+                    b_s=self.base_system['system_name'],
+                    t_s=target['system_name']
+                )
+            )
+            mids = int(math.floor(item['ly_range'] / float((self.config_file['eve_settings']['carrier_range_5']))))
+            dr_str += "[```{type:<20} {no_mids}```]({dl_link})".format(
+                type="Carriers/Dreads/FAX",
+                no_mids="{} mids".format(str(mids)) if mids != 0 else "direct range",
+                dl_link="http://evemaps.dotlan.net/jump/Archon,555/{b_s}:{t_s}".format(
+                    b_s=self.base_system['system_name'],
+                    t_s=target['system_name']
+                )
+            )
+            mids = int(math.floor(item['ly_range'] / float((self.config_file['eve_settings']['blops_range_5']))))
+            dr_str += "[```{type:<20} {no_mids}```]({dl_link})".format(
+                type="Blops",
+                no_mids="{} mids".format(str(mids)) if mids != 0 else "direct range",
+                dl_link="http://evemaps.dotlan.net/jump/Redeemer,555/{b_s}:{t_s}".format(
+                    b_s=self.base_system['system_name'],
+                    t_s=target['system_name']
+                )
+            )
+            gates = None  # todo gate counter
+            dr_str += "[```{type:<20}```]({dl_link})".format(
+                type="Gates",
+                # no_mids="{} mids".format(str(mids)) if mids != 0 else "direct range",
+                dl_link="http://evemaps.dotlan.net/route/{b_s}:{t_s}".format(
+                    b_s=self.base_system['system_name'],
+                    t_s=target['system_name']
+                )
+            )
+            dr_str += "\n**{}**".format(kill_url)
+
+            embed = discord.Embed(title=" ", colour=discord.Colour(0x691f5b),
+                                  url=kill_url,
+                                  description=str_tDesc,
+                                  timestamp=item['target']['kill_time'])
+            embed.set_image(
+                url="https://imageserver.eveonline.com/Render/{}_128.png".format(str(item['highest_shipID'])))
+            embed.set_thumbnail(url=link_aliCorp)
+            embed.set_author(name=str_An, url=kill_url)  # todo readd icon
+            # icon_url=None)
+            embed.add_field(name=inv_ship_t, value="```{}```".format(ship_str), inline=False)
+            embed.add_field(name="Routes from {} (clickable links)".format(self.base_system['system_name']),
+                            value=dr_str,
+                            inline=False)
+            try:
+                await self.channel.send(content=str_content, embed=embed)
+                self.postedQueue.queue.append(item)
+            except discord.Forbidden as ex:
+                await self.command_lock()  # disable the thread to save resources if we cant post to it
+
         while self.run_flag:
             while not self.killQueue.empty() and self.run_flag:
-                await send_message(self.killQueue.queue.pop())
+                try:
+                    await send_message(self.killQueue.queue.pop())
+                except Exception as ex:
+                    print(ex)
                 await asyncio.sleep(5)
             await asyncio.sleep(1)
 
@@ -188,14 +309,9 @@ class capRadar(feedService):
                     connection.close()
 
         async def prompt():
-            question = str("This tool will assist in adding ignored entities to your capRadar.\n\n"
-                           "How this works:\n"
-                           "Entities can include alliances, corps, or pilots. If the capRadar feed detects a"
-                           " capital that is on your ignore list, it will not be posted to channel.\n"
-                           "If capRadar detects a killmail that involves both ignored entities and non-ignored entites in capitals"
-                           "it will still post the kill and information about the non-ignored parties.\n\n"
-                           "How do I import?\n\nMost often you will want to ignore blues from your alliance or corp standings.")
-            response = await self.ask_question(question, d_message, self.client)
+            question = str(
+                'This tool will assist in adding ignored entities to your capRadar, most often you will want to ignore friendlies.\n Entities consist of pilots, corporation, or alliances you wish to filter from the radarFeed.\n\n Killmails involving capitals flown by an entity on your ignore list will not be posted if they are the only entities involved in a killmail.\n\n FAQ\n What happens if a killmail has capitals flown by both ignored and non-ignored entities?\n -The killmail will be posted to the channel but the overview of involved capital count will not include friendlies.\n\n What happens if a killmail has capitals only flown by ignored (friendly) entities?\n -The killmail will not be posted to the channel\n\n\n\n Now that you have an idea of how ignore lists work, its time to import entities to ignore.\n\n The easiest way to do this is open your corp/alliance standings menu in EVE, CTRL-A then CTRL-C to select all and copy. Then CTRL-V into this discord channel pressing enter.\n Note: Depending on how many contacts you have you may need to switch pages and copy and paste each page of standings to completely populate your intended ignore list.\n\n If you ever need to import more friendlies just run the command "!csettings !capRadar !ignore" to bring up this tool again. To delete previously imported standings you should select the overwrite option on the confirm import standings dialog.\n\n Please enter or paste the entities you wish to ignore into Discord:')
+            response = await self.ask_question(question, d_message, self.client, timeout=200)
             items = str(response.content)
             entities = [i for i in items.split('\n')]
             exact_match = True if len(entities) >= 5 else False
@@ -253,7 +369,7 @@ class capRadar(feedService):
         if d_message.author == self.client.user:
             return
         if await self.client.lookup_command(sub_command, self.client.commands_all['subc_ignore']):
-            await self.command_ignore(d_message, sub_command)
+            await self.command_ignore(d_message)
         elif await self.client.lookup_command(sub_command, self.client.commands_all['subc_start']):
             await self.command_start()
         elif await self.client.lookup_command(sub_command, self.client.commands_all['subc_stop']):

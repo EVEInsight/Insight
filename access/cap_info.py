@@ -5,6 +5,13 @@ class cap_info(object):
         self.search_cap_type = self.make_search_cap_type()
         self.range = self.make_range_dict()
 
+        self.super_ids = [int(i) for i in self.config_file['eve_settings']['super_group_ids'].split('\n')]
+        self.capital_ids = [int(i) for i in self.config_file['eve_settings']['capital_group_ids'].split('\n')]
+        self.blops_ids = [int(i) for i in self.config_file['eve_settings']['blops_group_ids'].split('\n')]
+
+        self.sorted_by_value = []
+        self.make_sorted_groupids()
+
     def make_search_cap_type(self):
         return {
             "Avatar": ["titans", "avatar", "erebus", "ragnarok", "levi", "leviathan", "tities", "vanquisher", "komodo",
@@ -32,6 +39,11 @@ class cap_info(object):
                           "JDC5": self.config_file["eve_settings"]["blops_range_5"]}
                 }
 
+    def make_sorted_groupids(self):
+        self.sorted_by_value.extend(self.super_ids)
+        self.sorted_by_value.extend(self.capital_ids)
+        self.sorted_by_value.extend(self.blops_ids)
+
     def return_jump_range(self, ship):
         if ship == "Avatar":
             return float(self.config_file["eve_settings"]["titan_range_5"])
@@ -47,3 +59,25 @@ class cap_info(object):
             return float(self.config_file["eve_settings"]["jf_range_5"])
         else:  # todo add rorqual jump range info
             return None
+
+    def is_super(self, id):
+        if int(id) in self.super_ids:
+            return True
+        else:
+            return False
+
+    def is_capital(self, id):
+        if int(id) in self.capital_ids:
+            return True
+        else:
+            return False
+
+    def is_blops(self, id):
+        if int(id) in self.blops_ids:
+            return True
+        else:
+            return False
+
+    def groups_by_value(self):
+        """returns a list of group ids sorted by value titans > supercarriers and so forth"""
+        return self.sorted_by_value
