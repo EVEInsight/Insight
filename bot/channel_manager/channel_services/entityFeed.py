@@ -115,7 +115,7 @@ class EntityFeed(feedService):
         while self.run_flag:
             add_toPost()
             registerPosted()
-            time.sleep(5)
+            time.sleep(15)
 
     async def async_loop(self):
         def isk_lost_format(val):

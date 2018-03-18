@@ -12,7 +12,7 @@ class zk_thread(object):
         self.arguments = args
 
         self.identifier = str(self.generate_identifier())
-        self.zk_stream_url = str("https://redisq.zkillboard.com/listen.php?queueID={}?ttw=1".format(self.identifier))
+        self.zk_stream_url = str("https://redisq.zkillboard.com/listen.php?queueID={}".format(self.identifier))
         self.thread_zk_run = True
 
         if not self.arguments.disable_zKill:
@@ -38,7 +38,7 @@ class zk_thread(object):
                                     timeout=int(self.config_file['thread_zKill_pull']['timeout']))
                 if resp.status_code == 200:
                     if (resp.json()['package'] == None):
-                        time.sleep(int(self.config_file['thread_zKill_pull']['delay_when_no_kills']))
+                        pass
                     else:
                         insert_killmail(resp.json()['package'])
                         time.sleep(int(self.config_file['thread_zKill_pull']['delay_between_successful_pulls']))

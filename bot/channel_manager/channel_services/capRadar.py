@@ -569,7 +569,7 @@ class capRadar(feedService):
 
             question = str(
                 '{}\nPlease specify the maximum capital jump range you wish to track capitals in LYs from your base system. Kills outside of this jump range will not be posted to the channel.\n\n'
-                'Example: If you wish to only show capitals active within black ops direct jump range of your base system you would enter "8"\n\n\nIf you wish to track all activity in K-Space'
+                'Example: If you wish to only show capitals active within black ops direct jump range of your base system you would enter "8"\n\n\nIf you wish to track all activity in K-Space '
                 'regardless of range from your base system enter "0".\n\nMax Radar Range in LYs: '.format(
                     d_message.author.mention))
             author_answer = await capRadar.ask_question(question, d_message, ch.client)
