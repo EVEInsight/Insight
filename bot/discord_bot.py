@@ -46,8 +46,8 @@ class D_client(discord.Client):
     async def status(self):
         await self.wait_until_ready()
         while not self.is_closed():
-            game = discord.Game(name='CPU:{:.1f}% MEM:{:.1f}GB  '
-                                     '{} kills added last 5m'.format(psutil.cpu_percent(),
+            game = discord.Game(name='CPU:{}% MEM:{:.1f}GB  '
+                                     '{} kills added last 5m'.format(str(int(psutil.cpu_percent())),
                                                                      psutil.virtual_memory()[3] / 2. ** 30,
                                                                      str(self.zk.kills_added_count(minutes=5))))
             await self.change_presence(game=game)
