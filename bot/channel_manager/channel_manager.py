@@ -18,9 +18,9 @@ class channel_manager(object):
 
         self.connected_channels = []
 
-        self.client.loop.create_task(self.my_background_task())
+        self.client.loop.create_task(self.channelLoader())
 
-    async def my_background_task(self):
+    async def channelLoader(self):
         await self.client.wait_until_ready()
         while not self.client.is_closed():
             for server in self.client.guilds:

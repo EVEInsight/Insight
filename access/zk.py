@@ -144,3 +144,24 @@ class zk_thread(object):
             if connection:
                 connection.close()
             return result
+
+    def kills_added_count(self, minutes=60):
+        """returns number of new kills occurring in the last minutes"""
+        assert isinstance(minutes, int)
+        count = 0
+        try:
+            connection = mysql.connector.connect(**self.con_.config())
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute(
+                "SELECT COUNT(*) AS count FROM zk_kills WHERE killmail_time > (UTC_TIMESTAMP() - INTERVAL (%s) MINUTE);",
+                [minutes])
+            resp = cursor.fetchone()
+            count = resp['count']
+        except Exception as ex:
+            print(ex)
+            if connection:
+                connection.rollback()
+        finally:
+            if connection:
+                connection.close()
+            return count

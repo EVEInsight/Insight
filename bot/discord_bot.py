@@ -5,7 +5,7 @@ import itertools
 import math
 import random
 from operator import itemgetter
-
+import psutil
 import discord
 
 from access.EntityUpdates import EntityUpdates
@@ -34,11 +34,24 @@ class D_client(discord.Client):
         self.dotlan_url_jplanner = "http://evemaps.dotlan.net/jump/{},555/{}:{}"
 
         self.import_vars()
+
+        self.bot_status = self.loop.create_task(self.status())
+
     async def on_ready(self):
         print('Logged in as')
         print(self.user.name)
         print(self.user.id)
         print('------')
+
+    async def status(self):
+        await self.wait_until_ready()
+        while not self.is_closed():
+            game = discord.Game(name='CPU:{}% MEM:{:.1f}GB  '
+                                     '{} kills added last 5m'.format(str(int(psutil.cpu_percent())),
+                                                                     psutil.virtual_memory()[3] / 2. ** 30,
+                                                                     str(self.zk.kills_added_count(minutes=5))))
+            await self.change_presence(game=game)
+            await asyncio.sleep(300)
 
     async def select_system(self, system_dict, message, original_lookup):
         if len(system_dict) == 0:
