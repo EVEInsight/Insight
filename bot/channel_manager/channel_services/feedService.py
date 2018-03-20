@@ -7,7 +7,7 @@ import traceback
 import math
 import discord
 import mysql.connector
-
+from bot.channel_manager.channel_services.limitManager import limiter
 import bot.channel_manager.channel
 from abc import ABCMeta, abstractmethod
 
@@ -27,6 +27,7 @@ class feedService(metaclass=ABCMeta):
         self.arguments = self.manager.arguments
         self.client = self.manager.client
         self.cap_info = self.client.cap_info
+        self.limits = limiter(minutes_decay=10)
 
         # vars
         self.setup()

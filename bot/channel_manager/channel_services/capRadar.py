@@ -92,7 +92,10 @@ class capRadar(feedService):
                     km['mention'] = self.feedConfig['blops_notification'] if self.feedConfig[
                                                                                  'blops_notification'] != "disabled" else ""
                 else:
-                    km['mention'] = None
+                    km['mention'] = ""
+                if km['mention'] != "":
+                    if self.limits.item_decayed(km['target']['system_id']) == False:
+                        km['mention'] = ""
             km['attackers'] = attackers
             return km
 
@@ -101,7 +104,7 @@ class capRadar(feedService):
                 connection = mysql.connector.connect(**self.con_.config())
                 cursor = connection.cursor(dictionary=True)
                 cursor.execute(
-                    'SELECT kill_id, system_id FROM kills_inv_SuperOrCap120M AS all_k LEFT OUTER JOIN discord_CapRadar_posted AS posted ON all_k.kill_id = posted.kill_id_posted AND (%s) = posted.CapRadar_posted_to WHERE kill_id_posted IS NULL;',
+                    'SELECT kill_id, kill_time, system_id FROM kills_inv_SuperOrCap120M AS all_k LEFT OUTER JOIN discord_CapRadar_posted AS posted ON all_k.kill_id = posted.kill_id_posted AND (%s) = posted.CapRadar_posted_to WHERE kill_id_posted IS NULL;',
                     [self.channel.id])
                 kills_all = cursor.fetchall()
                 for id in kills_all:
@@ -111,6 +114,10 @@ class capRadar(feedService):
                           'attackers': [], 'mention': None,
                           'highest_groupName': None, 'highest_shipID': None}
                     if km['ly_range'] > self.feedConfig['maxLY_fromBase']:
+                        self.postedQueue.queue.append(km)
+                        continue
+                    if id['kill_time'] < (
+                            datetime.datetime.utcnow() - datetime.timedelta(minutes=int(self.feedConfig['max_Age']))):
                         self.postedQueue.queue.append(km)
                         continue
                     elif exists_in_q(km):
@@ -130,6 +137,7 @@ class capRadar(feedService):
                             continue
                         else:
                             self.killQueue.queue.append(km)
+                            continue
             except Exception as ex:
                 print(ex)
             finally:
@@ -374,10 +382,12 @@ class capRadar(feedService):
             d_message.author.mention))
         config = await capRadar.createNewFeed(self.channel_managed, d_message, modify_existing=True)
         if config is not None:
+            await self.command_stop()
             self.feedConfig = config
             await self.command_saveVars()
             self.load_vars()
             await d_message.channel.send("Successfully modified the configuration for this capradar feed!")
+            await self.command_start()
 
     async def command_syncIgnore(self, d_message):
         def fetch_channels():
@@ -582,6 +592,20 @@ class capRadar(feedService):
             except ValueError:
                 raise Exception("{} is not a number".format(author_answer.content))
 
+            question = str(
+                '{}\nPlease specify the age limit in minutes for a kill to be posted to the radar feed. \n\nIf a kill is processed with an age older than your set limit it will not be posted.\n\n'
+                'Example you set the max age to "5". If a killmail occurred up to 5 minutes ago then it will be posted, otherwise it will be ignored.\n\n\nMax age for kills in minutes. Enter 0 to disregard this limit and post kills regardless of the time occurred: '.format(
+                    d_message.author.mention))
+            author_answer = await capRadar.ask_question(question, d_message, ch.client)
+            try:
+                num = int(author_answer.content)
+                if num == 0:
+                    db_insert_tracking['max_Age'] = 120
+                else:
+                    db_insert_tracking['max_Age'] = num
+            except ValueError:
+                raise Exception("{} is not a number".format(author_answer.content))
+
             question = str('{}\nDo you wish to track supers in this capRadar feed?\n\n'
                            'This will track supercarriers, titans, and faction supers/titans\n\nPlease select an option by entering the corresponding number\n\n\n'
                            '0 - No\n'
@@ -688,6 +712,8 @@ class capRadar(feedService):
             statement_list.append(str("Base System Name: {}".format(system_name)))
             statement_list.append(
                 str("Radar Max LY range from Base: {}".format(str(db_insert_tracking['maxLY_fromBase']))))
+            statement_list.append(
+                str("Radar Max Age in Minutes: {}".format(str(db_insert_tracking['max_Age']))))
             statement_list.append(
                 str("Track Supers (titans/supercarriers): {}".format(
                     str("True" if db_insert_tracking['track_supers'] == 1 else "False"))))

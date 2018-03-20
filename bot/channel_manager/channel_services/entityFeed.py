@@ -46,12 +46,15 @@ class EntityFeed(feedService):
             if km['ship_category_id'] == 65 and km['ignore_citadel'] == 1:
                 return True
             if km['show_loses'] == 0:
-                if km['alliance_tracking'] == km['alliance_id']:
-                    return True
-                if km['corp_tracking'] == km['corp_id']:
-                    return True
-                if km['pilot_tracking'] == km['pilot_id']:
-                    return True
+                if km['alliance_tracking'] is not None:
+                    if km['alliance_tracking'] == km['alliance_id']:
+                        return True
+                elif km['corp_tracking'] is not None:
+                    if km['corp_tracking'] == km['corp_id']:
+                        return True
+                elif km['pilot_tracking'] is not None:
+                    if km['pilot_tracking'] == km['pilot_id']:
+                        return True
             if km['show_kills'] == 0:
                 if km['alliance_tracking'] is not None:  # null safe compare
                     if km['alliance_tracking'] != km['alliance_id']:
