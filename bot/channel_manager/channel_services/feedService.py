@@ -12,7 +12,6 @@ import bot.channel_manager.channel
 from abc import ABCMeta, abstractmethod
 
 
-
 class feedService(metaclass=ABCMeta):
     def __init__(self, channel_ob):  # todo add discord channel check
         assert (isinstance(channel_ob, bot.channel_manager.channel.d_channel))
@@ -125,7 +124,7 @@ class feedService(metaclass=ABCMeta):
     async def command_status(self, additional_text=""):
         items = "{} configuration settings\n\n\n".format(self.feedName())
         for key, val in self.feedConfig.items():
-            items += str('{}    =   {}\n'.format(key, val))
+            items += str('{}    =   {}\n'.format(key, str(val).strip('@')))
         items += str(additional_text)
         await self.channel.send(items)
 

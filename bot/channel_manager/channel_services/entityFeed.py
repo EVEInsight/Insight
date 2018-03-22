@@ -86,11 +86,11 @@ class EntityFeed(feedService):
                     if kill_details is not None:
                         if not self.killQueue.full() and not self.postedQueue.full():
                             if ignore(kill_details):
-                                self.postedQueue.queue.append(kill_details)
+                                self.postedQueue.put(kill_details)
                             elif exists_in_q(kill_details):
-                                self.postedQueue.queue.append(kill_details)
+                                self.postedQueue.put(kill_details)
                             else:
-                                self.killQueue.queue.append(kill_details)
+                                self.killQueue.put(kill_details)
                     else:
                         print("found an invalid kill id on EntityThread: {}".format(str(id)))
             except Exception as ex:
@@ -106,7 +106,7 @@ class EntityFeed(feedService):
                 while not self.postedQueue.empty():
                     cursor.execute(
                         "INSERT IGNORE INTO `discord_EntityFeed_posted`(EntityFeed_posted_to,kill_id_posted,posted_date) VALUES (%s,%s,%s)",
-                        [self.channel.id, self.postedQueue.queue.pop()['kill_id'], datetime.datetime.utcnow()])
+                        [self.channel.id, self.postedQueue.get()['kill_id'], datetime.datetime.utcnow()])
                 connection.commit()
             except Exception as ex:
                 print(ex)
@@ -230,14 +230,14 @@ class EntityFeed(feedService):
                             inline=False)
             try:
                 await self.channel.send(content=mention_everyone, embed=embed)
-                self.postedQueue.queue.append(item)
+                self.postedQueue.put(item)
             except discord.Forbidden as ex:
                 await self.command_lock()  # disable the thread to save resources if we cant post to it
 
         while self.run_flag:
             while not self.killQueue.empty() and self.run_flag:
                 try:
-                    await send_message(self.killQueue.queue.pop())
+                    await send_message(self.killQueue.get())
                 except Exception as ex:
                     print(ex)
                 await asyncio.sleep(5)

@@ -94,7 +94,11 @@ class capRadar(feedService):
                 else:
                     km['mention'] = ""
                 if km['mention'] != "":
-                    if self.limits.item_decayed(km['target']['system_id']) == False:
+                    if km['target']['kill_time'] > (
+                            datetime.datetime.utcnow() - datetime.timedelta(minutes=self.feedConfig['max_AgeMention'])):
+                        if self.limits.item_decayed(km['target']['system_id']) == False:
+                            km['mention'] = ""
+                    else:
                         km['mention'] = ""
             km['attackers'] = attackers
             return km
@@ -114,14 +118,14 @@ class capRadar(feedService):
                           'attackers': [], 'mention': None,
                           'highest_groupName': None, 'highest_shipID': None}
                     if km['ly_range'] > self.feedConfig['maxLY_fromBase']:
-                        self.postedQueue.queue.append(km)
+                        self.postedQueue.put(km)
                         continue
                     if id['kill_time'] < (
                             datetime.datetime.utcnow() - datetime.timedelta(minutes=int(self.feedConfig['max_Age']))):
-                        self.postedQueue.queue.append(km)
+                        self.postedQueue.put(km)
                         continue
                     elif exists_in_q(km):
-                        self.postedQueue.queue.append(km)
+                        self.postedQueue.put(km)
                         continue
                     else:
                         cursor.execute(
@@ -133,10 +137,10 @@ class capRadar(feedService):
                         km['target'] = cursor.fetchone()
                         km = ignore_parse(km)
                         if len(km['attackers']) == 0:
-                            self.postedQueue.queue.append(km)
+                            self.postedQueue.put(km)
                             continue
                         else:
-                            self.killQueue.queue.append(km)
+                            self.killQueue.put(km)
                             continue
             except Exception as ex:
                 print(ex)
@@ -151,7 +155,7 @@ class capRadar(feedService):
                 while not self.postedQueue.empty():
                     cursor.execute(
                         "INSERT IGNORE INTO `discord_CapRadar_posted`(CapRadar_posted_to,kill_id_posted,posted_date) VALUES (%s,%s,%s)",
-                        [self.channel.id, self.postedQueue.queue.pop()['kill_id'], datetime.datetime.utcnow()])
+                        [self.channel.id, self.postedQueue.get()['kill_id'], datetime.datetime.utcnow()])
                 connection.commit()
             except Exception as ex:
                 print(ex)
@@ -268,14 +272,14 @@ class capRadar(feedService):
                             inline=False)
             try:
                 await self.channel.send(content=str_content, embed=embed)
-                self.postedQueue.queue.append(item)
+                self.postedQueue.put(item)
             except discord.Forbidden as ex:
                 await self.command_lock()  # disable the thread to save resources if we cant post to it
 
         while self.run_flag:
             while not self.killQueue.empty() and self.run_flag:
                 try:
-                    await send_message(self.killQueue.queue.pop())
+                    await send_message(self.killQueue.get())
                 except Exception as ex:
                     print(ex)
                 await asyncio.sleep(5)
@@ -708,6 +712,20 @@ class capRadar(feedService):
                 else:
                     raise Exception('Invalid response, you must enter "0" or "1" or "2"')
 
+            question = str(
+                '{}\nYou can specify the max age in minutes for mentions (if they are enabled).\n\nIf a mentionable kill is found that is older than the minutes specified than the kill will be posted but without a mention.\n\n'
+                'Please specify the max age in minutes to mention the channel. Enter 0 to use the recommended system default: '.format(
+                    d_message.author.mention))
+            author_answer = await capRadar.ask_question(question, d_message, ch.client)
+            try:
+                num = int(author_answer.content)
+                if num == 0:
+                    db_insert_tracking['max_AgeMention'] = 3
+                else:
+                    db_insert_tracking['max_AgeMention'] = num
+            except ValueError:
+                raise Exception("{} is not a number".format(author_answer.content))
+
             statement_list = []
             statement_list.append(str("Base System Name: {}".format(system_name)))
             statement_list.append(
@@ -732,6 +750,8 @@ class capRadar(feedService):
             statement_list.append(
                 str("Notification method on black ops battleship activity: {}".format(
                     str(db_insert_tracking['blops_notification']).strip('@'))))
+            statement_list.append(
+                str("Mention Max Age in Minutes: {}".format(str(db_insert_tracking['max_AgeMention']))))
             st_str = ""
             for i in statement_list:
                 st_str += str(i + '\n')
