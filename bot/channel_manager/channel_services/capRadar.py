@@ -467,6 +467,7 @@ class capRadar(feedService):
         index = 0
         for i in channels:
             ch_options += "{id} -- {name}\n".format(id=str(index), name=i['channel_name'])
+            index += 1
         resp = await capRadar.ask_question(ch_options, d_message, self.client, timeout=45)
         try:
             select = (channels[int(resp.content)])['channel_id']
