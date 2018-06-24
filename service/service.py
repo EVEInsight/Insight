@@ -1,34 +1,22 @@
-from database.tables import *
-from database.setup_db import setup_database
 from sqlalchemy.orm import scoped_session, Session
-from service.static_data_import import static_data_import
-from service.channel_manager import Channel_manager
-from service.zk import zk
+from . import channel_manager as cm
+from . import zk as zk
+from . import static_data_import as static_data
+import database as DB
 import argparse
 import configparser
-from threading import Lock
+
 
 class service_module(object):
     def __init__(self):
         self.config_file = configparser.ConfigParser()
         self.cli_args = self.__read_cli_args()
         self.config_file.read(self.__read_config_file())
-        self.__sc_session: scoped_session = setup_database().get_scoped_session()
-        #self.static_data_import = static_data_import(self)
-        #self.static_data_import.import_systems()
-        # tb_regions.api_import_all_ids(self)
-        # tb_constellations.api_import_all_ids(self)
-        # tb_systems.api_import_all_ids(self)
-        # tb_categories.api_import_all_ids(self)
-        # tb_groups.api_import_all_ids(self)
-        # tb_types.api_import_all_ids(self)
-        # tb_regions.api_mass_data_resolve(self)
-        # tb_constellations.api_mass_data_resolve(self)
-        # tb_systems.api_mass_data_resolve(self)
-        # tb_categories.api_mass_data_resolve(self)
-        # tb_groups.api_mass_data_resolve(self)
-        self.channel_manager = Channel_manager(self)
-        self.zk_obj = zk(self)
+        self.__sc_session: scoped_session = DB.setup_database().get_scoped_session()
+        self.static_data_import = static_data.static_data_import(self)
+        #self.static_data_import.load_data()
+        self.channel_manager = cm.Channel_manager(self)
+        self.zk_obj = zk.zk(self)
 
     def __read_cli_args(self):
         parser = argparse.ArgumentParser()

@@ -1,17 +1,17 @@
-import threading
 import random
-import string
 import time
+import string
 import requests
-from service.service import *
-from multiprocessing.pool import ThreadPool
 import queue
-from functools import partial
-from discord_bot.channel_types.base_object import discord_feed_service
 import datetime
+import service
+from sqlalchemy.orm import Session
+from database import tables as dbRow
+
 
 class zk(object):
     def __init__(self, service_module):
+        assert isinstance(service_module,service.ServiceModule)
         self.service = service_module
 
         self.identifier = str(self.generate_identifier())
@@ -36,11 +36,11 @@ class zk(object):
 
     def __make_km(self, km_json):
         db:Session = self.service.get_session()
-        __row = tb_kills.make_row(km_json, self.service)
+        __row = dbRow.tb_kills.make_row(km_json, self.service)
         if __row is not None:
             try:
                 db.commit()
-                name_resolver.api_mass_name_resolve(self.service)
+                dbRow.name_resolver.api_mass_name_resolve(self.service)
                 db.close()
                 return True
             except Exception as ex:
@@ -60,7 +60,7 @@ class zk(object):
                                 "KM Limit: {}\n".format(str(self.service.cli_args.debug_km),str(self.service.cli_args.force_ctime),str(self.service.cli_args.debug_limit)))
             db:Session = self.service.get_session()
             try:
-                results = db.query(tb_kills).filter(tb_kills.kill_id >=self.service.cli_args.debug_km).limit(self.service.cli_args.debug_limit).all()
+                results = db.query(dbRow.tb_kills).filter(dbRow.tb_kills.kill_id >=self.service.cli_args.debug_km).limit(self.service.cli_args.debug_limit).all()
                 db.close()
                 for km in results:
                     if self.service.cli_args.force_ctime:
@@ -86,7 +86,7 @@ class zk(object):
                     else:
                         if self.__make_km(json_data):
                             try:
-                                __km = tb_kills.get_row(json_data, self.service)
+                                __km = dbRow.tb_kills.get_row(json_data, self.service)
                                 self.service.get_session().close()
                                 self.__add_km_to_filter(__km)
                             except Exception as ex:
@@ -101,7 +101,7 @@ class zk(object):
 
     def __add_km_to_filter(self,km):
         try:
-            assert isinstance(km,tb_kills)
+            assert isinstance(km,dbRow.tb_kills)
             self.__pending_kms.put(km,block=True,timeout=25)
         except Exception as ex:
             print(ex)

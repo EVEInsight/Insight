@@ -1,20 +1,13 @@
 import discord
-from service.service import *
-import asyncio
-import time
-from service.service import *
-from discord_bot.discord_options import *
-from functools import partial
-from discord.ext import commands
 from concurrent.futures import ThreadPoolExecutor
+import service
+
 
 class Discord_Insight_Client(discord.Client):
-    #bot = commands.Bot(command_prefix="!")
-
     def __init__(self,service_module):
         super().__init__()
         self.service: service_module = service_module
-        self.channel_manager: Channel_manager = self.service.channel_manager
+        self.channel_manager: service.Channel_manager = self.service.channel_manager
         self.loop.set_default_executor(ThreadPoolExecutor(max_workers=5))
         self.loop.create_task(self.setup_tasks())
 

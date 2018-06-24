@@ -1,16 +1,19 @@
-from discord_bot.discord_main import *
+import discord_bot
 import random
 import discord_bot.channel_types as cType
+from functools import partial
+import discord
+import asyncio
 
 
 class Channel_manager(object):
     def __init__(self, serivce_module):
         self.service = serivce_module
         self.__channel_feed_container = {}
-        self.__discord_client:Discord_Insight_Client = None
+        self.__discord_client:discord_bot.Discord_Insight_Client = None
 
     def get_discord_client(self):
-        assert isinstance(self.__discord_client,Discord_Insight_Client)
+        assert isinstance(self.__discord_client,discord_bot.Discord_Insight_Client)
         return self.__discord_client
 
     def get_active_channels(self):
@@ -25,7 +28,7 @@ class Channel_manager(object):
 
     async def set_client(self,client_object):
         try:
-            assert isinstance(client_object,Discord_Insight_Client)
+            assert isinstance(client_object,discord_bot.Discord_Insight_Client)
             self.__discord_client = client_object
         except AssertionError:
             exit(1)
@@ -99,5 +102,4 @@ class Channel_manager(object):
             for feed in self.__channel_feed_container.values():
                 if feed.deque_done():
                     feed.set_deque_task(self.__discord_client.loop.create_task(feed.post_all()))
-            #print("Deque task creation loop done! Total number of tasks = {}".format(len(asyncio.Task.all_tasks(loop=self.__discord_client.loop))))
             await asyncio.sleep(.1)

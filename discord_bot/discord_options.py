@@ -1,4 +1,4 @@
-from discord_bot.discord_main import *
+from . import discord_main
 import discord
 import asyncio
 
@@ -31,7 +31,7 @@ class option_returns_object(option_calls_coroutine):
 class mapper_index(object):
     def __init__(self,discord_client_object,message_object,timeout_seconds=30):
         assert isinstance(message_object,discord.Message)
-        #assert isinstance(discord_client_object,Discord_Insight_Client)
+        assert isinstance(discord_client_object,discord_main.Discord_Insight_Client)
         self.__message = message_object
         self.__option_container = []
         self.__printout_format = []

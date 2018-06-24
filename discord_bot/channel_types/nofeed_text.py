@@ -11,9 +11,9 @@ class discord_text_nofeed_exist(inCh.discord_feed_service):
         await self.channel_discord_object.send("ok")
 
     async def command_create(self, message_object):
-        __options = mapper_index(self.discord_client, message_object)
+        __options = insightClient.mapper_index(self.discord_client, message_object)
         __options.set_main_header("This is a test")
-        __options.add_option(option_calls_coroutine("capRadar", "A fully customizable feed with the ability to track supers and stuff", inCR.capRadar.create_new(message_object,self.service,self.discord_client)))
+        __options.add_option(insightClient.option_calls_coroutine("capRadar", "A fully customizable feed with the ability to track supers and stuff", inCR.capRadar.create_new(message_object,self.service,self.discord_client)))
         await __options()
 
     @classmethod

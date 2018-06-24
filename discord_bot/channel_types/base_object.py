@@ -1,13 +1,17 @@
 import queue
-from discord_bot.discord_main import *
+import discord_bot as insightClient
 import asyncio
 import random
-
+import discord
+from functools import partial
+import service as Service
+import database.tables as dbRow
+from sqlalchemy.orm import Session
 
 class discord_feed_service(object):
     def __init__(self,channel_discord_object:discord.TextChannel, service_object):
         assert isinstance(channel_discord_object,discord.TextChannel)
-        #assert isinstance(service_object,service.service.service_module)
+        assert isinstance(service_object,Service.ServiceModule)
         self.channel_discord_object = channel_discord_object
         self.channel_id = channel_discord_object.id
         self.service = service_object
@@ -54,7 +58,7 @@ class discord_feed_service(object):
     async def command_start(self,message_object:discord.Message):
         if self.cached_feed_table.feed_running == False:
             try:
-                await self.discord_client.loop.run_in_executor(None,partial(tb_channels.set_feed_running,self.channel_id,True,self.service))
+                await self.discord_client.loop.run_in_executor(None,partial(dbRow.tb_channels.set_feed_running,self.channel_id,True,self.service))
                 await self.async_load_table()
                 await message_object.channel.send("Ok")
             except Exception as ex:
@@ -66,7 +70,7 @@ class discord_feed_service(object):
     async def command_stop(self,message_object:discord.Message):
         if self.cached_feed_table.feed_running == True:
             try:
-                await self.discord_client.loop.run_in_executor(None,partial(tb_channels.set_feed_running,self.channel_id,False,self.service))
+                await self.discord_client.loop.run_in_executor(None,partial(dbRow.tb_channels.set_feed_running,self.channel_id,False,self.service))
                 await self.async_load_table()
                 await message_object.channel.send("Ok")
             except Exception as ex:
@@ -75,7 +79,7 @@ class discord_feed_service(object):
             await message_object.channel.send("{}\nThe channel feed is already stopped".format(message_object.author.mention))
 
     async def command_remove(self,message_object:discord.Message):
-        __question = mapper_return_yes_no(self.discord_client,message_object,timeout_seconds=40)
+        __question = insightClient.mapper_return_yes_no(self.discord_client,message_object,timeout_seconds=40)
         __question.set_main_header("Are you sure to want to remove this channel feed, deleting all configured settings?\n")
         __question.set_footer_text("Enter either '1' for yes or '0' for no.")
         if await __question():
@@ -93,7 +97,7 @@ class discord_feed_service(object):
             random.shuffle(test2)
             random.shuffle(test)
             __test = set(test)-set(test2)
-            assert isinstance(km,tb_kills)
+            assert isinstance(km,dbRow.tb_kills)
             self.kmQueue.put_nowait(str("https://zkillboard.com/kill/{}/".format(str(km.kill_id))))
 
     def add_message(self,message_txt):
@@ -115,7 +119,7 @@ class discord_feed_service(object):
     def delete(self):
         db:Session = self.service.get_session()
         try:
-            __row = db.query(tb_channels).filter(tb_channels.channel_id == self.channel_id).one()
+            __row = db.query(dbRow.tb_channels).filter(dbRow.tb_channels.channel_id == self.channel_id).one()
             db.delete(__row)
             db.commit()
             return True
@@ -141,11 +145,11 @@ class discord_feed_service(object):
         return "For assistance, run the command '!help' to see a list of available commands and their functions or visit:\n\nhttps://github.com/Nathan-LS/Insight"
 
     @classmethod
-    def general_table(cls)->tb_channels:
-        return tb_channels
+    def general_table(cls)->dbRow.tb_channels:
+        return dbRow.tb_channels
 
     @classmethod
-    def linked_table(cls)->tb_discord_base:
+    def linked_table(cls)->dbRow.tb_discord_base:
         raise NotImplementedError
 
     @classmethod
@@ -170,7 +174,7 @@ class discord_feed_service(object):
     @staticmethod
     def send_km(km,feed_channel):
         try:
-            assert isinstance(km,tb_kills)
+            assert isinstance(km,dbRow.tb_kills)
             feed_channel.add_km(km)
         except Exception as ex:
             print(ex)

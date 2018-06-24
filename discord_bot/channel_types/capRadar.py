@@ -10,4 +10,4 @@ class capRadar(inCh.discord_text_nofeed_exist):
 
     @classmethod
     def linked_table(cls):
-        return tb_capRadar
+        return dbRow.tb_capRadar
