@@ -1,8 +1,8 @@
-from discord_bot.channel_types.base_object import *
-from discord_bot.discord_main import *
+from . import base_object as inCh
+from .base_object import *
 
 
-class discord_text_nofeed_exist(discord_feed_service):
+class discord_text_nofeed_exist(inCh.discord_feed_service):
     def __init__(self,channel_discord_object:discord.DMChannel, service_object):
         assert isinstance(channel_discord_object,discord.DMChannel)
         self.channel_discord_object = channel_discord_object

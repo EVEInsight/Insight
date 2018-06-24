@@ -5,7 +5,6 @@ import time
 from service.service import *
 from discord_bot.discord_options import *
 from functools import partial
-from discord_bot.channel_types import *
 from discord.ext import commands
 from concurrent.futures import ThreadPoolExecutor
 

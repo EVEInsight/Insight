@@ -18,8 +18,8 @@ class discord_feed_service(object):
         self.messageQueue = queue.Queue()
         self.__deque_task = None
 
-        self.setup_table()
-        self.load_table()
+        #self.setup_table()
+        #self.load_table()
 
     def set_deque_task(self,deq_task:asyncio.Task):
         assert isinstance(deq_task,asyncio.Task)
@@ -166,10 +166,6 @@ class discord_feed_service(object):
             print(ex)
             await __tmp_feed_object.delete()
             await message_object.channel.send("Something went wrong when creating a new feed")
-
-    @classmethod
-    def channel_id_is_feed(cls, id, service_module):
-        return cls.linked_table().exists(id,service_module)
 
     @staticmethod
     def send_km(km,feed_channel):

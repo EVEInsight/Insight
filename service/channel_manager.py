@@ -1,5 +1,7 @@
 from discord_bot.discord_main import *
 import random
+import discord_bot.channel_types as cType
+
 
 class Channel_manager(object):
     def __init__(self, serivce_module):
@@ -44,10 +46,7 @@ class Channel_manager(object):
 
     async def __already_exists(self,ch_id):
         try:
-            if await self.__discord_client.loop.run_in_executor(None, partial(insight_capRadar.channel_id_is_feed, ch_id, self.service)):
-                return insight_capRadar
-            else:
-                return None
+            return await self.__discord_client.loop.run_in_executor(None,partial(cType.insight_textChannel_NoFeed.get_existing_feed_type),ch_id,self.service)
         except Exception as ex:
             print(ex)
 
@@ -62,10 +61,10 @@ class Channel_manager(object):
                 if __ch_feed_type is not None:
                     return await self.__add_channel(channel_object,__ch_feed_type)
                 else:
-                    return insight_textChannel_NoFeed(channel_object, self.service)
+                    return cType.insight_textChannel_NoFeed(channel_object, self.service)
         except AssertionError:
             assert isinstance(channel_object,discord.DMChannel)
-            return insight_directMessage(channel_object,self.service)
+            return cType.insight_directMessage(channel_object,self.service)
 
     async def remove_feed(self,channel):
         ch_obj = None
