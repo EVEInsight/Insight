@@ -34,15 +34,19 @@ with an easier interface for commands.
 
 # Features
 * Feeds
-    * Entity tracking  
+    * **Entity tracking**  
         * Reports destroyed ships participated in or belonging to a set of entities (alliance,corp,pilot).
-    * Cap radar
+        
+        ![alt text](https://i.imgur.com/v3uOnyU.png)
+    * **Cap radar**
         * Reports supercapital, carrier, or blops activity in a LY radius of a selected system.
         * Ignore lists
             * API synchronizable standings to ignore friendly supers that may be used within the radius.
         * Alerts 
             * Optional @everyone and @here alerts if the radar detects a hostile capital/super recently involved in a KM.
             Example: KM occurred within the last minute so a supercapital could still be within the vicinity.
+        
+        ![alt text](https://i.imgur.com/hLS7ztb.png)
     * Discord embedded visuals
         * Visually appealing discord embeds instead of plain text messages for organized and functional information.
             * Multiple link buttons to quickly access more information through Dotlan or zKillboard.
