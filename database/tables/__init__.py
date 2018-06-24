@@ -1,0 +1,16 @@
+from database.tables.regions import Regions as tb_regions
+from database.tables.constellations import Constellations as tb_constellations
+from database.tables.systems import Systems as tb_systems
+from database.tables.categories import Categories as tb_categories
+from database.tables.groups import Groups as tb_groups
+from database.tables.types import Types as tb_types
+from database.tables.alliances import Alliances as tb_alliances
+from database.tables.corporations import Corporations as tb_corporations
+from database.tables.characters import Characters as tb_characters
+from database.tables.victims import Victims as tb_victims
+from database.tables.attackers import Attackers as tb_attackers
+from database.tables.kills import Kills as tb_kills
+from database.tables.mass_name_resolve import name_resolve as name_resolver
+from database.tables.discord_base import discord_channel_base as tb_discord_base
+from database.tables.discord_channels import Channels as tb_channels
+from database.tables.discord_capRadar import CapRadar as tb_capRadar
