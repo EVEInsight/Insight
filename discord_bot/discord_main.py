@@ -38,12 +38,16 @@ class Discord_Insight_Client(discord.Client):
             return
         elif message.content.startswith('!create'):
             await (await self.channel_manager.get_channel_feed(message.channel)).command_create(message)
+        elif message.content.startswith('!settings'):
+            await (await self.channel_manager.get_channel_feed(message.channel)).command_settings(message)
         elif message.content.startswith('!start'):
             await (await self.channel_manager.get_channel_feed(message.channel)).command_start(message)
         elif message.content.startswith('!stop'):
             await (await self.channel_manager.get_channel_feed(message.channel)).command_stop(message)
         elif message.content.startswith('!remove'):
             await (await self.channel_manager.get_channel_feed(message.channel)).command_remove(message)
+        elif message.content.startswith('!help'):
+            await (await self.channel_manager.get_channel_feed(message.channel)).command_help(message)
 
 
     @staticmethod

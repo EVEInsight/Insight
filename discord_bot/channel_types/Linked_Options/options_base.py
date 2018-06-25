@@ -1,15 +1,13 @@
-from .. import base_object as channel_type_base
+from .. import base_object
 
 
-class Options_Base(channel_type_base.discord_feed_service):
-    async def all_options(self):
+class Options_Base(base_object.discord_feed_service):
+
+    async def get_option_coroutines(self,required_only=False):
         for i in dir(self):
-            if i.startswith("InsightOption_") or i.startswith("InsightOptionRequired_"):
-                test = getattr(self,i)
-                yield test
-
-    async def all_options_required(self):
-        for i in dir(self):
-            if i.startswith("InsightOptionRequired_"):
-                test = getattr(self,i)
-                yield test
+            if required_only and i.startswith("InsightOptionRequired_"):
+                yield getattr(self,i)
+            elif not required_only and (i.startswith("InsightOption_") or i.startswith("InsightOptionRequired_")):
+                yield getattr(self,i)
+            else:
+                continue

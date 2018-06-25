@@ -37,7 +37,7 @@ class mapper_index(object):
         self.__printout_format = []
         self.__mention = "{}".format(self.__message.author.mention)
         self.__header_text = ""
-        self.__footer_text = "Select an option by entering it's number"
+        self.__footer_text = "Select an option by entering it's number:"
         self.__timeout_seconds = int(timeout_seconds)
         self.__discord_client = discord_client_object
 
@@ -51,7 +51,7 @@ class mapper_index(object):
         self.__printout_format.append("")
 
     def add_header_row(self,header_txt):
-        self.__printout_format.append("-----{}-----".format(str(header_txt)))
+        self.__printout_format.append("-----{}-----\n".format(str(header_txt)))
 
     def __current_option_index(self)->int:
         return int(len(self.__option_container))
@@ -65,10 +65,10 @@ class mapper_index(object):
             raise AssertionError
 
     def __str__(self):
-        __str_item = self.__mention + "\n" + self.__header_text + "\n"
+        __str_item = self.__mention + "\n" + self.__header_text + "\n\n\n"
         for i in self.__printout_format:
-            __str_item += (str(i) + "\n")
-        __str_item += self.__footer_text
+            __str_item += (str(i) + "\n\n")
+        __str_item += "\n\n" + self.__footer_text
         return __str_item + "\n"
 
     async def check_conditions(self):
@@ -116,6 +116,7 @@ class mapper_index(object):
 class mapper_return_yes_no(mapper_index):
     def __init__(self, discord_client_object, message_object, timeout_seconds=30):
         super(mapper_return_yes_no, self).__init__( discord_client_object, message_object, timeout_seconds)
+        self.set_footer_text("Enter either '1' for yes or '0' for no:")
         self.add_option(option_returns_object("No",return_object=False))
         self.add_option(option_returns_object("Yes",return_object=True))
 

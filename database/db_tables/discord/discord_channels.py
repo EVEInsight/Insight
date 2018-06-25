@@ -9,6 +9,7 @@ class Channels(dec_Base.Base,discord_channel_base):
     channel_name = Column(String,default="",nullable=False)
 
     object_capRadar = relationship("CapRadar", uselist=False,cascade="delete", back_populates="object_channel")
+    object_enFeed = relationship("EnFeed",uselist=True,cascade="delete",back_populates="object_channel")
     object_bl_alliances = relationship("BL_alliances",uselist=True,cascade="delete",back_populates="object_channel",
                                        lazy="joined")
     object_bl_corporations = relationship("BL_corporations", uselist=True, cascade="delete", back_populates="object_channel",

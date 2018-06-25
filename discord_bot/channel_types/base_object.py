@@ -50,46 +50,26 @@ class discord_feed_service(object):
     async def async_load_table(self):
         await self.discord_client.loop.run_in_executor(None,self.load_table)
 
-    async def command_help(self):
-        await self.channel_discord_object.send(self.command_not_supported("!help"))
-
     async def command_create(self, message_object):
-        await self.channel_discord_object.send(self.command_not_supported("!create"))
+        await self.command_not_supported_sendmessage(message_object)
+
+    async def command_help(self,message_object):
+        await self.command_not_supported_sendmessage(message_object)
+
+    async def command_settings(self,message_object):
+        __options = insightClient.mapper_index(self.discord_client,message_object)
+        async for cor in self.get_option_coroutines():
+            __options.add_option(insightClient.option_calls_coroutine(cor.__doc__,"",cor(message_object)))
+        await __options()
 
     async def command_start(self,message_object:discord.Message):
-        if self.cached_feed_table.feed_running == False:
-            try:
-                await self.discord_client.loop.run_in_executor(None,partial(dbRow.tb_channels.set_feed_running,self.channel_id,True,self.service))
-                await self.async_load_table()
-                await message_object.channel.send("Ok")
-            except Exception as ex:
-                await message_object.channel.send("Something went wrong when running this command.\n\nException: {}".format(str(ex)))
-        else:
-            await message_object.channel.send(
-                "{}\nThe channel feed is already running".format(message_object.author.mention))
+        await self.command_not_supported_sendmessage(message_object)
 
     async def command_stop(self,message_object:discord.Message):
-        if self.cached_feed_table.feed_running == True:
-            try:
-                await self.discord_client.loop.run_in_executor(None,partial(dbRow.tb_channels.set_feed_running,self.channel_id,False,self.service))
-                await self.async_load_table()
-                await message_object.channel.send("Ok")
-            except Exception as ex:
-                await message_object.channel.send("Something went wrong when running this command.\n\nException: {}".format(str(ex)))
-        else:
-            await message_object.channel.send("{}\nThe channel feed is already stopped".format(message_object.author.mention))
+        await self.command_not_supported_sendmessage(message_object)
 
     async def command_remove(self,message_object:discord.Message):
-        __question = insightClient.mapper_return_yes_no(self.discord_client,message_object,timeout_seconds=40)
-        __question.set_main_header("Are you sure to want to remove this channel feed, deleting all configured settings?\n")
-        __question.set_footer_text("Enter either '1' for yes or '0' for no.")
-        if await __question():
-            if await self.channel_manager.delete_feed(self.channel_id):
-                await message_object.channel.send("Successfully deleted this channel feed.")
-            else:
-                await message_object.channel.send("Something went wrong when removing the channel.")
-        else:
-            await message_object.channel.send("No changes were made")
+        await self.command_not_supported_sendmessage(message_object)
 
     def add_km(self,km):
         if self.cached_feed_table.feed_running:
@@ -131,19 +111,15 @@ class discord_feed_service(object):
         finally:
             db.close()
 
-    async def option_sample(self,message_object:discord.Message):
-        await message_object.channel.send("This is a sample option for the class. You should probably remove calls to it.")
-
-    def all_options(self):
-        return [self.option_sample]
-
-    @classmethod
-    def command_not_supported(cls, command:str):
-        return "The command '{}' is not supported by this channel.\n\n{}'".format(command,cls.str_more_help())
+    async def command_not_supported_sendmessage(self, message_object:discord.Message):
+        await message_object.channel.send("{}\nThis command is not supported in channel of type: {}\n".format(message_object.author.mention,str(self)))
 
     @classmethod
     def str_more_help(cls):
         return "For assistance, run the command '!help' to see a list of available commands and their functions or visit:\n\nhttps://github.com/Nathan-LS/Insight"
+
+    def __str__(self):
+        return "Base Insight Object"
 
     @classmethod
     def general_table(cls)->dbRow.tb_channels:
