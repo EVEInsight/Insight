@@ -1,6 +1,6 @@
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker,Session
 from sqlalchemy import create_engine
-from database.Base import Base
+import database.db_tables as DB
 
 
 class setup_database(object):
@@ -13,7 +13,15 @@ class setup_database(object):
         self.sc_session = scoped_session(Session)
 
     def create_tables(self):
-        Base.metadata.create_all(self.engine)
+        DB.Base.Base.metadata.create_all(self.engine)
 
     def get_scoped_session(self):
         return self.sc_session
+
+    @staticmethod
+    def test():
+        pass
+
+
+if __name__ == "__main__":
+    setup_database.test()

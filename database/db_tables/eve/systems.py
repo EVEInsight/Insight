@@ -1,8 +1,7 @@
-from database.tables.base_objects import *
-from database.tables import *
+from .base_objects import *
+from . import constellations
 
-
-class Systems(Base,name_only,individual_api_pulling,index_api_updating):
+class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating):
     __tablename__ = 'systems'
 
     system_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
@@ -28,7 +27,7 @@ class Systems(Base,name_only,individual_api_pulling,index_api_updating):
 
     def load_fk_objects(self):
         if self.constellation_id:
-            self.object_constellation = database.tables.constellations.Constellations(self.constellation_id)
+            self.object_constellation = constellations.Constellations(self.constellation_id)
 
     def get_id(self):
         return self.system_id

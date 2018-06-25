@@ -1,12 +1,12 @@
-from database.tables.discord_base import *
-from database.tables import *
+from .discord_base import *
+from . import discord_channels
 
 
-class CapRadar(Base,discord_channel_base):
+class CapRadar(dec_Base.Base,discord_channel_base):
     __tablename__ = 'capRadar'
 
     channel_id = Column(BIGINT,ForeignKey("channels.channel_id"),primary_key=True,nullable=False,autoincrement=False)
-    object_channel = relationship("Channels", uselist=False, back_populates="object_capRadars",lazy="joined")
+    object_channel = relationship("Channels", uselist=False, back_populates="object_capRadar",lazy="joined")
 
     def __init__(self, channel_id):
         self.channel_id = channel_id
@@ -14,7 +14,7 @@ class CapRadar(Base,discord_channel_base):
 
     def load_fk_objects(self):
         if self.channel_id is not None:
-            self.object_channel = tb_channels(self.channel_id)
+            self.object_channel = discord_channels.Channels(self.channel_id)
 
     @classmethod
     def primary_key_row(cls):

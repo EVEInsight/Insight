@@ -1,9 +1,10 @@
 from . import base_object as inCh
 from . import capRadar as inCR
 from .base_object import *
+from . import Linked_Options
 
 
-class discord_text_nofeed_exist(inCh.discord_feed_service):
+class discord_text_nofeed_exist(Linked_Options.opt_base):
     def __init__(self,channel_discord_object:discord.TextChannel, service_module):
         super(discord_text_nofeed_exist, self).__init__(channel_discord_object,service_module)
 
@@ -19,6 +20,19 @@ class discord_text_nofeed_exist(inCh.discord_feed_service):
     @classmethod
     def command_not_supported(cls, command:str):
         return "The command '{}' is not supported by a channel with no feed services created.\nRun the command '!create' to set up a new feed.\n\n{}".format(command,cls.str_more_help())
+
+    @classmethod
+    async def create_new(cls,message_object:discord.Message, service_module, discord_client):
+        __tmp_feed_object:cls = await cls.load_new(message_object.channel,service_module,discord_client)
+        try:
+            async for option in __tmp_feed_object.all_options_required():
+                await option(message_object)
+            await service_module.channel_manager.add_feed_object(__tmp_feed_object)
+            await message_object.channel.send("Created a new feed!")
+        except Exception as ex:
+            print(ex)
+            await __tmp_feed_object.delete()
+            await message_object.channel.send("Something went wrong when creating a new feed")
 
     @classmethod
     def channel_id_is_feed(cls, id, service_module):

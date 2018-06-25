@@ -1,9 +1,9 @@
-from database.tables.base_objects import *
-from database.tables import *
+from .base_objects import *
+from . import characters,corporations,alliances,types
 
 
-class Victims(Base, table_row):
-    __tablename__ = 'Victims'
+class Victims(dec_Base.Base, table_row):
+    __tablename__ = 'victims'
 
     kill_id = Column(Integer,ForeignKey("kills.kill_id"), primary_key=True,nullable=False, autoincrement=False)
     character_id = Column(Integer,ForeignKey("characters.character_id"),default=None, nullable=True)
@@ -16,10 +16,10 @@ class Victims(Base, table_row):
     ship_type_id = Column(Integer,ForeignKey("types.type_id"), default=None, nullable=True)
 
     object_kill = relationship("Kills",uselist=False,back_populates="object_victim")
-    object_pilot = relationship("Characters",uselist=False,back_populates="object_loses")
-    object_corp = relationship("Corporations",uselist=False,back_populates="object_loses")
-    object_alliance = relationship("Alliances",uselist=False,back_populates="object_loses")
-    object_ship = relationship("Types",uselist=False,back_populates="object_loses_ships")
+    object_pilot = relationship("Characters",uselist=False,back_populates="object_loses",lazy="joined")
+    object_corp = relationship("Corporations",uselist=False,back_populates="object_loses",lazy="joined")
+    object_alliance = relationship("Alliances",uselist=False,back_populates="object_loses",lazy="joined")
+    object_ship = relationship("Types",uselist=False,back_populates="object_loses_ships",lazy="joined")
 
     def __init__(self, data: dict):
         self.character_id = data.get("character_id")
@@ -36,10 +36,10 @@ class Victims(Base, table_row):
 
     def load_objects(self):
         if self.character_id:
-            self.object_pilot = tb_characters(self.character_id)
+            self.object_pilot = characters.Characters(self.character_id)
         if self.corporation_id:
-            self.object_corp = tb_corporations(self.corporation_id)
+            self.object_corp = corporations.Corporations(self.corporation_id)
         if self.alliance_id:
-            self.object_alliance = tb_alliances(self.alliance_id)
+            self.object_alliance = alliances.Alliances(self.alliance_id)
         if self.ship_type_id:
-            self.object_ship = tb_types(self.ship_type_id)
+            self.object_ship = types.Types(self.ship_type_id)

@@ -1,7 +1,7 @@
-from database.tables.base_objects import *
+from .base_objects import *
 
 
-class Alliances(Base,name_only):
+class Alliances(dec_Base.Base,name_only):
     __tablename__ = 'alliances'
 
     alliance_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
@@ -11,8 +11,8 @@ class Alliances(Base,name_only):
     api_Expires = Column(DateTime,default=None,nullable=True)
     api_Last_Modified = Column(DateTime,default=None,nullable=True)
 
-    object_attackers = relationship("Attackers", uselist=True,back_populates="object_alliance")
-    object_loses = relationship("Victims", uselist=True, back_populates="object_alliance")
+    object_attackers= relationship("Attackers", uselist=True,back_populates="object_alliance")
+    object_loses= relationship("Victims", uselist=True, back_populates="object_alliance")
 
     def __init__(self, alliance_id: int):
         self.alliance_id = alliance_id

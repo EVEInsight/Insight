@@ -1,24 +1,16 @@
-from database.Base import Base
-from service.service import *
-from database.tables import *
-import database.tables
 from swagger_client.rest import ApiException
-from swagger_client import Configuration
-from sqlalchemy.orm import Session
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy.inspection import inspect
-from sqlalchemy.orm.exc import NoResultFound
-import datetime
-from sqlalchemy.orm import Session
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy.inspection import inspect
-from sqlalchemy import *
 import swagger_client
 from sqlalchemy.orm import scoped_session, Session, sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm import *
+from sqlalchemy import *
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 import dateparser
 from multiprocessing.pool import ThreadPool
+from database.db_tables import Base as dec_Base
+import datetime
+import dateparser
+from typing import List
 
 
 class table_row(object):

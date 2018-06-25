@@ -1,8 +1,7 @@
-from database.tables.base_objects import *
-from database.tables import *
+from .base_objects import *
+from . import constellations
 
-
-class Regions(Base,individual_api_pulling,index_api_updating):
+class Regions(dec_Base.Base,individual_api_pulling,index_api_updating):
     __tablename__ = 'regions'
 
     region_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
@@ -22,7 +21,7 @@ class Regions(Base,individual_api_pulling,index_api_updating):
         if self.__constellations:
             self.object_constellations = []
             for id in self.__constellations:
-                self.object_constellations.append(database.tables.constellations.Constellations(id))
+                self.object_constellations.append(constellations.Constellations(id))
 
     def get_id(self):
         return self.region_id

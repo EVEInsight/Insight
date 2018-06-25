@@ -1,15 +1,14 @@
-from database.tables.base_objects import *
-from database.tables import *
-import dateparser
-import datetime
+from .base_objects import *
+from . import systems,attackers,victims,locations
 
-class Kills(Base, table_row):
+
+class Kills(dec_Base.Base, table_row):
     __tablename__ = 'kills'
 
     kill_id = Column(Integer,primary_key=True, nullable=False, autoincrement=False)
     killmail_time = Column(DateTime,default=None,nullable=True)
-    solar_system_id = Column(Integer, ForeignKey(tb_systems.system_id), default=None, nullable=True)
-    locationID = Column(Integer,default=None,nullable=True)
+    solar_system_id = Column(Integer, ForeignKey("systems.system_id"), default=None, nullable=True)
+    locationID = Column(Integer,ForeignKey("locations.location_id"),default=None,nullable=True)
     hash = Column(String,default=None,nullable=True)
     fittedValue = Column(Float,default=0.0,nullable=False)
     totalValue = Column(Float,default=0.0,nullable=False)
@@ -20,9 +19,10 @@ class Kills(Base, table_row):
     href = Column(String,default=None,nullable=True)
     loaded_time = Column(DateTime,default=datetime.datetime.utcnow(),nullable=False)
 
-    object_system = relationship("Systems", uselist=False, back_populates="object_kills_in_system",lazy="joined")
-    object_attackers = relationship("Attackers",uselist=True,back_populates="object_kill",lazy="joined")
-    object_victim = relationship("Victims",uselist=False,back_populates="object_kill",lazy="joined")
+    object_system: systems.Systems = relationship("Systems", uselist=False, back_populates="object_kills_in_system",lazy="joined")
+    object_attackers: List[attackers.Attackers] = relationship("Attackers",uselist=True,back_populates="object_kill",lazy="joined")
+    object_victim: victims.Victims = relationship("Victims",uselist=False,back_populates="object_kill",lazy="joined")
+    object_location: locations.Locations = relationship("Locations",uselist=False, back_populates="object_kills_at_location",lazy="joined")
 
     def __init__(self, data: dict):
         self.kill_id = data.get("killID")
@@ -47,12 +47,14 @@ class Kills(Base, table_row):
 
     def load_fk_objects(self):
         if self.solar_system_id:
-            self.object_system = tb_systems(self.solar_system_id)
+            self.object_system = systems.Systems(self.solar_system_id)
+        if self.locationID:
+            self.object_location = locations.Locations(self.locationID)
         if self.dict_attackers:
             for attacker in self.dict_attackers:
-                self.object_attackers.append(tb_attackers(attacker))
+                self.object_attackers.append(attackers.Attackers(attacker))
         if self.dict_victim:
-            self.object_victim = tb_victims(self.dict_victim)
+            self.object_victim = victims.Victims(self.dict_victim)
 
     @classmethod
     def primary_key_row(cls):

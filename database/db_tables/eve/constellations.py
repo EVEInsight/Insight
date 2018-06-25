@@ -1,8 +1,7 @@
-from database.tables.base_objects import *
-from database.tables import *
+from .base_objects import *
+from . import regions,systems
 
-
-class Constellations(Base,individual_api_pulling,index_api_updating):
+class Constellations(dec_Base.Base,individual_api_pulling,index_api_updating):
     __tablename__ = 'constellations'
 
     constellation_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
@@ -16,7 +15,7 @@ class Constellations(Base,individual_api_pulling,index_api_updating):
     api_Expires = Column(DateTime,default=None,nullable=True)
     api_Last_Modified = Column(DateTime,default=None,nullable=True)
 
-    object_region = relationship("Regions", uselist=False, back_populates="object_constellations")
+    object_region = relationship("Regions", uselist=False, back_populates="object_constellations",lazy="joined")
     object_systems = relationship("Systems",uselist=True, back_populates="object_constellation")
 
     def __init__(self, eve_id: int):
@@ -24,11 +23,11 @@ class Constellations(Base,individual_api_pulling,index_api_updating):
 
     def load_fk_objects(self):
         if self.region_id:
-            self.object_region = tb_regions(self.region_id)
+            self.object_region = regions.Regions(self.region_id)
         if self.__systems:
             self.object_systems = []
             for system_id in self.__systems:
-                self.object_systems.append(database.tables.systems.Systems(system_id))
+                self.object_systems.append(systems.Systems(system_id))
 
     def get_id(self):
         return self.constellation_id

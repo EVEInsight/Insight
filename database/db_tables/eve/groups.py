@@ -1,7 +1,8 @@
-from database.tables.base_objects import *
+from .base_objects import *
+from . import categories,types
 
 
-class Groups(Base,individual_api_pulling,index_api_updating):
+class Groups(dec_Base.Base,individual_api_pulling,index_api_updating):
     __tablename__ = 'groups'
 
     group_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
@@ -13,18 +14,18 @@ class Groups(Base,individual_api_pulling,index_api_updating):
     api_Last_Modified = Column(DateTime,default=None,nullable=True)
 
     object_types = relationship("Types",uselist=True,back_populates="object_group")
-    object_category = relationship("Categories",uselist=False,back_populates="object_groups")
+    object_category = relationship("Categories",uselist=False,back_populates="object_groups",lazy="joined")
 
     def __init__(self, eve_id: int):
         self.group_id = eve_id
 
     def load_fk_objects(self):
         if self.category_id:
-            self.object_category = database.tables.categories.Categories(self.category_id)
+            self.object_category = categories.Categories(self.category_id)
         if self.__types:
             self.object_types = []
             for object_id in self.__types:
-                self.object_types.append(database.tables.types.Types(object_id))
+                self.object_types.append(types.Types(object_id))
 
     def get_id(self):
         return self.group_id

@@ -1,5 +1,5 @@
 import service
-#import database.tables as dbRow
+import database.db_tables as dbRow
 
 
 class static_data_import(object):

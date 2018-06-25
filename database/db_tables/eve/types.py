@@ -1,7 +1,7 @@
-from database.tables.base_objects import *
+from .base_objects import *
 
 
-class Types(Base,name_only,index_api_updating):
+class Types(dec_Base.Base,name_only,index_api_updating):
     __tablename__ = 'types'
 
     type_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
@@ -10,7 +10,7 @@ class Types(Base,name_only,index_api_updating):
     api_Expires = Column(DateTime,default=None,nullable=True)
     api_Last_Modified = Column(DateTime,default=None,nullable=True)
 
-    object_group = relationship("Groups",uselist=False,back_populates="object_types")
+    object_group = relationship("Groups",uselist=False,back_populates="object_types",lazy="joined")
     object_attacker_ships = relationship("Attackers", uselist=True,foreign_keys="Attackers.ship_type_id",back_populates="object_ship")
     object_attacker_weapons = relationship("Attackers", uselist=True,foreign_keys="Attackers.weapon_type_id",back_populates="object_weapon")
     object_loses_ships = relationship("Victims", uselist=True, back_populates="object_ship")

@@ -1,7 +1,7 @@
-from database.tables.base_objects import *
+from .base_objects import *
 
 
-class Characters(Base,name_only):
+class Characters(dec_Base.Base,name_only):
     __tablename__ = 'characters'
 
     character_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)

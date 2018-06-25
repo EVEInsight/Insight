@@ -1,7 +1,7 @@
-from database.tables.base_objects import *
+from .base_objects import *
+from . import groups
 
-
-class Categories(Base,individual_api_pulling,index_api_updating):
+class Categories(dec_Base.Base,individual_api_pulling,index_api_updating):
     __tablename__ = 'categories'
 
     category_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
@@ -20,7 +20,7 @@ class Categories(Base,individual_api_pulling,index_api_updating):
         if self.__groups:
             self.object_groups = []
             for object_id in self.__groups:
-                self.object_groups.append(database.tables.groups.Groups(object_id))
+                self.object_groups.append(groups.Groups(object_id))
 
     def get_id(self):
         return self.category_id

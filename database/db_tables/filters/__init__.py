@@ -1,0 +1,16 @@
+from .bl_alliances import BL_alliances as tb_bl_alliances
+from .bl_corporations import BL_corporations as tb_bl_corporations
+from .bl_characters import BL_characters as tb_bl_characters
+from .bl_categories import BL_categories as tb_bl_categories
+from .bl_groups import BL_groups as tb_bl_groups
+from .bl_types import BL_types as tb_bl_types
+from .bl_regions import BL_regions as tb_bl_regions
+from .bl_systems import BL_systems as tb_bl_systems
+from .wl_alliances import WL_alliances as tb_wl_alliances
+from .wl_corporations import WL_corporations as tb_wl_corporations
+from .wl_characters import WL_characters as tb_wl_characters
+from .wl_categories import WL_categories as tb_wl_categories
+from .wl_groups import WL_groups as tb_wl_groups
+from .wl_types import WL_types as tb_wl_types
+from .wl_regions import WL_regions as tb_wl_regions
+from .wl_systems import WL_systems as tb_wl_systems

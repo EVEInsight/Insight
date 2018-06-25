@@ -5,8 +5,9 @@ import random
 import discord
 from functools import partial
 import service as Service
-import database.tables as dbRow
+import database.db_tables as dbRow
 from sqlalchemy.orm import Session
+
 
 class discord_feed_service(object):
     def __init__(self,channel_discord_object:discord.TextChannel, service_object):
@@ -156,20 +157,6 @@ class discord_feed_service(object):
     async def load_new(cls,channel_object:discord.TextChannel,service_module, discord_client):
         assert isinstance(channel_object,discord.TextChannel)
         return await discord_client.loop.run_in_executor(None, partial(cls,channel_object,service_module))
-
-    @classmethod
-    async def create_new(cls,message_object:discord.Message, service_module, discord_client):
-        __tmp_feed_object:cls = await cls.load_new(message_object.channel,service_module,discord_client)
-        try:
-            for option in __tmp_feed_object.all_options():
-                option:cls.option_sample
-                await option(message_object)
-            await service_module.channel_manager.add_feed_object(__tmp_feed_object)
-            await message_object.channel.send("Created a new feed!")
-        except Exception as ex:
-            print(ex)
-            await __tmp_feed_object.delete()
-            await message_object.channel.send("Something went wrong when creating a new feed")
 
     @staticmethod
     def send_km(km,feed_channel):

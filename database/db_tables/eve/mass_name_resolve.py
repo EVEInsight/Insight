@@ -1,17 +1,16 @@
-from database.tables.base_objects import *
-from database.tables import *
-
+from .base_objects import *
+from . import characters,corporations,alliances,types,systems
 
 class name_resolve(name_only):
     @classmethod
     def __get_objects_with_missing_names(cls,service_module):
         __missing_objects = []
-        __missing_objects += tb_characters.missing_name_objects(service_module)
-        __missing_objects += tb_corporations.missing_name_objects(service_module)
-        __missing_objects += tb_alliances.missing_name_objects(service_module)
-        __missing_objects += tb_types.missing_name_objects(service_module)
-        __missing_objects += tb_characters.missing_name_objects(service_module)
-        __missing_objects += tb_systems.missing_name_objects(service_module)
+        __missing_objects += characters.Characters.missing_name_objects(service_module)
+        __missing_objects += corporations.Corporations.missing_name_objects(service_module)
+        __missing_objects += alliances.Alliances.missing_name_objects(service_module)
+        __missing_objects += types.Types.missing_name_objects(service_module)
+        __missing_objects += characters.Characters.missing_name_objects(service_module)
+        __missing_objects += systems.Systems.missing_name_objects(service_module)
         return __missing_objects
 
     @classmethod

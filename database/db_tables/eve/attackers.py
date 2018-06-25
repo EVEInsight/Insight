@@ -1,7 +1,8 @@
-from database.tables.base_objects import *
-from database.tables import *
+from .base_objects import *
+from . import characters,corporations,alliances,types
 
-class Attackers(Base, table_row):
+
+class Attackers(dec_Base.Base):
     __tablename__ = 'attackers'
 
     no_pk = Column(Integer,primary_key=True,autoincrement=True,nullable=False)
@@ -16,11 +17,11 @@ class Attackers(Base, table_row):
     weapon_type_id = Column(Integer,ForeignKey("types.type_id"),default=None, nullable=True)
 
     object_kill = relationship("Kills",uselist=False,back_populates="object_attackers")
-    object_pilot = relationship("Characters",uselist=False,back_populates="object_attackers")
-    object_corp = relationship("Corporations",uselist=False,back_populates="object_attackers")
-    object_alliance = relationship("Alliances",uselist=False,back_populates="object_attackers")
-    object_ship = relationship("Types",uselist=False,foreign_keys=[ship_type_id],back_populates="object_attacker_ships")
-    object_weapon = relationship("Types",uselist=False,foreign_keys=[weapon_type_id],back_populates="object_attacker_weapons")
+    object_pilot = relationship("Characters",uselist=False,back_populates="object_attackers",lazy="joined")
+    object_corp = relationship("Corporations",uselist=False,back_populates="object_attackers",lazy="joined")
+    object_alliance = relationship("Alliances",uselist=False,back_populates="object_attackers",lazy="joined")
+    object_ship = relationship("Types",uselist=False,foreign_keys=[ship_type_id],back_populates="object_attacker_ships",lazy="joined")
+    object_weapon = relationship("Types",uselist=False,foreign_keys=[weapon_type_id],back_populates="object_attacker_weapons",lazy="joined")
 
     def __init__(self, data: dict):
         self.character_id = data.get("character_id")
@@ -36,12 +37,12 @@ class Attackers(Base, table_row):
 
     def load_objects(self):
         if self.character_id:
-            self.object_pilot = tb_characters(self.character_id)
+            self.object_pilot = characters.Characters(self.character_id)
         if self.corporation_id:
-            self.object_corp = tb_corporations(self.corporation_id)
+            self.object_corp = corporations.Corporations(self.corporation_id)
         if self.alliance_id:
-            self.object_alliance = tb_alliances(self.alliance_id)
+            self.object_alliance = alliances.Alliances(self.alliance_id)
         if self.ship_type_id:
-            self.object_ship = tb_types(self.ship_type_id)
+            self.object_ship = types.Types(self.ship_type_id)
         if self.weapon_type_id:
-            self.object_weapon = tb_types(self.weapon_type_id)
+            self.object_weapon = types.Types(self.weapon_type_id)

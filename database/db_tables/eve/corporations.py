@@ -1,7 +1,7 @@
-from database.tables.base_objects import *
+from .base_objects import *
 
 
-class Corporations(Base,name_only):
+class Corporations(dec_Base.Base,name_only):
     __tablename__ = 'corporations'
 
     corporation_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)

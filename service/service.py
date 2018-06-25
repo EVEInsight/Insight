@@ -2,7 +2,7 @@ from sqlalchemy.orm import scoped_session, Session
 from . import channel_manager as cm
 from . import zk as zk
 from . import static_data_import as static_data
-import database as DB
+import database
 import argparse
 import configparser
 
@@ -12,7 +12,7 @@ class service_module(object):
         self.config_file = configparser.ConfigParser()
         self.cli_args = self.__read_cli_args()
         self.config_file.read(self.__read_config_file())
-        self.__sc_session: scoped_session = DB.setup_database().get_scoped_session()
+        self.__sc_session: scoped_session = database.setup_database().get_scoped_session()
         self.static_data_import = static_data.static_data_import(self)
         #self.static_data_import.load_data()
         self.channel_manager = cm.Channel_manager(self)

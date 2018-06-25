@@ -6,7 +6,7 @@ import queue
 import datetime
 import service
 from sqlalchemy.orm import Session
-from database import tables as dbRow
+import database.db_tables as dbRow
 
 
 class zk(object):
