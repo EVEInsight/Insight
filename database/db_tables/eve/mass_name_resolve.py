@@ -1,6 +1,7 @@
 from .base_objects import *
 from . import characters,corporations,alliances,types,systems
 
+
 class name_resolve(name_only):
     @classmethod
     def __get_objects_with_missing_names(cls,service_module):

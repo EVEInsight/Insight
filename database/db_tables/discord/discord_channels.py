@@ -2,7 +2,7 @@ from .discord_base import *
 
 
 class Channels(dec_Base.Base,discord_channel_base):
-    __tablename__ = 'channels'
+    __tablename__ = 'discord_channels'
 
     channel_id = Column(BIGINT,primary_key=True,nullable=False,autoincrement=False)
     feed_running = Column(Boolean,default=False,nullable=False)
@@ -10,37 +10,21 @@ class Channels(dec_Base.Base,discord_channel_base):
 
     object_capRadar = relationship("CapRadar", uselist=False,cascade="delete", back_populates="object_channel")
     object_enFeed = relationship("EnFeed",uselist=True,cascade="delete",back_populates="object_channel")
-    object_bl_alliances = relationship("BL_alliances",uselist=True,cascade="delete",back_populates="object_channel",
+    object_filter_alliances = relationship("Filter_alliances",uselist=True,cascade="delete",back_populates="object_channel",
                                        lazy="joined")
-    object_bl_corporations = relationship("BL_corporations", uselist=True, cascade="delete", back_populates="object_channel",
+    object_filter_corporations = relationship("Filter_corporations", uselist=True, cascade="delete", back_populates="object_channel",
                                        lazy="joined")
-    object_bl_characters = relationship("BL_characters ", uselist=True, cascade="delete", back_populates="object_channel",
+    object_filter_characters = relationship("Filter_characters ", uselist=True, cascade="delete", back_populates="object_channel",
                                        lazy="joined")
-    object_bl_categories = relationship("BL_categories", uselist=True, cascade="delete", back_populates="object_channel",
+    object_filter_categories = relationship("Filter_categories", uselist=True, cascade="delete", back_populates="object_channel",
                                        lazy="joined")
-    object_bl_groups = relationship("BL_groups", uselist=True, cascade="delete", back_populates="object_channel",
+    object_filter_groups = relationship("Filter_groups", uselist=True, cascade="delete", back_populates="object_channel",
                                        lazy="joined")
-    object_bl_types = relationship("BL_types", uselist=True, cascade="delete", back_populates="object_channel",
+    object_filter_types = relationship("Filter_types", uselist=True, cascade="delete", back_populates="object_channel",
                                        lazy="joined")
-    object_bl_regions = relationship("BL_regions", uselist=True, cascade="delete", back_populates="object_channel",
+    object_filter_regions = relationship("Filter_regions", uselist=True, cascade="delete", back_populates="object_channel",
                                        lazy="joined")
-    object_bl_systems = relationship("BL_systems", uselist=True, cascade="delete", back_populates="object_channel",
-                                       lazy="joined")
-    object_wl_alliances = relationship("WL_alliances",uselist=True,cascade="delete",back_populates="object_channel",
-                                       lazy="joined")
-    object_wl_corporations = relationship("WL_corporations", uselist=True, cascade="delete", back_populates="object_channel",
-                                       lazy="joined")
-    object_wl_characters = relationship("WL_characters ", uselist=True, cascade="delete", back_populates="object_channel",
-                                       lazy="joined")
-    object_wl_categories = relationship("WL_categories", uselist=True, cascade="delete", back_populates="object_channel",
-                                       lazy="joined")
-    object_wl_groups = relationship("WL_groups", uselist=True, cascade="delete", back_populates="object_channel",
-                                       lazy="joined")
-    object_wl_types = relationship("WL_types", uselist=True, cascade="delete", back_populates="object_channel",
-                                       lazy="joined")
-    object_wl_regions = relationship("WL_regions", uselist=True, cascade="delete", back_populates="object_channel",
-                                       lazy="joined")
-    object_wl_systems = relationship("WL_systems", uselist=True, cascade="delete", back_populates="object_channel",
+    object_filter_systems = relationship("Filter_systems", uselist=True, cascade="delete", back_populates="object_channel",
                                        lazy="joined")
 
     def __init__(self, object_id):

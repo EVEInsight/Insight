@@ -1,7 +1,11 @@
+import discord
 from .. import base_object
 
 
-class Options_Base(base_object.discord_feed_service):
+class Options_Base(object):
+    def __init__(self,insight_channel):
+        assert isinstance(insight_channel,base_object.discord_feed_service)
+        self.cfeed = insight_channel
 
     async def get_option_coroutines(self,required_only=False):
         for i in dir(self):

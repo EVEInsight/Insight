@@ -121,3 +121,14 @@ class mapper_return_yes_no(mapper_index):
         self.add_option(option_returns_object("Yes",return_object=True))
 
 
+class mapper_return_noOptions(mapper_index):
+    async def add_option(self, mapper_option_obj:option_calls_coroutine):
+        raise NotImplementedError
+
+    async def check_conditions(self):
+        pass
+
+    async def response_action(self, response):
+        return response
+
+

@@ -3,9 +3,9 @@ from . import discord_channels
 
 
 class CapRadar(dec_Base.Base,discord_channel_base):
-    __tablename__ = 'capRadar'
+    __tablename__ = 'discord_capRadar'
 
-    channel_id = Column(BIGINT,ForeignKey("channels.channel_id"),primary_key=True,nullable=False,autoincrement=False)
+    channel_id = Column(BIGINT,ForeignKey("discord_channels.channel_id"),primary_key=True,nullable=False,autoincrement=False)
     object_channel = relationship("Channels", uselist=False, back_populates="object_capRadar",lazy="joined")
 
     def __init__(self, channel_id):

@@ -1,10 +1,9 @@
-from . import options_base
-import discord
-import discord_bot as bot
+from . import Base_Feed
 
 
-class Options_CapRadar(options_base.Options_Base):
-    """InsightOption_  InsightOptionRequired_"""
-    async def InsightOptionRequired_1(self, message_object:discord.Message):
-        """Changes a capradar settings"""
-        await message_object.channel.send("option1")
+class Options_CapRadar(Base_Feed.base_activefeed):
+    def __init__(self, insight_channel):
+        assert isinstance(insight_channel, capRadar.capRadar)
+        super().__init__(insight_channel)
+
+from .. import capRadar

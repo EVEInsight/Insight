@@ -1,9 +1,7 @@
-from . import capRadar as inCR
 from .base_object import *
-from . import Linked_Options
 
 
-class discord_text_nofeed_exist(Linked_Options.opt_base):
+class discord_text_nofeed_exist(discord_feed_service):
     def __init__(self,channel_discord_object:discord.TextChannel, service_module):
         super(discord_text_nofeed_exist, self).__init__(channel_discord_object,service_module)
 
@@ -74,7 +72,7 @@ class discord_text_nofeed_exist(Linked_Options.opt_base):
     async def create_new(cls,message_object:discord.Message, service_module, discord_client):
         __tmp_feed_object:cls = await cls.load_new(message_object.channel,service_module,discord_client)
         try:
-            async for option in __tmp_feed_object.get_option_coroutines(required_only=True):
+            async for option in __tmp_feed_object.linked_options.get_option_coroutines(required_only=True):
                 await option(message_object)
             await service_module.channel_manager.add_feed_object(__tmp_feed_object)
             await message_object.channel.send("Created a new feed!")
@@ -96,4 +94,9 @@ class discord_text_nofeed_exist(Linked_Options.opt_base):
         else:
             return None
 
+    def get_linked_options(self):
+        return Linked_Options.opt_blankchannel(self)
+
+from . import Linked_Options
+from . import capRadar as inCR
 from . import enFeed as inEF

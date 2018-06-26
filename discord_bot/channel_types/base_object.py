@@ -22,7 +22,7 @@ class discord_feed_service(object):
         self.kmQueue = queue.Queue()
         self.messageQueue = queue.Queue()
         self.__deque_task = None
-
+        self.linked_options = self.get_linked_options()
         #self.setup_table()
         #self.load_table()
 
@@ -58,7 +58,7 @@ class discord_feed_service(object):
 
     async def command_settings(self,message_object):
         __options = insightClient.mapper_index(self.discord_client,message_object)
-        async for cor in self.get_option_coroutines():
+        async for cor in self.linked_options.get_option_coroutines():
             __options.add_option(insightClient.option_calls_coroutine(cor.__doc__,"",cor(message_object)))
         await __options()
 
@@ -129,6 +129,9 @@ class discord_feed_service(object):
     def linked_table(cls)->dbRow.tb_discord_base:
         raise NotImplementedError
 
+    def get_linked_options(self):
+        return Linked_Options.opt_base(self)
+
     @classmethod
     async def load_new(cls,channel_object:discord.TextChannel,service_module, discord_client):
         assert isinstance(channel_object,discord.TextChannel)
@@ -141,4 +144,6 @@ class discord_feed_service(object):
             feed_channel.add_km(km)
         except Exception as ex:
             print(ex)
+
+from . import Linked_Options
 
