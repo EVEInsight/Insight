@@ -81,3 +81,22 @@ class Kills(dec_Base.Base, table_row):
         db:Session = service_module.get_session()
         return db.query(cls).filter(cls.primary_key_row() == data.get("killID")).one()
 
+    def filter_attackers(self,attacker_list:List[attackers.Attackers]=None,filter_list=[],using_blacklist=False):
+        """return a list of attackers filtered using either a blacklist or whitelist
+        whitelist - attacker must be in whitelist otherwise not returned
+        blacklist - attacker must not be in blacklist otherwise returned"""
+        return_list:List[attackers.Attackers] = []
+        if attacker_list is None:
+            attacker_list = self.object_attackers
+        for a in attacker_list:
+            if any(a.compare_filter_list(f) for f in filter_list):
+                if not using_blacklist:
+                    return_list.append(a)
+            else:
+                if using_blacklist:
+                    return_list.append(a)
+        return return_list
+
+
+
+

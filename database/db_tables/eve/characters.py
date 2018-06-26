@@ -23,6 +23,9 @@ class Characters(dec_Base.Base,name_only):
     def set_name(self, api_name):
         self.character_name = api_name
 
+    def get_name(self):
+        return self.character_name
+
     @hybrid_property
     def need_name(self):
         return self.character_name == None

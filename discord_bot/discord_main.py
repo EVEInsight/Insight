@@ -34,6 +34,7 @@ class Discord_Insight_Client(discord.Client):
         await self.loop.run_in_executor(None,self.service.zk_obj.pass_to_filters)
 
     async def on_message(self, message):
+        await self.wait_until_ready()
         if message.author.id == self.user.id:
             return
         elif message.content.startswith('!create'):

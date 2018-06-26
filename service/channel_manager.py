@@ -85,7 +85,7 @@ class Channel_manager(object):
         elif isinstance(channel,discord.TextChannel):
             ch_obj = await self.__remove_container(channel.id)
         if ch_obj is not None:
-            if await self.__discord_client.loop.run_in_executor(None,ch_obj.delete):
+            if await ch_obj.delete():
                 return True
             else:
                 return False

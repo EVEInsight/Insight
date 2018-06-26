@@ -1,6 +1,8 @@
 from .base_objects import name_only
 from discord_bot import discord_options
-from . import systems,characters,corporations,alliances
+from sqlalchemy.orm import Session
+from swagger_client.rest import ApiException
+
 
 class id_resolve(name_only):
     @classmethod
@@ -8,19 +10,30 @@ class id_resolve(name_only):
         return api.post_universe_ids(**kwargs, datasource='tranquility',user_agent="InsightDiscordBot")
 
     @classmethod
-    def make_options(cls,option_mapper,search_str):
-        def make_categories(options:discord_options.mapper_index,resp,db_row:systems.Systems,header_str):
-            if resp is not None:
-                options.add_header_row(header_str)
-                for i in resp:
-                    try:
-                        options.add_option(discord_options.option_returns_object("{}".format(i.name),return_object=db_row(i.id)))
-                    except Exception as ex:
-                        print("ex")
-        assert isinstance(option_mapper,discord_options.mapper_index)
-        option_mapper.set_main_header("Select from the following:")
-        resp = cls.get_response(cls.get_api(cls.get_configuration()),names=[str(search_str)])
-        make_categories(option_mapper,resp.alliances,alliances.Alliances,"Alliances")
-        make_categories(option_mapper, resp.corporations, corporations.Corporations,"Corporations")
-        make_categories(option_mapper, resp.characters, characters.Characters,"Pilots")
-        return option_mapper
+    def api_mass_id_resolve(cls,service_module,search_str):
+        db: Session = service_module.get_session()
+
+        def make_rows(item_list,row_init:tb_alliances):
+            if item_list is not None:
+                for i in item_list:
+                    __row = row_init.make_row(i.id)
+                    __row.set_name(i.name)
+                    db.merge(__row)
+        try:
+            resp = cls.get_response(cls.get_api(cls.get_configuration()),names=[str(search_str)])
+            try:
+                make_rows(resp.alliances,tb_alliances)
+                make_rows(resp.corporations,tb_corporations)
+                make_rows(resp.characters,tb_characters)
+                db.commit()
+            except Exception as ex:
+                print(ex)
+                db.rollback()
+            finally:
+                db.close()
+        except ApiException as ex:
+            print(ex)
+        service_module.close_session()
+
+
+from ..eve import tb_characters,tb_corporations,tb_alliances

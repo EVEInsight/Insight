@@ -6,7 +6,7 @@ class Filter_alliances(dec_Base.Base,filter_base):
 
     channel_id = Column(BIGINT,ForeignKey("discord_channels.channel_id"),primary_key=True,nullable=False,autoincrement=False)
     filter_id = Column(Integer, ForeignKey("alliances.alliance_id"),primary_key=True, nullable=False,autoincrement=False)
-    list_type = Column(Enum(listTypeEnum),primary_key=True ,default=listTypeEnum.nolist, nullable=False)
+    list_type = Column(Enum(listTypeEnum),primary_key=True,default=listTypeEnum.nolist, nullable=False)
     min = Column(Float,default=None,nullable=True)
     max = Column(Float,default=None,nullable=True)
     mention = Column(Enum(mention_method),default=mention_method.noMention,nullable=False)

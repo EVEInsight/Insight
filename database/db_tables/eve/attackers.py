@@ -14,7 +14,7 @@ class Attackers(dec_Base.Base):
     final_blow = Column(Boolean, default=False, nullable=False)
     security_status = Column(Float, default=0.0, nullable=False)
     ship_type_id = Column(Integer,ForeignKey("types.type_id"), default=None, nullable=True)
-    weapon_type_id = Column(Integer,ForeignKey("types.type_id"),default=None, nullable=True)
+    weapon_type_id = Column(Integer,ForeignKey("types.type_id"),default=None, nullable=True) #not compared with anything
 
     object_kill = relationship("Kills",uselist=False,back_populates="object_attackers")
     object_pilot = relationship("Characters",uselist=False,back_populates="object_attackers",lazy="joined")
@@ -46,3 +46,33 @@ class Attackers(dec_Base.Base):
             self.object_ship = types.Types(self.ship_type_id)
         if self.weapon_type_id:
             self.object_weapon = types.Types(self.weapon_type_id)
+
+    def compare_filter_list(self, other):
+        if isinstance(other,tb_Filter_characters):
+            return self.character_id == other.filter_id
+        if isinstance(other,tb_Filter_corporations):
+            return self.corporation_id == other.filter_id
+        if isinstance(other,tb_Filter_alliances):
+            return self.alliance_id == other.filter_id
+        if isinstance(other,tb_Filter_types):
+            return self.ship_type_id == other.filter_id
+        if isinstance(other,tb_Filter_groups):
+            try:
+                compare: tb_types = self.object_ship
+                return compare.group_id == other.filter_id
+            except Exception as ex:
+                print(ex)
+                return False
+        if isinstance(other,tb_Filter_categories):
+            try:
+                compare: tb_groups = self.object_ship.object_group
+                return compare.category_id == other.filter_id
+            except Exception as ex:
+                print(ex)
+                return False
+        return False
+
+
+
+from ..filters import *
+from ..eve import *

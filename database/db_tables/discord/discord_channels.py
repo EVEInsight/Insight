@@ -1,5 +1,5 @@
 from .discord_base import *
-
+from ..eve import tb_alliances
 
 class Channels(dec_Base.Base,discord_channel_base):
     __tablename__ = 'discord_channels'
@@ -35,6 +35,27 @@ class Channels(dec_Base.Base,discord_channel_base):
         return cls.channel_id
 
     @classmethod
+    def commit_list_entry(cls,eve_object:tb_alliances,channel_id,service_module):
+        db:Session = service_module.get_session()
+        try:
+            if isinstance(eve_object, tb_alliances):
+                db.merge(tb_Filter_alliances(eve_object.get_id(), channel_id))
+            if isinstance(eve_object,tb_corporations):
+                db.merge(tb_Filter_corporations(eve_object.get_id(),channel_id))
+            if isinstance(eve_object,tb_characters):
+                db.merge(tb_Filter_characters(eve_object.get_id(),channel_id))
+            db.commit()
+            return "ok"
+        except IntegrityError:
+            return "This entity has already been added previously"
+        except Exception as ex:
+            print(ex)
+            return str(ex)
+        finally:
+            db.close()
+
+
+    @classmethod
     def set_feed_running(cls,channel_id,value:bool,service_module):
         __row = cls.get_row(channel_id,service_module)
         __row.feed_running = value
@@ -46,3 +67,6 @@ class Channels(dec_Base.Base,discord_channel_base):
             service_module.get_session().rollback()
         finally:
             service_module.get_session().close()
+
+from ..filters import *
+from ..eve import *

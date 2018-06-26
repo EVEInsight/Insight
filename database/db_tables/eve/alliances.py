@@ -23,6 +23,9 @@ class Alliances(dec_Base.Base,name_only):
     def set_name(self, api_name):
         self.alliance_name = api_name
 
+    def get_name(self):
+        return self.alliance_name
+
     @hybrid_property
     def need_name(self):
         return self.alliance_name == None  # and self.api_Last_Modified is not None and self.api_Expires is not None

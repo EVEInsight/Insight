@@ -73,13 +73,18 @@ class discord_feed_service(object):
 
     def add_km(self,km):
         if self.cached_feed_table.feed_running:
-            test = [i for i in range(1000)]
-            test2 = [i for i in range(1000)]
-            random.shuffle(test2)
-            random.shuffle(test)
-            __test = set(test)-set(test2)
             assert isinstance(km,dbRow.tb_kills)
-            self.kmQueue.put_nowait(str("https://zkillboard.com/kill/{}/".format(str(km.kill_id))))
+            found_attackers = []
+            found_attackers += (km.filter_attackers(filter_list=self.cached_feed_table.object_filter_alliances,using_blacklist=False))
+            found_attackers += (
+                km.filter_attackers(filter_list=self.cached_feed_table.object_filter_corporations, using_blacklist=False))
+            found_attackers += (
+                km.filter_attackers(filter_list=self.cached_feed_table.object_filter_characters, using_blacklist=False))
+            print(len(found_attackers))
+            found_attackers = list(set(found_attackers))
+            if len(found_attackers) > 0:
+                print(len(found_attackers))
+                self.kmQueue.put_nowait(str("https://zkillboard.com/kill/{}/".format(str(km.kill_id))))
 
     def add_message(self,message_txt):
         if self.cached_feed_table.feed_running:
@@ -89,6 +94,7 @@ class discord_feed_service(object):
         if self.cached_feed_table.feed_running:
             try:
                 await self.channel_discord_object.send(self.kmQueue.get_nowait())
+                #await km_obj()
             except queue.Empty:
                 pass
             except discord.Forbidden:
@@ -97,19 +103,21 @@ class discord_feed_service(object):
     async def remove(self):
         print("removed")
 
-    def delete(self):
-        db:Session = self.service.get_session()
-        try:
-            __row = db.query(dbRow.tb_channels).filter(dbRow.tb_channels.channel_id == self.channel_id).one()
-            db.delete(__row)
-            db.commit()
-            return True
-        except Exception as ex:
-            print(ex)
-            db.rollback()
-            return False
-        finally:
-            db.close()
+    async def delete(self):
+        def non_async_delete():
+            db:Session = self.service.get_session()
+            try:
+                __row = db.query(dbRow.tb_channels).filter(dbRow.tb_channels.channel_id == self.channel_id).one()
+                db.delete(__row)
+                db.commit()
+                return True
+            except Exception as ex:
+                print(ex)
+                db.rollback()
+                return False
+            finally:
+                db.close()
+        return await self.discord_client.loop.run_in_executor(None,non_async_delete)
 
     async def command_not_supported_sendmessage(self, message_object:discord.Message):
         await message_object.channel.send("{}\nThis command is not supported in channel of type: {}\n".format(message_object.author.mention,str(self)))

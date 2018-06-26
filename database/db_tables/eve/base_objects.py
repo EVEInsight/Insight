@@ -177,7 +177,14 @@ class individual_api_pulling(table_row):
 
 class name_only(table_row):
 
+    @classmethod
+    def make_row(cls,id):
+        return cls(id)
+
     def set_name(self, api_name):
+        raise NotImplementedError
+
+    def get_name(self):
         raise NotImplementedError
 
     @hybrid_property
