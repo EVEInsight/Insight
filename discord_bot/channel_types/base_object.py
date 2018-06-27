@@ -98,7 +98,12 @@ class discord_feed_service(object):
             except queue.Empty:
                 pass
             except discord.Forbidden:
-                await self.channel_manager.remove_feed(self.channel_id)
+                try:
+                    await self.channel_discord_object.send("Permissions are incorrectly set for the bot. This bot requires the following Discord channel permissions to function:\n\nRead Messages\nSend Messages\nEmbed Links\nMention Everyone\n\n\nOnce permissions are correctly set, run the command '!start to resume the feed.'")
+                except:
+                    pass
+                finally:
+                    await self.channel_manager.remove_feed(self.channel_id)
             except Exception as ex:
                 print(ex)
 

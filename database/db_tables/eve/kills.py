@@ -140,6 +140,27 @@ class Kills(dec_Base.Base, table_row):
         except:
             return ""
 
+    def victim_totalDamage(self):
+        try:
+            return str("{:,d}".format(int(self.object_victim.damage_taken)))
+        except:
+            return ""
+
+    def victim_iskLost(self):
+        try:
+            val = self.totalValue
+            if val >= 1000000000:
+                num = float(val / 1000000000)
+                return '{:.2f}b'.format(num)
+            elif val >= 1000000:
+                num = float(val / 1000000)
+                return '{:.2f}m'.format(num)
+            else:
+                num = float(val / 10000)
+                return '{:.2f}k'.format(num)
+        except:
+            return ""
+
     def systemName(self):
         try:
             return str(self.object_system.name)
@@ -182,6 +203,12 @@ class Kills(dec_Base.Base, table_row):
             return "solo"
         else:
             return "and **{}** others".format(str(count-1))
+
+    def str_minutes_ago(self):
+        try:
+            return str(round(((datetime.datetime.utcnow() - self.killmail_time).total_seconds() / 60), 1)) + " m/ago"
+        except:
+            return ""
 
 
 
