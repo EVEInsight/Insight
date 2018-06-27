@@ -81,13 +81,11 @@ class Kills(dec_Base.Base, table_row):
         db:Session = service_module.get_session()
         return db.query(cls).filter(cls.primary_key_row() == data.get("killID")).one()
 
-    def filter_attackers(self,attacker_list:List[attackers.Attackers]=None,filter_list=[],using_blacklist=False):
+    def filter_attackers(self,attacker_list:List[attackers.Attackers],filter_list:List[List]=[],using_blacklist=False):
         """return a list of attackers filtered using either a blacklist or whitelist
         whitelist - attacker must be in whitelist otherwise not returned
         blacklist - attacker must not be in blacklist otherwise returned"""
-        return_list:List[attackers.Attackers] = []
-        if attacker_list is None:
-            attacker_list = self.object_attackers
+        return_list: List[attackers.Attackers] = []
         for a in attacker_list:
             if any(a.compare_filter_list(f) for f in filter_list):
                 if not using_blacklist:
@@ -95,7 +93,95 @@ class Kills(dec_Base.Base, table_row):
             else:
                 if using_blacklist:
                     return_list.append(a)
-        return return_list
+        test = list(set(return_list))
+        return test
+
+    def filter_victim(self,victim:victims.Victims,filter_list=[],using_blacklist=False):
+        __return_item = None
+        if victim is not None:
+            if any(victim.compare_filter_list(f) for f in filter_list):
+                if not using_blacklist:
+                    __return_item = victim
+            else:
+                if using_blacklist:
+                    __return_item = victim
+        return __return_item
+
+    def get_final_blow(self):
+        for i in self.object_attackers:
+            if i.final_blow == True:
+                return i
+        return None
+
+    def get_attacker_count(self)->int:
+        return len(self.object_attackers)
+
+    def victim_pilotID(self):
+        try:
+            return str(self.object_victim.character_id)
+        except:
+            return ""
+
+    def victim_pilotName(self):
+        try:
+            return str(self.object_victim.object_pilot.character_name)
+        except:
+            return ""
+
+    def victim_corpName(self):
+        try:
+            return str(self.object_victim.object_corp.corporation_name)
+        except:
+            return ""
+
+    def victim_allianceName(self):
+        try:
+            return str(self.object_victim.object_alliance.alliance_name)
+        except:
+            return ""
+
+    def systemName(self):
+        try:
+            return str(self.object_system.name)
+        except:
+            return ""
+
+    def regionName(self):
+        try:
+            return str(self.object_system.object_constellation.object_region.name)
+        except:
+            return ""
+
+    def fb_pID(self,final_blow:attackers.Attackers):
+        try:
+            return str(final_blow.character_id)
+        except:
+            return ""
+
+    def fb_ship(self,final_blow:attackers.Attackers):
+        try:
+            return str(final_blow.object_ship.type_name)
+        except:
+            return ""
+
+    def fb_Name(self,final_blow:attackers.Attackers):
+        try:
+            return str(final_blow.object_pilot.character_name)
+        except:
+            return ""
+
+    def fb_Corp(self,final_blow:attackers.Attackers):
+        try:
+            return str(final_blow.object_corp.corporation_name)
+        except:
+            return ""
+
+    def str_attacker_count(self):
+        count = self.get_attacker_count()
+        if count == 1:
+            return "solo"
+        else:
+            return "and **{}** others".format(str(count-1))
 
 
 

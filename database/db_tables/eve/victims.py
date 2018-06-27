@@ -43,3 +43,31 @@ class Victims(dec_Base.Base, table_row):
             self.object_alliance = alliances.Alliances(self.alliance_id)
         if self.ship_type_id:
             self.object_ship = types.Types(self.ship_type_id)
+
+    def compare_filter_list(self, other):
+        if isinstance(other,tb_Filter_characters):
+            return self.character_id == other.filter_id
+        if isinstance(other,tb_Filter_corporations):
+            return self.corporation_id == other.filter_id
+        if isinstance(other,tb_Filter_alliances):
+            return self.alliance_id == other.filter_id
+        if isinstance(other,tb_Filter_types):
+            return self.ship_type_id == other.filter_id
+        if isinstance(other,tb_Filter_groups):
+            try:
+                compare: tb_types = self.object_ship
+                return compare.group_id == other.filter_id
+            except Exception as ex:
+                print(ex)
+                return False
+        if isinstance(other,tb_Filter_categories):
+            try:
+                compare: tb_groups = self.object_ship.object_group
+                return compare.category_id == other.filter_id
+            except Exception as ex:
+                print(ex)
+                return False
+        return False
+
+from ..filters import *
+from ..eve import *

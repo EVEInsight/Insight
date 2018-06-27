@@ -7,7 +7,7 @@ from functools import partial
 import service as Service
 import database.db_tables as dbRow
 from sqlalchemy.orm import Session
-
+from .FiltersVisualsEmbedded import *
 
 class discord_feed_service(object):
     def __init__(self,channel_discord_object:discord.TextChannel, service_object):
@@ -45,7 +45,8 @@ class discord_feed_service(object):
             raise None
 
     def load_table(self):
-        self.cached_feed_table = self.general_table().get_row(self.channel_id, self.service)
+        self.cached_feed_table:dbRow.tb_channels = self.general_table().get_row(self.channel_id, self.service)
+        # must be set to sqlalchemy channel specific object ex self.cached_feed_specific.object_enfeed
 
     async def async_load_table(self):
         await self.discord_client.loop.run_in_executor(None,self.load_table)
@@ -74,31 +75,32 @@ class discord_feed_service(object):
     def add_km(self,km):
         if self.cached_feed_table.feed_running:
             assert isinstance(km,dbRow.tb_kills)
-            found_attackers = []
-            found_attackers += (km.filter_attackers(filter_list=self.cached_feed_table.object_filter_alliances,using_blacklist=False))
-            found_attackers += (
-                km.filter_attackers(filter_list=self.cached_feed_table.object_filter_corporations, using_blacklist=False))
-            found_attackers += (
-                km.filter_attackers(filter_list=self.cached_feed_table.object_filter_characters, using_blacklist=False))
-            print(len(found_attackers))
-            found_attackers = list(set(found_attackers))
-            if len(found_attackers) > 0:
-                print(len(found_attackers))
-                self.kmQueue.put_nowait(str("https://zkillboard.com/kill/{}/".format(str(km.kill_id))))
+            __visual = self.linked_visual(km)
+            if __visual:
+                self.kmQueue.put_nowait(__visual)
 
-    def add_message(self,message_txt):
+    def add_message(self,message_text):
         if self.cached_feed_table.feed_running:
-            self.kmQueue.put_nowait(str(message_txt))
+            self.kmQueue.put_nowait(message_text)
+
+    def linked_visual(self,km_row):
+        raise NotImplementedError
+        #return visual_enfeed(km_row,self.channel_discord_object,self.cached_feed_table,self.cached_feed_specific)
 
     async def post_all(self):
         if self.cached_feed_table.feed_running:
             try:
-                await self.channel_discord_object.send(self.kmQueue.get_nowait())
-                #await km_obj()
+                __item = self.kmQueue.get_nowait()
+                if isinstance(__item, base_visual):
+                    await __item()
+                else:
+                    await self.channel_discord_object.send(str(__item))
             except queue.Empty:
                 pass
             except discord.Forbidden:
                 await self.channel_manager.remove_feed(self.channel_id)
+            except Exception as ex:
+                print(ex)
 
     async def remove(self):
         print("removed")

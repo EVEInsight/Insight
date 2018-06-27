@@ -8,9 +8,16 @@ class enFeed(noCh.discord_text_nofeed_exist):
         self.setup_table()
         self.load_table()
 
+    def load_table(self):
+        super(enFeed, self).load_table()
+        self.cached_feed_specific = self.cached_feed_table.object_enFeed
+
     @classmethod
     def linked_table(cls):
         return dbRow.tb_enfeed
+
+    def linked_visual(self,km_row):
+        return visual_enfeed(km_row, self.channel_discord_object, self.cached_feed_table, self.cached_feed_specific)
 
     def __str__(self):
         return "Entity Feed"

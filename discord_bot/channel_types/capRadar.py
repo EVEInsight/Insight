@@ -11,6 +11,13 @@ class capRadar(noCH.discord_text_nofeed_exist):
     def __str__(self):
         return "Capital Radar Feed"
 
+    def load_table(self):
+        super(capRadar, self).load_table()
+        self.cached_feed_specific = self.cached_feed_table.object_capRadar
+
+    def linked_visual(self,km_row):
+        return visual_enfeed(km_row, self.channel_discord_object, self.cached_feed_table, self.cached_feed_specific)
+
     @classmethod
     def linked_table(cls):
         return dbRow.tb_capRadar

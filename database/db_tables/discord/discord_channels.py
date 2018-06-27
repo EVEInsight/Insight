@@ -8,8 +8,8 @@ class Channels(dec_Base.Base,discord_channel_base):
     feed_running = Column(Boolean,default=False,nullable=False)
     channel_name = Column(String,default="",nullable=False)
 
-    object_capRadar = relationship("CapRadar", uselist=False,cascade="delete", back_populates="object_channel")
-    object_enFeed = relationship("EnFeed",uselist=True,cascade="delete",back_populates="object_channel")
+    object_capRadar = relationship("CapRadar", uselist=False,cascade="delete", back_populates="object_channel",lazy="joined")
+    object_enFeed = relationship("EnFeed",uselist=False,cascade="delete",back_populates="object_channel",lazy="joined")
     object_filter_alliances = relationship("Filter_alliances",uselist=True,cascade="delete",back_populates="object_channel",
                                        lazy="joined")
     object_filter_corporations = relationship("Filter_corporations", uselist=True, cascade="delete", back_populates="object_channel",
