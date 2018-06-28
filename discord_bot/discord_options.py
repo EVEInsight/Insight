@@ -28,18 +28,26 @@ class option_returns_object(option_calls_coroutine):
         return self.mapper_object
 
 
+class option_cancel(option_calls_coroutine):
+    def __init__(self,name="Cancel",description="",return_object=None):
+        super(option_cancel, self).__init__(name,description,return_object)
+
+    async def __call__(self, *args, **kwargs):
+        raise None
+
+
 class mapper_index(object):
     def __init__(self,discord_client_object,message_object,timeout_seconds=30):
         assert isinstance(message_object,discord.Message)
         assert isinstance(discord_client_object,discord_main.Discord_Insight_Client)
-        self.__message = message_object
+        self.message = message_object
         self.__option_container = []
         self.__printout_format = []
-        self.__mention = "{}".format(self.__message.author.mention)
+        self.__mention = "{}".format(self.message.author.mention)
         self.__header_text = ""
         self.__footer_text = "Select an option by entering it's number:"
         self.__timeout_seconds = int(timeout_seconds)
-        self.__discord_client = discord_client_object
+        self.discord_client = discord_client_object
 
     def set_main_header(self,main_header_txt:str):
         self.__header_text = main_header_txt
@@ -75,7 +83,7 @@ class mapper_index(object):
         try:
             assert self.__current_option_index() > 0
         except AssertionError:
-            await self.__message.channel.send("One of the assertions for the option container failed. This is likely a programming error")
+            await self.message.channel.send("One of the assertions for the option container failed. This is likely a programming error")
             raise None
 
     def isInt(self,value):
@@ -90,8 +98,11 @@ class mapper_index(object):
             assert self.isInt(response)
             assert int(response) >= 0 and int(response) < self.__current_option_index()
         except AssertionError:
-            await self.__message.channel.send("You must enter a number between 0 and {} but you entered {}".format(str(self.__current_option_index()-1),str(response)))
+            await self.message.channel.send("You must enter a number between 0 and {} but you entered {}".format(str(self.__current_option_index() - 1), str(response)))
             raise None
+
+    async def add_additional(self):
+        pass
 
     def get_option(self,index:int)->option_calls_coroutine:
         return self.__option_container[index]
@@ -103,15 +114,22 @@ class mapper_index(object):
 
     async def __call__(self):
         def is_author(m: discord.Message):
-            return m.author == self.__message.author and m.channel == self.__message.channel
+            return m.author == self.message.author and m.channel == self.message.channel
         try:
+            await self.add_additional()
             await self.check_conditions()
-            await self.__message.channel.send(str(self))
-            __response = await self.__discord_client.wait_for('message',check=is_author,timeout=self.__timeout_seconds)
+            await self.message.channel.send(str(self))
+            __response = await self.discord_client.wait_for('message', check=is_author, timeout=self.__timeout_seconds)
             return await self.response_action(__response.content)
         except asyncio.TimeoutError:
-            await self.__message.channel.send("{}\nSorry, but you took to long to respond. You must respond within {} seconds.".format(self.__message.author.mention,str(self.__timeout_seconds)))
+            await self.message.channel.send("{}\nSorry, but you took to long to respond. You must respond within {} seconds.".format(self.message.author.mention, str(self.__timeout_seconds)))
+            raise None
 
+
+class mapper_index_withAdditional(mapper_index):
+    async def add_additional(self):
+        self.add_header_row("Additional options")
+        self.add_option(option_cancel())
 
 class mapper_return_yes_no(mapper_index):
     def __init__(self, discord_client_object, message_object, timeout_seconds=30):
@@ -130,5 +148,18 @@ class mapper_return_noOptions(mapper_index):
 
     async def response_action(self, response):
         return response
+
+
+class mapper_return_noOptions_requiresInt(mapper_return_noOptions):
+    async def check_response(self,response):
+        if not self.isInt(response):
+            await self.message.channel.send("You entered an invalid number. You must enter a number but you entered "
+                                            "'{}'".format(str(response)))
+            raise None
+
+    async def response_action(self, response):
+        await self.check_response(response)
+        return response
+
 
 

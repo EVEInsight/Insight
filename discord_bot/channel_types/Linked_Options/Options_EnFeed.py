@@ -96,10 +96,10 @@ class Options_EnFeed(Base_Feed.base_activefeed):
             raise None
         await self.cfeed.async_load_table()
 
-    async def InsightOptionRequired_track_deployable(self, message_object:discord.Message):
-        """Track deployables  - Set if the feed should track KMs of deployables (mobile depots, cyno inhibs, etc)
-        """
-        await message_object.channel.send("Not Implemented")
+    # async def InsightOptionRequired_track_deployable(self, message_object:discord.Message):
+    #     """Track deployables  - Set if the feed should track KMs of deployables (mobile depots, cyno inhibs, etc)
+    #     """
+    #     await message_object.channel.send("Not Implemented")
 
 
 from .. import enFeed

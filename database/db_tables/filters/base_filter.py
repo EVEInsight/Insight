@@ -35,3 +35,26 @@ class filter_base(object):
 
     def set_nolist(self):
         self.list_type = listTypeEnum.nolist
+
+    @classmethod
+    def get_row(cls, channel_id, filter_id, service_module):
+        db: Session = service_module.get_session()
+        try:
+            __row = db.query(cls).filter(cls.channel_id == channel_id, cls.filter_id == filter_id).one()
+            return __row
+        except NoResultFound:
+            __row = cls(filter_id,channel_id)
+            return __row
+
+    @classmethod
+    def get_remove(cls,channel_id,filter_id,service_module):
+        db:Session = service_module.get_session()
+        try:
+            __row = db.query(cls).filter(cls.channel_id == channel_id, cls.filter_id == filter_id).one()
+            db.delete(__row)
+        except NoResultFound:
+            pass
+        except Exception as ex:
+            print(ex)
+
+

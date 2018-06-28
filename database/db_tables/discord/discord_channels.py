@@ -35,19 +35,21 @@ class Channels(dec_Base.Base,discord_channel_base):
         return cls.channel_id
 
     @classmethod
-    def commit_list_entry(cls,eve_object:tb_alliances,channel_id,service_module):
+    def commit_list_entry(cls,eve_object:tb_alliances,channel_id,service_module,**kwargs):
         db:Session = service_module.get_session()
         try:
             if isinstance(eve_object, tb_alliances):
-                db.merge(tb_Filter_alliances(eve_object.get_id(), channel_id))
+                db.merge(tb_Filter_alliances.get_row(channel_id=channel_id,filter_id=eve_object.get_id(),service_module=service_module))
             if isinstance(eve_object,tb_corporations):
-                db.merge(tb_Filter_corporations(eve_object.get_id(),channel_id))
+                db.merge(tb_Filter_corporations.get_row(channel_id=channel_id,filter_id=eve_object.get_id(),service_module=service_module))
             if isinstance(eve_object,tb_characters):
-                db.merge(tb_Filter_characters(eve_object.get_id(),channel_id))
+                db.merge(tb_Filter_characters.get_row(channel_id=channel_id,filter_id=eve_object.get_id(),service_module=service_module))
+            if isinstance(eve_object,tb_systems):
+                __row = tb_Filter_systems.get_row(channel_id=channel_id,filter_id=eve_object.get_id(),service_module=service_module)
+                __row.max = kwargs.get("maxly")
+                db.merge(__row)
             db.commit()
             return "ok"
-        except IntegrityError:
-            return "This entity has already been added previously"
         except Exception as ex:
             print(ex)
             return str(ex)

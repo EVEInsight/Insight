@@ -7,7 +7,7 @@ class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating,
     __tablename__ = 'systems'
 
     system_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
-    name = Column(String,default=None,nullable=True,index=True)
+    name = Column(String,default=None,nullable=True, index=True)
     constellation_id = Column(Integer, ForeignKey("constellations.constellation_id"),nullable=True)
     security_class = Column(String,default=None, nullable=True)
     security_status = Column(Float,default=0.0, nullable=True)
