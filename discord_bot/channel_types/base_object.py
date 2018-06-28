@@ -9,6 +9,7 @@ import database.db_tables as dbRow
 from sqlalchemy.orm import Session
 from .FiltersVisualsEmbedded import *
 
+
 class discord_feed_service(object):
     def __init__(self,channel_discord_object:discord.TextChannel, service_object):
         assert isinstance(channel_discord_object,discord.TextChannel)
@@ -58,7 +59,8 @@ class discord_feed_service(object):
         await self.command_not_supported_sendmessage(message_object)
 
     async def command_settings(self,message_object):
-        __options = insightClient.mapper_index(self.discord_client,message_object)
+        __options = insightClient.mapper_index_withAdditional(self.discord_client,message_object)
+        __options.set_main_header("Select an option to modify for this feed")
         async for cor in self.linked_options.get_option_coroutines():
             __options.add_option(insightClient.option_calls_coroutine(cor.__doc__,"",cor(message_object)))
         await __options()
@@ -161,4 +163,5 @@ class discord_feed_service(object):
             print(ex)
 
 from . import Linked_Options
+
 

@@ -157,8 +157,8 @@ class mapper_return_noOptions_requiresInt(mapper_return_noOptions):
 
     async def check_response(self,response):
         if not self.isInt(response):
-            await self.message.channel.send("You entered an invalid number. You must enter a number but you entered "
-                                            "'{}'".format(str(response)))
+            await self.message.channel.send("You entered an invalid number. You must enter an integer but you entered "
+                                            "'{}' which is not an integer".format(str(response)))
             raise None
 
     async def response_action(self, response):

@@ -53,10 +53,7 @@ class Options_EnFeed(Base_Feed.base_activefeed):
             __selected_option = await __found_results()
         function_call = partial(tb_channels.commit_list_entry,__selected_option,self.cfeed.channel_id,self.cfeed.service)
         __code = await self.cfeed.discord_client.loop.run_in_executor(None, function_call)
-        await message_object.channel.send(str(__code))
-        if __code != "ok":
-            raise None
-        await self.cfeed.async_load_table()
+        await self.response_code_action(message_object, __code)
 
     async def InsightOption_remove(self,message_object:discord.Message):
         """Remove tracking  - Removes tracking of km involvement for a pilot, corp, or alliance from """
@@ -91,15 +88,8 @@ class Options_EnFeed(Base_Feed.base_activefeed):
             return_object=enum_kmType.show_both))
         __selected_option = await __options()
         __code = await self.cfeed.discord_client.loop.run_in_executor(None,partial(set_mode,__selected_option))
-        await message_object.channel.send(__code)
-        if __code != "ok":
-            raise None
-        await self.cfeed.async_load_table()
+        await self.response_code_action(message_object, __code)
 
-    # async def InsightOptionRequired_track_deployable(self, message_object:discord.Message):
-    #     """Track deployables  - Set if the feed should track KMs of deployables (mobile depots, cyno inhibs, etc)
-    #     """
-    #     await message_object.channel.send("Not Implemented")
 
 
 from .. import enFeed

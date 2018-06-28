@@ -15,3 +15,10 @@ class Options_Base(object):
                 yield getattr(self,i)
             else:
                 continue
+
+    async def response_code_action(self,message_object,resp_code_str):
+        await message_object.channel.send(str(resp_code_str))
+        if resp_code_str != "ok":
+            raise None
+        else:
+            await self.cfeed.async_load_table()
