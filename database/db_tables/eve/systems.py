@@ -1,7 +1,9 @@
 from .base_objects import *
 from . import constellations
+from .sde_importer import *
 
-class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating):
+
+class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating,sde_impoter):
     __tablename__ = 'systems'
 
     system_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
@@ -59,3 +61,35 @@ class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating)
     @classmethod
     def primary_key_row(cls):
         return cls.system_id
+
+    @classmethod
+    def make_from_sde(cls,__row):
+        new_row = cls(__row.solarSystemID)
+        new_row.name = __row.solarSystemName
+        new_row.constellation_id = __row.constellationID
+        new_row.security_class = __row.securityClass
+        new_row.security_status = __row.security
+        #new_row.star_id = __row.sunTypeID location?
+        new_row.pos_x = __row.x
+        new_row.pos_y = __row.y
+        new_row.pos_z = __row.z
+        new_row.load_fk_objects()
+        return new_row
+
+    @hybrid_property
+    def need_api(self):
+        return self.name is None or self.constellation_id is None or self.pos_x is None or self.pos_y is None or self.pos_y is None
+
+    @need_api.expression
+    def need_api(cls):
+        return or_(cls.name.is_(None),cls.constellation_id.is_(None),cls.pos_x.is_(None),cls.pos_y.is_(None),cls.pos_z.is_(None))
+
+    @classmethod
+    def get_missing_ids(cls,service_module,sde_session,sde_base):
+        existing_ids = [i.system_id for i in service_module.get_session().query(cls.system_id).filter(not_(cls.need_api)).all()]
+        importing_ids = [i.solarSystemID for i in sde_session.query(sde_base.solarSystemID).all()]
+        return list(set(importing_ids)-set(existing_ids))
+
+    @classmethod
+    def get_query_filter(cls,sde_base):
+        return sde_base.solarSystemID

@@ -13,7 +13,7 @@ class visual_enfeed(base_visual):
             self.__im_victim_corpAli = "https://imageserver.eveonline.com/Alliance/{}_128.png".format\
                 (str(self.km.object_victim.alliance_id))
         else:
-            self.__im_victim_corpAli = "https://imageserver.eveonline.com/Alliance/{}_128.png".format(
+            self.__im_victim_corpAli = "https://imageserver.eveonline.com/Corporation/{}_128.png".format(
                 str(self.km.object_victim.corporation_id))
 
     def internal_list_options(self):

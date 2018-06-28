@@ -93,8 +93,7 @@ class Kills(dec_Base.Base, table_row):
             else:
                 if using_blacklist:
                     return_list.append(a)
-        test = list(set(return_list))
-        return test
+        return list(set(return_list))
 
     def filter_victim(self,victim:victims.Victims,filter_list=[],using_blacklist=False):
         __return_item = None

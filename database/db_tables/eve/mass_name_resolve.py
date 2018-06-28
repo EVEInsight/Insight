@@ -35,4 +35,5 @@ class name_resolve(name_only):
         except Exception as ex:
             print(ex)
             db.rollback()
-        db.close()
+        finally:
+            db.close()

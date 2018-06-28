@@ -98,7 +98,11 @@ class index_api_updating(table_row):
 class individual_api_pulling(table_row):
     @hybrid_property
     def need_api(self):
-        return self.api_ETag == None
+        raise NotImplementedError
+
+    @need_api.expression
+    def need_api(cls):
+        raise NotImplementedError
 
     def api_download(self):
         try:
@@ -137,7 +141,7 @@ class individual_api_pulling(table_row):
     @classmethod
     def missing_api_objects(cls, service_module):
         db: Session = service_module.get_session()
-        return db.query(cls).filter(cls.need_api == True).all()
+        return db.query(cls).filter(cls.need_api).all()
 
     @classmethod
     def __helper_call_api_populate(cls,row_object):
@@ -172,7 +176,11 @@ class individual_api_pulling(table_row):
             print(ex)
         remaining = len(cls.missing_api_objects(service_module))
         db.close()
-        return remaining
+        if remaining > 0:
+            print("{} remaining {} with data missing after ESI calls.".format(str(remaining),cls.__name__))
+            return remaining
+        else:
+            return remaining
 
 
 class name_only(table_row):

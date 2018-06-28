@@ -60,5 +60,6 @@ class base_visual(metaclass=ABCMeta):
         raise NotImplementedError
         #return tb_enfeed  <example
 
+
 from database.db_tables import *
 import discord

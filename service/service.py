@@ -12,9 +12,10 @@ class service_module(object):
         self.config_file = configparser.ConfigParser()
         self.cli_args = self.__read_cli_args()
         self.config_file.read(self.__read_config_file())
-        self.__sc_session: scoped_session = database.setup_database().get_scoped_session()
-        self.static_data_import = static_data.static_data_import(self)
-        #self.static_data_import.load_data()
+        self.__import_everything_flag = False
+        self.__import_check()
+        self.__sc_session: scoped_session = database.setup_database(self).get_scoped_session()
+        self.static_data_import = static_data.static_data_import(self,self.__import_everything_flag)
         self.channel_manager = cm.Channel_manager(self)
         self.zk_obj = zk.zk(self)
 
@@ -33,15 +34,30 @@ class service_module(object):
         parser.add_argument("--debug_limit","-limit",
                             help="Sets the total limit of debug kms to push through feeds before exiting the program. Default is unlimited.",
                             type=int)
+        parser.add_argument("--api_import","-api",action="store_true",
+                            help="Sets the bot to import all data from the SDE database and EVE ESI.",default=False)
+        parser.add_argument("--sde_db","-sde",
+                            help="Specifies the name of the SDE database file relative to main.py. Download and extract the "
+                                 "sqlite-latest.sqlite file from https://www.fuzzwork.co.uk/dump/",
+                            type=str, default="sqlite-latest.sqlite")
         return parser.parse_args()
 
     def __read_config_file(self):
         try:
-            with open(self.cli_args.config, 'r') as f:
+            with open(self.cli_args.config, 'r'):
                 return self.cli_args.config
         except FileNotFoundError:
             print("The config file '{0}' could not be found. Try renaming the file 'default-config.ini' to '{0}'".format(str(self.cli_args.config)))
             exit(1)
+
+    def __import_check(self):
+        try:
+            with open(self.config_file['sqlite_database']['filename'],'r'):
+                if self.cli_args.api_import:
+                    self.__import_everything_flag = True
+        except FileNotFoundError:
+            print("{} does not exist. Forcing first time static data import.".format(self.config_file['sqlite_database']['filename']))
+            self.__import_everything_flag = True
 
     def get_session(self)-> Session:
         """
