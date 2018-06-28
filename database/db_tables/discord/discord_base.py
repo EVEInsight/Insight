@@ -29,6 +29,8 @@ class discord_channel_base(object):
         except NoResultFound:
             __row = cls(id)
             return __row
+        except Exception as ex:
+            print(ex)
         finally:
             db.close()
 

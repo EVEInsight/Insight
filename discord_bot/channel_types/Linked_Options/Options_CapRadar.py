@@ -171,6 +171,33 @@ class Options_CapRadar(Base_Feed.base_activefeed):
             raise None
         await self.cfeed.async_load_table()
 
+    async def InsightOptionRequired_maxage(self,message_object:discord.Message):
+        """Set max KM age - Sets the maximum KM age in minutes for kills to be posted to this channel. If a km occurred
+        more than this many minutes ago it will not be posted to the channel."""
+        def change_limit(new_limit):
+            db: Session = self.cfeed.service.get_session()
+            try:
+                __row = tb_capRadar.get_row(self.cfeed.channel_id,self.cfeed.service)
+                __row.max_km_age = new_limit
+                db.merge(__row)
+                db.commit()
+                return "ok"
+            except Exception as ex:
+                print(ex)
+                return "An error occurred when attempting to set max age: {}".format(str(ex))
+            finally:
+                db.close()
+
+        __options = discord_options.mapper_return_noOptions_requiresInt(self.cfeed.discord_client,message_object,timeout_seconds=45)
+        __options.set_main_header("Enter the maximum age in minutes for a KM to be posted to the channel. KMs "
+                                  "occurring more than this many minutes ago will not be posted.")
+        _max_age = await __options()
+        __code = await self.cfeed.discord_client.loop.run_in_executor(None,partial(change_limit,_max_age))
+        await message_object.channel.send(str(__code))
+        if __code != "ok":
+            raise None
+        await self.cfeed.async_load_table()
+
 from .. import capRadar
 from discord_bot import discord_options
 from database.db_tables import *

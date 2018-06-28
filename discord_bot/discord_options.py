@@ -151,6 +151,10 @@ class mapper_return_noOptions(mapper_index):
 
 
 class mapper_return_noOptions_requiresInt(mapper_return_noOptions):
+    def __init__(self, discord_client_object, message_object, timeout_seconds=30):
+        super(mapper_return_noOptions_requiresInt, self).__init__( discord_client_object, message_object, timeout_seconds)
+        self.set_footer_text("Enter a number:")
+
     async def check_response(self,response):
         if not self.isInt(response):
             await self.message.channel.send("You entered an invalid number. You must enter a number but you entered "
