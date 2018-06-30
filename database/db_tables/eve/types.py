@@ -54,10 +54,18 @@ class Types(dec_Base.Base,name_only,index_api_updating,sde_impoter):
         new_row.load_fk_objects()
         return new_row
 
+    @hybrid_property
+    def need_api(self):
+        return self.type_name is None or self.group_id is None
+
+    @need_api.expression
+    def need_api(cls):
+        return or_(cls.type_name.is_(None), cls.group_id.is_(None))
+
     @classmethod
     def get_missing_ids(cls, service_module, sde_session, sde_base):
         existing_ids = [i.type_id for i in
-                        service_module.get_session().query(cls.type_id).all()]
+                        service_module.get_session().query(cls.type_id).filter(not_(cls.need_api)).all()]
         importing_ids = [i.typeID for i in sde_session.query(sde_base.typeID).all()]
         return list(set(importing_ids) - set(existing_ids))
 

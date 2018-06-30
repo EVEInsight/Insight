@@ -35,6 +35,21 @@ class Attackers(dec_Base.Base):
 
         self.load_objects()
 
+    def compare_ship_value(self, other):
+        try:
+            if self.object_ship is None:
+                return False
+            if other.object_ship is None:
+                return True
+            if self.object_ship.basePrice is None:
+                return False
+            if other.object_ship.basePrice is None:
+                return True
+            return self.object_ship.basePrice >= other.object_ship.basePrice
+        except Exception as ex:
+            print(ex)
+            return False
+
     def load_objects(self):
         if self.character_id:
             self.object_pilot = characters.Characters(self.character_id)
@@ -61,14 +76,12 @@ class Attackers(dec_Base.Base):
                 compare: tb_types = self.object_ship
                 return compare.group_id == other.filter_id
             except Exception as ex:
-                print(ex)
                 return False
         if isinstance(other,tb_Filter_categories):
             try:
                 compare: tb_groups = self.object_ship.object_group
                 return compare.category_id == other.filter_id
             except Exception as ex:
-                print(ex)
                 return False
         return False
 

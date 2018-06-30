@@ -1,6 +1,7 @@
 from .base_objects import *
 from . import constellations
 from .sde_importer import *
+import math
 
 
 class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating,sde_impoter):
@@ -36,6 +37,29 @@ class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating,
 
     def set_name(self, api_name):
         self.name = api_name
+
+    def ly_range(self, other):
+        other_x = 0
+        other_y = 0
+        other_z = 0
+        if isinstance(other, Systems):
+            other_x, other_y, other_z = other.pos_x, other.pos_y, other.pos_z
+        if isinstance(other, tb_Filter_systems):
+            other_x, other_y, other_z = other.object_item.pos_x, other.object_item.pos_y, other.object_item.pos_z
+        return math.sqrt(
+            pow(self.pos_x - other_x, 2) + pow(self.pos_y - other_y, 2) + pow(self.pos_z - other_z, 2)) / 9.4605284e15
+
+    def compare_range(self, other):
+        if isinstance(other, tb_Filter_systems):
+            return other.max > self.ly_range(other)
+        return False
+
+    def compare_filter(self, other):
+        if isinstance(other, tb_systems):
+            return self.system_id == other.system_id
+        if isinstance(other, tb_Filter_systems):
+            return self.system_id == other.filter_id
+        return False
 
     @classmethod
     def index_swagger_api_call(cls, api, **kwargs):
@@ -93,3 +117,7 @@ class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating,
     @classmethod
     def get_query_filter(cls,sde_base):
         return sde_base.solarSystemID
+
+
+from ..filters import *
+from ..eve import *

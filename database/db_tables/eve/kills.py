@@ -1,5 +1,7 @@
 from .base_objects import *
-from . import systems,attackers,victims,locations
+from . import systems, attackers, victims, locations, types
+from functools import cmp_to_key
+import operator
 
 
 class Kills(dec_Base.Base, table_row):
@@ -81,7 +83,36 @@ class Kills(dec_Base.Base, table_row):
         db:Session = service_module.get_session()
         return db.query(cls).filter(cls.primary_key_row() == data.get("killID")).one()
 
-    def filter_attackers(self,attacker_list:List[attackers.Attackers],filter_list:List[List]=[],using_blacklist=False):
+    def get_highest_attacker(self, attackers_list):
+        top_attacker: attackers.Attackers = attackers_list[0]
+        for a in attackers_list:
+            if a.compare_ship_value(top_attacker):
+                top_attacker = a
+        return top_attacker
+
+    def str_overview_attacking_capitals(self, attackers_list):
+        ship_totals = []
+        ships = [i.object_ship for i in attackers_list]
+        for ship in list(set(ships)):
+            ship_totals.append((ship.type_name, ships.count(ship)))
+        ship_totals.sort(key=operator.itemgetter(1), reverse=True)
+        ships_str = ""
+        for s in ship_totals:
+            ships_str += "{0:<20}   {1}\n".format(str(s[0]), str(s[1]))
+        return ships_str
+
+    def filter_system_ly(self, filter_list=[], using_blacklist=False):
+        """whitelist - returns the first system within range, otherwise returns None if no systems in filter are within ly range
+        blacklist - returns KM system if it is not within range of any systems in the BL otherwise returns none"""
+        for system in filter_list:
+            if self.object_system.compare_range(system):
+                if not using_blacklist:
+                    return system.object_item
+                else:
+                    return None
+        return None if not using_blacklist else self.object_system
+
+    def filter_attackers(self, attacker_list: List[attackers.Attackers], filter_list=[], using_blacklist=False):
         """return a list of attackers filtered using either a blacklist or whitelist
         whitelist - attacker must be in whitelist otherwise not returned
         blacklist - attacker must not be in blacklist otherwise returned"""
@@ -184,6 +215,12 @@ class Kills(dec_Base.Base, table_row):
         except:
             return ""
 
+    def fb_ShipGroup(self, attacker_: attackers.Attackers):
+        try:
+            return str(attacker_.object_ship.object_group.name)
+        except:
+            return ""
+
     def fb_Name(self,final_blow:attackers.Attackers):
         try:
             return str(final_blow.object_pilot.character_name)
@@ -196,6 +233,13 @@ class Kills(dec_Base.Base, table_row):
         except:
             return ""
 
+    def fb_Alliance(self, attacker_: attackers.Attackers, brackets=False):
+        try:
+            return str(attacker_.object_alliance.alliance_name) if not brackets else "({})".format(
+                str(attacker_.object_alliance.alliance_name))
+        except:
+            return ""
+
     def str_attacker_count(self):
         count = self.get_attacker_count()
         if count == 1:
@@ -203,12 +247,22 @@ class Kills(dec_Base.Base, table_row):
         else:
             return "and **{}** others".format(str(count-1))
 
-    def str_minutes_ago(self):
+    def str_minutes_ago(self, text_mituntes_ago=False):
         try:
-            return str(round(((datetime.datetime.utcnow() - self.killmail_time).total_seconds() / 60), 1)) + " m/ago"
+            minutes_ago = round(((datetime.datetime.utcnow() - self.killmail_time).total_seconds() / 60), 1)
+            return str(minutes_ago) + " m/ago" if not text_mituntes_ago else str(minutes_ago) + " minutes ago"
         except:
             return ""
 
+    def str_ly_range(self, other_system):
+        try:
+            return "{0:.2f}".format(self.object_system.ly_range(other_system))
+        except:
+            return ""
 
-
-
+    def str_location_name(self):
+        try:
+            return " near **{}**.".format(
+                str(self.object_location.name)) if self.object_location.name is not None else "."
+        except:
+            return "."
