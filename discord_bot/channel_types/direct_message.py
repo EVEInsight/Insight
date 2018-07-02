@@ -1,14 +1,27 @@
 from . import base_object as inCh
 from .base_object import *
+import discord
 
 
 class direct_message(inCh.discord_feed_service):
     def __init__(self,channel_discord_object:discord.DMChannel, service_object):
         super(direct_message, self).__init__(channel_discord_object, service_object)
+        assert isinstance(channel_discord_object, discord.DMChannel)
+        self.user_id = self.channel_discord_object.recipient.id
+        self.setup_table()
 
-    def make_table(self):
-        pass
+    def get_linked_options(self):
+        return Linked_Options.opt_dm(self)
+
+    def get_object_id(self):
+        return self.user_id
 
     @classmethod
-    def command_not_supported_sendmessage(cls, command:str):
-        return "The command '{}' is not supported in direct messages. The ability to set up feeds in direct messages is not supported.\n\n{}".format(command,cls.str_more_help())
+    def linked_table(cls):
+        return dbRow.tb_users
+
+    def __str__(self):
+        return "Direct Message"
+
+
+from . import Linked_Options

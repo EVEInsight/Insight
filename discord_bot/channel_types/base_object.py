@@ -12,7 +12,6 @@ from .FiltersVisualsEmbedded import *
 
 class discord_feed_service(object):
     def __init__(self,channel_discord_object:discord.TextChannel, service_object):
-        assert isinstance(channel_discord_object,discord.TextChannel)
         assert isinstance(service_object,Service.ServiceModule)
         self.channel_discord_object = channel_discord_object
         self.channel_id = channel_discord_object.id
@@ -24,7 +23,7 @@ class discord_feed_service(object):
         self.messageQueue = queue.Queue()
         self.__deque_task = None
         self.linked_options = self.get_linked_options()
-        #self.setup_table()
+        # self.setup_table() #must be done by channel
         #self.load_table()
 
     def set_deque_task(self,deq_task:asyncio.Task):
@@ -40,10 +39,13 @@ class discord_feed_service(object):
 
     def setup_table(self):
         """make the related table if it does not yet exist"""
-        if self.linked_table().make_row(self.channel_id,self.service):
+        if self.linked_table().make_row(self.get_object_id(), self.service):
             pass
         else:
             raise None
+
+    def get_object_id(self):
+        return self.channel_id
 
     def load_table(self):
         self.cached_feed_table:dbRow.tb_channels = self.general_table().get_row(self.channel_id, self.service)
@@ -60,7 +62,7 @@ class discord_feed_service(object):
 
     async def command_settings(self,message_object):
         __options = insightClient.mapper_index_withAdditional(self.discord_client,message_object)
-        __options.set_main_header("Select an option to modify for this feed")
+        __options.set_main_header("Select an option to modify:")
         async for cor in self.linked_options.get_option_coroutines():
             __options.add_option(insightClient.option_calls_coroutine(cor.__doc__,"",cor(message_object)))
         await __options()

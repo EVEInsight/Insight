@@ -12,6 +12,7 @@ from database.db_tables import Base as dec_Base
 from sqlalchemy.exc import *
 import enum
 
+
 class discord_channel_base(object):
     def load_fk_objects(self):
         pass
