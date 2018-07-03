@@ -179,6 +179,10 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         __code = await self.cfeed.discord_client.loop.run_in_executor(None,partial(change_limit,_max_age))
         await self.response_code_action(message_object,__code)
 
+    async def InsightOption_sync(self, message_object: discord.Message):
+        """Manage feed sync settings - Set up and manage EVE contact syncing to ignore allies in a capradar feed."""
+        await self.cfeed.command_sync(message_object)
+
 from .. import capRadar
 from discord_bot import discord_options
 from database.db_tables import *

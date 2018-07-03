@@ -41,14 +41,13 @@ class table_row(object):
 
     @classmethod
     def get_row(cls,id, service_module):
-        pass
-        # db: Session = service_module.get_session()
-        # try:
-        #     __row = db.query(cls).filter(cls.primary_key_row() == id).one()
-        #     return __row
-        # except NoResultFound:
-        #     __row = cls(id)
-        #     return __row
+        db: Session = service_module.get_session()
+        try:
+            __row = db.query(cls).filter(cls.primary_key_row() == id).one()
+            return __row
+        except NoResultFound:
+            __row = cls(id)
+            return __row
 
 
 class index_api_updating(table_row):

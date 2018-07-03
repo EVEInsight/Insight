@@ -57,6 +57,9 @@ class discord_feed_service(object):
     async def command_create(self, message_object):
         await self.command_not_supported_sendmessage(message_object)
 
+    async def command_sync(self, message_object):
+        await self.command_not_supported_sendmessage(message_object)
+
     async def command_help(self,message_object):
         await self.command_not_supported_sendmessage(message_object)
 

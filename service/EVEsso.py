@@ -69,11 +69,11 @@ class EVEsso(object):
                 token_row.token = response.json().get("access_token")
             elif response.status_code == 400:
                 db.delete(token_row)
-            db.commit()
+            else:
+                token_row.token = None
         except Exception as ex:
+            token_row.token = None
             print(ex)
-        finally:
-            db.close()
 
     def get_char(self, token):
         headers = {"Authorization": "Bearer {}".format(token), "Content-Type": "application/json",

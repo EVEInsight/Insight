@@ -11,7 +11,22 @@ import datetime
 from database.db_tables import Base as dec_Base
 from sqlalchemy.exc import *
 import enum
+from ..eve import *
+
+
+class contact_owner(enum.Enum):
+    pilot = 'pilot'
+    corp = 'corp'
+    alliance = 'alliance'
+
+    def __gt__(self, other):
+        return False
+
+    def __lt__(self, other):
+        return False
+
 
 
 class sso_base(object):
-    pass
+    def load_fk_objects(self, service_module):
+        pass
