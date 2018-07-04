@@ -77,7 +77,7 @@ class visual_capradar(base_visual):
         s = (datetime.datetime.utcnow() - self.km.killmail_time).total_seconds()
         if 0 <= s <= 60:
             self.color = discord.Color(12124259)
-        elif 61 <= s <= 300:
+        elif 60 <= s <= 300:
             self.color = discord.Color(8454210)
         else:
             self.color = discord.Color(4128800)
