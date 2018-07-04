@@ -13,6 +13,7 @@ class Characters(dec_Base.Base,name_only):
 
     object_attackers = relationship("Attackers", uselist=True,back_populates="object_pilot")
     object_loses = relationship("Victims", uselist=True, back_populates="object_pilot")
+    object_filters = relationship("Filter_characters", uselist=True, back_populates="object_item")
 
     def __init__(self, pilot_id: int):
         self.character_id = pilot_id

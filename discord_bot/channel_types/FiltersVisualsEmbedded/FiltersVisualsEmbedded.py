@@ -1,5 +1,6 @@
 import enum
 from abc import ABCMeta, abstractmethod
+import datetime
 
 
 class internal_options(enum.Enum):
@@ -20,6 +21,7 @@ class base_visual(metaclass=ABCMeta):
         self.internal_list_options()
         self.embed = discord.Embed()
         self.message_txt = ""
+        self.color = discord.Color(800680)
 
     @abstractmethod
     def internal_list_options(self):
@@ -72,6 +74,9 @@ class base_visual(metaclass=ABCMeta):
     def make_body(self):
         raise NotImplementedError
 
+    def set_frame_color(self):
+        self.embed.color = self.color
+
     def generate_view(self):
         self.make_vars()
         self.make_links()
@@ -79,6 +84,7 @@ class base_visual(metaclass=ABCMeta):
         self.make_text_heading()
         self.make_header()
         self.make_body()
+        self.set_frame_color()
 
     def __bool__(self):
         try:

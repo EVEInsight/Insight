@@ -16,6 +16,9 @@ class direct_message(inCh.discord_feed_service):
     def get_object_id(self):
         return self.user_id
 
+    async def command_sync(self, message_object):
+        await self.command_settings(message_object)
+
     @classmethod
     def linked_table(cls):
         return dbRow.tb_users

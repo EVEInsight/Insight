@@ -59,5 +59,8 @@ class discord_channel_base(object):
             return True
         except NoResultFound:
             return False
+        except Exception as ex:
+            print(ex)
+            return False
         finally:
             db.close()

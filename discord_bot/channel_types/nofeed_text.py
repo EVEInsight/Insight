@@ -14,6 +14,7 @@ class discord_text_nofeed_exist(discord_feed_service):
             __options.add_header_row("Fully customizable feed services")
             __options.add_option(insightClient.option_calls_coroutine(name=inCR.capRadar.create_new.__doc__,coroutine_object=inCR.capRadar.create_new(message_object,self.service,self.discord_client)))
             __options.add_option(insightClient.option_calls_coroutine(name=inEF.enFeed.create_new.__doc__,coroutine_object=inEF.enFeed.create_new(message_object,self.service,self.discord_client)))
+            __options.add_header_row("Preconfigured template feeds")
             await __options()
 
     async def command_settings(self,message_object):
@@ -30,7 +31,7 @@ class discord_text_nofeed_exist(discord_feed_service):
                 try:
                     await self.discord_client.loop.run_in_executor(None,partial(dbRow.tb_channels.set_feed_running,self.channel_id,True,self.service))
                     await self.async_load_table()
-                    await message_object.channel.send("Ok")
+                    await message_object.channel.send("Feed service started")
                 except Exception as ex:
                     await message_object.channel.send("Something went wrong when running this command.\n\nException: {}".format(str(ex)))
             else:
@@ -45,7 +46,7 @@ class discord_text_nofeed_exist(discord_feed_service):
                 try:
                     await self.discord_client.loop.run_in_executor(None,partial(dbRow.tb_channels.set_feed_running,self.channel_id,False,self.service))
                     await self.async_load_table()
-                    await message_object.channel.send("Ok")
+                    await message_object.channel.send("Feed service stopped")
                 except Exception as ex:
                     await message_object.channel.send("Something went wrong when running this command.\n\nException: {}".format(str(ex)))
             else:
@@ -76,10 +77,13 @@ class discord_text_nofeed_exist(discord_feed_service):
                 await option(message_object)
             await service_module.channel_manager.add_feed_object(__tmp_feed_object)
             await message_object.channel.send("Created a new feed!")
+            await __tmp_feed_object.command_start(message_object)
         except Exception as ex:
             print(ex)
             await __tmp_feed_object.delete()
-            await message_object.channel.send("Something went wrong when creating a new feed")
+            await message_object.channel.send(
+                "Something went wrong when creating a new feed. Run the command '!create' "
+                "to start over.")
 
     @classmethod
     def channel_id_is_feed(cls, id, service_module):

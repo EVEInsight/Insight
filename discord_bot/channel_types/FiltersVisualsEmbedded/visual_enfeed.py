@@ -23,14 +23,15 @@ class visual_enfeed(base_visual):
 
     def __set_loss(self):
         self.is_kill = False
+        self.color = discord.Color(16711680)
 
     def __set_kill(self):
         self.is_kill = True
+        self.color = discord.Color(65299)
 
     def make_vars(self):
         super(visual_enfeed, self).make_vars()
         self.author_text = "Kill" if self.is_kill else "Loss"
-        self.embed.color = discord.Color(65299) if self.is_kill else discord.Color(16711680)
 
     def make_header(self):
         self.embed.set_author(name=self.author_text, url=self.zk_kill, icon_url=self.__im_victim_corpAli)
@@ -64,6 +65,10 @@ class visual_enfeed(base_visual):
 
 
     def run_filter(self):
+        tdiff = datetime.datetime.utcnow() - datetime.timedelta(
+            hours=3)  # hardcoded entity feed limits to prevent posting month old KMs
+        if tdiff >= self.km.killmail_time:
+            return False
         __list_aff = self.filters.object_filter_alliances + self.filters.object_filter_corporations + self.filters.object_filter_characters
         if self.km.filter_victim(self.km.object_victim,filter_list=__list_aff,using_blacklist=self.in_victim_affiliation) is None: #affiliated is victim/loss
             self.__set_loss()

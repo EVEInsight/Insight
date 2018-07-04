@@ -45,6 +45,8 @@ class Discord_Insight_Client(discord.Client):
             await (await self.channel_manager.get_channel_feed(message.channel)).command_start(message)
         elif message.content.startswith('!stop'):
             await (await self.channel_manager.get_channel_feed(message.channel)).command_stop(message)
+        elif message.content.startswith('!sync'):
+            await (await self.channel_manager.get_channel_feed(message.channel)).command_sync(message)
         elif message.content.startswith('!remove'):
             await (await self.channel_manager.get_channel_feed(message.channel)).command_remove(message)
         elif message.content.startswith('!help'):

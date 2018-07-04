@@ -22,3 +22,6 @@ class Contacts_Characters(dec_Base.Base, sso_base):
     def load_fk_objects(self, service_module):
         if self.character_id:
             self.object_pilot = tb_characters.get_row(self.character_id, service_module)
+
+    def get_id(self):
+        return self.character_id

@@ -13,6 +13,7 @@ class Alliances(dec_Base.Base,name_only):
 
     object_attackers= relationship("Attackers", uselist=True,back_populates="object_alliance")
     object_loses= relationship("Victims", uselist=True, back_populates="object_alliance")
+    object_filters = relationship("Filter_alliances", uselist=True, back_populates="object_item")
 
     def __init__(self, alliance_id: int):
         self.alliance_id = alliance_id

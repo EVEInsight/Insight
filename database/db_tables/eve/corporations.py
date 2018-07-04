@@ -13,6 +13,7 @@ class Corporations(dec_Base.Base,name_only):
 
     object_attackers = relationship("Attackers", uselist=True,back_populates="object_corp")
     object_loses = relationship("Victims", uselist=True, back_populates="object_corp")
+    object_filters = relationship("Filter_corporations", uselist=True, back_populates="object_item")
 
     def __init__(self, corp_id: int):
         self.corporation_id = corp_id

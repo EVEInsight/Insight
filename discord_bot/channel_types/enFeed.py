@@ -24,7 +24,7 @@ class enFeed(noCh.discord_text_nofeed_exist):
 
     @classmethod
     async def create_new(cls,message_object:discord.Message, service_module, discord_client):
-        """Entity Feed  - A general feed that posts kills/losses involving selected entities(pilots,corps,alliances)"""
+        """Entity Feed  - A general feed that displays kills/losses involving selected entities(pilots, corps, alliances)"""
         await super().create_new(message_object,service_module,discord_client)
 
     def get_linked_options(self):

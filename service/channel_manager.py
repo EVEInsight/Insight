@@ -10,6 +10,7 @@ class Channel_manager(object):
     def __init__(self, serivce_module):
         self.service = serivce_module
         self.__channel_feed_container = {}
+        self.__dm_container = {}
         self.__discord_client:discord_bot.Discord_Insight_Client = None
 
     def get_discord_client(self):
@@ -68,6 +69,15 @@ class Channel_manager(object):
         except AssertionError:
             assert isinstance(channel_object,discord.DMChannel)
             return cType.insight_directMessage(channel_object,self.service)
+
+    async def get_user_dm(self, message_object: discord.Message):
+        try:
+            assert isinstance(message_object, discord.Message)
+            await message_object.author.send("Opening a new conversation! Hello!")
+            dm = message_object.author.dm_channel
+            return cType.insight_directMessage(dm, self.service)
+        except Exception as ex:
+            print(ex)
 
     async def remove_feed(self,channel):
         ch_obj = None

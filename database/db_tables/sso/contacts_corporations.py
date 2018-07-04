@@ -22,3 +22,6 @@ class Contacts_Corporations(dec_Base.Base, sso_base):
     def load_fk_objects(self, service_module):
         if self.corporation_id:
             self.object_corp = tb_corporations.get_row(self.corporation_id, service_module)
+
+    def get_id(self):
+        return self.corporation_id

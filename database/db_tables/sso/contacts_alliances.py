@@ -22,3 +22,6 @@ class Contacts_Alliances(dec_Base.Base, sso_base):
     def load_fk_objects(self, service_module):
         if self.alliance_id:
             self.object_alliance = tb_alliances.get_row(self.alliance_id, service_module)
+
+    def get_id(self):
+        return self.alliance_id

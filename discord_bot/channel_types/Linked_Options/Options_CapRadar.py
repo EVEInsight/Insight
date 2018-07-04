@@ -11,7 +11,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         assert isinstance(insight_channel, capRadar.capRadar)
         super().__init__(insight_channel)
         self.super_ids = [30,659]
-        self.capital_ids = [547,485,1538]
+        self.capital_ids = [547, 485, 1538, 883]
         self.blops_ids = [898]
 
     def mention_options(self,message_object,group_type):
@@ -103,7 +103,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
             __remove = discord_options.mapper_index_withAdditional(self.cfeed.discord_client, message_object, timeout_seconds=60)
             __remove.set_main_header("Select the system you wish to remove as a base.")
             try:
-                __remove.add_header_row("Systems currently set as bases for this feed")
+                __remove.add_header_row("Systems currently set as base systems for this feed")
                 for i in db.query(tb_Filter_systems).filter(tb_Filter_systems.channel_id==self.cfeed.channel_id).all():
                     __representation = "System: {}-----LY Range: {}".format(str(i.object_item.name),str(i.max))
                     __remove.add_option(discord_options.option_returns_object(name=__representation,return_object=i.filter_id))
@@ -118,7 +118,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         await self.response_code_action(message_object, __code)
 
     async def InsightOptionRequired_supers(self,message_object:discord.Message):
-        """Super tracking - Enables or disables tracking of supercarriers/titans within range of bases."""
+        """Super tracking - Enables or disables tracking of supercarriers/titans within range of base systems."""
         __options = discord_options.mapper_return_yes_no(self.cfeed.discord_client,message_object,timeout_seconds=45)
         __options.set_main_header("Track supercarrier and titan activity in this channel?")
         __track_group_TF = await __options()
@@ -131,9 +131,9 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         await self.response_code_action(message_object, __code)
 
     async def InsightOptionRequired_capitals(self,message_object:discord.Message):
-        """Capital tracking - Enables or disables tracking of capitals(dreads,carriers,FAX) within range of bases."""
+        """Capital tracking - Enables or disables tracking of capitals(dreads,carriers,FAX,rorquals) within range of base systems."""
         __options = discord_options.mapper_return_yes_no(self.cfeed.discord_client,message_object,timeout_seconds=45)
-        __options.set_main_header("Track capital(dreads,carriers,FAX) activity in this channel?")
+        __options.set_main_header("Track capital(dreads,carriers,FAX,rorquals) activity in this channel?")
         __track_group_TF = await __options()
         if __track_group_TF:
             __mention_method = self.mention_options(message_object,"capital(dreads,carriers,FAX)")
@@ -144,7 +144,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         await self.response_code_action(message_object, __code)
 
     async def InsightOptionRequired_blops(self,message_object:discord.Message):
-        """BLOPS tracking - Enables or disables tracking of blackops battleships within range of bases."""
+        """BLOPS tracking - Enables or disables tracking of blackops battleships within range of base systems."""
         __options = discord_options.mapper_return_yes_no(self.cfeed.discord_client,message_object,timeout_seconds=45)
         __options.set_main_header("Track blackops battleship activity in this channel?")
         __track_group_TF = await __options()

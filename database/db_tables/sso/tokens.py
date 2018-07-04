@@ -9,19 +9,19 @@ import swagger_client
 class Tokens(dec_Base.Base, sso_base):
     __tablename__ = 'tokens'
 
-    discord_user = Column(BIGINT, ForeignKey("discord_users.user_id"), primary_key=True, autoincrement=False,
-                          nullable=False)
+    discord_user = Column(BIGINT, ForeignKey("discord_users.user_id"), nullable=False)
     refresh_token = Column(String, primary_key=True, nullable=False)
     token = Column(String, nullable=True)
     character_id = Column(Integer, ForeignKey("characters.character_id"), nullable=True)
     corporation_id = Column(Integer, ForeignKey("corporations.corporation_id"), nullable=True)
     alliance_id = Column(Integer, ForeignKey("alliances.alliance_id"), nullable=True)
-    last_updated = Column(DateTime)
+    last_updated = Column(DateTime, default=datetime.datetime.utcnow(), nullable=False)
     etag_character = Column(String, nullable=True)
     etag_corp = Column(String, nullable=True)
     etag_alliance = Column(String, nullable=True)
 
     object_user = relationship("Users", uselist=False, back_populates="object_tokens")
+    object_channels = relationship("Discord_Tokens", uselist=True, cascade="delete", back_populates="object_token")
     object_pilot = relationship("Characters", uselist=False, lazy="joined")
     object_corp = relationship("Corporations", uselist=False, lazy="joined")
     object_alliance = relationship("Alliances", uselist=False, lazy="joined")
@@ -40,14 +40,18 @@ class Tokens(dec_Base.Base, sso_base):
         self.refresh_token = refresh_token
 
     def __str__(self):
-        syncs_with = ""
-        syncs_with += "{} ".format(self.object_pilot.character_name) if self.object_pilot else ""
-        syncs_with += ",{} ".format(self.object_corp.corporation_name) if self.object_corp else ""
-        syncs_with += ",{} ".format(self.object_alliance.alliance_name) if self.object_alliance else ""
-        total_count = "Token contains {} pilots, {} corps, {} alliances contacts" \
+        syncs_with = "Token: * Last updated: {}\n".format(self.last_updated)
+        syncs_with += "Pilot: {}\n".format(self.object_pilot.character_name) if self.object_pilot else ""
+        syncs_with += "Corp: {}\n".format(self.object_corp.corporation_name) if self.object_corp else ""
+        syncs_with += "Alliance: {}\n".format(self.object_alliance.alliance_name) if self.object_alliance else ""
+        syncs_with += "Contains {} pilots, {} corps, and {} alliances contacts." \
             .format(str(len(self.object_contacts_pilots)), str(len(self.object_contacts_corps)),
                     str(len(self.object_contacts_alliances)))
-        return "Token: *{} -- Syncs with: {}. {}.".format(self.refresh_token[-4:], syncs_with, total_count)
+        return syncs_with
+
+    def str_wChcount(self):
+        ch_count = "Discord channels using this token: {}".format(str(len(self.object_channels)))
+        return "{}\n{}".format(str(self), ch_count)
 
     def get_affiliation(self, token, service_module):
         char_id = service_module.sso.get_char(token)
@@ -118,11 +122,9 @@ class Tokens(dec_Base.Base, sso_base):
 
     def __remove(self, enum_owner, service_module):
         db: Session = service_module.get_session()
-
         def helper(table):
             rows = db.query(table).filter(table.token == self.refresh_token, table.owner == enum_owner)
             rows.delete()
-
         helper(tb_contacts_alliances)
         helper(tb_contacts_corps)
         helper(tb_contacts_pilots)
@@ -144,9 +146,10 @@ class Tokens(dec_Base.Base, sso_base):
                     tb_contacts_alliances(self.alliance_id, enum_owner, 10.0, service_module))
             else:
                 pass
+            self.last_updated = datetime.datetime.utcnow()
         except ApiException as ex:
             if ex.status == 304:  # nochanges
-                pass
+                self.last_updated = datetime.datetime.utcnow()
             if ex.status == 403:  # changed alliance/corp
                 self.corporation_id = None
                 self.alliance_id = None

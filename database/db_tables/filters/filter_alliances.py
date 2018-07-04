@@ -1,6 +1,7 @@
 from .base_filter import *
 from ..eve import alliances
 
+
 class Filter_alliances(dec_Base.Base,filter_base):
     __tablename__ = 'filter_alliances'
 
@@ -12,12 +13,13 @@ class Filter_alliances(dec_Base.Base,filter_base):
     mention = Column(Enum(mention_method),default=mention_method.noMention,nullable=False)
 
     object_channel = relationship("Channels",uselist=False,back_populates="object_filter_alliances")
-    object_item = relationship("Alliances",uselist=False,lazy="joined")
+    object_item = relationship("Alliances", uselist=False, back_populates="object_filters", lazy="joined")
 
-    def __init__(self, eve_id: int, discord_channel_id: int):
+    def __init__(self, eve_id: int, discord_channel_id, load_fk=True):
         self.filter_id = eve_id
         self.channel_id = discord_channel_id
-        self.load_fk_objects()
+        if load_fk:
+            self.load_fk_objects()
 
     def load_fk_objects(self):
         self.object_channel = discord_channels.Channels(self.channel_id) if self.channel_id else None

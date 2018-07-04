@@ -1,5 +1,4 @@
 from .FiltersVisualsEmbedded import *
-import datetime
 
 
 class visual_capradar(base_visual):
@@ -74,6 +73,16 @@ class visual_capradar(base_visual):
         self.embed.add_field(name=__heading_routes, value=self.__helper_routes(), inline=False)
         self.embed.color = discord.Color(800680)
 
+    def set_frame_color(self):
+        s = (datetime.datetime.utcnow() - self.km.killmail_time).total_seconds()
+        if 0 <= s <= 60:
+            self.color = discord.Color(12124259)
+        elif 61 <= s <= 300:
+            self.color = discord.Color(8454210)
+        else:
+            self.color = discord.Color(4128800)
+        super().set_frame_color()
+
     def __helper_routes(self):
         _dotlan_link = "http://evemaps.dotlan.net/jump/{ship},555/{base}:{target}".format(ship="{2}",
                                                                                           base=self.base_name,
@@ -104,7 +113,6 @@ class visual_capradar(base_visual):
         if len(self.tracked_hostiles) == 0:
             return False
         return True
-
 
     @classmethod
     def feed_specific_row_type(cls):

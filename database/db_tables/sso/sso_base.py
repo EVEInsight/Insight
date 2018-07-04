@@ -26,7 +26,9 @@ class contact_owner(enum.Enum):
         return False
 
 
-
 class sso_base(object):
+    def get_id(self):
+        raise NotImplementedError
+
     def load_fk_objects(self, service_module):
         pass

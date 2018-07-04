@@ -10,6 +10,19 @@ class Options_DM(options_base.Options_Base):
         assert isinstance(insight_channel, direct_message.direct_message)
         super().__init__(insight_channel)
 
+    def printout_my_tokens(self):
+        db: Session = self.cfeed.service.get_session()
+        return_str = "My Tokens:\n\n"
+        try:
+            for t in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).all():
+                return_str += t.str_wChcount() + '\n\n'
+            return return_str
+        except Exception as ex:
+            print(ex)
+            return "An error occurred when getting your tokens."
+        finally:
+            db.close()
+
     async def InsightOption_addToken(self, message_object: discord.Message):
         """Add new token - Adds a new token for syncing contact information related to pilots, corporations, or alliances."""
 
@@ -75,13 +88,10 @@ class Options_DM(options_base.Options_Base):
 
     async def InsightOption_deleteToken(self, message_object: discord.Message):
         """Delete token - Deletes one of your added tokens and removes it from all channels that use it."""
-
         def delete_token(token):
             db: Session = self.cfeed.service.get_session()
             try:
-                row = db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id,
-                                                 tb_tokens.refresh_token == token.refresh_token).one()
-                db.delete(row)
+                db.delete(token)
                 db.commit()
                 return "ok"
             except Exception as ex:
@@ -113,7 +123,41 @@ class Options_DM(options_base.Options_Base):
 
     async def InsightOption_removeChannel(self, message_object: discord.Message):
         """Remove a token from Discord channel - Removes your token from a Discord channel"""
-        pass
+
+        def remove_channel(token):
+            db: Session = self.cfeed.service.get_session()
+            try:
+                db.delete(token)
+                db.commit()
+                return "ok"
+            except Exception as ex:
+                print(ex)
+                return "An error occurred when attempting to delete a token from the channel. Please try again."
+            finally:
+                db.close()
+
+        def get_options():
+            db: Session = self.cfeed.service.get_session()
+            _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object, timeout_seconds=70)
+            _options.set_main_header("These are your tokens associated with Discord channel IDs. Select a channel id "
+                                     "to remove a given token from.")
+            try:
+                for t in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).all():
+                    if len(t.object_channels) > 0:
+                        _options.add_header_row(t)
+                        for channel in t.object_channels:
+                            _options.add_option(
+                                dOpt.option_returns_object(name=channel.channel_id, return_object=channel))
+            except Exception as ex:
+                print(ex)
+            finally:
+                db.close()
+            return _options
+
+        options = await self.cfeed.discord_client.loop.run_in_executor(None, get_options)
+        row = await options()
+        resp = await self.cfeed.discord_client.loop.run_in_executor(None, partial(remove_channel, row))
+        await message_object.channel.send(resp)
 
     async def InsightOption_syncnow(self, message_object: discord.Message):
         """Force sync - Forces an API pull on all of your tokens. Note: Insight automatically syncs your tokens every 8 hours."""
@@ -121,7 +165,41 @@ class Options_DM(options_base.Options_Base):
         await self.cfeed.discord_client.loop.run_in_executor(None,
                                                              partial(tb_tokens.sync_all_tokens, self.cfeed.user_id,
                                                                      self.cfeed.service))
+        resp = await self.cfeed.discord_client.loop.run_in_executor(None, self.printout_my_tokens)
+        await message_object.channel.send("{}\n{}".format(message_object.author.mention, resp))
 
+    async def InsightOption_viewtokens(self, message_object: discord.Message):
+        """View my tokens - Views information on all tokens you have currently with Insight"""
+        resp = await self.cfeed.discord_client.loop.run_in_executor(None, self.printout_my_tokens)
+        await message_object.channel.send("{}\n{}".format(message_object.author.mention, resp))
+
+    async def InsightOptionAbstract_addchannel(self):
+        message_object = await self.cfeed.channel_discord_object.send(
+            "This tool will assist in adding a token to a channel")
+        message_object.author = self.cfeed.discord_client.get_user(self.cfeed.user_id)
+
+        def make_options():
+            _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object, timeout_seconds=75)
+            _options.set_main_header(
+                "Select one of your tokens to add to the feed. If you do not have any tokens created yet select the 'cancel' option"
+                " and do the following:\n\nStep 1. Direct Message this bot with the command '!settings'\n\nStep 2. Select the option"
+                " to add a new token.\n\nStep 3.Follow the steps needed to add a token and then rerun the command '!sync' "
+                "in the channel you wish to sync your contacts with to get back to this step.")
+            db: Session = self.cfeed.service.get_session()
+            try:
+                _options.add_header_row("Your available tokens")
+                for token in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).all():
+                    _options.add_option(dOpt.option_returns_object(name=str(token), return_object=token))
+                return _options
+            except Exception as ex:
+                print(ex)
+                raise Exception("Error when getting your tokens")
+            finally:
+                db.close()
+
+        options = await self.cfeed.discord_client.loop.run_in_executor(None, partial(make_options))
+        token_row = await options()
+        return token_row
 
 from discord_bot import discord_options as dOpt
 from database.db_tables import *

@@ -1,6 +1,7 @@
 from .discord_base import *
 from ..eve import tb_alliances
 
+
 class Channels(dec_Base.Base,discord_channel_base):
     __tablename__ = 'discord_channels'
 
@@ -10,12 +11,19 @@ class Channels(dec_Base.Base,discord_channel_base):
 
     object_capRadar = relationship("CapRadar", uselist=False,cascade="delete", back_populates="object_channel",lazy="joined")
     object_enFeed = relationship("EnFeed",uselist=False,cascade="delete",back_populates="object_channel",lazy="joined")
-    object_filter_alliances = relationship("Filter_alliances",uselist=True,cascade="delete",back_populates="object_channel",
-                                       lazy="joined")
-    object_filter_corporations = relationship("Filter_corporations", uselist=True, cascade="delete", back_populates="object_channel",
-                                       lazy="joined")
-    object_filter_characters = relationship("Filter_characters ", uselist=True, cascade="delete", back_populates="object_channel",
-                                       lazy="joined")
+    object_tokens = relationship("Discord_Tokens", uselist=True, cascade="delete", back_populates="object_channel")
+    object_filter_alliances = relationship("Filter_alliances", uselist=True,
+                                           cascade="save-update, merge, delete, delete-orphan",
+                                           back_populates="object_channel",
+                                           lazy="subquery")
+    object_filter_corporations = relationship("Filter_corporations", uselist=True,
+                                              cascade="save-update, merge, delete, delete-orphan",
+                                              back_populates="object_channel",
+                                              lazy="subquery")
+    object_filter_characters = relationship("Filter_characters", uselist=True,
+                                            cascade="save-update, merge, delete, delete-orphan",
+                                            back_populates="object_channel",
+                                            lazy="subquery")
     object_filter_categories = relationship("Filter_categories", uselist=True, cascade="delete", back_populates="object_channel",
                                        lazy="joined")
     object_filter_groups = relationship("Filter_groups", uselist=True, cascade="delete", back_populates="object_channel",
@@ -69,6 +77,53 @@ class Channels(dec_Base.Base,discord_channel_base):
             service_module.get_session().rollback()
         finally:
             service_module.get_session().close()
+
+    def delete_all_contacts(self, service_module):
+        db: Session = service_module.get_session()
+
+        def helper(table):
+            for i in table:
+                db.delete(i)
+
+        helper(self.object_filter_characters)
+        helper(self.object_filter_corporations)
+        helper(self.object_filter_alliances)
+
+    def str_tokens(self):
+        if len(self.object_tokens) > 0:
+            return_str = "This channel is now synced with the following tokens:\n\n"
+            for t in self.object_tokens:
+                return_str += str(t) + '\n\n'
+            return return_str
+        else:
+            return "This channel has no associated tokens to sync ignore lists. You can add one by running command '!sync'"
+
+    def sync_api_contacts(self, service_module):
+        db: Session = service_module.get_session()
+        try:
+            _pilots = []
+            _corps = []
+            _alliances = []
+            for token in self.object_tokens:
+                _pilots += [p for p in token.get_all_pilot_ids()]
+                _corps += [c for c in token.get_all_corp_ids()]
+                _alliances += [a for a in token.get_all_alliance_ids()]
+            self.object_filter_characters = []
+            self.object_filter_corporations = []
+            self.object_filter_alliances = []
+            db.flush()
+            for p in list(set(_pilots)):
+                self.object_filter_characters.append(
+                    tb_Filter_characters(p, discord_channel_id=self.channel_id, load_fk=False))
+            for c in list(set(_corps)):
+                self.object_filter_corporations.append(
+                    tb_Filter_corporations(c, discord_channel_id=self.channel_id, load_fk=False))
+            for a in list(set(_alliances)):
+                self.object_filter_alliances.append(
+                    tb_Filter_alliances(a, discord_channel_id=self.channel_id, load_fk=False))
+        except Exception as ex:
+            print(ex)
+
 
 from ..filters import *
 from ..eve import *
