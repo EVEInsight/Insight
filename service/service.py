@@ -16,8 +16,8 @@ class service_module(object):
         self.__import_everything_flag = False
         self.__import_check()
         self.__sc_session: scoped_session = database.setup_database(self).get_scoped_session()
-        self.sso = EVEsso.EVEsso(self)
         self.static_data_import = static_data.static_data_import(self,self.__import_everything_flag)
+        self.sso = EVEsso.EVEsso(self)
         self.channel_manager = cm.Channel_manager(self)
         self.zk_obj = zk.zk(self)
 
