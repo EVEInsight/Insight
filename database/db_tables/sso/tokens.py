@@ -89,7 +89,7 @@ class Tokens(dec_Base.Base, sso_base):
         swagger_config = swagger_client.Configuration()
         swagger_config.access_token = self.token
         contacts_api = swagger_client.ContactsApi(swagger_client.ApiClient(swagger_config))
-        r = function_ptr(contacts_api, datasource='tranquility', user_agent="InsightDiscordKillfeeds", token=self.token,
+        r = function_ptr(contacts_api, datasource='tranquility', token=self.token,
                          if_none_match=str(etag))
         __new_etag = r[2].get("Etag")
         number_pages = r[2].get("X-Pages")
@@ -99,8 +99,8 @@ class Tokens(dec_Base.Base, sso_base):
             r_items = [] + r[0]
             __index = 2
             while int(number_pages) >= __index:
-                r_items += self.__alliance_api_call(contacts_api, page=__index, datasource='tranquility',
-                                                    user_agent="InsightDiscordKillfeeds", token=self.token)[0]
+                r_items += \
+                self.__alliance_api_call(contacts_api, page=__index, datasource='tranquility', token=self.token)[0]
                 __index += 1
             new_etag_function_ptr(__new_etag)
             return r_items

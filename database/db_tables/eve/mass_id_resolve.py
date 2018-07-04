@@ -7,7 +7,7 @@ from swagger_client.rest import ApiException
 class id_resolve(name_only):
     @classmethod
     def get_response(cls, api, **kwargs):
-        return api.post_universe_ids(**kwargs, datasource='tranquility',user_agent="InsightDiscordBot")
+        return api.post_universe_ids(**kwargs, datasource='tranquility')
 
     @classmethod
     def api_mass_id_resolve(cls,service_module,search_str):

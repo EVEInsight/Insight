@@ -13,7 +13,7 @@ link to invite an Insight bot I personally host to your server. The bot is desig
 Discord servers, providing a separate individual experience for each. I.e. It's wasteful to run a separate
 individual Insight application for each server. 
 
-https://discordapp.com/oauth2/authorize?&client_id=379780340098662412&scope=bot
+https://discordapp.com/api/oauth2/authorize?client_id=463952393206497290&permissions=149504&scope=bot
 
 Note: This Discord Application link is running the Insight Main (original) branch
 while this rewrite branch is finalized.

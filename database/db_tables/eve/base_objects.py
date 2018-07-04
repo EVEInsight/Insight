@@ -33,7 +33,7 @@ class table_row(object):
     @classmethod
     def get_response(cls,api):
         raise NotImplementedError
-        #return api.get_characters_character_id_attributes(self.character_id,datasource='tranquility',token=token,user_agent="my_test_agent")
+        # return api.get_characters_character_id_attributes(self.character_id,datasource='tranquility',token=token)
 
     @classmethod
     def primary_key_row(cls):
@@ -81,7 +81,7 @@ class index_api_updating(table_row):
 
     @classmethod
     def __index_get_response(cls, api):
-        r = cls.index_swagger_api_call(api, datasource='tranquility', user_agent="InsightDiscordBot")
+        r = cls.index_swagger_api_call(api, datasource='tranquility')
         number_pages = r[2].get("X-Pages")
         if number_pages is None:
             return r[0]
@@ -89,7 +89,7 @@ class index_api_updating(table_row):
             r_items = [] + r[0]
             __index = 2
             while int(number_pages) >= __index:
-                r_items += cls.index_swagger_api_call(api, page=__index, datasource='tranquility', user_agent="InsightDiscordBot")[0]
+                r_items += cls.index_swagger_api_call(api, page=__index, datasource='tranquility')[0]
                 __index += 1
             return r_items
 
@@ -105,7 +105,8 @@ class individual_api_pulling(table_row):
 
     def api_download(self):
         try:
-            return self.get_response(self.get_api(self.get_configuration()),datasource='tranquility', user_agent="InsightDiscordBot",if_none_match=str(self.api_ETag))
+            return self.get_response(self.get_api(self.get_configuration()), datasource='tranquility',
+                                     if_none_match=str(self.api_ETag))
         except ApiException as ex:
             return None
         except Exception as ex:
@@ -204,7 +205,7 @@ class name_only(table_row):
 
     @classmethod
     def get_response(cls, api, **kwargs):
-        return api.post_universe_names(**kwargs, datasource='tranquility',user_agent="InsightDiscordBot")
+        return api.post_universe_names(**kwargs, datasource='tranquility')
 
     @classmethod
     def missing_id_chunk_size(cls)->int:
