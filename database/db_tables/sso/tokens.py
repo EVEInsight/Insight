@@ -158,13 +158,14 @@ class Tokens(dec_Base.Base, sso_base):
             print(ex)
 
     def update_contacts(self, service_):
-        self.write_changes(self.__alliance_api_call, self.etag_alliance, self.__set_alliance_etag,
-                           contact_owner.alliance,
-                           service_) if self.alliance_id else None
-        self.write_changes(self.__corp_api_call, self.etag_corp, self.__set_corp_etag, contact_owner.corp,
-                           service_) if self.corporation_id else None
-        self.write_changes(self.__pilot_api_call, self.etag_character, self.__set_pilot_etag, contact_owner.pilot,
-                           service_) if self.character_id else None
+        if self.token is not None:
+            self.write_changes(self.__alliance_api_call, self.etag_alliance, self.__set_alliance_etag,
+                               contact_owner.alliance,
+                               service_) if self.alliance_id else None
+            self.write_changes(self.__corp_api_call, self.etag_corp, self.__set_corp_etag, contact_owner.corp,
+                               service_) if self.corporation_id else None
+            self.write_changes(self.__pilot_api_call, self.etag_character, self.__set_pilot_etag, contact_owner.pilot,
+                               service_) if self.character_id else None
 
     @classmethod
     def generate_from_auth(cls, discord_user_id, auth_code, service_module):
