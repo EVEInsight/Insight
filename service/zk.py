@@ -18,7 +18,7 @@ class zk(object):
         identifier = str(self.generate_identifier())
         self.zk_stream_url = str("https://redisq.zkillboard.com/listen.php?queueID={}".format(identifier))
         self.run = True
-
+        self.error_ids = []
         self.__pending_kms = queue.Queue(maxsize=1000)
         self.__error_km_json = queue.Queue()
 
@@ -47,7 +47,7 @@ class zk(object):
         if __row is not None:
             try:
                 db.commit()
-                dbRow.name_resolver.api_mass_name_resolve(self.service)
+                self.error_ids = dbRow.name_resolver.api_mass_name_resolve(self.service, error_ids=self.error_ids)
                 db.close()
                 return True
             except Exception as ex:
