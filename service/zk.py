@@ -14,8 +14,9 @@ class zk(object):
         assert isinstance(service_module,service.ServiceModule)
         self.service = service_module
 
-        self.identifier = str(self.generate_identifier())
-        self.zk_stream_url = str("https://redisq.zkillboard.com/listen.php?queueID={}".format(self.identifier))
+        self.rSession: requests.Session = self.make_session()
+        identifier = str(self.generate_identifier())
+        self.zk_stream_url = str("https://redisq.zkillboard.com/listen.php?queueID={}".format(identifier))
         self.run = True
 
         self.__pending_kms = queue.Queue(maxsize=1000)
@@ -33,6 +34,12 @@ class zk(object):
                 random_s = ''.join(random.choice(string.ascii_lowercase) for x in range(8))
                 f.write(random_s)
                 return random_s
+
+    def make_session(self):
+        ses = requests.Session()
+        ses.headers.update({
+                               'User-Agent': "InsightDiscordKillfeeds https://github.com/Nathan-LS/Insight Maintainer:Nathan nathan@nathan-s.com"})
+        return ses
 
     def __make_km(self, km_json):
         db:Session = self.service.get_session()
@@ -76,13 +83,11 @@ class zk(object):
         self.__debug_simulate()
         while self.run:
             try:
-                resp = requests.get(self.zk_stream_url, verify=True,
-                                    timeout=int(20))
+                resp = self.rSession.get(self.zk_stream_url, verify=True, timeout=30)
                 if resp.status_code == 200:
                     json_data = resp.json()['package']
                     if json_data == None:
                         pass
-                        #return
                     else:
                         if self.__make_km(json_data):
                             try:
@@ -93,8 +98,6 @@ class zk(object):
                                 print(ex)
                 else:
                     print("zk non 200 error code {}".format(resp.status_code))
-            except requests.exceptions.RequestException as ex:
-                print(ex)
             except Exception as ex:
                 print(ex)
             time.sleep(.1)

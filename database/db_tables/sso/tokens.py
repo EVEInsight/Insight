@@ -89,8 +89,7 @@ class Tokens(dec_Base.Base, sso_base):
         swagger_config = swagger_client.Configuration()
         swagger_config.access_token = self.token
         contacts_api = swagger_client.ContactsApi(swagger_client.ApiClient(swagger_config))
-        r = function_ptr(contacts_api, datasource='tranquility', token=self.token,
-                         if_none_match=str(etag))
+        r = function_ptr(contacts_api, datasource='tranquility', token=self.token, if_none_match=str(etag))
         __new_etag = r[2].get("Etag")
         number_pages = r[2].get("X-Pages")
         if number_pages is None:
