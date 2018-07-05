@@ -1,7 +1,7 @@
 from .base_objects import *
 from . import characters,corporations,alliances,types,systems
 import requests
-import json
+
 
 class name_resolve(name_only):
     @classmethod

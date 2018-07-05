@@ -1,6 +1,7 @@
 import discord
 from concurrent.futures import ThreadPoolExecutor
 import service
+from .background_tasks import background_tasks
 
 
 class Discord_Insight_Client(discord.Client):
@@ -8,6 +9,7 @@ class Discord_Insight_Client(discord.Client):
         super().__init__()
         self.service: service_module = service_module
         self.channel_manager: service.Channel_manager = self.service.channel_manager
+        self.background_tasks = background_tasks(self)
         self.loop.set_default_executor(ThreadPoolExecutor(max_workers=5))
         self.loop.create_task(self.setup_tasks())
 
@@ -21,6 +23,7 @@ class Discord_Insight_Client(discord.Client):
         await self.wait_until_ready()
         await self.channel_manager.set_client(self)
         await self.channel_manager.load_channels()
+        self.__task_backgrounds = self.loop.create_task(self.background_tasks.setup_backgrounds())
         self.__task_km_enqueue = self.loop.create_task(self.km_enqueue())
         self.__task_km_deque_filter = self.loop.create_task(self.km_deque_filter())
         self.__task_km_deque = self.loop.create_task(self.channel_manager.post_all_queued())

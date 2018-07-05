@@ -214,6 +214,18 @@ class Tokens(dec_Base.Base, sso_base):
         finally:
             db.close()
 
+    @classmethod
+    def mass_sync_all(cls, service_module):
+        db: Session = service_module.get_session()
+        try:
+            ids = [id.discord_user for id in db.query(cls.discord_user).distinct()]
+            db.close()
+            for id in ids:
+                cls.sync_all_tokens(id, service_module)
+        except Exception as ex:
+            print(ex)
+        finally:
+            db.close()
 
 from ..filters import *
 from ..eve import *

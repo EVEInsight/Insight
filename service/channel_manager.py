@@ -22,6 +22,10 @@ class Channel_manager(object):
         random.shuffle(__feeds)
         return __feeds
 
+    async def get_all_channels(self):
+        for channel in self.__channel_feed_container.values():
+            yield channel
+
     async def __get_text_channels(self):
         for guild in self.__discord_client.guilds:
             for channel in guild.text_channels:

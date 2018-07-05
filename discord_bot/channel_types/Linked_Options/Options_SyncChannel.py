@@ -3,7 +3,7 @@ from .. import capRadar, direct_message
 import discord
 from functools import partial
 from sqlalchemy.orm import Session
-
+import asyncio
 
 class Options_Sync(options_base.Options_Base):
     def __init__(self, insight_channel):
@@ -78,7 +78,7 @@ class Options_Sync(options_base.Options_Base):
         if _resp == "ok":
             await self.InsightOption_syncnow(message_object)
 
-    async def InsightOption_syncnow(self, message_object: discord.Message):
+    async def InsightOption_syncnow(self, message_object: discord.Message = None):
         """Force sync - Updates the channel's allies list if you have SSO tokens assigned to it."""
 
         def sync_contacts():
@@ -94,9 +94,9 @@ class Options_Sync(options_base.Options_Base):
             finally:
                 db.close()
 
-        await message_object.channel.send("Syncing contact lists now")
+        await self.cfeed.channel_discord_object.send("Syncing contact lists now")
         __resp = await self.cfeed.discord_client.loop.run_in_executor(None, sync_contacts)
-        await message_object.channel.send(__resp)
+        await self.cfeed.channel_discord_object.send(__resp)
         await self.cfeed.async_load_table()
 
 

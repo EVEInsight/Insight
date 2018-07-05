@@ -9,8 +9,10 @@ class Channels(dec_Base.Base,discord_channel_base):
     feed_running = Column(Boolean,default=False,nullable=False)
     channel_name = Column(String,default="",nullable=False)
 
-    object_capRadar = relationship("CapRadar", uselist=False,cascade="delete", back_populates="object_channel",lazy="joined")
-    object_enFeed = relationship("EnFeed",uselist=False,cascade="delete",back_populates="object_channel",lazy="joined")
+    object_capRadar = relationship("CapRadar", uselist=False, cascade="delete", back_populates="object_channel",
+                                   lazy="subquery")
+    object_enFeed = relationship("EnFeed", uselist=False, cascade="delete", back_populates="object_channel",
+                                 lazy="subquery")
     object_tokens = relationship("Discord_Tokens", uselist=True, cascade="delete", back_populates="object_channel")
     object_filter_alliances = relationship("Filter_alliances", uselist=True,
                                            cascade="save-update, merge, delete, delete-orphan",
@@ -25,15 +27,15 @@ class Channels(dec_Base.Base,discord_channel_base):
                                             back_populates="object_channel",
                                             lazy="subquery")
     object_filter_categories = relationship("Filter_categories", uselist=True, cascade="delete", back_populates="object_channel",
-                                       lazy="joined")
+                                            lazy="subquery")
     object_filter_groups = relationship("Filter_groups", uselist=True, cascade="delete", back_populates="object_channel",
-                                       lazy="joined")
+                                        lazy="subquery")
     object_filter_types = relationship("Filter_types", uselist=True, cascade="delete", back_populates="object_channel",
-                                       lazy="joined")
+                                       lazy="subquery")
     object_filter_regions = relationship("Filter_regions", uselist=True, cascade="delete", back_populates="object_channel",
-                                       lazy="joined")
+                                         lazy="subquery")
     object_filter_systems = relationship("Filter_systems", uselist=True, cascade="delete", back_populates="object_channel",
-                                       lazy="joined")
+                                         lazy="subquery")
 
     def __init__(self, object_id):
         self.channel_id = object_id
