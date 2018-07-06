@@ -17,14 +17,28 @@ class Channel_manager(object):
         assert isinstance(self.__discord_client,discord_bot.Discord_Insight_Client)
         return self.__discord_client
 
-    def get_active_channels(self):
+    def __get_active_channels(self):
         __feeds = list(self.__channel_feed_container.values())
         random.shuffle(__feeds)
         return __feeds
 
-    async def get_all_channels(self):
-        for channel in self.__channel_feed_container.values():
+    def sy_get_all_channels(self):
+        for channel in self.__get_active_channels():
             yield channel
+
+    async def get_all_channels(self):
+        for channel in self.__get_active_channels():
+            yield channel
+
+    async def get_all_capRadar(self):
+        async for channel in self.get_all_channels():
+            if isinstance(channel, cType.insight_capRadar):
+                yield channel
+
+    async def get_all_enFeed(self):
+        async for channel in self.get_all_channels():
+            if isinstance(channel, cType.insight_enFeed):
+                yield channel
 
     async def __get_text_channels(self):
         for guild in self.__discord_client.guilds:
@@ -105,15 +119,29 @@ class Channel_manager(object):
                 return False
 
     def post_message(self,message_txt):
-        for feed in self.get_active_channels():
+        for feed in self.sy_get_all_channels():
             try:
                 feed.add_message(message_txt)
             except Exception as ex:
                 print(ex)
 
+    def send_km(self, km):
+        assert isinstance(km, tb_kills)
+        for feed in self.sy_get_all_channels():
+            try:
+                feed.add_km(km)
+            except Exception as ex:
+                print(ex)
+
     async def post_all_queued(self):
         while True:
-            for feed in self.__channel_feed_container.values():
-                if feed.deque_done():
-                    feed.set_deque_task(self.__discord_client.loop.create_task(feed.post_all()))
+            async for feed in self.get_all_channels():
+                try:
+                    if feed.deque_done():
+                        feed.set_deque_task(self.__discord_client.loop.create_task(feed.post_all()))
+                except Exception as ex:
+                    print(ex)
             await asyncio.sleep(.1)
+
+
+from database.db_tables.eve import tb_kills

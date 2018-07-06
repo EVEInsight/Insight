@@ -112,18 +112,7 @@ class zk(object):
     def pass_to_filters(self):
         print("Starting zk filter pass")
         while True:
-            __km = self.__pending_kms.get(block=True)
-            for feed in self.service.channel_manager.get_active_channels():
-                try:
-                    feed.add_km(__km)
-                except Exception as ex:
-                    print(ex)
-
-
-
-
-
-
-
-
-
+            try:
+                self.service.channel_manager.send_km(self.__pending_kms.get(block=True))
+            except Exception as ex:
+                print(ex)

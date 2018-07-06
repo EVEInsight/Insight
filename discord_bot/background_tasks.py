@@ -13,12 +13,11 @@ class background_tasks(object):
         self.task_sync_contacts = self.client.loop.create_task(self.sync_contacts())
 
     async def __helper_update_contacts_channels(self):
-        async for channel in self.client.channel_manager.get_all_channels():
-            if isinstance(channel, discord_bot.channel_types.insight_capRadar):
-                try:
-                    await channel.sync_settings.InsightOption_syncnow(None)
-                except Exception as ex:
-                    print(ex)
+        async for channel in self.client.channel_manager.get_all_capRadar():
+            try:
+                await channel.sync_settings.InsightOption_syncnow(None)
+            except Exception as ex:
+                print(ex)
 
     async def sync_contacts(self):
         while True:
