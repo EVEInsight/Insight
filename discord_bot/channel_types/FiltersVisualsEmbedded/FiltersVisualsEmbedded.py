@@ -10,6 +10,7 @@ class internal_options(enum.Enum):
 
 class base_visual(metaclass=ABCMeta):
     def __init__(self,km_row,discord_channel_object,overall_filters,feed_specific_row):
+        self.__creation_time = datetime.datetime.utcnow()
         assert isinstance(km_row,tb_kills)
         assert isinstance(discord_channel_object,discord.TextChannel)
         assert isinstance(overall_filters,tb_channels)
@@ -22,6 +23,9 @@ class base_visual(metaclass=ABCMeta):
         self.embed = discord.Embed()
         self.message_txt = ""
         self.color = discord.Color(800680)
+
+    def get_delay(self):
+        return ((datetime.datetime.utcnow() - self.__creation_time).total_seconds())
 
     @abstractmethod
     def internal_list_options(self):

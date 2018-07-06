@@ -1,6 +1,8 @@
 import discord
 import asyncio
 from functools import partial
+import psutil
+import datetime
 
 
 class background_tasks(object):
@@ -11,6 +13,7 @@ class background_tasks(object):
     async def setup_backgrounds(self):
         await self.client.wait_until_ready()
         self.task_sync_contacts = self.client.loop.create_task(self.sync_contacts())
+        self.task_bot_status = self.client.loop.create_task(self.bot_status())
 
     async def __helper_update_contacts_channels(self):
         async for channel in self.client.channel_manager.get_all_capRadar():
@@ -28,6 +31,43 @@ class background_tasks(object):
             except Exception as ex:
                 print(ex)
             await asyncio.sleep(25200)  # run every 7 hours
+
+    async def bot_status(self):
+        await self.client.wait_until_ready()
+        last_warning = datetime.datetime.utcnow() - datetime.timedelta(minutes=60)
+        while True:
+            try:
+                await asyncio.sleep(300)
+                status_str = 'CPU:{}% MEM:{:.1f}GB [Service Stats 5m]'.format(str(int(psutil.cpu_percent())),
+                                                                              psutil.virtual_memory()[3] / 2. ** 30)
+                stats_zk = await self.client.loop.run_in_executor(None, self.client.service.zk_obj.avg_delay)
+                d_status = discord.Status.online
+                if stats_zk[1] >= 900:
+                    d_status = discord.Status.idle
+                    if datetime.datetime.utcnow() >= last_warning + datetime.timedelta(minutes=30):
+                        msg = "Service Warning: \nThe average delay of Insight receiving killmails from when they actually " \
+                              "occurred is {} seconds. This indicates a service issue with zKill or CCP API.".format(
+                            str(stats_zk[1]))
+                        await self.client.loop.run_in_executor(None,
+                                                               partial(self.client.channel_manager.post_message, msg))
+                        last_warning = datetime.datetime.utcnow()
+                status_str += '[zK] KMs Added: {}, AVG Delay: {}s '.format(str(stats_zk[0]), str(stats_zk[1]))
+                stats_feeds = await self.client.channel_manager.avg_delay()
+                if stats_feeds[1] >= 15:
+                    d_status = discord.Status.dnd
+                    if datetime.datetime.utcnow() >= last_warning + datetime.timedelta(minutes=30):
+                        msg = "Service Warning: \nThe average Insight filtering and posting task delay is {} seconds. This " \
+                              "indicates service issues with Discord or the Insight bot could be under heavy load.".format(
+                            stats_feeds[1])
+                        await self.client.loop.run_in_executor(None,
+                                                               partial(self.client.channel_manager.post_message, msg))
+                        last_warning = datetime.datetime.utcnow()
+                status_str += '[Insight] KMs Pushed: {}, AVG Delay: {}s '.format(str(stats_feeds[0]),
+                                                                                 str(stats_feeds[1]))
+                game_act = discord.Activity(name=status_str, type=discord.ActivityType.watching)
+                await self.client.change_presence(activity=game_act, status=d_status)
+            except Exception as ex:
+                print(ex)
 
 
 import discord_bot

@@ -4,6 +4,7 @@ import discord_bot.channel_types as cType
 from functools import partial
 import discord
 import asyncio
+import datetime
 
 
 class Channel_manager(object):
@@ -12,6 +13,31 @@ class Channel_manager(object):
         self.__channel_feed_container = {}
         self.__dm_container = {}
         self.__discord_client:discord_bot.Discord_Insight_Client = None
+        self.__km_post_delays = asyncio.Queue()
+
+    async def add_delay(self, seconds_number):
+        try:
+            self.__km_post_delays.put_nowait(seconds_number)
+        except Exception as ex:
+            print(ex)
+
+    async def avg_delay(self):
+        values = []
+        total = 0
+        avg = 0
+        try:
+            while True:
+                values.append(self.__km_post_delays.get_nowait())
+        except asyncio.QueueEmpty:
+            try:
+                total = len(values)
+                avg = sum(values) / total
+            except:
+                pass
+        except Exception as ex:
+            print(ex)
+        finally:
+            return (total, int(round(avg)))
 
     def get_discord_client(self):
         assert isinstance(self.__discord_client,discord_bot.Discord_Insight_Client)

@@ -100,6 +100,7 @@ class discord_feed_service(object):
                 __item = self.kmQueue.get_nowait()
                 if isinstance(__item, base_visual):
                     await __item()
+                    await self.channel_manager.add_delay(__item.get_delay())
                 else:
                     await self.channel_discord_object.send(str(__item))
             except queue.Empty:

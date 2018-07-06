@@ -2,6 +2,7 @@ configparser==3.5.0
 dateparser==0.7.0
 git+https://github.com/Rapptz/discord.py.git@rewrite#egg=discord.py
 mysql-connector-python==8.0.11
+psutil==5.4.6
 requests==2.19.1
 SQLAlchemy==1.2.9
 swagger-client==1.0.0 #see article to install this package https://developers.eveonline.com/blog/article/swagger-codegen-update

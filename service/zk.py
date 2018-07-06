@@ -7,6 +7,7 @@ import datetime
 import service
 from sqlalchemy.orm import Session
 import database.db_tables as dbRow
+import statistics
 
 
 class zk(object):
@@ -21,6 +22,31 @@ class zk(object):
         self.error_ids = []
         self.__pending_kms = queue.Queue(maxsize=1000)
         self.__error_km_json = queue.Queue()
+        self.time_delay = queue.Queue()
+
+    def __add_delay(self, other_time):
+        try:
+            self.time_delay.put_nowait((datetime.datetime.utcnow() - other_time).total_seconds())
+        except Exception as ex:
+            print(ex)
+
+    def avg_delay(self):
+        values = []
+        total = 0
+        avg = 0
+        try:
+            while True:
+                values.append(self.time_delay.get_nowait())
+        except queue.Empty:
+            try:
+                total = len(values)
+                avg = statistics.median(values)
+            except:
+                pass
+        except Exception as ex:
+            print(ex)
+        finally:
+            return (total, int(round(avg)))
 
     @staticmethod
     def generate_identifier():
@@ -106,6 +132,7 @@ class zk(object):
         try:
             assert isinstance(km,dbRow.tb_kills)
             self.__pending_kms.put(km,block=True,timeout=25)
+            self.__add_delay(km.killmail_time)
         except Exception as ex:
             print(ex)
 
