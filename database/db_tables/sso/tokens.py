@@ -44,7 +44,7 @@ class Tokens(dec_Base.Base, sso_base):
         syncs_with += "Pilot: {}\n".format(self.object_pilot.character_name) if self.object_pilot else ""
         syncs_with += "Corp: {}\n".format(self.object_corp.corporation_name) if self.object_corp else ""
         syncs_with += "Alliance: {}\n".format(self.object_alliance.alliance_name) if self.object_alliance else ""
-        syncs_with += "Contains {} pilots, {} corps, and {} alliances contacts." \
+        syncs_with += "Contains {} pilot, {} corp, and {} alliance contacts." \
             .format(str(len(self.object_contacts_pilots)), str(len(self.object_contacts_corps)),
                     str(len(self.object_contacts_alliances)))
         return syncs_with

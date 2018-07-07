@@ -94,7 +94,8 @@ class Options_Sync(options_base.Options_Base):
             finally:
                 db.close()
 
-        await self.cfeed.channel_discord_object.send("Syncing contact lists now")
+        if message_object is not None:
+            await self.cfeed.channel_discord_object.send("Syncing ignored ally capRadar contact lists now")
         __resp = await self.cfeed.discord_client.loop.run_in_executor(None, sync_contacts)
         await self.cfeed.channel_discord_object.send(__resp)
         await self.cfeed.async_load_table()

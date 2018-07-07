@@ -160,7 +160,7 @@ class Options_DM(options_base.Options_Base):
         await message_object.channel.send(resp)
 
     async def InsightOption_syncnow(self, message_object: discord.Message):
-        """Force sync - Forces an API pull on all of your tokens. Note: Insight automatically syncs your tokens every 8 hours."""
+        """Force sync - Forces an API pull on all of your tokens. Note: Insight automatically syncs your tokens every 7 hours."""
         await message_object.channel.send("Syncing your tokens now")
         await self.cfeed.discord_client.loop.run_in_executor(None,
                                                              partial(tb_tokens.sync_all_tokens, self.cfeed.user_id,
