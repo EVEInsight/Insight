@@ -37,7 +37,7 @@ class Channel_manager(object):
         except Exception as ex:
             print(ex)
         finally:
-            return (total, int(round(avg)))
+            return (total, round(avg, 1))
 
     def get_discord_client(self):
         assert isinstance(self.__discord_client,discord_bot.Discord_Insight_Client)

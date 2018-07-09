@@ -26,7 +26,7 @@ class zk(object):
 
     def __add_delay(self, other_time):
         try:
-            self.time_delay.put_nowait((datetime.datetime.utcnow() - other_time).total_seconds())
+            self.time_delay.put_nowait(((datetime.datetime.utcnow() - other_time).total_seconds()) / 60)
         except Exception as ex:
             print(ex)
 
@@ -46,7 +46,7 @@ class zk(object):
         except Exception as ex:
             print(ex)
         finally:
-            return (total, int(round(avg)))
+            return (total, round(avg, 1))
 
     @staticmethod
     def generate_identifier():
@@ -131,6 +131,7 @@ class zk(object):
     def __add_km_to_filter(self,km):
         try:
             assert isinstance(km,dbRow.tb_kills)
+            km.loaded_time = datetime.datetime.utcnow()  # adjust for name resolve
             self.__pending_kms.put(km,block=True,timeout=25)
             self.__add_delay(km.killmail_time)
         except Exception as ex:

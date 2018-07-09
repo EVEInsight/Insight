@@ -24,7 +24,7 @@ class background_tasks(object):
 
     async def sync_contacts(self):
         while True:
-            await asyncio.sleep(25200)  # run every 7 hours, run later instead of start
+            await asyncio.sleep(36000)  # run every 10 hours, run later instead of start
             print("Running sync contacts task")
             try:
                 await self.client.loop.run_in_executor(None, partial(tb_tokens.mass_sync_all, self.client.service))
@@ -41,18 +41,18 @@ class background_tasks(object):
                                                                         psutil.virtual_memory()[3] / 2. ** 30)
                 stats_zk = await self.client.loop.run_in_executor(None, self.client.service.zk_obj.avg_delay)
                 d_status = discord.Status.online
-                if stats_zk[1] >= 1500:
+                if stats_zk[1] >= 30:
                     d_status = discord.Status.idle
                     if datetime.datetime.utcnow() >= last_warning + datetime.timedelta(hours=3):
                         msg = "Service Warning: \nThe average delay of Insight receiving killmails from when they actually " \
-                              "occurred is {} seconds. This indicates a service issue with zKill or CCP API.".format(
+                              "occurred is {} minutes. This indicates a service issue with zKill or CCP API.".format(
                             str(stats_zk[1]))
                         await self.client.loop.run_in_executor(None,
                                                                partial(self.client.channel_manager.post_message, msg))
                         last_warning = datetime.datetime.utcnow()
-                status_str += '[zK] KMs Added: {}, AVG Delay: {}s '.format(str(stats_zk[0]), str(stats_zk[1]))
+                status_str += '[zK] KMs Added: {}, AVG Delay: {}m '.format(str(stats_zk[0]), str(stats_zk[1]))
                 stats_feeds = await self.client.channel_manager.avg_delay()
-                if stats_feeds[1] >= 20:
+                if stats_feeds[1] >= 25:
                     d_status = discord.Status.dnd
                     if datetime.datetime.utcnow() >= last_warning + datetime.timedelta(hours=3):
                         msg = "Service Warning: \nThe average Insight filtering and posting task delay is {} seconds. This " \
@@ -67,7 +67,7 @@ class background_tasks(object):
                 await self.client.change_presence(activity=game_act, status=d_status)
             except Exception as ex:
                 print(ex)
-            await asyncio.sleep(600)
+            await asyncio.sleep(25)
 
 
 import discord_bot
