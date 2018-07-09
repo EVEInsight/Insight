@@ -47,12 +47,11 @@ class background_tasks(object):
                         msg = "Service Warning: \nThe average delay of Insight receiving killmails from when they actually " \
                               "occurred is {} minutes. This indicates a service issue with zKill or CCP API.".format(
                             str(stats_zk[1]))
-                        await self.client.loop.run_in_executor(None,
-                                                               partial(self.client.channel_manager.post_message, msg))
+                        # await self.client.loop.run_in_executor(None, partial(self.client.channel_manager.post_message, msg))
                         last_warning = datetime.datetime.utcnow()
                 status_str += '[zK] KMs Added: {}, AVG Delay: {}m '.format(str(stats_zk[0]), str(stats_zk[1]))
                 stats_feeds = await self.client.channel_manager.avg_delay()
-                if stats_feeds[1] >= 25:
+                if stats_feeds[1] >= 30:
                     d_status = discord.Status.dnd
                     if datetime.datetime.utcnow() >= last_warning + datetime.timedelta(hours=3):
                         msg = "Service Warning: \nThe average Insight filtering and posting task delay is {} seconds. This " \
