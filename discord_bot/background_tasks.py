@@ -67,7 +67,7 @@ class background_tasks(object):
                 await self.client.change_presence(activity=game_act, status=d_status)
             except Exception as ex:
                 print(ex)
-            await asyncio.sleep(25)
+            await asyncio.sleep(600)
 
 
 import discord_bot
