@@ -6,3 +6,4 @@ from .discord_options import option_returns_object as option_returns_object
 from .discord_main import Discord_Insight_Client as Discord_Insight_Client
 from . import channel_types as channel_types
 from .background_tasks import background_tasks
+from .DiscordCommands import DiscordCommands

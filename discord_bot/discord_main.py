@@ -2,6 +2,7 @@ import discord
 from concurrent.futures import ThreadPoolExecutor
 import service
 from .background_tasks import background_tasks
+from .DiscordCommands import DiscordCommands
 
 
 class Discord_Insight_Client(discord.Client):
@@ -9,6 +10,7 @@ class Discord_Insight_Client(discord.Client):
         super().__init__()
         self.service: service_module = service_module
         self.channel_manager: service.Channel_manager = self.service.channel_manager
+        self.commandLookup = DiscordCommands()
         self.background_tasks = background_tasks(self)
         self.loop.set_default_executor(ThreadPoolExecutor(max_workers=5))
         self.loop.create_task(self.setup_tasks())
@@ -40,24 +42,26 @@ class Discord_Insight_Client(discord.Client):
         await self.wait_until_ready()
         if message.author.id == self.user.id:
             return
-        elif message.content.startswith('!create'):
+        if not await self.commandLookup.is_command(message):
+            return
+        elif await self.commandLookup.create(message):
             await (await self.channel_manager.get_channel_feed(message.channel)).command_create(message)
-        elif message.content.startswith('!settings'):
+        elif await self.commandLookup.settings(message):
             await (await self.channel_manager.get_channel_feed(message.channel)).command_settings(message)
-        elif message.content.startswith('!start'):
+        elif await self.commandLookup.start(message):
             await (await self.channel_manager.get_channel_feed(message.channel)).command_start(message)
-        elif message.content.startswith('!stop'):
+        elif await self.commandLookup.stop(message):
             await (await self.channel_manager.get_channel_feed(message.channel)).command_stop(message)
-        elif message.content.startswith('!sync'):
+        elif await self.commandLookup.sync(message):
             await (await self.channel_manager.get_channel_feed(message.channel)).command_sync(message)
-        elif message.content.startswith('!remove'):
+        elif await self.commandLookup.remove(message):
             await (await self.channel_manager.get_channel_feed(message.channel)).command_remove(message)
-        elif message.content.startswith('!help'):
+        elif await self.commandLookup.help(message):
             await (await self.channel_manager.get_channel_feed(message.channel)).command_help(message)
-        elif message.content.startswith('!about'):
+        elif await self.commandLookup.about(message):
             await (await self.channel_manager.get_channel_feed(message.channel)).command_about(message)
         else:
-            return
+            await self.commandLookup.notfound(message)
 
 
     @staticmethod
