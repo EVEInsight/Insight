@@ -54,6 +54,10 @@ class Discord_Insight_Client(discord.Client):
             await (await self.channel_manager.get_channel_feed(message.channel)).command_remove(message)
         elif message.content.startswith('!help'):
             await (await self.channel_manager.get_channel_feed(message.channel)).command_help(message)
+        elif message.content.startswith('!about'):
+            await (await self.channel_manager.get_channel_feed(message.channel)).command_about(message)
+        else:
+            return
 
 
     @staticmethod

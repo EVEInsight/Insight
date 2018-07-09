@@ -6,6 +6,7 @@ class discord_text_nofeed_exist(discord_feed_service):
         super(discord_text_nofeed_exist, self).__init__(channel_discord_object,service_module)
 
     async def command_create(self, message_object):
+        """!create - Begin setting up a new channel feed service in this channel."""
         if not type(self) == discord_text_nofeed_exist:
             await self.command_not_supported_sendmessage(message_object)
         else:
@@ -18,12 +19,14 @@ class discord_text_nofeed_exist(discord_feed_service):
             await __options()
 
     async def command_settings(self,message_object):
+        """!settings - Modify feed settings for a channel."""
         if type(self) == discord_text_nofeed_exist:
             await self.command_not_supported_sendmessage(message_object)
         else:
             await super(discord_text_nofeed_exist, self).command_settings(message_object)
 
     async def command_start(self,message_object:discord.Message):
+        """!start - Starts/resumes a channel feed from being paused."""
         if type(self) == discord_text_nofeed_exist:
             await self.command_not_supported_sendmessage(message_object)
         else:
@@ -39,6 +42,7 @@ class discord_text_nofeed_exist(discord_feed_service):
                     "{}\nThe channel feed is already running".format(message_object.author.mention))
 
     async def command_stop(self,message_object:discord.Message):
+        """!stop - Pauses a channel feed temporarily."""
         if type(self) == discord_text_nofeed_exist:
             await self.command_not_supported_sendmessage(message_object)
         else:
@@ -53,6 +57,7 @@ class discord_text_nofeed_exist(discord_feed_service):
                 await message_object.channel.send("{}\nThe channel feed is already stopped".format(message_object.author.mention))
 
     async def command_remove(self,message_object:discord.Message):
+        """!remove - Delete the currently configured feed service in this channel."""
         if type(self) == discord_text_nofeed_exist:
             await self.command_not_supported_sendmessage(message_object)
         else:

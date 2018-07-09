@@ -29,6 +29,7 @@ class capRadar(noCH.discord_text_nofeed_exist):
         await super(capRadar, cls).create_new(message_object,service_module,discord_client)
 
     async def command_sync(self, message_object):
+        """!sync - Manage contact EVE tokens for this channel. Contact tokens allow you to ignore allies in tracked ships from appearing on radar."""
         __options = insightClient.mapper_index_withAdditional(self.discord_client, message_object)
         __options.set_main_header("Select an option to modify:")
         async for cor in self.sync_settings.get_option_coroutines():

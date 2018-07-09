@@ -60,10 +60,31 @@ class discord_feed_service(object):
     async def command_sync(self, message_object):
         await self.command_not_supported_sendmessage(message_object)
 
+    async def command_about(self, message_object):
+        """!about - Display Insight credits and version info."""
+        msg = "Insight by Nathan-LS. An EVE Online killfeed bot for Discord.\n\nhttps://github.com/Nathan-LS/Insight"
+        await message_object.channel.send(msg)
+
     async def command_help(self,message_object):
-        await self.command_not_supported_sendmessage(message_object)
+        """!help - Displays information about available commands."""
+
+        def get_commands():
+            for i in dir(self):
+                if i.startswith("command_"):
+                    yield getattr(self, i)
+                else:
+                    continue
+
+        resp_str = "These are all commands and their descriptions available to be used:\n\n"
+        for i in get_commands():
+            info = i.__doc__
+            if info is not None:
+                resp_str += "{}\n\n".format(info)
+        resp_str += "\nFor more detailed information, check out the project wiki:\nhttps://github.com/Nathan-LS/Insight/wiki"
+        await message_object.channel.send("{}\n{}".format(message_object.author.mention, resp_str))
 
     async def command_settings(self,message_object):
+        """!settings - Modify Insight settings related to this channel or user."""
         __options = insightClient.mapper_index_withAdditional(self.discord_client,message_object)
         __options.set_main_header("Select an option to modify:")
         async for cor in self.linked_options.get_option_coroutines():
