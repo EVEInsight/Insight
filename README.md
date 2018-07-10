@@ -14,20 +14,20 @@ and manage the project yourself.
 * Project Screenshots: [Imgur Album](https://imgur.com/a/0LIkjNc)
 
 # Table of contents
-- [Insight Project](#Insight)
-- [Links](#Links)
+- [Insight Project](#insight)
+- [Links](#links)
 - [Table of Contents](#table-of-contents)
 - [Features](#features)
     - [Feeds](#feeds)
     - [Discord Embedded Visuals](#discord-embedded-visuals)
     - [Preconfigured Feeds](#preconfigured-feeds)
-- [Commands](#Commands)
-- [Permissions](#Permissions)
+- [Commands](#commands)
+- [Permissions](#permissions)
 - [Getting Started](#getting-started)
     - [Entity Feed](#entity-feed)
     - [Cap Radar Feed](#cap-radar-feed)
-- [Installation](#Installation)
-- [Licenses](#Licenses)
+- [Installation](#installation)
+- [Licenses](#licenses)
     
 
 # Features
@@ -71,8 +71,8 @@ or run the command ```!help```.
 # Permissions
 An overview of required Discord permissions for the bot to function. 
 
-The preconfigured bot invite [link](#Links) creates a server role with these permissions after which you assign the 
-role to intended feed channels. Using the invite [link](#Links) without preconfigured roles requires manual 
+The preconfigured bot invite [link](#links) creates a server role with these permissions after which you assign the 
+role to intended feed channels. Using the invite [link](#links) without preconfigured roles requires manual 
 configuration of the following permissions.
 
 In intended feed channels the bot requires the following permissions:
@@ -89,8 +89,8 @@ In intended feed channels the bot requires the following permissions:
 ### Entity Feed
 This quick start guide will help you set up an entity feed to track both kills and losses for an alliance.
 
-1. Begin by inviting Insight to your Discord server using one of the provided [links](#Links).
-2. Ensure Insight has the correct [permissions](#Permissions) in the intended feed channel.
+1. Begin by inviting Insight to your Discord server using one of the provided [links](#links).
+2. Ensure Insight has the correct [permissions](#permissions) in the intended feed channel.
 3. Run the command:
 ``` !create``` and select 'Entity Feed'.
 4. Type in the name of an entity you wish to track. In this case, 
@@ -103,8 +103,8 @@ in your feed. If you wish to remove the feed, run ```!remove```.
 ### Cap Radar Feed
 This quick start guide will help you set up a cap radar feed for tracking supercapital activity within
 12 LYs of our base system, Jita.
-1. Begin by inviting Insight to your Discord server using one of the provided [links](#Links).
-2. Ensure Insight has the correct [permissions](#Permissions) in the intended feed channel.
+1. Begin by inviting Insight to your Discord server using one of the provided [links](#links).
+2. Ensure Insight has the correct [permissions](#permissions) in the intended feed channel.
 3. Run the command:
 ``` !create``` and select 'Cap Radar'.
 4. The bot will ask us for the name of a base system. In our example case, enter ```Jita```.
@@ -122,7 +122,7 @@ to blacklist from appearing on the radar, accessible by the ```!sync``` command.
 The [wiki](https://github.com/Nathan-LS/Insight/wiki/Installation) contains a detailed guide for Insight installation on a Linux server.
     
 # Credits
-* [Fuzzwork](https://www.fuzzwork.co.uk/) - Provides SQLite databases conversions of CCP's SDE which Insight references on initial loading.
+* [Fuzzwork](https://www.fuzzwork.co.uk/) - Provides SQLite database conversions of CCP's SDE which Insight references on initial loading.
 * [zKillboard](https://github.com/zKillboard/zKillboard) - Provides a centralized database of killmails for the game EVE Online.
     * [zKillboard RedisQ](https://github.com/zKillboard/RedisQ) - A websocket alternative Insight uses to pull KMs from in real time.
 * [CCP Games](https://www.ccpgames.com/)
