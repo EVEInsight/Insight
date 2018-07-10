@@ -1,106 +1,139 @@
-# Insight Rewrite
-A complete rewrite of the original Insight Bot. The Insight rewrite code has been slowly worked on over the last few weeks
-and is nearly ready. Note: This is a WIP and feedback is appreciated.
-
-The original hosted Insight bot will still run until the rewrite is complete. 
-
-When the rewrite is complete the original hosted Insight bot will be discontinued and be replaced with
-a new hosted Discord bot running the rewrite code.
-
-
-To use this bot you may self host and create a Discord application with this code or use the provided
-link to invite an Insight bot I personally host to your server. The bot is designed to be capable of running on multiple 
-Discord servers, providing a separate individual experience for each. I.e. It's wasteful to run a separate
-individual Insight application for each server. 
-
-https://discordapp.com/api/oauth2/authorize?client_id=463952393206497290&permissions=149504&scope=bot
-
-Note: This Discord Application link is running the Insight Main (original) branch
-while this rewrite branch is finalized.
+# Insight
+Insight is a Discord bot that provides various live killmail feeds for ships destroyed within the 
+game EVE Online. Insight can track your personal, corporate, or alliance activity and display information 
+in visually appealing Discord embedded objects. Insight also features a live radar feed capable of
+displaying hostile capital, supercapital, or black ops activity within a lightyear radius of selected
+systems. The bot is available hosted to invite directly to your server, or you can clone the project, set up, host, 
+and manage the project yourself.
 
 
-# Description
-The original Insight bot requires a much needed code redesign.
-At the time of the project's creation I was unfamiliar with asnycio and as a result, 
-much of the original code was heavily unoptimized, confusing, and fractured.
+# Links
+* Insight (with preconfigured role): [Insight Bot Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=463952393206497290&permissions=149504&scope=bot)
+* Insight (without preconfigured role): [Insight Bot Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=463952393206497290&permissions=0&scope=bot)
+* Project Help/Support Server: [Project Support](https://discord.gg/Np3FCUn)
+* Project Screenshots: [Imgur Album](https://imgur.com/a/0LIkjNc)
 
-The bot started off as a basic utility bot without a clear set of functions or features and as features were coded in
-the code grew to be unmanageable and slow.
-
-
-The most popular utility of the original Insight project appeared to be live KM feeds, and as a result the Insight rewrite
-will specialize entirely in various KM feeds to see basic live entity(alliance/corp/pilot) and capRadar(tracking and reporting of nearby capitals)
-with an easier interface for commands.
+# Table of contents
+- [Insight Project](#Insight)
+- [Links](#Links)
+- [Table of Contents](#table-of-contents)
+- [Features](#features)
+    - [Feeds](#feeds)
+    - [Discord Embedded Visuals](#discord-embedded-visuals)
+    - [Preconfigured Feeds](#preconfigured-feeds)
+- [Commands](#Commands)
+- [Permissions](#Permissions)
+- [Getting Started](#getting-started)
+    - [Entity Feed](#entity-feed)
+    - [Cap Radar Feed](#cap-radar-feed)
+- [Installation](#Installation)
+- [Licenses](#Licenses)
+    
 
 # Features
 * Feeds
     * **Entity tracking**  
-        * Reports destroyed ships participated in or belonging to a set of entities (alliance,corp,pilot).
-        
-        ![alt text](https://i.imgur.com/v3uOnyU.png)
+        * Displays involvement (kills/losses) for tracked entities (pilot, corporation, alliance).
+        * Multiple entities can be added per channel.
     * **Cap radar**
-        * Reports supercapital, carrier, or blops activity in a LY radius of a selected system.
+        * Reports supercapital, carrier, or blops activity in a LY radius of selected systems.
         * Ignore lists
-            * API synchronizable standings to ignore friendly supers that may be used within the radius.
-        * Alerts 
-            * Optional @everyone and @here alerts if the radar detects a hostile capital/super recently involved in a KM.
+            * Synchronize SSO standings to blacklist friendly supers from appearing in the radar feed.
+        * Alerts (coming soon!)
+            * Optional @everyone and @here alerts for when the radar detects a hostile capital/super recently involved in a KM.
             Example: KM occurred within the last minute so a supercapital could still be within the vicinity.
-        
-        ![alt text](https://i.imgur.com/hLS7ztb.png)
-    * Discord embedded visuals
-        * Visually appealing discord embeds instead of plain text messages for organized and functional information.
-            * Multiple link buttons to quickly access more information through Dotlan or zKillboard.
-                * Links for system related, pilot, detailed km in the case of Entity tracking feeds.
-                * Links for attacking super/capital pilot zK, detailed zK report, premade Dotlan jump routes from base system to km system for titans/supers, carriers, and blops in the case of capRadar.
-            * Relevant embedded images
-                * Logos, portraits, destroyed ship in the case of Entity feeds.
-                * Highest valued attacking ship (titan/super,blops) image and corporation/alliance logo.  
-            * Formatted text
-                * Description and text are formatted with Discord code blocks for alignment and layout spacing not possible with normal Discord text messages.
-            * Adjusted timestamp footer
-                * Shows the time occurrence of a KM localized to every Discord client.
-* Preconfigured Feeds
-    * Constant addition of preconfigured feeds without the need for configuration.
+* Discord embedded visuals
+    * Visually appealing Discord embedded objects for organized and functional information.
+        * Multiple link buttons to quickly access useful information through Dotlan or zKillboard.
+            * Links for system, related, pilot, detailed km in entity feeds.
+            * Links for attacking super/capital pilot zK, detailed zK report, and premade Dotlan jump routes from base system for differing ship classes in capRadar feeds.
+        * Relevant embedded images
+            * Logos, portraits, destroyed ship in entity feeds.
+            * Highest valued attacking ship image and corporation/alliance logo in capRadar feeds.  
+        * Formatted text
+            * Description and text are formatted with Discord code blocks for easier reading.
+        * Adjusted timestamp footer
+            * Shows the time occurrence of a KM localized to every Discord client.
+* Preconfigured Feeds (coming soon!)
+    * Constant addition of fun, preconfigured feeds without the need for configuration.
         * Supercapital losses only
             * A feed that only shows supercapitals destroyed.
-        * Abysmal losses only 
-            * A feed that only shows ships destroyed in abyssal space.
+        * Abyssal losses only 
+            * A feed that only shows ships destroyed in Abyssal space.
         * Freighter ganks
             * Shows only freighters destroyed in high security space not to war decelerations.
         * Universal supercarrier activity
-            * A capRadar feed that shows all supercapital activity within the game regardless of standing or location.        
-* Simpler Commands 
-    * Removal of chained, hard to remember commands. All available commands will be one word.
-        * Example command to create a new feed:
-            * Before: "!csettings !capRadar !create" or "!csettings !enfeed !create" 
-            * After: "!create"
-        * Example command to remove a feed:
-            * Before: "!csettings !capRadar !delete" or "!csettings !enfeed !delete"
-            * After: "!delete"
-    * Nested options
-        * Running commands will present you with options, exact descriptions, and a selection to chose one.
-    * No arguments
-        * Commands no longer require confusing arguments. Running a command will present you with options and allow you to select one.
+            * A capRadar feed that shows all supercapital activity within the game regardless of standing or location.       
+# Commands
+To see detailed command information, see [commands wiki](https://github.com/Nathan-LS/Insight/wiki/Commands)
+or run the command ```!help```.
+
+# Permissions
+An overview of required Discord permissions for the bot to function. 
+
+The preconfigured bot invite [link](#Links) creates a server role with these permissions after which you assign the 
+role to intended feed channels. Using the invite [link](#Links) without preconfigured roles requires manual 
+configuration of the following permissions.
+
+In intended feed channels the bot requires the following permissions:
+
+| Permission | Reason |
+|---|---|
+| Read Messages | Allows the bot to access the channel and read command events.|
+| Send Messages | Allows the bot to communicate and display prompts to users running commands.|
+| Embed Links   | Allows the bot to post Discord embedded content containing images (ship renders, player portraits, corp/alliance logos) and hyperlinks (zKillboard and Dotlan).
+| Mention Everyone | Allows the bot to optionally mention @here or @everyone if configured to do so for alerts in capRadar feeds.
+
+
+# Getting started
+### Entity Feed
+This quick start guide will help you set up an entity feed to track both kills and losses for an alliance.
+
+1. Begin by inviting Insight to your Discord server using one of the provided [links](#Links).
+2. Ensure Insight has the correct [permissions](#Permissions) in the intended feed channel.
+3. Run the command:
+``` !create``` and select 'Entity Feed'.
+4. Type in the name of an entity you wish to track. In this case, 
+let's create a feed that tracks alliance Brave Collective. Type the name ```Brave Collective``` or whichever
+entity you wish to track.
+5. Select the display mode if you want to display kill, losses, or both for Brave Collective.
+6. The feed service is successfully configured and running! You should start to see activity whenever
+a tracked entity participates in PvP. You can now run the command ```!settings``` to add or remove entities
+in your feed. If you wish to remove the feed, run ```!remove```.
+### Cap Radar Feed
+This quick start guide will help you set up a cap radar feed for tracking supercapital activity within
+12 LYs of our base system, Jita.
+1. Begin by inviting Insight to your Discord server using one of the provided [links](#Links).
+2. Ensure Insight has the correct [permissions](#Permissions) in the intended feed channel.
+3. Run the command:
+``` !create``` and select 'Cap Radar'.
+4. The bot will ask us for the name of a base system. In our example case, enter ```Jita```.
+5. Next, we will be asked for the maximum lightyear range from Jita we wish to track targets. Enter ```12```
+or whichever ly range you wish.
+6. We will be shown a few prompts asking if we wish to track black ops, regular capitals, and supers. You 
+can track all of these groups or a subset as in our case. Answer ```no``` to tracking blops
+and normal capitals, selecting ```yes``` to track supercapitals.
+7. A prompt will ask for the maximum KM age in minutes. Enter ```20``` as a reasonable limit or some other integer.
+8. The feed service is now fully configured! You can manage settings, add or remove base systems, and more 
+by running the ```!settings``` command. Cap radar feeds feature an optional API synchronized list of allies
+to blacklist from appearing on the radar, accessible by the ```!sync``` command.
+
+# Installation
+The [wiki](https://github.com/Nathan-LS/Insight/wiki/Installation) contains a detailed guide for Insight installation on a Linux server.
+    
+# Credits
+* [Fuzzwork](https://www.fuzzwork.co.uk/) - Provides SQLite databases conversions of CCP's SDE which Insight references on initial loading.
+* [zKillboard](https://github.com/zKillboard/zKillboard) - Provides a centralized database of killmails for the game EVE Online.
+    * [zKillboard RedisQ](https://github.com/zKillboard/RedisQ) - A websocket alternative Insight uses to pull KMs from in real time.
+* [CCP Games](https://www.ccpgames.com/)
+    * [EVE Swagger Interface](https://esi.evetech.net/ui/) - EVE's official API, used by Insight to lookup names, information, and utilize access tokens.
+* [Swagger Codegen](https://github.com/swagger-api/swagger-codegen) - An automatic API client generation tool for services utilizing Swagger definitions.
+
+# Licenses
+Insight is released under the GNU General Public License v3.0, and the full license
+is available in the file ```LICENSE```. This project utilizes various python libraries each with their
+own licensing. Insight uses data and names from the game EVE Online subject to its license
+included in the file ```CCP.md```.
         
-* Faster, rewritten backend
-    * Responsible, restricted threading. Less threads but more specialized and responsibly programed.
-        * The original project was written with a disregard to the number of threads and the danger of using asyncio and too many threads together.
-        * Rewrite uses only 3 threads for work.
-            * A zk KM pulling/db insertion thread.
-            * A thread that pushes a KM object to all running feed channels and checks filters / criteria.
-            * The Discord asnycio event loop to handle commands and asynchronous pushing of matched KM objects to channels.
-    * No requerying of the database for km information.
-        * KM objects are represented as SQLAlchemy objects and linked information is all eagerly loaded.
-        * From the second KMs are inserted into the database the underlying KM SQLAlchemy instance is passed to all channels without the need
-        of a requery for each individual channel compared to the original which queried the entire database for each channel with expensive joining.
-    * Better scaling
-        * Adding more feeds and servers will not impact the bot's ability to run
-            * As more servers and feeds were added with the original branch, more
-            threads and MySQL queries would be hitting the database. In most
-            cases this would slow the bot and MySQL down to a crawl and KMs
-            would be displayed hours after they initially occurred.
-            * In rewrite, the number of threads and ongoing queries remains constant
-            so Insight is only limited by Discord's 100 server limit per bot application.
-                * Add as many feeds as you like! Rewrite can handle it without stalling!
                 
          

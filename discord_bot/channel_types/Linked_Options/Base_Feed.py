@@ -10,7 +10,7 @@ class base_activefeed(options_base.Options_Base):
     # InsightOption_ InsightOptionRequired_
 
     async def InsightOption_remove_opt(self,message_object:discord.Message):
-        """Delete Feed  - Removes the currently active feed from this channel, deleting it's configuration."""
+        """Delete Feed  - Removes the currently active feed from this channel, deleting its configuration."""
         await self.cfeed.command_remove(message_object)
 
     async def InsightOption_pause(self,message_object:discord.Message):

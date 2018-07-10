@@ -45,7 +45,7 @@ class mapper_index(object):
         self.__printout_format = []
         self.__mention = "{}".format(self.message.author.mention)
         self.__header_text = ""
-        self.__footer_text = "Select an option by entering it's number:"
+        self.__footer_text = "Select an option by entering its number:"
         self.__timeout_seconds = int(timeout_seconds)
         self.discord_client = discord_client_object
 

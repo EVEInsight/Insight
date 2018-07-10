@@ -42,7 +42,7 @@ class Options_EnFeed(Base_Feed.base_activefeed):
         __search = dOpt.mapper_return_noOptions(self.cfeed.discord_client, message_object, timeout_seconds=60)
         __search.set_main_header("Enter the name of an entity you wish to track in this feed.\n\n"
                                  "An entity is a pilot, corporation, or alliance in which this channel "
-                                 "will streams kms involving.")
+                                 "will stream kms involving.")
         __search.set_footer_text("Enter a name. Note: partial names are accepted: ")
         __selected_option = None
         while __selected_option is None:
