@@ -5,11 +5,9 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm import *
 from sqlalchemy import *
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
-import dateparser
 from multiprocessing.pool import ThreadPool
 from database.db_tables import Base as dec_Base
 import datetime
-import dateparser
 from typing import List
 import concurrent.futures
 

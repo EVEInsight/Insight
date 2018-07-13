@@ -6,6 +6,7 @@ from . import EVEsso
 import database
 import argparse
 import configparser
+import sys
 
 
 class service_module(object):
@@ -50,7 +51,7 @@ class service_module(object):
                 return self.cli_args.config
         except FileNotFoundError:
             print("The config file '{0}' could not be found. Try renaming the file 'default-config.ini' to '{0}'".format(str(self.cli_args.config)))
-            exit(1)
+            sys.exit(1)
 
     def __import_check(self):
         try:

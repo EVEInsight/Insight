@@ -3,6 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 import service
 from .background_tasks import background_tasks
 from .DiscordCommands import DiscordCommands
+import sys
 
 
 class Discord_Insight_Client(discord.Client):
@@ -71,4 +72,4 @@ class Discord_Insight_Client(discord.Client):
             client.run(service_module.config_file["discord"]["token"])
         else:
             print("Missing a Discord Application token. Please make sure to set this variable in the config file '{}'".format(service_module.cli_args.config))
-            exit(1)
+            sys.exit(1)

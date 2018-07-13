@@ -5,12 +5,11 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm import *
 from sqlalchemy import *
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
-import dateparser
 from multiprocessing.pool import ThreadPool
 from database.db_tables import Base as dec_Base
 import datetime
-import dateparser
 from typing import List
+from dateutil.parser import parse as dateTimeParser
 
 
 class table_row(object):
@@ -133,8 +132,8 @@ class individual_api_pulling(table_row):
     def process_headers(self, response):
         try:
             self.api_ETag = response.get("Etag")
-            self.api_Expires = dateparser.parse(response.get("Expires"))
-            self.api_Last_Modified = dateparser.parse(response.get("Last-Modified"))
+            self.api_Expires = dateTimeParser(response.get("Expires"))
+            self.api_Last_Modified = dateTimeParser(response.get("Last-Modified"))
         except Exception as ex:
             print(ex)
 

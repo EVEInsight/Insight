@@ -3,6 +3,7 @@ import database.db_tables as dbRow
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
+import sys
 
 
 class static_data_import(object):
@@ -31,7 +32,7 @@ class static_data_import(object):
             self.locations = sdeBase.classes.mapDenormalize
         except Exception as ex:
             print("An error occurred when loading the SDE. Make sure you have downloaded and placed it correctly\n{}".format(ex))
-            exit(1)
+            sys.exit(1)
 
     def load_data_sde(self):
         tb_systems.import_all_sde(self.service,self.sde_session,self.systems)

@@ -4,6 +4,7 @@ import urllib.parse as urlparse
 import requests
 from requests.auth import HTTPBasicAuth
 import json
+import sys
 
 
 class EVEsso(object):
@@ -25,7 +26,7 @@ class EVEsso(object):
         self.__callback = self.service.config_file["ccp_developer"]["callback_url"]
         if not self.__client_id or not self.__client_secret or not self.__callback:
             print("You are missing a CCP developer application key and secret. Please set these in the config file.")
-            exit(1)
+            sys.exit(1)
         self._login_url = "https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={cb}&client_id={cid}&scope={scopes}".format(
             cb=self.__callback, cid=self.__client_id, scopes=self.__get_scopes())
 

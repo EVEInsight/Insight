@@ -3,8 +3,7 @@ Insight is a Discord bot that provides various live killmail feeds for ships des
 game EVE Online. Insight can track your personal, corporate, or alliance activity and display information 
 in visually appealing Discord embedded objects. Insight also features a live radar feed capable of
 displaying hostile capital, supercapital, or black ops activity within a lightyear radius of selected
-systems. The bot is available hosted to invite directly to your server, or you can clone the project, set up, host, 
-and manage the project yourself.
+systems. The bot is available hosted to invite directly to your server, or you can clone, set up, and host the project yourself.
 
 
 # Links

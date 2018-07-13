@@ -1,5 +1,6 @@
 from .base_objects import *
 from . import systems, attackers, victims, locations, types
+from dateutil.parser import parse as dateTimeParser
 from functools import cmp_to_key
 import operator
 
@@ -30,7 +31,7 @@ class Kills(dec_Base.Base, table_row):
         self.kill_id = data.get("killID")
         killmail_dict = data.get("killmail")
         if killmail_dict:
-            self.killmail_time = dateparser.parse(killmail_dict.get("killmail_time"))
+            self.killmail_time = dateTimeParser(killmail_dict.get("killmail_time"))
             self.solar_system_id = killmail_dict.get("solar_system_id")
         zkb_dict = data.get("zkb")
         if zkb_dict:

@@ -5,6 +5,7 @@ from functools import partial
 import discord
 import asyncio
 import datetime
+import sys
 
 
 class Channel_manager(object):
@@ -76,7 +77,7 @@ class Channel_manager(object):
             assert isinstance(client_object,discord_bot.Discord_Insight_Client)
             self.__discord_client = client_object
         except AssertionError:
-            exit(1)
+            sys.exit(1)
 
     async def load_channels(self):
         async for i in self.__get_text_channels():
