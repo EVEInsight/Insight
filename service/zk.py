@@ -154,9 +154,10 @@ class zk(object):
                                 print(ex)
                 else:
                     print("zk non 200 error code {}".format(resp.status_code))
+                    time.sleep(.1)
             except Exception as ex:
                 print(ex)
-            time.sleep(.1)
+                time.sleep(.1)
 
     def __add_km_to_filter(self,km):
         try:
