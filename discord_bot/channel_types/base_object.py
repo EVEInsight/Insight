@@ -134,11 +134,14 @@ class discord_feed_service(object):
                     pass
                 finally:
                     await self.channel_manager.remove_feed(self.channel_id)
+            except discord.HTTPException as ex:
+                if ex.status == 404:  # channel deleted
+                    await self.channel_manager.remove_feed(self.channel_id)
             except Exception as ex:
                 print(ex)
 
     async def remove(self):
-        print("removed")
+        print("feed removed")
 
     async def delete(self):
         def non_async_delete():
