@@ -35,18 +35,16 @@ class name_resolve(name_only):
         id_keys = list(set(id_keys) - set(error_ids))
         for id_list in cls.split_lists(id_keys,cls.missing_id_chunk_size()):
             try:
-                response = requests.post(url=cls.post_url(), headers=cls.get_headers(), json=id_list, timeout=5)
+                response = requests.post(url=cls.post_url(), headers=cls.get_headers(), json=id_list, timeout=3)
                 if response.status_code == 200:
                     for search_result in response.json():
                         selected_item = missing_object_dict.get(search_result.get('id'))
                         if selected_item is not None:
                             selected_item.set_name(search_result.get('name'))
-                elif response.status_code == 404:
-                    ids_404.extend(id_list)
                 else:
-                    pass
-            except Exception as ex:
-                print(ex)
+                    ids_404.extend(id_list)
+            except:
+                ids_404.extend(id_list)
         try:
             db.commit()
         except Exception as ex:

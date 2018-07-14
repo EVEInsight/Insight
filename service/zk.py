@@ -23,10 +23,18 @@ class zk(object):
         self.__pending_kms = queue.Queue(maxsize=1000)
         self.__error_km_json = queue.Queue()
         self.time_delay = queue.Queue()
+        self.time_delay_sql = queue.Queue()
 
     def __add_delay(self, other_time):
         try:
-            self.time_delay.put_nowait(((datetime.datetime.utcnow() - other_time).total_seconds()) / 60)
+            tn = datetime.datetime.now(datetime.timezone.utc)
+            self.time_delay.put_nowait(((tn - other_time).total_seconds()) / 60)
+        except Exception as ex:
+            print(ex)
+
+    def __add_sql_name_delay(self, other_time):
+        try:
+            self.time_delay_sql.put_nowait((datetime.datetime.utcnow() - other_time).total_seconds())
         except Exception as ex:
             print(ex)
 
@@ -46,7 +54,26 @@ class zk(object):
         except Exception as ex:
             print(ex)
         finally:
-            return (total, round(avg, 1))
+            return (total, round(avg, 1), self.__avg_delay_sql())
+
+    def __avg_delay_sql(self):
+        values = []
+        total = 0
+        avg = 0
+        try:
+            while True:
+                values.append(self.time_delay_sql.get_nowait())
+        except queue.Empty:
+            try:
+                total = len(values)
+                avg = sum(values) / total
+            except:
+                pass
+        except Exception as ex:
+            print(ex)
+        finally:
+            return (round(avg, 1))
+
 
     @staticmethod
     def generate_identifier():
@@ -73,14 +100,15 @@ class zk(object):
         if __row is not None:
             try:
                 db.commit()
+                self.__add_delay(__row.killmail_time)
                 self.error_ids = dbRow.name_resolver.api_mass_name_resolve(self.service, error_ids=self.error_ids)
-                db.close()
                 return True
             except Exception as ex:
                 db.rollback()
                 print(ex)
-                db.close()
                 return False
+            finally:
+                db.close()
         else:
             db.close()
             return False
@@ -111,6 +139,7 @@ class zk(object):
             try:
                 resp = self.rSession.get(self.zk_stream_url, verify=True, timeout=30)
                 if resp.status_code == 200:
+                    pull_start_time = datetime.datetime.utcnow()
                     json_data = resp.json()['package']
                     if json_data == None:
                         pass
@@ -120,6 +149,7 @@ class zk(object):
                                 __km = dbRow.tb_kills.get_row(json_data, self.service)
                                 self.service.get_session().close()
                                 self.__add_km_to_filter(__km)
+                                self.__add_sql_name_delay(pull_start_time)
                             except Exception as ex:
                                 print(ex)
                 else:
@@ -133,7 +163,6 @@ class zk(object):
             assert isinstance(km,dbRow.tb_kills)
             km.loaded_time = datetime.datetime.utcnow()  # adjust for name resolve
             self.__pending_kms.put(km,block=True,timeout=25)
-            self.__add_delay(km.killmail_time)
         except Exception as ex:
             print(ex)
 

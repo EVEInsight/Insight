@@ -28,6 +28,7 @@ class Kills(dec_Base.Base, table_row):
     object_location: locations.Locations = relationship("Locations",uselist=False, back_populates="object_kills_at_location",lazy="joined")
 
     def __init__(self, data: dict):
+        self.loaded_time = datetime.datetime.utcnow()
         self.kill_id = data.get("killID")
         killmail_dict = data.get("killmail")
         if killmail_dict:
@@ -46,7 +47,6 @@ class Kills(dec_Base.Base, table_row):
             self.href = zkb_dict.get("href")
         self.dict_attackers = killmail_dict.get("attackers") if killmail_dict else None
         self.dict_victim = killmail_dict.get("victim") if killmail_dict else None
-        self.loaded_time = datetime.datetime.utcnow()
 
     def load_fk_objects(self):
         if self.solar_system_id:

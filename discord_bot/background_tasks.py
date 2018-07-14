@@ -49,7 +49,8 @@ class background_tasks(object):
                             str(stats_zk[1]))
                         # await self.client.loop.run_in_executor(None, partial(self.client.channel_manager.post_message, msg))
                         last_warning = datetime.datetime.utcnow()
-                status_str += '[zK] KMs Added: {}, AVG Delay: {}m '.format(str(stats_zk[0]), str(stats_zk[1]))
+                status_str += '[zK] KM Add: {}, AVG Delay: {}m(+{}s) '.format(str(stats_zk[0]), str(stats_zk[1]),
+                                                                              str(stats_zk[2]))
                 stats_feeds = await self.client.channel_manager.avg_delay()
                 if stats_feeds[1] >= 30:
                     d_status = discord.Status.dnd
@@ -60,8 +61,8 @@ class background_tasks(object):
                         await self.client.loop.run_in_executor(None,
                                                                partial(self.client.channel_manager.post_message, msg))
                         last_warning = datetime.datetime.utcnow()
-                status_str += '[Insight] KMs Pushed: {}, AVG Delay: {}s '.format(str(stats_feeds[0]),
-                                                                                 str(stats_feeds[1]))
+                status_str += '[Insight] KM Sent: {}, AVG Delay: {}s '.format(str(stats_feeds[0]),
+                                                                              str(stats_feeds[1]))
                 game_act = discord.Activity(name=status_str, type=discord.ActivityType.watching)
                 await self.client.change_presence(activity=game_act, status=d_status)
             except Exception as ex:
