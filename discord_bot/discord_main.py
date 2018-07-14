@@ -21,6 +21,10 @@ class Discord_Insight_Client(discord.Client):
         print(self.user.name)
         print(self.user.id)
         print('------')
+        print('This bot is a member of')
+        print('Servers: {}'.format(str(len(self.guilds))))
+        print('Channels: {}'.format(str(len(list(self.get_all_channels())))))
+        print('------')
 
     async def setup_tasks(self):
         await self.wait_until_ready()
