@@ -59,6 +59,22 @@ class Kills(dec_Base.Base, table_row):
         if self.dict_victim:
             self.object_victim = victims.Victims(self.dict_victim)
 
+    def compare_value(self, filter):
+        try:
+            if filter.min is None and filter.max is None:
+                return True
+            elif filter.min is not None and filter.max is not None:
+                return filter.min <= self.totalValue <= filter.max
+            elif filter.min is not None and filter.max is None:
+                return self.totalValue >= filter.min
+            elif filter.min is None and filter.max is not None:
+                return self.totalValue <= filter.max
+            else:
+                return False
+        except Exception as ex:
+            print(ex)
+            return False
+
     @classmethod
     def primary_key_row(cls):
         return cls.kill_id
@@ -101,6 +117,17 @@ class Kills(dec_Base.Base, table_row):
         for s in ship_totals:
             ships_str += "{0:<20}   {1}\n".format(str(s[0]), str(s[1]))
         return ships_str
+
+    def filter_loss(self, filter_list=[], using_blacklist=False):
+        """whitelist - True=in filter_list, False=not in filter list
+        blacklist - True=not in filter_list, False=in filter list"""
+        for filter in filter_list:
+            if self.object_victim.compare_filter_list(filter):
+                if using_blacklist:
+                    return False
+                else:
+                    return True
+        return True if using_blacklist else False
 
     def filter_system_ly(self, filter_list=[], using_blacklist=False):
         """whitelist - returns the first system within range, otherwise returns None if no systems in filter are within ly range

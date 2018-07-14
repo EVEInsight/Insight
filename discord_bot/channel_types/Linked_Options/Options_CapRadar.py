@@ -15,7 +15,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         self.blops_ids = [898]
 
     def mention_options(self,message_object,group_type):
-        __options = discord_options.mapper_index(self.cfeed.discord_client, message_object, timeout_seconds=45)
+        __options = discord_options.mapper_index(self.cfeed.discord_client, message_object)
         __options.set_main_header("Select mention mode for this channel. On detected {} activity the bot "
                                   "can optionally mention @ here or @ everyone if the km occurred very recently.".format(group_type))
         __options.add_option(discord_options.option_returns_object("No mention", return_object=enum_mention.noMention))
@@ -47,7 +47,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
     async def InsightOptionRequired_add(self, message_object: discord.Message):
         """Add or modify LY range for base system - Track targets within a specific LY range of an added system. Multiple systems can be added to a channel for a better spread."""
         def make_options(search_str):
-            __options = discord_options.mapper_index(self.cfeed.discord_client, message_object, timeout_seconds=45)
+            __options = discord_options.mapper_index(self.cfeed.discord_client, message_object)
             __options.set_main_header("Select the entity you wish to add.")
             db: Session = self.cfeed.service.get_session()
 
@@ -67,7 +67,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
                 db.close()
                 return __options
 
-        __search = discord_options.mapper_return_noOptions(self.cfeed.discord_client,message_object,timeout_seconds=60)
+        __search = discord_options.mapper_return_noOptions(self.cfeed.discord_client, message_object)
         __search.set_main_header("Enter the name of a base system to track activity within range of.")
         __search.set_footer_text("Enter a name. Note: partial names are accepted: ")
         __selected_option = None
@@ -75,8 +75,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
             __search_name = await __search()
             __found_results = await self.cfeed.discord_client.loop.run_in_executor(None,partial(make_options,__search_name))
             __selected_option:tb_systems = await __found_results()
-        __ly_range = discord_options.mapper_return_noOptions_requiresInt(self.cfeed.discord_client, message_object,
-                                                            timeout_seconds=45)
+        __ly_range = discord_options.mapper_return_noOptions_requiresInt(self.cfeed.discord_client, message_object)
         __ly_range.set_main_header("Enter the maximum LY radius to post KMs for the selected system.\n\n"
                                   "Only systems within your chosen LY range will appear in this feed.")
         __range = await __ly_range()
@@ -100,7 +99,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
 
         def make_options():
             db:Session = self.cfeed.service.get_session()
-            __remove = discord_options.mapper_index_withAdditional(self.cfeed.discord_client, message_object, timeout_seconds=60)
+            __remove = discord_options.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
             __remove.set_main_header("Select the system you wish to remove as a base.")
             try:
                 __remove.add_header_row("Systems currently set as base systems for this feed")
@@ -119,7 +118,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
 
     async def InsightOptionRequired_supers(self,message_object:discord.Message):
         """Super tracking - Enables or disables tracking of supercarriers/titans within range of base systems."""
-        __options = discord_options.mapper_return_yes_no(self.cfeed.discord_client,message_object,timeout_seconds=45)
+        __options = discord_options.mapper_return_yes_no(self.cfeed.discord_client, message_object)
         __options.set_main_header("Track supercarrier and titan activity in this channel?")
         __track_group_TF = await __options()
         if __track_group_TF:
@@ -132,7 +131,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
 
     async def InsightOptionRequired_capitals(self,message_object:discord.Message):
         """Capital tracking - Enables or disables tracking of capitals(dreads,carriers,FAX,rorquals) within range of base systems."""
-        __options = discord_options.mapper_return_yes_no(self.cfeed.discord_client,message_object,timeout_seconds=45)
+        __options = discord_options.mapper_return_yes_no(self.cfeed.discord_client, message_object)
         __options.set_main_header("Track capital(dreads,carriers,FAX,rorquals) activity in this channel?")
         __track_group_TF = await __options()
         if __track_group_TF:
@@ -145,7 +144,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
 
     async def InsightOptionRequired_blops(self,message_object:discord.Message):
         """BLOPS tracking - Enables or disables tracking of blackops battleships within range of base systems."""
-        __options = discord_options.mapper_return_yes_no(self.cfeed.discord_client,message_object,timeout_seconds=45)
+        __options = discord_options.mapper_return_yes_no(self.cfeed.discord_client, message_object)
         __options.set_main_header("Track blackops battleship activity in this channel?")
         __track_group_TF = await __options()
         if __track_group_TF:
@@ -172,7 +171,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
             finally:
                 db.close()
 
-        __options = discord_options.mapper_return_noOptions_requiresInt(self.cfeed.discord_client,message_object,timeout_seconds=45)
+        __options = discord_options.mapper_return_noOptions_requiresInt(self.cfeed.discord_client, message_object)
         __options.set_main_header("Enter the maximum age in minutes for a KM to be posted to the channel. KMs "
                                   "occurring more than this many minutes ago will not be posted.")
         _max_age = await __options()

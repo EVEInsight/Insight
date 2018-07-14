@@ -128,7 +128,8 @@ class discord_feed_service(object):
                 pass
             except discord.Forbidden:
                 try:
-                    await self.channel_discord_object.send("Permissions are incorrectly set for the bot. This bot requires the following Discord channel permissions to function:\n\nRead Messages\nSend Messages\nEmbed Links\nMention Everyone\n\n\nOnce permissions are correctly set, run the command '!start to resume the feed.'")
+                    await self.channel_discord_object.send(
+                        "Permissions are incorrectly set for the bot. See https://github.com/Nathan-LS/Insight#permissions\n\n\nOnce permissions are correctly set, run the command '!start to resume the feed.'")
                 except:
                     pass
                 finally:
@@ -188,6 +189,7 @@ class discord_feed_service(object):
             feed_channel.add_km(km)
         except Exception as ex:
             print(ex)
+
 
 from . import Linked_Options
 

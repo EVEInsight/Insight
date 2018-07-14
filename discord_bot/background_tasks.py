@@ -37,8 +37,8 @@ class background_tasks(object):
         last_warning = datetime.datetime.utcnow() - datetime.timedelta(minutes=175)
         while True:
             try:
-                status_str = 'CPU:{}% MEM:{:.1f}GB [Stats 10m] '.format(str(int(psutil.cpu_percent())),
-                                                                        psutil.virtual_memory()[3] / 2. ** 30)
+                status_str = 'CPU:{}% MEM:{:.1f}GB [Stats 5m] '.format(str(int(psutil.cpu_percent())),
+                                                                       psutil.virtual_memory()[3] / 2. ** 30)
                 stats_zk = await self.client.loop.run_in_executor(None, self.client.service.zk_obj.avg_delay)
                 d_status = discord.Status.online
                 if stats_zk[1] >= 30:
@@ -66,7 +66,7 @@ class background_tasks(object):
                 await self.client.change_presence(activity=game_act, status=d_status)
             except Exception as ex:
                 print(ex)
-            await asyncio.sleep(600)
+            await asyncio.sleep(300)
 
 
 import discord_bot

@@ -63,11 +63,13 @@ class visual_enfeed(base_visual):
                     isk_lost=self.isk_lost, min_ago=self.min_ago)
         self.embed.add_field(name="**Details**", value=__field_body,inline=False)
 
-
     def run_filter(self):
         tdiff = datetime.datetime.utcnow() - datetime.timedelta(
             hours=3)  # hardcoded entity feed limits to prevent posting month old KMs
         if tdiff >= self.km.killmail_time:
+            return False
+        if not self.km.filter_loss(self.filters.object_filter_groups,
+                                   self.in_victim_ship_group):  # if false/contained in cat blacklist ignore posting
             return False
         __list_aff = self.filters.object_filter_alliances + self.filters.object_filter_corporations + self.filters.object_filter_characters
         if self.km.filter_victim(self.km.object_victim,filter_list=__list_aff,using_blacklist=self.in_victim_affiliation) is None: #affiliated is victim/loss

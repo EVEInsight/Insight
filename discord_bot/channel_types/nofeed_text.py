@@ -61,7 +61,7 @@ class discord_text_nofeed_exist(discord_feed_service):
         if type(self) == discord_text_nofeed_exist:
             await self.command_not_supported_sendmessage(message_object)
         else:
-            __question = insightClient.mapper_return_yes_no(self.discord_client,message_object,timeout_seconds=40)
+            __question = insightClient.mapper_return_yes_no(self.discord_client, message_object)
             __question.set_main_header("Are you sure to want to remove this channel feed, deleting all configured settings?\n")
             if await __question():
                 if await self.channel_manager.delete_feed(self.channel_id):

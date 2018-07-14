@@ -57,7 +57,7 @@ class Options_Sync(options_base.Options_Base):
                 db.close()
 
         def get_options():
-            _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object, timeout_seconds=60)
+            _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
             _options.set_main_header(
                 "Delete a token from this channel, removing all associated contacts in the blacklist.")
             db: Session = self.cfeed.service.get_session()

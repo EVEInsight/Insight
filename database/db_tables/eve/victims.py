@@ -69,5 +69,6 @@ class Victims(dec_Base.Base, table_row):
                 return False
         return False
 
+
 from ..filters import *
 from ..eve import *

@@ -28,7 +28,7 @@ class Options_DM(options_base.Options_Base):
 
         async def track_this(row_object, type_str):
             if row_object is not None:
-                track = dOpt.mapper_return_yes_no(self.cfeed.discord_client, message_object, timeout_seconds=60)
+                track = dOpt.mapper_return_yes_no(self.cfeed.discord_client, message_object)
                 track.set_main_header(
                     "Sync standings for {} {} for this token?".format(type_str, row_object.get_name()))
                 return await track()
@@ -58,7 +58,7 @@ class Options_DM(options_base.Options_Base):
             finally:
                 db.close()
 
-        _options = dOpt.mapper_return_noOptions(self.cfeed.discord_client, message_object, timeout_seconds=240)
+        _options = dOpt.mapper_return_noOptions(self.cfeed.discord_client, message_object, timeout_seconds=400)
         _options.set_main_header(
             "Open this link and login to EVE's SSO system. After clicking 'Authorize' and being redirected to a blank webpage, copy and paste the content of your browser's "
             "address bar into this conversation: \n{}"
@@ -102,7 +102,7 @@ class Options_DM(options_base.Options_Base):
                 db.close()
 
         def get_options():
-            _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object, timeout_seconds=75)
+            _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
             _options.set_main_header(
                 "These are all the tokens currently in the system. Select one to delete and remove it from all channels.")
             db: Session = self.cfeed.service.get_session()
@@ -138,7 +138,7 @@ class Options_DM(options_base.Options_Base):
 
         def get_options():
             db: Session = self.cfeed.service.get_session()
-            _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object, timeout_seconds=70)
+            _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
             _options.set_main_header("These are your tokens associated with Discord channel IDs. Select a channel id "
                                      "to remove a given token from.")
             try:
@@ -179,7 +179,7 @@ class Options_DM(options_base.Options_Base):
         message_object.author = self.cfeed.discord_client.get_user(self.cfeed.user_id)
 
         def make_options():
-            _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object, timeout_seconds=75)
+            _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
             _options.set_main_header(
                 "Select one of your tokens to add to the feed. If you do not have any tokens created yet select the 'cancel' option"
                 " and do the following:\n\nStep 1. Direct Message this bot with the command '!settings'\n\nStep 2. Select the option"
