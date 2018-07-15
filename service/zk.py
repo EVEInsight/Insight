@@ -20,8 +20,9 @@ class zk(object):
         self.zk_stream_url = str("https://redisq.zkillboard.com/listen.php?queueID={}".format(identifier))
         self.run = True
         self.error_ids = []
-        self.__pending_kms = queue.Queue(maxsize=1000)
-        self.__error_km_json = queue.Queue()
+        self.__km_preProcess = queue.Queue()  # raw json, before insertion to database
+        self.__km_postProcess = queue.Queue()  # fully finished sqlalchemy objects with names resolved
+        self.__error_km_json = queue.Queue()  # todo
         self.time_delay = queue.Queue()
         self.time_delay_sql = queue.Queue()
 
@@ -132,26 +133,18 @@ class zk(object):
             self.service.channel_manager.post_message("Debugging is now finished. Switching back to streaming live kms.")
             time.sleep(5)
 
-    def pull_km(self):
+    def thread_pull_km(self):
         print("Starting zk puller")
         self.__debug_simulate()
         while self.run:
             try:
-                resp = self.rSession.get(self.zk_stream_url, verify=True, timeout=30)
+                resp = self.rSession.get(self.zk_stream_url, verify=True, timeout=45)
                 if resp.status_code == 200:
-                    pull_start_time = datetime.datetime.utcnow()
                     json_data = resp.json()['package']
                     if json_data == None:
                         pass
                     else:
-                        if self.__make_km(json_data):
-                            try:
-                                __km = dbRow.tb_kills.get_row(json_data, self.service)
-                                self.service.get_session().close()
-                                self.__add_km_to_filter(__km)
-                                self.__add_sql_name_delay(pull_start_time)
-                            except Exception as ex:
-                                print(ex)
+                        self.__km_preProcess.put_nowait(json_data)
                 else:
                     print("zk non 200 error code {}".format(resp.status_code))
                     time.sleep(.1)
@@ -163,14 +156,28 @@ class zk(object):
         try:
             assert isinstance(km,dbRow.tb_kills)
             km.loaded_time = datetime.datetime.utcnow()  # adjust for name resolve
-            self.__pending_kms.put(km,block=True,timeout=25)
+            self.__km_postProcess.put_nowait(km)
         except Exception as ex:
             print(ex)
 
-    def pass_to_filters(self):
+    def thread_process_json(self):
+        print('Starting zk data processor')
+        while True:
+            try:
+                json_data = self.__km_preProcess.get(block=True)
+                pull_start_time = datetime.datetime.utcnow()
+                if self.__make_km(json_data):
+                    __km = dbRow.tb_kills.get_row(json_data, self.service)
+                    self.service.get_session().close()
+                    self.__add_km_to_filter(__km)
+                    self.__add_sql_name_delay(pull_start_time)
+            except Exception as ex:
+                print(ex)
+
+    def thread_filters(self):
         print("Starting zk filter pass")
         while True:
             try:
-                self.service.channel_manager.send_km(self.__pending_kms.get(block=True))
+                self.service.channel_manager.send_km(self.__km_postProcess.get(block=True))
             except Exception as ex:
                 print(ex)
