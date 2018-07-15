@@ -23,58 +23,47 @@ class zk(object):
         self.__km_preProcess = queue.Queue()  # raw json, before insertion to database
         self.__km_postProcess = queue.Queue()  # fully finished sqlalchemy objects with names resolved
         self.__error_km_json = queue.Queue()  # todo
-        self.time_delay = queue.Queue()
-        self.time_delay_sql = queue.Queue()
+        self.delay_km = queue.Queue()  # delay from occurrence to load
+        self.delay_process = queue.Queue()  # process/name resolve delay
+        self.delay_next = queue.Queue()  # delay between zk requests
 
-    def __add_delay(self, other_time):
+    @staticmethod
+    def add_delay(q, other_time, minutes=False):
         try:
-            tn = datetime.datetime.now(datetime.timezone.utc)
-            self.time_delay.put_nowait(((tn - other_time).total_seconds()) / 60)
+            assert isinstance(q, queue.Queue)
+            div_s = 60 if minutes else 1
+            q.put_nowait(((datetime.datetime.utcnow() - other_time).total_seconds()) / div_s)
         except Exception as ex:
             print(ex)
 
-    def __add_sql_name_delay(self, other_time):
-        try:
-            self.time_delay_sql.put_nowait((datetime.datetime.utcnow() - other_time).total_seconds())
-        except Exception as ex:
-            print(ex)
-
-    def avg_delay(self):
+    @staticmethod
+    def avg_delay(q, median=False):
+        assert isinstance(q, queue.Queue)
         values = []
         total = 0
         avg = 0
         try:
             while True:
-                values.append(self.time_delay.get_nowait())
+                values.append(q.get_nowait())
         except queue.Empty:
             try:
                 total = len(values)
-                avg = statistics.median(values)
+                if median:
+                    avg = statistics.median(values)
+                else:
+                    avg = sum(values) / total
             except:
                 pass
         except Exception as ex:
             print(ex)
         finally:
-            return (total, round(avg, 1), self.__avg_delay_sql())
+            return (total, round(avg, 1))
 
-    def __avg_delay_sql(self):
-        values = []
-        total = 0
-        avg = 0
-        try:
-            while True:
-                values.append(self.time_delay_sql.get_nowait())
-        except queue.Empty:
-            try:
-                total = len(values)
-                avg = sum(values) / total
-            except:
-                pass
-        except Exception as ex:
-            print(ex)
-        finally:
-            return (round(avg, 1))
-
+    def get_stats(self):
+        _km_delay = self.avg_delay(self.delay_km, median=True)
+        _km_process = self.avg_delay(self.delay_process)
+        _km_next = self.avg_delay(self.delay_next)
+        return (_km_delay[0], _km_delay[1], _km_process[1], _km_next[1])
 
     @staticmethod
     def generate_identifier():
@@ -101,7 +90,6 @@ class zk(object):
         if __row is not None:
             try:
                 db.commit()
-                self.__add_delay(__row.killmail_time)
                 self.error_ids = dbRow.name_resolver.api_mass_name_resolve(self.service, error_ids=self.error_ids)
                 return True
             except Exception as ex:
@@ -136,6 +124,7 @@ class zk(object):
     def thread_pull_km(self):
         print("Starting zk puller")
         self.__debug_simulate()
+        next_delay = datetime.datetime.utcnow()
         while self.run:
             try:
                 resp = self.rSession.get(self.zk_stream_url, verify=True, timeout=45)
@@ -145,6 +134,8 @@ class zk(object):
                         pass
                     else:
                         self.__km_preProcess.put_nowait(json_data)
+                        self.add_delay(self.delay_next, next_delay)
+                    next_delay = datetime.datetime.utcnow()
                 else:
                     print("zk non 200 error code {}".format(resp.status_code))
                     time.sleep(.1)
@@ -155,6 +146,7 @@ class zk(object):
     def __add_km_to_filter(self,km):
         try:
             assert isinstance(km,dbRow.tb_kills)
+            self.add_delay(self.delay_km, km.killmail_time, minutes=True)
             km.loaded_time = datetime.datetime.utcnow()  # adjust for name resolve
             self.__km_postProcess.put_nowait(km)
         except Exception as ex:
@@ -170,7 +162,7 @@ class zk(object):
                     __km = dbRow.tb_kills.get_row(json_data, self.service)
                     self.service.get_session().close()
                     self.__add_km_to_filter(__km)
-                    self.__add_sql_name_delay(pull_start_time)
+                    self.add_delay(self.delay_process, pull_start_time)
             except Exception as ex:
                 print(ex)
 

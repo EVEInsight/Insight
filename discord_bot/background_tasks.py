@@ -39,9 +39,9 @@ class background_tasks(object):
             try:
                 status_str = 'CPU:{}% MEM:{:.1f}GB [Stats 5m] '.format(str(int(psutil.cpu_percent())),
                                                                        psutil.virtual_memory()[3] / 2. ** 30)
-                stats_zk = await self.client.loop.run_in_executor(None, self.client.service.zk_obj.avg_delay)
+                stats_zk = await self.client.loop.run_in_executor(None, self.client.service.zk_obj.get_stats)
                 d_status = discord.Status.online
-                if stats_zk[1] >= 30:
+                if stats_zk[3] >= 10:
                     d_status = discord.Status.idle
                     if datetime.datetime.utcnow() >= last_warning + datetime.timedelta(hours=3):
                         msg = "Service Warning: \nThe average delay of Insight receiving killmails from when they actually " \
@@ -49,8 +49,8 @@ class background_tasks(object):
                             str(stats_zk[1]))
                         # await self.client.loop.run_in_executor(None, partial(self.client.channel_manager.post_message, msg))
                         last_warning = datetime.datetime.utcnow()
-                status_str += '[zK] KM Add: {}, AVG Delay: {}m(+{}s) '.format(str(stats_zk[0]), str(stats_zk[1]),
-                                                                              str(stats_zk[2]))
+                status_str += '[zK] Add: {}, AVG Delay: {}m(+{}s), AVG Next: {}s '.format(
+                    str(stats_zk[0]), str(stats_zk[1]), str(stats_zk[2]), str(stats_zk[3]))
                 stats_feeds = await self.client.channel_manager.avg_delay()
                 if stats_feeds[1] >= 30:
                     d_status = discord.Status.dnd
@@ -61,8 +61,8 @@ class background_tasks(object):
                         await self.client.loop.run_in_executor(None,
                                                                partial(self.client.channel_manager.post_message, msg))
                         last_warning = datetime.datetime.utcnow()
-                status_str += '[Insight] KM Sent: {}, AVG Delay: {}s '.format(str(stats_feeds[0]),
-                                                                              str(stats_feeds[1]))
+                status_str += '[Insight] Sent: {}, AVG Delay: {}s '.format(str(stats_feeds[0]),
+                                                                           str(stats_feeds[1]))
                 game_act = discord.Activity(name=status_str, type=discord.ActivityType.watching)
                 await self.client.change_presence(activity=game_act, status=d_status)
             except Exception as ex:
