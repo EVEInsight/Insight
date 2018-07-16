@@ -23,8 +23,8 @@ class base_visual(metaclass=ABCMeta):
         self.message_txt = ""
         self.color = discord.Color(800680)
 
-    def get_delay(self):
-        return ((datetime.datetime.utcnow() - self.km.loaded_time).total_seconds())
+    def get_load_time(self):
+        return self.km.loaded_time
 
     @abstractmethod
     def internal_list_options(self):

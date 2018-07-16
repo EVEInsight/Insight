@@ -5,40 +5,24 @@ from functools import partial
 import discord
 import asyncio
 import datetime
+import queue
 import sys
 
 
 class Channel_manager(object):
-    def __init__(self, serivce_module):
-        self.service = serivce_module
+    def __init__(self, service_module):
+        self.service = service_module
         self.__channel_feed_container = {}
         self.__dm_container = {}
         self.__discord_client:discord_bot.Discord_Insight_Client = None
-        self.__km_post_delays = asyncio.Queue()
+        self.__delay_post = queue.Queue()
 
-    async def add_delay(self, seconds_number):
-        try:
-            self.__km_post_delays.put_nowait(seconds_number)
-        except Exception as ex:
-            print(ex)
+    async def add_delay(self, other_time):
+        zk_module.add_delay(self.__delay_post, other_time)
 
     async def avg_delay(self):
-        values = []
-        total = 0
-        avg = 0
-        try:
-            while True:
-                values.append(self.__km_post_delays.get_nowait())
-        except asyncio.QueueEmpty:
-            try:
-                total = len(values)
-                avg = sum(values) / total
-            except:
-                pass
-        except Exception as ex:
-            print(ex)
-        finally:
-            return (total, round(avg, 1))
+        result = await self.__discord_client.loop.run_in_executor(None, partial(zk_module.avg_delay, self.__delay_post))
+        return result
 
     def get_discord_client(self):
         assert isinstance(self.__discord_client,discord_bot.Discord_Insight_Client)
@@ -172,3 +156,4 @@ class Channel_manager(object):
 
 
 from database.db_tables.eve import tb_kills
+from service.zk import zk as zk_module
