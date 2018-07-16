@@ -4,6 +4,7 @@ import service
 from .background_tasks import background_tasks
 from .DiscordCommands import DiscordCommands
 import sys
+from functools import partial
 
 
 class Discord_Insight_Client(discord.Client):
@@ -30,6 +31,7 @@ class Discord_Insight_Client(discord.Client):
         await self.wait_until_ready()
         await self.channel_manager.set_client(self)
         await self.channel_manager.load_channels()
+        await self.post_motd()
         self.__task_backgrounds = self.loop.create_task(self.background_tasks.setup_backgrounds())
         self.__task_km_enqueue = self.loop.create_task(self.km_enqueue())
         self.__task_km_process = self.loop.create_task(self.km_process())
@@ -47,6 +49,13 @@ class Discord_Insight_Client(discord.Client):
     async def km_deque_filter(self):
         await self.wait_until_ready()
         await self.loop.run_in_executor(None, self.service.zk_obj.thread_filters)
+
+    async def post_motd(self):
+        div = '=================================\n'
+        motd = (div + 'Insight server message of the day:\n\n{}\n'.format(str(self.service.motd)) + div)
+        print(motd)
+        if self.service.motd:
+            await self.loop.run_in_executor(None, partial(self.channel_manager.post_message, motd))
 
     async def on_message(self, message):
         await self.wait_until_ready()

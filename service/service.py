@@ -17,6 +17,7 @@ class service_module(object):
         self.config_file = configparser.ConfigParser()
         self.cli_args = self.__read_cli_args()
         self.config_file.read(self.__read_config_file())
+        self.motd = self.__read_motd()
         self.__import_everything_flag = False
         self.__import_check()
         self.__sc_session: scoped_session = database.setup_database(self).get_scoped_session()
@@ -56,6 +57,23 @@ class service_module(object):
             print("The config file '{0}' could not be found. Try renaming the file 'default-config.ini' to '{0}'".format(str(self.cli_args.config)))
             sys.exit(1)
 
+    def __read_motd(self):
+        filename = 'motd.txt'
+        print('Edit the message of the day file "{}" to send a message to all '
+              'feeds on Insight startup. Edit the file to be blank to prevent Insight from sending '
+              'a message of the day to all active feeds.'.format(filename))
+        try:
+            with open(filename, 'r') as f:
+                text = f.read()
+                if text.strip():
+                    return text
+                else:
+                    return None
+        except FileNotFoundError:
+            with open(filename, 'w'):
+                print('Creating empty motd file: "{}"'.format(filename))
+                return None
+
     def __import_check(self):
         try:
             with open(self.config_file['sqlite_database']['filename'],'r'):
@@ -79,12 +97,11 @@ class service_module(object):
 
     def welcome(self):
         """Prints a welcome message with current version and displays alerts if new project updates are available."""
-        div = '=================================================================================\n'
-        resp_str = div
-        resp_str += 'Insight {}\n'.format(str(self.get_version()))
+        div = '================================================================================='
+        print(div)
+        print('Insight {}'.format(str(self.get_version())))
         self.update_available()
-        resp_str += div
-        print(resp_str)
+        print(div)
 
     @classmethod
     def update_available(cls):
@@ -107,5 +124,5 @@ class service_module(object):
 
     @classmethod
     def get_version(cls):
-        version_str = 'v0.10.0'
+        version_str = 'v0.10.0-beta'
         return LooseVersion(version_str)
