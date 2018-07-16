@@ -7,10 +7,13 @@ import database
 import argparse
 import configparser
 import sys
+from distutils.version import LooseVersion
+import requests
 
 
 class service_module(object):
     def __init__(self):
+        self.welcome()
         self.config_file = configparser.ConfigParser()
         self.cli_args = self.__read_cli_args()
         self.config_file.read(self.__read_config_file())
@@ -73,3 +76,36 @@ class service_module(object):
 
     def close_session(self):
         self.__sc_session.remove()
+
+    def welcome(self):
+        """Prints a welcome message with current version and displays alerts if new project updates are available."""
+        div = '=================================================================================\n'
+        resp_str = div
+        resp_str += 'Insight {}\n'.format(str(self.get_version()))
+        self.update_available()
+        resp_str += div
+        print(resp_str)
+
+    @classmethod
+    def update_available(cls):
+        giturl = 'https://api.github.com/repos/Nathan-LS/Insight/releases/latest'
+        try:
+            resp = requests.get(url=giturl, timeout=25, verify=True)
+            if resp.status_code == 200:
+                data = resp.json()
+                new_version = LooseVersion(data.get('tag_name'))
+                if new_version > cls.get_version():
+                    print('A new version is available. Please visit {} to update.'.format(data.get('html_url')))
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        except Exception as ex:
+            print(ex)
+            return False
+
+    @classmethod
+    def get_version(cls):
+        version_str = 'v0.10.0'
+        return LooseVersion(version_str)

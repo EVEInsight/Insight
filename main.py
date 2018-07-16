@@ -6,5 +6,6 @@ def main():
     service_mod = service_module()
     Discord_Insight_Client.start_bot(service_mod)
 
+
 if __name__ == "__main__":
     main()
