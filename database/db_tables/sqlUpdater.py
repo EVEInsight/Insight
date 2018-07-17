@@ -18,6 +18,13 @@ class sqlUpdater(object):
         for i in statements:
             self.connection.execute(i)
 
+    def sqlV_0_10_1(self):
+        """v0.10.1"""
+        qs = []
+        qs.append('ALTER TABLE discord_enFeed ADD template_id INTEGER DEFAULT 0 NOT NULL;')
+        qs.append('ALTER TABLE discord_capRadar ADD template_id INTEGER DEFAULT 0 NOT NULL;')
+        return qs
+
     def update_all(self):
         """Updates tables, returning the latest successful updated version"""
         error = False

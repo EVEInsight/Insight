@@ -137,7 +137,6 @@ class zk(object):
                         self.add_delay(self.delay_next, next_delay)
                     next_delay = datetime.datetime.utcnow()
                 else:
-                    print("zk non 200 error code {}".format(resp.status_code))
                     time.sleep(.1)
             except Exception as ex:
                 print(ex)

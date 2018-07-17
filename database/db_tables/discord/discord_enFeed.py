@@ -12,6 +12,7 @@ class EnFeed(dec_Base.Base,discord_channel_base):
     __tablename__ = 'discord_enFeed'
 
     channel_id = Column(BIGINT,ForeignKey("discord_channels.channel_id"),primary_key=True,nullable=False,autoincrement=False)
+    template_id = Column(Integer, default=0, nullable=False)
     show_mode = Column(Enum(km_type_mode),default=km_type_mode.show_both,nullable=False)
     object_channel = relationship("Channels", uselist=False, back_populates="object_enFeed",lazy="joined")
 
