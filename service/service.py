@@ -17,7 +17,6 @@ class service_module(object):
         self.config_file = configparser.ConfigParser()
         self.cli_args = self.__read_cli_args()
         self.config_file.read(self.__read_config_file())
-        self.motd = self.__read_motd()
         self.__import_everything_flag = False
         self.__import_check()
         self.__sc_session: scoped_session = database.setup_database(self).get_scoped_session()
@@ -25,6 +24,7 @@ class service_module(object):
         self.sso = EVEsso.EVEsso(self)
         self.channel_manager = cm.Channel_manager(self)
         self.zk_obj = zk.zk(self)
+        self.motd = self.__read_motd()
 
     def __read_cli_args(self):
         parser = argparse.ArgumentParser()
@@ -124,5 +124,5 @@ class service_module(object):
 
     @classmethod
     def get_version(cls):
-        version_str = 'v0.10.0-beta'
+        version_str = 'v0.10.0'
         return LooseVersion(version_str)
