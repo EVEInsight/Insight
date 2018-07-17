@@ -41,8 +41,9 @@ class background_tasks(object):
                 if update:
                     status_str = 'Update available. See program console. '
                 else:
-                    status_str = 'CPU:{}% MEM:{:.1f}GB [Stats 5m] '.format(str(int(psutil.cpu_percent())),
-                                                                       psutil.virtual_memory()[3] / 2. ** 30)
+                    status_str = 'CPU:{}% MEM:{:.1f}GB {} [Stats 5m] '.format(str(int(psutil.cpu_percent())),
+                                                                              psutil.virtual_memory()[3] / 2. ** 30,
+                                                                              str(self.client.service.get_version()))
                 stats_zk = await self.client.loop.run_in_executor(None, self.client.service.zk_obj.get_stats)
                 d_status = discord.Status.online
                 if stats_zk[3] >= 10:
