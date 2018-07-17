@@ -20,17 +20,16 @@ class sqlUpdater(object):
 
     def sqlV_0_10_1(self):
         """v0.10.1"""
-        qs = []
-        qs.append('ALTER TABLE discord_enFeed ADD template_id INTEGER DEFAULT 0 NOT NULL;')
-        qs.append('ALTER TABLE discord_capRadar ADD template_id INTEGER DEFAULT 0 NOT NULL;')
-        return qs
+        yield ('ALTER TABLE discord_enFeed ADD template_id INTEGER DEFAULT 0 NOT NULL;')
+        yield ('ALTER TABLE discord_capRadar ADD template_id INTEGER DEFAULT 0 NOT NULL;')
 
     def update_all(self):
         """Updates tables, returning the latest successful updated version"""
         error = False
         for i in self.get_versions_higher():
             try:
-                results = i()
+                results = list(i())
+                print('Updating database to version: {}'.format(i.__doc__))
                 self.__execute_statements(results)
                 self.updated_version = i.__doc__
             except Exception as ex:

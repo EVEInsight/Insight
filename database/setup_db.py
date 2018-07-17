@@ -18,7 +18,7 @@ class setup_database(object):
     def initial_load(self):
         engine = create_engine('sqlite:///{}'.format(self.service.config_file['sqlite_database']['filename']),
                                connect_args={'check_same_thread': True, 'timeout': 3000}, echo=False)
-        DB.Base.Base.metadata.create_all(engine)
+        DB.version.versionBase.metadata.create_all(engine)
         ses = sessionmaker(bind=engine)
         session_ob = ses()
         DB.version.Version.make_version(session_ob, engine)

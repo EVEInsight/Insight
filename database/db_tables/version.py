@@ -1,12 +1,14 @@
 from sqlalchemy import *
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
-from . import Base
 from . import sqlUpdater
 from distutils.version import LooseVersion
+from sqlalchemy.ext.declarative import declarative_base
+
+versionBase = declarative_base()
 
 
-class Version(Base.Base):
+class Version(versionBase):
     __tablename__ = 'version'
 
     row = Column(Integer, default=0, primary_key=True, autoincrement=False, nullable=False)
