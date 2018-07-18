@@ -13,10 +13,10 @@ import requests
 
 class service_module(object):
     def __init__(self):
-        self.welcome()
         self.config_file = configparser.ConfigParser()
         self.cli_args = self.__read_cli_args()
         self.config_file.read(self.__read_config_file())
+        self.welcome()
         self.__import_everything_flag = False
         self.__import_check()
         self.__sc_session: scoped_session = database.setup_database(self).get_scoped_session()
@@ -124,5 +124,5 @@ class service_module(object):
 
     @classmethod
     def get_version(cls):
-        version_str = 'v0.10.3'
+        version_str = 'v0.10.4'
         return LooseVersion(version_str)

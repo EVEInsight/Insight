@@ -1,4 +1,4 @@
-# Insight
+# Insight v0.10.4
 Insight is a Discord bot that provides various live killmail feeds for ships destroyed within the 
 game EVE Online. Insight can track your personal, corporate, or alliance activity and display information 
 in visually appealing Discord embedded objects. Insight also features a live radar feed capable of
@@ -118,7 +118,12 @@ by running the ```!settings``` command. Cap radar feeds feature an optional API 
 to blacklist from appearing on the radar, accessible by the ```!sync``` command.
 
 # Installation
-The [wiki](https://github.com/Nathan-LS/Insight/wiki/Installation) contains a detailed guide for Insight installation on a Linux server.
+Packaged executables are available for Windows and Linux under [releases](https://github.com/Nathan-LS/Insight/releases).
+Edit the ```default-config.ini``` file and run! See ```Installation.md``` for installation and upgrade instructions.
+
+If you instead wish to run Insight from source, you need a Python 3 interpreter and 
+the packages in ```requirements.txt```. The [wiki](https://github.com/Nathan-LS/Insight/wiki/Installation) contains a detailed guide for 
+source installation using a Linux operating system.
     
 # Credits
 * [Fuzzwork](https://www.fuzzwork.co.uk/) - Provides SQLite database conversions of CCP's SDE which Insight references on initial loading.

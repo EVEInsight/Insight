@@ -4,6 +4,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from . import sqlUpdater
 from distutils.version import LooseVersion
 from sqlalchemy.ext.declarative import declarative_base
+import sys
 
 versionBase = declarative_base()
 
@@ -38,10 +39,10 @@ class Version(versionBase):
             ses_obj.commit()
             if tu[1]:
                 print("An error occurred when modifying the tables.")
-                exit(1)
+                sys.exit(1)
         except Exception as ex:
             print(ex)
-            exit(1)
+            sys.exit(1)
 
 
 import service

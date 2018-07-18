@@ -39,7 +39,7 @@ class background_tasks(object):
             try:
                 update = await self.client.loop.run_in_executor(None, self.client.service.update_available)
                 if update:
-                    status_str = 'Update available. See program console. '
+                    status_str = 'Update available. See console. '
                 else:
                     status_str = 'CPU:{}% MEM:{:.1f}GB {} [Stats 5m] '.format(str(int(psutil.cpu_percent())),
                                                                               psutil.virtual_memory()[3] / 2. ** 30,
