@@ -3,6 +3,7 @@
 block_cipher = None
 
 import shutil
+from PyInstaller.utils.hooks import collect_submodules
 try:
     shutil.rmtree('dist')
 except FileNotFoundError:
@@ -12,12 +13,15 @@ try:
 except FileNotFoundError:
     pass
 
+added_hiddenimports = collect_submodules('sqlalchemy')
+added_hiddenimports.extend(collect_submodules('discord'))
+added_hiddenimports.extend(collect_submodules('swagger-client'))
 
 a = Analysis(['main.py'],
              pathex=['.'],
              binaries=[],
              datas=[],
-             hiddenimports=[],
+             hiddenimports=added_hiddenimports,
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
@@ -37,6 +41,7 @@ exe = EXE(pyz,
           upx=True,
           runtime_tmpdir=None,
           console=True)
+
 from sys import platform
 import os
 os.mkdir('{}/EVE-Insight'.format(DISTPATH))

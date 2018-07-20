@@ -3,7 +3,7 @@
 ## Executable Requirements
 
 ### Windows
-* Windows 10
+* Windows 10 or Windows Server 2016
 ### Linux
 * GLIBC 2.19 or greater
     * Run ```ldd --version``` to check
@@ -42,8 +42,9 @@ Note: On first run, Insight will begin importing data from the SDE database. Thi
 10. See [inviting your bot](#inviting-your-bot) to invite your newly created bot to your Discord server.
 
 ## Updating
-1. Delete all files in your current EVE-Insight directory except **Database.db** and **config.ini**.
-2. Download and extract the latest Insight release into your current EVE-Insight project directory.
+1. Download the latest Insight release archive for your operating system from [github](https://github.com/Nathan-LS/Insight/releases).
+1. Extract the archive overwriting all files in your current EVE-Insight directory except **Database.db** and **config.ini**.
+
 
 ## Inviting your bot
 1. Find your Discord application's id from [Discord Apps](https://discordapp.com/developers/applications/me).

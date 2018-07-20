@@ -48,7 +48,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         """Add or modify LY range for base system - Track targets within a specific LY range of an added system. Multiple systems can be added to a channel for a better spread."""
         def make_options(search_str):
             __options = discord_options.mapper_index(self.cfeed.discord_client, message_object)
-            __options.set_main_header("Select the entity you wish to add.")
+            __options.set_main_header("Select the system base you wish to add.")
             db: Session = self.cfeed.service.get_session()
 
             def header_make(row_list:List[tb_systems],header_text):
