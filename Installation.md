@@ -32,7 +32,7 @@ like this:
         * esi-characters.read_contacts.v1
         * esi-corporations.read_contacts.v1
         * esi-alliances.read_contacts.v1
-    * For the **callback**, enter ```https://insight.nathan-s.com/callback``` if you don't plan on personally hosting a callback landing page.
+    * For the **callback**, enter ```https://insight.nathan-s.com/Insight/callback``` if you don't plan on personally hosting a callback landing page.
     Insight does not utilize a callback listener for simplicity so the user must manually copy and paste their returned callback URL into Discord.
     Feel free the host the contents of /callback/index.html and modify the callback to point to your own landing page.
 7. Create your new CCP App and copy paste the **Client ID**, **Secret Key**, and **Callback URL** into the appropriate sections in your **config** file.
