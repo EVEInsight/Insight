@@ -7,18 +7,18 @@ from PyInstaller.utils.hooks import collect_submodules
 try:
     shutil.rmtree('dist')
 except FileNotFoundError:
-    pass
+    print('dist folder not found!')
 try:
     shutil.rmtree('distTest')
 except FileNotFoundError:
-    pass
+    print('distTest folder not found!')
 
 added_hiddenimports = collect_submodules('sqlalchemy')
 added_hiddenimports.extend(collect_submodules('discord'))
 added_hiddenimports.extend(collect_submodules('swagger-client'))
 
-a = Analysis(['main.py'],
-             pathex=['.'],
+a = Analysis(['../Insight/__main__.py'],
+             pathex=['./Insight'],
              binaries=[],
              datas=[],
              hiddenimports=added_hiddenimports,
@@ -47,11 +47,11 @@ import os
 os.mkdir('{}/EVE-Insight'.format(DISTPATH))
 shutil.copy('README.md','{}/EVE-Insight/README.md'.format(DISTPATH))
 shutil.copy('LICENSE.md','{}/EVE-Insight/LICENSE.md'.format(DISTPATH))
-shutil.copy('default-config.ini','{}/EVE-Insight/default-config.ini'.format(DISTPATH))
+shutil.copy('Insight/default-config.ini','{}/EVE-Insight/default-config.ini'.format(DISTPATH))
 shutil.copy('CCP.md','{}/EVE-Insight/CCP.md'.format(DISTPATH))
 shutil.copy('Installation.md','{}/EVE-Insight/Installation.md'.format(DISTPATH))
 shutil.copy('sqlite-latest.sqlite','{}/EVE-Insight/sqlite-latest.sqlite'.format(DISTPATH))
-shutil.copytree('callback','{}/EVE-Insight/callback'.format(DISTPATH))
+shutil.copytree('Insight/callback','{}/EVE-Insight/callback'.format(DISTPATH))
 if platform == "win32":
     shutil.move('{}/Insight.exe'.format(DISTPATH),'{}/EVE-Insight/Insight.exe'.format(DISTPATH))
     print("This is Windows. Making a zip of file.")
