@@ -5,6 +5,7 @@ from .background_tasks import background_tasks
 from .DiscordCommands import DiscordCommands
 import sys
 from functools import partial
+import InsightExc
 
 
 class Discord_Insight_Client(discord.Client):
@@ -59,28 +60,32 @@ class Discord_Insight_Client(discord.Client):
 
     async def on_message(self, message):
         await self.wait_until_ready()
-        if message.author.id == self.user.id:
-            return
-        if not await self.commandLookup.is_command(message):
-            return
-        elif await self.commandLookup.create(message):
-            await (await self.channel_manager.get_channel_feed(message.channel)).command_create(message)
-        elif await self.commandLookup.settings(message):
-            await (await self.channel_manager.get_channel_feed(message.channel)).command_settings(message)
-        elif await self.commandLookup.start(message):
-            await (await self.channel_manager.get_channel_feed(message.channel)).command_start(message)
-        elif await self.commandLookup.stop(message):
-            await (await self.channel_manager.get_channel_feed(message.channel)).command_stop(message)
-        elif await self.commandLookup.sync(message):
-            await (await self.channel_manager.get_channel_feed(message.channel)).command_sync(message)
-        elif await self.commandLookup.remove(message):
-            await (await self.channel_manager.get_channel_feed(message.channel)).command_remove(message)
-        elif await self.commandLookup.help(message):
-            await (await self.channel_manager.get_channel_feed(message.channel)).command_help(message)
-        elif await self.commandLookup.about(message):
-            await (await self.channel_manager.get_channel_feed(message.channel)).command_about(message)
-        else:
-            await self.commandLookup.notfound(message)
+        try:
+            if message.author.id == self.user.id:
+                return
+            if not await self.commandLookup.is_command(message):
+                return
+            elif await self.commandLookup.create(message):
+                await (await self.channel_manager.get_channel_feed(message.channel)).command_create(message)
+            elif await self.commandLookup.settings(message):
+                await (await self.channel_manager.get_channel_feed(message.channel)).command_settings(message)
+            elif await self.commandLookup.start(message):
+                await (await self.channel_manager.get_channel_feed(message.channel)).command_start(message)
+            elif await self.commandLookup.stop(message):
+                await (await self.channel_manager.get_channel_feed(message.channel)).command_stop(message)
+            elif await self.commandLookup.sync(message):
+                await (await self.channel_manager.get_channel_feed(message.channel)).command_sync(message)
+            elif await self.commandLookup.remove(message):
+                await (await self.channel_manager.get_channel_feed(message.channel)).command_remove(message)
+            elif await self.commandLookup.help(message):
+                await (await self.channel_manager.get_channel_feed(message.channel)).command_help(message)
+            elif await self.commandLookup.about(message):
+                await (await self.channel_manager.get_channel_feed(message.channel)).command_about(message)
+            else:
+                await self.commandLookup.notfound(message)
+        except Exception as ex:
+            if isinstance(ex, InsightExc.InsightException):
+                await message.channel.send("{}\n{}".format(message.author.mention, str(ex)))
 
 
     @staticmethod

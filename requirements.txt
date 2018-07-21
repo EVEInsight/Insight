@@ -1,6 +1,5 @@
 configparser==3.5.0
 git+https://github.com/Rapptz/discord.py.git@rewrite#egg=discord.py
-mysql-connector-python==8.0.11
 python-dateutil==2.7.3
 psutil==5.4.6
 requests==2.19.1

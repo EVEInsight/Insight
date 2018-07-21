@@ -1,6 +1,7 @@
 from . import discord_main
 import discord
 import asyncio
+import InsightExc
 
 
 class option_calls_coroutine(object):
@@ -33,7 +34,7 @@ class option_cancel(option_calls_coroutine):
         super(option_cancel, self).__init__(name,description,return_object)
 
     async def __call__(self, *args, **kwargs):
-        raise None
+        raise InsightExc.User.Cancel
 
 
 class mapper_index(object):
@@ -130,6 +131,7 @@ class mapper_index_withAdditional(mapper_index):
     async def add_additional(self):
         self.add_header_row("Additional options")
         self.add_option(option_cancel())
+
 
 class mapper_return_yes_no(mapper_index):
     def __init__(self, discord_client_object, message_object, timeout_seconds=60):
