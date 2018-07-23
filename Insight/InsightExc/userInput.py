@@ -26,3 +26,8 @@ class InputTimeout(InsightException):
 class InsightProgrammingError(InsightException):
     def __init__(self, message="One of the assertions for the option container failed. This is a programming error"):
         super().__init__(message)
+
+
+class TooManyOptions(InsightException):
+    def __init__(self, message="There are too many options to show! If you are searching, please refine your search."):
+        super().__init__(message)

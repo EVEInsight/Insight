@@ -4,6 +4,7 @@ from functools import partial
 from sqlalchemy.orm import Session
 from typing import List
 from sqlalchemy.exc import IntegrityError
+import InsightExc
 
 
 class Options_CapRadar(Base_Feed.base_activefeed):
@@ -35,15 +36,13 @@ class Options_CapRadar(Base_Feed.base_activefeed):
                     __row.mention = mention_method
                     db.merge(__row)
                 db.commit()
-                return "ok"
             else:
                 for i in group_ids:
                     tb_Filter_groups.get_remove(self.cfeed.channel_id,i,self.cfeed.service)
                 db.commit()
-                return "ok"
         except Exception as ex:
             print(ex)
-            return "An error occurred when attempting to set group tracking mode: {}".format(str(ex))
+            raise InsightExc.Db.DatabaseError
         finally:
             db.close()
 
@@ -83,8 +82,8 @@ class Options_CapRadar(Base_Feed.base_activefeed):
                                   "Only systems within your chosen LY range will appear in this feed.")
         __range = await __ly_range()
         function_call = partial(tb_channels.commit_list_entry,__selected_option,self.cfeed.channel_id,self.cfeed.service,maxly=__range)
-        __code = await self.cfeed.discord_client.loop.run_in_executor(None, function_call)
-        await self.response_code_action(message_object, __code)
+        await self.cfeed.discord_client.loop.run_in_executor(None, function_call)
+        await self.reload(message_object)
 
     async def InsightOption_remove(self, message_object: discord.Message):
         """Remove base system - Removes a selected base system from the feed."""
@@ -93,10 +92,9 @@ class Options_CapRadar(Base_Feed.base_activefeed):
             try:
                 tb_Filter_systems.get_remove(channel_id=self.cfeed.channel_id,filter_id=system_id,service_module=self.cfeed.service)
                 db.commit()
-                return "ok"
             except Exception as ex:
                 print(ex)
-                return "An error occurred when attempting to remove a system: {}".format(str(ex))
+                raise InsightExc.Db.DatabaseError
             finally:
                 db.close()
 
@@ -116,8 +114,8 @@ class Options_CapRadar(Base_Feed.base_activefeed):
                 return __remove
         __options = await self.cfeed.discord_client.loop.run_in_executor(None,make_options)
         system_id = await __options()
-        __code = await self.cfeed.discord_client.loop.run_in_executor(None,partial(remove_system,system_id))
-        await self.response_code_action(message_object, __code)
+        await self.cfeed.discord_client.loop.run_in_executor(None, partial(remove_system, system_id))
+        await self.reload(message_object)
 
     async def InsightOptionRequired_supers(self,message_object:discord.Message):
         """Super tracking - Enables or disables tracking of supercarriers/titans within range of base systems."""
@@ -127,10 +125,12 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         if __track_group_TF:
             __mention_method = self.mention_options(message_object,"supercarrier/titan")
             __mention_enum = await __mention_method()
-            __code = await self.cfeed.discord_client.loop.run_in_executor(None,partial(self.modify_groups,self.super_ids,__mention_enum))
+            await self.cfeed.discord_client.loop.run_in_executor(None, partial(self.modify_groups, self.super_ids,
+                                                                               __mention_enum))
         else:
-            __code = await self.cfeed.discord_client.loop.run_in_executor(None,partial(self.modify_groups,self.super_ids,enum_mention.noMention,remove=True))
-        await self.response_code_action(message_object, __code)
+            await self.cfeed.discord_client.loop.run_in_executor(None, partial(self.modify_groups, self.super_ids,
+                                                                               enum_mention.noMention, remove=True))
+        await self.reload(message_object)
 
     async def InsightOptionRequired_capitals(self,message_object:discord.Message):
         """Capital tracking - Enables or disables tracking of capitals(dreads,carriers,FAX,rorquals) within range of base systems."""
@@ -140,10 +140,12 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         if __track_group_TF:
             __mention_method = self.mention_options(message_object,"capital(dreads,carriers,FAX)")
             __mention_enum = await __mention_method()
-            __code = await self.cfeed.discord_client.loop.run_in_executor(None,partial(self.modify_groups,self.capital_ids,__mention_enum))
+            await self.cfeed.discord_client.loop.run_in_executor(None, partial(self.modify_groups, self.capital_ids,
+                                                                               __mention_enum))
         else:
-            __code = await self.cfeed.discord_client.loop.run_in_executor(None,partial(self.modify_groups,self.capital_ids,enum_mention.noMention,remove=True))
-        await self.response_code_action(message_object, __code)
+            await self.cfeed.discord_client.loop.run_in_executor(None, partial(self.modify_groups, self.capital_ids,
+                                                                               enum_mention.noMention, remove=True))
+        await self.reload(message_object)
 
     async def InsightOptionRequired_blops(self,message_object:discord.Message):
         """BLOPS tracking - Enables or disables tracking of blackops battleships within range of base systems."""
@@ -153,10 +155,12 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         if __track_group_TF:
             __mention_method = self.mention_options(message_object,"blackops battleships")
             __mention_enum = await __mention_method()
-            __code = await self.cfeed.discord_client.loop.run_in_executor(None,partial(self.modify_groups,self.blops_ids,__mention_enum))
+            await self.cfeed.discord_client.loop.run_in_executor(None, partial(self.modify_groups, self.blops_ids,
+                                                                               __mention_enum))
         else:
-            __code = await self.cfeed.discord_client.loop.run_in_executor(None,partial(self.modify_groups,self.blops_ids,enum_mention.noMention,remove=True))
-        await self.response_code_action(message_object, __code)
+            await self.cfeed.discord_client.loop.run_in_executor(None, partial(self.modify_groups, self.blops_ids,
+                                                                               enum_mention.noMention, remove=True))
+        await self.reload(message_object)
 
     async def InsightOptionRequired_maxage(self,message_object:discord.Message):
         """Set max KM age - Sets the maximum KM age in minutes for kills to be posted to this channel. If a km occurred more than this many minutes ago it will not be posted to the channel."""
@@ -167,10 +171,9 @@ class Options_CapRadar(Base_Feed.base_activefeed):
                 __row.max_km_age = new_limit
                 db.merge(__row)
                 db.commit()
-                return "ok"
             except Exception as ex:
                 print(ex)
-                return "An error occurred when attempting to set max age: {}".format(str(ex))
+                raise InsightExc.Db.DatabaseError
             finally:
                 db.close()
 
@@ -178,8 +181,8 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         __options.set_main_header("Enter the maximum age in minutes for a KM to be posted to the channel. KMs "
                                   "occurring more than this many minutes ago will not be posted.")
         _max_age = await __options()
-        __code = await self.cfeed.discord_client.loop.run_in_executor(None,partial(change_limit,_max_age))
-        await self.response_code_action(message_object,__code)
+        await self.cfeed.discord_client.loop.run_in_executor(None, partial(change_limit, _max_age))
+        await self.reload(message_object)
 
     async def InsightOption_sync(self, message_object: discord.Message):
         """Manage feed sync settings - Set up and manage EVE contact syncing to ignore allies in a capradar feed."""

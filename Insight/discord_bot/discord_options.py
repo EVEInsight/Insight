@@ -124,6 +124,11 @@ class mapper_index(object):
         except asyncio.TimeoutError:
             raise InsightExc.User.InputTimeout("Sorry, but you took too long to respond. You must respond within {} "
                                                "seconds.".format(str(self.__timeout_seconds)))
+        except discord.HTTPException as ex:
+            if ex.code == 50035 and ex.status == 400:
+                raise InsightExc.User.TooManyOptions
+            else:
+                raise ex
 
 
 class mapper_index_withAdditional(mapper_index):
