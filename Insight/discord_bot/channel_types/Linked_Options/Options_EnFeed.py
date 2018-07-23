@@ -6,6 +6,7 @@ from functools import partial
 from sqlalchemy.orm import *
 from sqlalchemy import *
 from typing import List
+import InsightExc
 
 
 class Options_EnFeed(Base_Feed.base_activefeed):
@@ -18,7 +19,7 @@ class Options_EnFeed(Base_Feed.base_activefeed):
         """Add tracked entities  - Add an entity (pilot, corp, or alliance) to post their involved kms. You can add more than 1 tracking entities to a channel if you wish."""
 
         def make_options(search_str) -> dOpt.mapper_index:
-            __options = dOpt.mapper_index(self.cfeed.discord_client, message_object)
+            __options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
             __options.set_main_header("Select the entity you wish to add.")
             db: Session = self.cfeed.service.get_session()
 
@@ -53,8 +54,8 @@ class Options_EnFeed(Base_Feed.base_activefeed):
             __found_results = await self.cfeed.discord_client.loop.run_in_executor(None,partial(make_options,__search_name))
             __selected_option = await __found_results()
         function_call = partial(tb_channels.commit_list_entry,__selected_option,self.cfeed.channel_id,self.cfeed.service)
-        __code = await self.cfeed.discord_client.loop.run_in_executor(None, function_call)
-        await self.response_code_action(message_object, __code)
+        await self.cfeed.discord_client.loop.run_in_executor(None, function_call)
+        await self.reload(message_object)
 
     async def InsightOption_remove(self,message_object:discord.Message):
         """Remove tracking  - Removes tracking of km involvement for a pilot, corp, or alliance."""
@@ -64,10 +65,9 @@ class Options_EnFeed(Base_Feed.base_activefeed):
             try:
                 db.delete(row)
                 db.commit()
-                return "ok"
             except Exception as ex:
                 print(ex)
-                return "An error occurred when attempting to remove this entity from the entity feed."
+                raise InsightExc.Db.DatabaseError
             finally:
                 db.close()
 
@@ -91,30 +91,29 @@ class Options_EnFeed(Base_Feed.base_activefeed):
                 print(ex)
             finally:
                 db.close()
-            return _options
+                return _options
 
         _options = await self.cfeed.discord_client.loop.run_in_executor(None, get_options)
         _row = await _options()
-        _resp = await self.cfeed.discord_client.loop.run_in_executor(None, partial(remove_en, _row))
-        await self.response_code_action(message_object, _resp)
+        await self.cfeed.discord_client.loop.run_in_executor(None, partial(remove_en, _row))
+        await self.reload(message_object)
 
     async def InsightOptionRequired_tracktype(self, message_object:discord.Message):
         """Show losses/kills  - Set the feed to one of three modes for tracked entities: show losses only, show kills only, show both kills and losses"""
         def set_mode(option):
             db:Session = self.cfeed.service.get_session()
             try:
-                __row:tb_enfeed = db.query(tb_enfeed).filter(tb_enfeed.channel_id==self.cfeed.channel_id).one()
+                __row: tb_enfeed = db.query(tb_enfeed).filter(tb_enfeed.channel_id == self.cfeed.channel_id).one()
                 __row.show_mode = option
                 db.merge(__row)
                 db.commit()
-                return "ok"
             except Exception as ex:
                 print(ex)
-                return "An error occurred when attempting to set channel mode: {}".format(str(ex))
+                raise InsightExc.Db.DatabaseError
             finally:
                 db.close()
 
-        __options = dOpt.mapper_index(self.cfeed.discord_client, message_object)
+        __options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
         __options.set_main_header("Select the KM viewing mode for this entity feed.")
         __options.add_option(dOpt.option_returns_object(
             name="Show losses only   - Only losses involving your tracked entities will be posted",
@@ -126,8 +125,8 @@ class Options_EnFeed(Base_Feed.base_activefeed):
             name="Show kills and losses   - Both kills and losses involving feed tracked entities will be posted",
             return_object=enum_kmType.show_both))
         __selected_option = await __options()
-        __code = await self.cfeed.discord_client.loop.run_in_executor(None,partial(set_mode,__selected_option))
-        await self.response_code_action(message_object, __code)
+        await self.cfeed.discord_client.loop.run_in_executor(None, partial(set_mode, __selected_option))
+        await self.reload(message_object)
 
     async def InsightOptionRequired_trackpods(self, message_object: discord.Message):
         """Display POD(capsule) kills/losses - Set the feed to either ignore or display POD killmails."""
@@ -140,23 +139,21 @@ class Options_EnFeed(Base_Feed.base_activefeed):
                         __row: tb_Filter_groups = tb_Filter_groups.get_row(self.cfeed.channel_id, i, self.cfeed.service)
                         db.merge(__row)
                     db.commit()
-                    return "ok"
                 else:
                     for i in self.pod_group_ids:
                         tb_Filter_groups.get_remove(self.cfeed.channel_id, i, self.cfeed.service)
                     db.commit()
-                    return "ok"
             except Exception as ex:
                 print(ex)
-                return "An error occurred when attempting set tracking on pods: {}".format(str(ex))
+                raise InsightExc.Db.DatabaseError
             finally:
                 db.close()
 
         __options = dOpt.mapper_return_yes_no(self.cfeed.discord_client, message_object)
-        __options.set_main_header("Do you want this feed to track pods (capsules) kills/losses?")
+        __options.set_main_header("Do you want to track pods (capsules) kills/losses in this feed?")
         resp = await __options()
-        __code = await self.cfeed.discord_client.loop.run_in_executor(None, partial(set_mode, resp))
-        await self.response_code_action(message_object, __code)
+        await self.cfeed.discord_client.loop.run_in_executor(None, partial(set_mode, resp))
+        await self.reload(message_object)
 
 
 from .. import enFeed

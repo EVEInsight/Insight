@@ -14,7 +14,7 @@ class DiscordCommands(object):
         self.commands['about'] = ['about', 'info']
         self.commands['help'] = ['help', 'commands']
         self.commands['create'] = ['create', 'new']
-        self.commands['settings'] = ['settings', 'modify']
+        self.commands['settings'] = ['settings', 'modify', 'options']
         self.commands['sync'] = ['sync', 'ignorelists', 'lists']
         self.commands['start'] = ['start']
         self.commands['stop'] = ['stop', 'pause']

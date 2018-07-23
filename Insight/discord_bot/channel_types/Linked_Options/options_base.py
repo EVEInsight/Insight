@@ -22,3 +22,7 @@ class Options_Base(object):
             raise None
         else:
             await self.cfeed.async_load_table()
+
+    async def reload(self, message_object):
+        await self.cfeed.async_load_table()
+        await message_object.channel.send('ok')

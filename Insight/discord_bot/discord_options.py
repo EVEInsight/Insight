@@ -128,7 +128,7 @@ class mapper_index(object):
 
 class mapper_index_withAdditional(mapper_index):
     async def add_additional(self):
-        self.add_header_row("Additional options")
+        self.add_header_row("Additional Options")
         self.add_option(option_cancel())
 
 

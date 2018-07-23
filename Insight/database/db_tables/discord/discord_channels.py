@@ -1,5 +1,6 @@
 from .discord_base import *
 from ..eve import tb_alliances
+import InsightExc
 
 
 class Channels(dec_Base.Base,discord_channel_base):
@@ -59,10 +60,9 @@ class Channels(dec_Base.Base,discord_channel_base):
                 __row.max = kwargs.get("maxly")
                 db.merge(__row)
             db.commit()
-            return "ok"
         except Exception as ex:
             print(ex)
-            return str(ex)
+            raise InsightExc.Db.DatabaseError
         finally:
             db.close()
 
