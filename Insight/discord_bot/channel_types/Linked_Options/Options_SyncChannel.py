@@ -4,6 +4,8 @@ import discord
 from functools import partial
 from sqlalchemy.orm import Session
 import asyncio
+import InsightExc
+
 
 class Options_Sync(options_base.Options_Base):
     def __init__(self, insight_channel):

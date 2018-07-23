@@ -1,4 +1,6 @@
 from distutils.version import LooseVersion
+import sys
+import service
 
 
 class sqlUpdater(object):
@@ -6,6 +8,14 @@ class sqlUpdater(object):
         self.connection = engine.connect()
         self.current_version = current_version
         self.updated_version = current_version
+
+    def compatibility_check(self):
+        if self.current_version > service.ServiceModule.get_version():
+            print("You cannot downgrade to a version of Insight below {0} as there will be"
+                  " database compatibility issues. Insight releases are forward compatible, but in this case"
+                  " only backward compatible to version {0}. If you wish to downgrade to an older version"
+                  " you must first delete your database file.".format(str(self.current_version)))
+            sys.exit(1)
 
     def get_versions_higher(self):
         for i in dir(self):
@@ -25,6 +35,7 @@ class sqlUpdater(object):
 
     def update_all(self):
         """Updates tables, returning the latest successful updated version"""
+        self.compatibility_check()
         error = False
         for i in self.get_versions_higher():
             try:
@@ -37,3 +48,4 @@ class sqlUpdater(object):
                 error = True
                 break
         return (str(self.updated_version), error)
+

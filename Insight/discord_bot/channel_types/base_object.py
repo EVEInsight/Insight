@@ -63,7 +63,8 @@ class discord_feed_service(object):
 
     async def command_about(self, message_object):
         """!about - Display Insight credits and version info."""
-        msg = "Insight by Nathan-LS. An EVE Online killfeed bot for Discord.\n\nhttps://github.com/Nathan-LS/Insight"
+        msg = "Insight {} by Nathan-LS. An EVE Online killmail feed" \
+              " bot for Discord.\n\nhttps://github.com/Nathan-LS/Insight".format(str(self.service.get_version()))
         await message_object.channel.send(msg)
 
     async def command_help(self,message_object):

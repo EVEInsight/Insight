@@ -1,4 +1,4 @@
-# Insight v0.10.5 Installation Guide
+# Insight v0.11.0 Installation Guide
 
 ## Executable Requirements
 
