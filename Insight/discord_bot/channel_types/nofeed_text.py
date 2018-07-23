@@ -83,6 +83,12 @@ class discord_text_nofeed_exist(discord_feed_service):
             await service_module.channel_manager.add_feed_object(__tmp_feed_object)
             await message_object.channel.send("Created a new feed!")
             await __tmp_feed_object.command_start(message_object)
+            try:
+                channel_name = str(message_object.channel.name)
+                server_name = str(message_object.channel.guild.name)
+                print('New {} in {}({})'.format(str(__tmp_feed_object), channel_name, server_name))
+            except Exception as ex:
+                print(ex)
         except Exception as ex:
             print(ex)
             await __tmp_feed_object.delete()
@@ -105,6 +111,7 @@ class discord_text_nofeed_exist(discord_feed_service):
 
     def get_linked_options(self):
         return Linked_Options.opt_blankchannel(self)
+
 
 from . import Linked_Options
 from . import capRadar as inCR

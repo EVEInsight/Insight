@@ -17,7 +17,10 @@ class Options_CapRadar(Base_Feed.base_activefeed):
     def mention_options(self,message_object,group_type):
         __options = discord_options.mapper_index(self.cfeed.discord_client, message_object)
         __options.set_main_header("Select mention mode for this channel. On detected {} activity the bot "
-                                  "can optionally mention @ here or @ everyone if the km occurred very recently.".format(group_type))
+                                  "can optionally mention @ here or @ everyone if the km occurred very recently.\n\n"
+                                  "Note: Mentions are a planned feature and are not currently implemented. "
+                                  "When mentions are implemented, they will follow your specified settings "
+                                  "set here.".format(group_type))
         __options.add_option(discord_options.option_returns_object("No mention", return_object=enum_mention.noMention))
         __options.add_option(discord_options.option_returns_object("@ here", return_object=enum_mention.here))
         __options.add_option(discord_options.option_returns_object("@ everyone", return_object=enum_mention.everyone))

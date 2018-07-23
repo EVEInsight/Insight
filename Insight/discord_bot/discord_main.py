@@ -19,11 +19,14 @@ class Discord_Insight_Client(discord.Client):
         self.loop.create_task(self.setup_tasks())
 
     async def on_ready(self):
-        print('Logged in as')
+        print('Logged in as:')
         print(self.user.name)
-        print(self.user.id)
         print('------')
-        print('This bot is a member of')
+        invite_url = 'https://discordapp.com/api/oauth2/authorize?client_id={}&permissions=149504&scope=bot'.format(
+            self.user.id)
+        print('Invite Link: {}'.format(invite_url))
+        print(self.user.id)
+        print('This bot is a member of:')
         print('Servers: {}'.format(str(len(self.guilds))))
         print('Channels: {}'.format(str(len(list(self.get_all_channels())))))
         print('------')
