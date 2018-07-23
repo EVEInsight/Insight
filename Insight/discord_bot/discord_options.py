@@ -84,8 +84,7 @@ class mapper_index(object):
         try:
             assert self.__current_option_index() > 0
         except AssertionError:
-            await self.message.channel.send("One of the assertions for the option container failed. This is likely a programming error")
-            raise None
+            raise InsightExc.User.InsightProgrammingError
 
     def isInt(self,value):
         try:
@@ -99,8 +98,8 @@ class mapper_index(object):
             assert self.isInt(response)
             assert int(response) >= 0 and int(response) < self.__current_option_index()
         except AssertionError:
-            await self.message.channel.send("You must enter a number between 0 and {} but you entered {}".format(str(self.__current_option_index() - 1), str(response)))
-            raise None
+            raise InsightExc.User.InvalidIndex("You must enter a number between 0 and {} but you entered '{}'."
+                                               "".format(str(self.__current_option_index() - 1), str(response)))
 
     async def add_additional(self):
         pass
@@ -123,8 +122,8 @@ class mapper_index(object):
             __response = await self.discord_client.wait_for('message', check=is_author, timeout=self.__timeout_seconds)
             return await self.response_action(__response.content)
         except asyncio.TimeoutError:
-            await self.message.channel.send("{}\nSorry, but you took to long to respond. You must respond within {} seconds.".format(self.message.author.mention, str(self.__timeout_seconds)))
-            raise None
+            raise InsightExc.User.InputTimeout("Sorry, but you took too long to respond. You must respond within {} "
+                                               "seconds.".format(str(self.__timeout_seconds)))
 
 
 class mapper_index_withAdditional(mapper_index):
@@ -159,9 +158,8 @@ class mapper_return_noOptions_requiresInt(mapper_return_noOptions):
 
     async def check_response(self,response):
         if not self.isInt(response):
-            await self.message.channel.send("You entered an invalid number. You must enter an integer but you entered "
-                                            "'{}' which is not an integer".format(str(response)))
-            raise None
+            raise InsightExc.User.NotInteger(("You entered an invalid number. You must enter an integer but you entered"
+                                              " '{}' which is not an integer.".format(str(response))))
 
     async def response_action(self, response):
         await self.check_response(response)

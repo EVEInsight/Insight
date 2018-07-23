@@ -6,6 +6,7 @@ from .DiscordCommands import DiscordCommands
 import sys
 from functools import partial
 import InsightExc
+import traceback
 
 
 class Discord_Insight_Client(discord.Client):
@@ -89,6 +90,8 @@ class Discord_Insight_Client(discord.Client):
         except Exception as ex:
             if isinstance(ex, InsightExc.InsightException):
                 await message.channel.send("{}\n{}".format(message.author.mention, str(ex)))
+            else:
+                print(traceback.print_exc())
 
 
     @staticmethod

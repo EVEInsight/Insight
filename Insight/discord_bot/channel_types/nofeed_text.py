@@ -90,11 +90,11 @@ class discord_text_nofeed_exist(discord_feed_service):
             except Exception as ex:
                 print(ex)
         except Exception as ex:
-            print(ex)
             await __tmp_feed_object.delete()
             await message_object.channel.send(
                 "Something went wrong when creating a new feed. Run the command '!create' "
                 "to start over.")
+            raise ex
 
     @classmethod
     def channel_id_is_feed(cls, id, service_module):
