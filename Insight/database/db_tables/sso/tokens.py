@@ -4,6 +4,7 @@ import requests
 import json
 from requests.auth import HTTPBasicAuth
 import swagger_client
+import InsightExc
 
 
 class Tokens(dec_Base.Base, sso_base):
@@ -65,7 +66,7 @@ class Tokens(dec_Base.Base, sso_base):
             if response.alliance_id:
                 self.object_alliance = tb_alliances(response.alliance_id)
         else:
-            raise None
+            raise InsightExc.SSO.SSOerror
 
     def __alliance_api_call(self, api, **kwargs):
         return api.get_alliances_alliance_id_contacts_with_http_info(alliance_id=self.alliance_id, **kwargs)

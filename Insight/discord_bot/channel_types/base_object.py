@@ -8,6 +8,7 @@ import service as Service
 import database.db_tables as dbRow
 from sqlalchemy.orm import Session
 from .FiltersVisualsEmbedded import *
+import InsightExc
 
 
 class discord_feed_service(object):
@@ -42,7 +43,7 @@ class discord_feed_service(object):
         if self.linked_table().make_row(self.get_object_id(), self.service):
             pass
         else:
-            raise None
+            raise InsightExc.Db.DatabaseError
 
     def get_object_id(self):
         return self.channel_id

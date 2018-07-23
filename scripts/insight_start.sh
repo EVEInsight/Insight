@@ -8,4 +8,4 @@ SPath=$(dirname "$Script")
 cd $SPath
 cd ..
 git pull
-screen -dmS eveInsight venv/bin/python3 Insight -api
+screen -dmS eveInsight venv/bin/python3 Insight

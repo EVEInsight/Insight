@@ -41,8 +41,8 @@ class service_module(object):
         parser.add_argument("--debug_limit","-limit",
                             help="Sets the total limit of debug kms to push through feeds before exiting the program. Default is unlimited.",
                             type=int)
-        parser.add_argument("--api_import","-api",action="store_true",
-                            help="Sets the bot to import all data from the SDE database and EVE ESI.",default=False)
+        parser.add_argument("--skip_api_import", "-noapi", action="store_true",
+                            help="Skip startup API static data import check.", default=False)
         parser.add_argument("--sde_db","-sde",
                             help="Specifies the name of the SDE database file relative to main.py. Download and extract the "
                                  "sqlite-latest.sqlite file from https://www.fuzzwork.co.uk/dump/",
@@ -77,7 +77,7 @@ class service_module(object):
     def __import_check(self):
         try:
             with open(self.config_file['sqlite_database']['filename'],'r'):
-                if self.cli_args.api_import:
+                if not self.cli_args.skip_api_import:
                     self.__import_everything_flag = True
         except FileNotFoundError:
             print("{} does not exist. Forcing first time static data import.".format(self.config_file['sqlite_database']['filename']))

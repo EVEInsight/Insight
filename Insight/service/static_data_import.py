@@ -16,6 +16,8 @@ class static_data_import(object):
             self.load_indexes()
             self.load_api()
             self.engine.dispose()
+        else:
+            print("Skipping API static data import. This is not recommended.")
 
     def sde_importer(self):
         try:
