@@ -13,6 +13,8 @@ try:
 except FileNotFoundError:
     print('distTest folder not found!')
 
+version_str = str('v0.12.0')
+
 added_hiddenimports = collect_submodules('sqlalchemy')
 added_hiddenimports.extend(collect_submodules('discord'))
 added_hiddenimports.extend(collect_submodules('swagger-client'))
@@ -53,15 +55,19 @@ shutil.copy('Installation.md','{}/EVE-Insight/Installation.md'.format(DISTPATH))
 shutil.copy('sqlite-latest.sqlite','{}/EVE-Insight/sqlite-latest.sqlite'.format(DISTPATH))
 shutil.copytree('Insight/callback','{}/EVE-Insight/callback'.format(DISTPATH))
 if platform == "win32":
+    archive_name = 'Insight-{}-Windows'.format(version_str)
+    archive_file = '{}.zip'.format(archive_name)
     shutil.move('{}/Insight.exe'.format(DISTPATH),'{}/EVE-Insight/Insight.exe'.format(DISTPATH))
     print("This is Windows. Making a zip of file.")
-    shutil.make_archive('Insight_Windows','zip','{}'.format(DISTPATH))
-    shutil.move('Insight_Windows.zip'.format(DISTPATH),'{}/Insight_Windows.zip'.format(DISTPATH))
+    shutil.make_archive(archive_name,'zip','{}'.format(DISTPATH))
+    shutil.move(archive_file,'{}/{}'.format(DISTPATH,archive_file))
 elif platform.startswith('linux'):
+    archive_name = 'Insight-{}-Linux'.format(version_str)
+    archive_file = '{}.zip'.format(archive_name)
     shutil.move('{}/Insight'.format(DISTPATH),'{}/EVE-Insight/Insight'.format(DISTPATH))
     print("This is Linux. Making a tar of file.")
-    shutil.make_archive('Insight_Linux','gztar','{}'.format(DISTPATH))
-    shutil.move('Insight_Linux.tar.gz'.format(DISTPATH),'{}/Insight_Linux.tar.gz'.format(DISTPATH))
+    shutil.make_archive(archive_name,'gztar','{}'.format(DISTPATH))
+    shutil.move(archive_file,'{}/{}'.format(DISTPATH,archive_file))
 else:
     print("Unsupported os")
 shutil.copytree('{}/EVE-Insight'.format(DISTPATH),'distTest')
