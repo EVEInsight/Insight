@@ -4,7 +4,7 @@ from .sso_base import *
 class Contacts_Alliances(dec_Base.Base, sso_base):
     __tablename__ = 'contacts_alliances'
 
-    token = Column(String, ForeignKey("tokens.refresh_token"), primary_key=True, nullable=False)
+    token = Column(String, ForeignKey("tokens.token_id"), primary_key=True, nullable=False)
     owner = Column(Enum(contact_owner), primary_key=True, default=contact_owner.pilot, nullable=False, index=False)
     alliance_id = Column(Integer, ForeignKey("alliances.alliance_id"), primary_key=True, nullable=False,
                          autoincrement=False)

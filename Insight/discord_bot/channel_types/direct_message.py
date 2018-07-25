@@ -16,6 +16,9 @@ class direct_message(inCh.discord_feed_service):
     def get_object_id(self):
         return self.user_id
 
+    async def async_load_table(self):
+        pass
+
     async def command_sync(self, message_object):
         """!sync - Manage your configured contact tokens settings. Add, delete, and update your tokens."""
         await self.command_settings(message_object)

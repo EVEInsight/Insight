@@ -10,8 +10,9 @@ import InsightExc
 class Tokens(dec_Base.Base, sso_base):
     __tablename__ = 'tokens'
 
+    token_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     discord_user = Column(BIGINT, ForeignKey("discord_users.user_id"), nullable=False)
-    refresh_token = Column(String, primary_key=True, nullable=False)
+    refresh_token = Column(String, nullable=False)
     token = Column(String, nullable=True)
     character_id = Column(Integer, ForeignKey("characters.character_id"), nullable=True)
     corporation_id = Column(Integer, ForeignKey("corporations.corporation_id"), nullable=True)
@@ -41,7 +42,7 @@ class Tokens(dec_Base.Base, sso_base):
         self.refresh_token = refresh_token
 
     def __str__(self):
-        syncs_with = "Token: * Last updated: {}\n".format(self.last_updated)
+        syncs_with = "TokenID: {} Updated: {}\n".format(str(self.token_id), self.last_updated.replace(microsecond=0))
         syncs_with += "Pilot: {}\n".format(self.object_pilot.character_name) if self.object_pilot else ""
         syncs_with += "Corp: {}\n".format(self.object_corp.corporation_name) if self.object_corp else ""
         syncs_with += "Alliance: {}\n".format(self.object_alliance.alliance_name) if self.object_alliance else ""
@@ -123,7 +124,7 @@ class Tokens(dec_Base.Base, sso_base):
     def __remove(self, enum_owner, service_module):
         db: Session = service_module.get_session()
         def helper(table):
-            rows = db.query(table).filter(table.token == self.refresh_token, table.owner == enum_owner)
+            rows = db.query(table).filter(table.token == self.token_id, table.owner == enum_owner)
             rows.delete()
         helper(tb_contacts_alliances)
         helper(tb_contacts_corps)
@@ -173,30 +174,25 @@ class Tokens(dec_Base.Base, sso_base):
         try:
             clean_auth = service_module.sso.clean_auth_code(auth_code)
         except KeyError:
-            return "You entered an invalid code. Please try again."
+            raise InsightExc.SSO.SSOerror("You entered an invalid URL. Please try again.")
         try:
             response = service_module.sso.get_token_from_auth(clean_auth)
         except:
-            return "An error occurred when attempting to get a token from the auth code. Please try again later."
+            raise InsightExc.SSO.SSOerror(
+                "An error occurred when attempting to get a token from the auth code. Please try again later.")
         try:
-            db.query(cls).filter(cls.discord_user == discord_user_id,
-                                 cls.refresh_token == response.get("refresh_token")).one()
+            __row = cls(discord_user_id, response.get("refresh_token"))
+            __row.get_affiliation(response.get("access_token"), service_module)
+            db.merge(__row)
+            db.commit()
+            name_resolver.api_mass_name_resolve(service_module)
+            return db.query(cls).filter(cls.discord_user == discord_user_id,
+                                        cls.refresh_token == response.get("refresh_token")).one()
+        except Exception as ex:
+            print(ex)
+            raise InsightExc.Db.DatabaseError
+        finally:
             db.close()
-            return "This token already exists."
-        except NoResultFound:
-            try:
-                __row = cls(discord_user_id, response.get("refresh_token"))
-                __row.get_affiliation(response.get("access_token"), service_module)
-                db.merge(__row)
-                db.commit()
-                name_resolver.api_mass_name_resolve(service_module)
-                return db.query(cls).filter(cls.discord_user == discord_user_id,
-                                            cls.refresh_token == response.get("refresh_token")).one()
-            except Exception as ex:
-                print(ex)
-                return "An error occurred when attempting to get affiliation, please try again later!"
-            finally:
-                db.close()
 
     @classmethod
     def sync_all_tokens(cls, discord_user_id, service_module):

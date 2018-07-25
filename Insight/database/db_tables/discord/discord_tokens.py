@@ -7,7 +7,7 @@ class Discord_Tokens(dec_Base.Base, discord_channel_base):
 
     channel_id = Column(BIGINT, ForeignKey("discord_channels.channel_id"), primary_key=True, nullable=False,
                         autoincrement=False)
-    token = Column(String, ForeignKey("tokens.refresh_token"), primary_key=True, nullable=False)
+    token = Column(Integer, ForeignKey("tokens.token_id"), primary_key=True, nullable=False)
 
     object_channel = relationship("Channels", uselist=False, back_populates="object_tokens")
     object_token = relationship("Tokens", uselist=False, back_populates="object_channels")
