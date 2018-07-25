@@ -17,6 +17,22 @@ class sqlUpdater(object):
                   " you must first delete your database file.".format(str(self.current_version)))
             sys.exit(1)
 
+    def get_approval(self, changes):
+        print("Insight Database Updater Warning: Certain updates modify the architecture of the database file that "
+              "require your approval. \nThis new update will make the following changes:\n\n")
+        print(changes + '\n')
+        resp = input("\nProceed with these changes? Note: You will be unable to use this version of Insight unless you "
+                     "approve.[Y/N]: ").lower()
+        if resp.startswith('y'):
+            return
+        elif resp.startswith('n'):
+            print("No changes you were made. If you wish to continue using your database without changes then you must "
+                  "downgrade to an older, unsupported Insight release.")
+            sys.exit(1)
+        else:
+            print("Unknown response. No changes were made.")
+            sys.exit(1)
+
     def get_versions_higher(self):
         for i in dir(self):
             if i.startswith("sqlV"):
@@ -28,10 +44,21 @@ class sqlUpdater(object):
         for i in statements:
             self.connection.execute(i)
 
+    def sqlV_0_12_0(self):
+        """v0.12.0"""
+        changes = "- Delete all access tokens.\n- Require users to readd their standing tokens.\n- Encrypt all " \
+                  "new authorization and access tokens using a generated pass file."
+        self.get_approval(changes)
+        yield 'DROP TABLE IF EXISTS contacts_alliances;'
+        yield 'DROP TABLE IF EXISTS contacts_corporations;'
+        yield 'DROP TABLE IF EXISTS contacts_characters;'
+        yield 'DROP TABLE IF EXISTS discord_tokens;'
+        yield 'DROP TABLE IF EXISTS tokens;'
+
     def sqlV_0_10_1(self):
         """v0.10.1"""
-        yield ('ALTER TABLE discord_enFeed ADD template_id INTEGER DEFAULT 0 NOT NULL;')
-        yield ('ALTER TABLE discord_capRadar ADD template_id INTEGER DEFAULT 0 NOT NULL;')
+        yield 'ALTER TABLE discord_enFeed ADD template_id INTEGER DEFAULT 0 NOT NULL;'
+        yield 'ALTER TABLE discord_capRadar ADD template_id INTEGER DEFAULT 0 NOT NULL;'
 
     def update_all(self):
         """Updates tables, returning the latest successful updated version"""
