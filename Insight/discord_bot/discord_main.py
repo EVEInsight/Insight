@@ -16,7 +16,7 @@ class Discord_Insight_Client(discord.Client):
         self.channel_manager: service.Channel_manager = self.service.channel_manager
         self.commandLookup = DiscordCommands()
         self.background_tasks = background_tasks(self)
-        self.loop.set_default_executor(ThreadPoolExecutor(max_workers=6))
+        self.loop.set_default_executor(ThreadPoolExecutor(max_workers=5))
         self.loop.create_task(self.setup_tasks())
 
     async def on_ready(self):

@@ -46,14 +46,10 @@ class background_tasks(object):
                                                                               str(self.client.service.get_version()))
                 stats_zk = await self.client.loop.run_in_executor(None, self.client.service.zk_obj.get_stats)
                 d_status = discord.Status.online
-                if stats_zk[3] >= 10:
+                if stats_zk[0] == 10 or stats_zk[3] >= 6:
                     d_status = discord.Status.idle
-                    if datetime.datetime.utcnow() >= last_warning + datetime.timedelta(hours=3):
-                        msg = "Service Warning: \nThe average delay of Insight receiving killmails from when they actually " \
-                              "occurred is {} minutes. This indicates a service issue with zKill or CCP API.".format(
-                            str(stats_zk[1]))
-                        # await self.client.loop.run_in_executor(None, partial(self.client.channel_manager.post_message, msg))
-                        last_warning = datetime.datetime.utcnow()
+                if stats_zk[2] > 100:
+                    stats_zk[2] = "99+"
                 status_str += '[zK] Add: {}, AVG Delay: {}m(+{}s), AVG Next: {}s '.format(
                     str(stats_zk[0]), str(stats_zk[1]), str(stats_zk[2]), str(stats_zk[3]))
                 stats_feeds = await self.client.channel_manager.avg_delay()

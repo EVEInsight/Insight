@@ -35,28 +35,6 @@ class Options_DM(options_base.Options_Base):
                 return await track()
             return False
 
-        def save_changes(row):
-            db: Session = self.cfeed.service.get_session()
-            try:
-                db.merge(row)
-                db.commit()
-            except Exception as ex:
-                print(ex)
-                raise InsightExc.Db.DatabaseError
-            finally:
-                db.close()
-
-        def remove_row(row):
-            db: Session = self.cfeed.service.get_session()
-            try:
-                db.delete(row)
-                db.commit()
-            except Exception as ex:
-                print(ex)
-                raise InsightExc.Db.DatabaseError
-            finally:
-                db.close()
-
         _options = dOpt.mapper_return_noOptions(self.cfeed.discord_client, message_object, timeout_seconds=400)
         _options.set_main_header(
             "Open this link and login to EVE's SSO system. After clicking 'Authorize' and being redirected to a blank webpage, copy and paste the content of your browser's "
@@ -74,26 +52,15 @@ class Options_DM(options_base.Options_Base):
                 __resp.corporation_id = None
             if not await track_this(__resp.object_alliance, "alliance"):
                 __resp.alliance_id = None
-            await self.cfeed.discord_client.loop.run_in_executor(None, partial(save_changes, __resp))
+            await self.save_row(__resp)
             await self.reload(message_object)
             await self.InsightOption_syncnow(message_object)
         except Exception as ex:
-            await self.cfeed.discord_client.loop.run_in_executor(None, partial(remove_row, __resp))
+            await self.delete_row(__resp)
             raise ex
 
     async def InsightOption_deleteToken(self, message_object: discord.Message):
         """Delete token - Deletes one of your added tokens and removes it from all channels that use it."""
-        def delete_token(token):
-            db: Session = self.cfeed.service.get_session()
-            try:
-                db.delete(token)
-                db.commit()
-            except Exception as ex:
-                print(ex)
-                raise InsightExc.Db.DatabaseError
-            finally:
-                db.close()
-
         def get_options():
             _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
             _options.set_main_header(
@@ -111,22 +78,11 @@ class Options_DM(options_base.Options_Base):
 
         _options = await self.cfeed.discord_client.loop.run_in_executor(None, get_options)
         rm_token = await _options()
-        await self.cfeed.discord_client.loop.run_in_executor(None, partial(delete_token, rm_token))
+        await self.delete_row(rm_token)
         await self.reload(message_object)
 
     async def InsightOption_removeChannel(self, message_object: discord.Message):
         """Remove a token from Discord channel - Removes your token from a Discord channel"""
-
-        def remove_channel(token):
-            db: Session = self.cfeed.service.get_session()
-            try:
-                db.delete(token)
-                db.commit()
-            except Exception as ex:
-                print(ex)
-            finally:
-                db.close()
-
         def get_options():
             db: Session = self.cfeed.service.get_session()
             _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
@@ -148,7 +104,7 @@ class Options_DM(options_base.Options_Base):
 
         options = await self.cfeed.discord_client.loop.run_in_executor(None, get_options)
         row = await options()
-        await self.cfeed.discord_client.loop.run_in_executor(None, partial(remove_channel, row))
+        await self.delete_row(row)
         await self.reload(message_object)
 
     async def InsightOption_syncnow(self, message_object: discord.Message):
