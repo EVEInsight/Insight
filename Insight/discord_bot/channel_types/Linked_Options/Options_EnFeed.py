@@ -59,18 +59,6 @@ class Options_EnFeed(Base_Feed.base_activefeed):
 
     async def InsightOption_remove(self,message_object:discord.Message):
         """Remove tracking  - Removes tracking of km involvement for a pilot, corp, or alliance."""
-
-        def remove_en(row):
-            db: Session = self.cfeed.service.get_session()
-            try:
-                db.delete(row)
-                db.commit()
-            except Exception as ex:
-                print(ex)
-                raise InsightExc.Db.DatabaseError
-            finally:
-                db.close()
-
         def get_options():
             db: Session = self.cfeed.service.get_session()
             _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
@@ -95,7 +83,7 @@ class Options_EnFeed(Base_Feed.base_activefeed):
 
         _options = await self.cfeed.discord_client.loop.run_in_executor(None, get_options)
         _row = await _options()
-        await self.cfeed.discord_client.loop.run_in_executor(None, partial(remove_en, _row))
+        await self.delete_row(_row)
         await self.reload(message_object)
 
     async def InsightOptionRequired_tracktype(self, message_object:discord.Message):

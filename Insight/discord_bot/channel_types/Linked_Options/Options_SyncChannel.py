@@ -19,45 +19,27 @@ class Options_Sync(options_base.Options_Base):
         def write_token(token_row):
             db: Session = self.cfeed.service.get_session()
             try:
-                __row = tb_discord_tokens(channel_id=self.cfeed.channel_id, token=token_row.refresh_token)
+                __row = tb_discord_tokens(channel_id=self.cfeed.channel_id, token=token_row.token_id)
                 db.merge(__row)
                 db.commit()
-                return "ok"
             except Exception as ex:
                 print(ex)
-                return "An error occurred attempting to enable this token for the channel."
+                raise InsightExc.Db.DatabaseError
             finally:
                 db.close()
 
         if isinstance(user_channel, direct_message.direct_message):
             await message_object.channel.send(
-                "{} I opened a direct message with you. Please read it.".format(message_object.author.mention))
+                "{}\nI opened a direct message with you. Please read it.".format(message_object.author.mention))
             try:
                 __token = await user_channel.linked_options.InsightOptionAbstract_addchannel()
-                assert isinstance(__token, tb_tokens)
-                __resp = await self.cfeed.discord_client.loop.run_in_executor(None, partial(write_token, __token))
-                await message_object.channel.send(str(__resp))
-                if __resp != "ok":
-                    raise Exception("An error occurred when saving the token to channel")
+                await self.cfeed.discord_client.loop.run_in_executor(None, partial(write_token, __token))
                 await self.InsightOption_syncnow(message_object)
-            except Exception as ex:
+            except:
                 await message_object.channel.send("No changes were made to the token configuration for this channel")
 
     async def InsightOption_removeToken(self, message_object: discord.Message):
         """Remove token - Removes a token from the channel along with any synced contacts associated with it."""
-
-        def remove_token(token_row):
-            db: Session = self.cfeed.service.get_session()
-            try:
-                db.delete(token_row)
-                db.commit()
-                return "ok"
-            except Exception as ex:
-                print(ex)
-                return "An error occurred when attempting to remove this token from the channel"
-            finally:
-                db.close()
-
         def get_options():
             _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
             _options.set_main_header(
@@ -75,10 +57,8 @@ class Options_Sync(options_base.Options_Base):
 
         __options = await self.cfeed.discord_client.loop.run_in_executor(None, get_options)
         selected_row = await __options()
-        _resp = await self.cfeed.discord_client.loop.run_in_executor(None, partial(remove_token, selected_row))
-        await message_object.channel.send(_resp)
-        if _resp == "ok":
-            await self.InsightOption_syncnow(message_object)
+        await self.delete_row(selected_row)
+        await self.InsightOption_syncnow(message_object)
 
     async def InsightOption_syncnow(self, message_object: discord.Message = None):
         """Force sync - Updates the channel's allies list if you have SSO tokens assigned to it."""
@@ -92,7 +72,7 @@ class Options_Sync(options_base.Options_Base):
                 return __row.str_tokens()
             except Exception as ex:
                 print(ex)
-                return "Something went wrong when updating this channel's ignore lists with the tokens."
+                raise InsightExc.Db.DatabaseError
             finally:
                 db.close()
 
@@ -100,7 +80,7 @@ class Options_Sync(options_base.Options_Base):
             await self.cfeed.channel_discord_object.send("Syncing ignored ally capRadar contact lists now")
         __resp = await self.cfeed.discord_client.loop.run_in_executor(None, sync_contacts)
         await self.cfeed.channel_discord_object.send(__resp)
-        await self.cfeed.async_load_table()
+        await self.reload(message_object)
 
 
 from discord_bot import discord_options as dOpt

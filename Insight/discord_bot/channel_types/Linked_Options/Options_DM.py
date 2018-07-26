@@ -131,7 +131,7 @@ class Options_DM(options_base.Options_Base):
             _options.set_main_header(
                 "Select one of your tokens to add to the feed. If you do not have any tokens created yet select the 'cancel' option"
                 " and do the following:\n\nStep 1. Direct Message this bot with the command '!settings'\n\nStep 2. Select the option"
-                " to add a new token.\n\nStep 3.Follow the steps needed to add a token and then rerun the command '!sync' "
+                " to add a new token.\n\nStep 3. Follow the steps needed to add a token and then rerun the command '!sync' "
                 "in the channel you wish to sync your contacts with to get back to this step.")
             db: Session = self.cfeed.service.get_session()
             try:
@@ -146,8 +146,7 @@ class Options_DM(options_base.Options_Base):
                 db.close()
 
         options = await self.cfeed.discord_client.loop.run_in_executor(None, partial(make_options))
-        token_row = await options()
-        return token_row
+        return await options()
 
 
 from discord_bot import discord_options as dOpt
