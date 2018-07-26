@@ -9,14 +9,17 @@ import configparser
 import sys
 from distutils.version import LooseVersion
 import requests
+import secrets
+
+__passkey = None
 
 
 class service_module(object):
     def __init__(self):
+        self.welcome()
         self.config_file = configparser.ConfigParser()
         self.cli_args = self.__read_cli_args()
-        self.config_file.read(self.__read_config_file())
-        self.welcome()
+        self.config_file.read(self.read_config_file(self.cli_args.config))
         self.__import_everything_flag = False
         self.__import_check()
         self.__sc_session: scoped_session = database.setup_database(self).get_scoped_session()
@@ -49,12 +52,23 @@ class service_module(object):
                             type=str, default="sqlite-latest.sqlite")
         return parser.parse_args()
 
-    def __read_config_file(self):
+    @classmethod
+    def read_config_file(cls, fname, newkey=False):
         try:
-            with open(self.cli_args.config, 'r'):
-                return self.cli_args.config
+            with open(fname, 'r'):
+                pass
+            tmpConfig = configparser.ConfigParser()
+            tmpConfig.read(fname)
+            if not tmpConfig['encryption']['secret_key'] or newkey:
+                print("Generating a new encryption secret key in config file.")
+                tmpConfig['encryption']['secret_key'] = cls.generate_secret()
+                with open(fname, 'w') as cf:
+                    tmpConfig.write(cf)
+            global __passkey
+            __passkey = tmpConfig['encryption']['secret_key']
+            return fname
         except FileNotFoundError:
-            print("The config file '{0}' could not be found. Try renaming the file 'default-config.ini' to '{0}'".format(str(self.cli_args.config)))
+            print("The config file '{0}' could not be found. Rename file 'default-config.ini' to '{0}'".format(fname))
             sys.exit(1)
 
     def __read_motd(self):
@@ -126,3 +140,12 @@ class service_module(object):
     def get_version(cls):
         version_str = 'v0.12.0'
         return LooseVersion(version_str)
+
+    @staticmethod
+    def get_key():
+        global __passkey
+        return __passkey
+
+    @staticmethod
+    def generate_secret():
+        return str(secrets.token_urlsafe(64))

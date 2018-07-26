@@ -56,7 +56,8 @@ class Options_DM(options_base.Options_Base):
             await self.reload(message_object)
             await self.InsightOption_syncnow(message_object)
         except Exception as ex:
-            await self.delete_row(__resp)
+            await self.cfeed.discord_client.loop.run_in_executor(None,
+                                                                 partial(self.cfeed.service.sso.delete_token, __resp))
             raise ex
 
     async def InsightOption_deleteToken(self, message_object: discord.Message):
@@ -78,7 +79,8 @@ class Options_DM(options_base.Options_Base):
 
         _options = await self.cfeed.discord_client.loop.run_in_executor(None, get_options)
         rm_token = await _options()
-        await self.delete_row(rm_token)
+        await self.cfeed.discord_client.loop.run_in_executor(None,
+                                                             partial(self.cfeed.service.sso.delete_token, rm_token))
         await self.reload(message_object)
 
     async def InsightOption_removeChannel(self, message_object: discord.Message):

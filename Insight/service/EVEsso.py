@@ -5,6 +5,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 import json
 import sys
+import InsightExc
 
 
 class EVEsso(object):
@@ -16,6 +17,7 @@ class EVEsso(object):
         self.__callback = ""
         self._token_url = "https://login.eveonline.com/oauth/token"
         self._verify_url = "https://login.eveonline.com/oauth/verify"
+        self._revoke_url = "https://login.eveonline.com/oauth/revoke"
         self._login_url = ""
         self.__get_config()
 
@@ -50,7 +52,8 @@ class EVEsso(object):
         auth_header = (HTTPBasicAuth(self.__client_id, self.__client_secret))
         headers = {"Content-Type": "application/json", "User-Agent": "InsightDiscordKillfeeds"}
         payload = {"grant_type": "authorization_code", "code": auth_code}
-        response = requests.post(url=self._token_url, auth=auth_header, data=json.dumps(payload), headers=headers)
+        response = requests.post(url=self._token_url, auth=auth_header, data=json.dumps(payload), headers=headers,
+                                 timeout=60)
         if response.status_code == 200:
             return response.json()
         else:
@@ -65,7 +68,8 @@ class EVEsso(object):
         headers = {"Content-Type": "application/json", "User-Agent": "InsightDiscordKillfeeds"}
         payload = {"grant_type": "refresh_token", "refresh_token": token_row.refresh_token}
         try:
-            response = requests.post(url=self._token_url, auth=auth_header, data=json.dumps(payload), headers=headers)
+            response = requests.post(url=self._token_url, auth=auth_header, data=json.dumps(payload), headers=headers,
+                                     timeout=60)
             if response.status_code == 200:
                 token_row.token = response.json().get("access_token")
             elif response.status_code == 400:
@@ -75,6 +79,32 @@ class EVEsso(object):
         except Exception as ex:
             token_row.token = None
             print(ex)
+
+    def delete_token(self, row):
+        assert isinstance(row, tb_tokens)
+        db: Session = self.service.get_session()
+        ref_token = row.refresh_token
+        try:
+            db.delete(row)
+            db.commit()
+        except Exception as ex:
+            print(ex)
+            raise InsightExc.Db.DatabaseError("Database Error: Unable to delete token from the database")
+        finally:
+            db.close()
+            try:
+                auth_header = (
+                    HTTPBasicAuth(self.__client_id, self.__client_secret))
+                headers = {"Content-Type": "application/json", "User-Agent": "InsightDiscordKillfeeds"}
+                payload = {"token_type_hint": "refresh_token", "token": ref_token}
+                response = requests.post(url=self._revoke_url, auth=auth_header, data=json.dumps(payload),
+                                         headers=headers, timeout=60, verify=True)
+                if response.status_code != 200:
+                    raise InsightExc.SSO.SSOerror
+            except:
+                raise InsightExc.SSO.SSOerror('The token was not revoked from EVE SSO. Please visit '
+                                              'https://community.eveonline.com/support/third-party-applications/ '
+                                              'to ensure your token is properly deleted.')
 
     def get_char(self, token):
         headers = {"Authorization": "Bearer {}".format(token), "Content-Type": "application/json",

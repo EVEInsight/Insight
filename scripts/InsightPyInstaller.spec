@@ -18,6 +18,8 @@ version_str = str('v0.12.0')
 added_hiddenimports = collect_submodules('sqlalchemy')
 added_hiddenimports.extend(collect_submodules('discord'))
 added_hiddenimports.extend(collect_submodules('swagger-client'))
+added_hiddenimports.extend(collect_submodules('SQLAlchemy-Utils'))
+added_hiddenimports.extend(collect_submodules('cryptography'))
 
 a = Analysis(['../Insight/__main__.py'],
              pathex=['./Insight'],

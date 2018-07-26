@@ -8,7 +8,7 @@ class Users(dec_Base.Base, discord_channel_base):
     user_id = Column(BIGINT, primary_key=True, nullable=False, autoincrement=False)
     user_name = Column(String, default="")
 
-    object_tokens = relationship("Tokens", cascade="delete", uselist=True, back_populates="object_user", lazy="joined")
+    object_tokens = relationship("Tokens", cascade="delete", uselist=True, back_populates="object_user")
 
     def __init__(self, object_id):
         self.user_id = object_id
