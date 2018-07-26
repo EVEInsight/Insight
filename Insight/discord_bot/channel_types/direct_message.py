@@ -5,16 +5,18 @@ import discord
 
 class direct_message(inCh.discord_feed_service):
     def __init__(self,channel_discord_object:discord.DMChannel, service_object):
-        super(direct_message, self).__init__(channel_discord_object, service_object)
         assert isinstance(channel_discord_object, discord.DMChannel)
-        self.user_id = self.channel_discord_object.recipient.id
-        self.setup_table()
+        self.user_id = channel_discord_object.recipient.id
+        super(direct_message, self).__init__(channel_discord_object, service_object)
 
     def get_linked_options(self):
         return Linked_Options.opt_dm(self)
 
     def get_object_id(self):
         return self.user_id
+
+    def load_table(self):
+        pass
 
     async def async_load_table(self):
         pass

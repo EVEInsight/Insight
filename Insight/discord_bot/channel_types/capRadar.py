@@ -6,8 +6,6 @@ class capRadar(noCH.discord_text_nofeed_exist):
     def __init__(self, channel_discord_object: discord.TextChannel, service_module):
         super(capRadar, self).__init__(channel_discord_object, service_module)
         self.sync_settings = Linked_Options.opt_sync(self)
-        self.setup_table()
-        self.load_table()
 
     def __str__(self):
         return "Capital Radar Feed"
@@ -16,7 +14,7 @@ class capRadar(noCH.discord_text_nofeed_exist):
         super(capRadar, self).load_table()
         self.cached_feed_specific = self.cached_feed_table.object_capRadar
 
-    def linked_visual(self,km_row):
+    def linked_visual(self, km_row):
         return visual_capradar(km_row, self.channel_discord_object, self.cached_feed_table, self.cached_feed_specific)
 
     @classmethod

@@ -24,8 +24,8 @@ class discord_feed_service(object):
         self.messageQueue = queue.Queue()
         self.__deque_task = None
         self.linked_options = self.get_linked_options()
-        # self.setup_table() #must be done by channel
-        #self.load_table()
+        self.setup_table()
+        self.load_table()
 
     def set_deque_task(self,deq_task:asyncio.Task):
         assert isinstance(deq_task,asyncio.Task)

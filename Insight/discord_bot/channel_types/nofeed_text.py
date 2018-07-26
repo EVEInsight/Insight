@@ -2,8 +2,13 @@ from .base_object import *
 
 
 class discord_text_nofeed_exist(discord_feed_service):
-    def __init__(self,channel_discord_object:discord.TextChannel, service_module):
-        super(discord_text_nofeed_exist, self).__init__(channel_discord_object,service_module)
+    def load_table(self):
+        if not type(self) == discord_text_nofeed_exist:
+            super().load_table()
+
+    def setup_table(self):
+        if not type(self) == discord_text_nofeed_exist:
+            super().setup_table()
 
     async def command_create(self, message_object):
         """!create - Begin setting up a new channel feed service in this channel."""
