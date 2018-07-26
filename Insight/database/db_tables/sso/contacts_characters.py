@@ -4,7 +4,7 @@ from .sso_base import *
 class Contacts_Characters(dec_Base.Base, sso_base):
     __tablename__ = 'contacts_characters'
 
-    token = Column(String, ForeignKey("tokens.token_id"), primary_key=True, nullable=False, autoincrement=False)
+    token = Column(Integer, ForeignKey("tokens.token_id"), primary_key=True, nullable=False, autoincrement=False)
     owner = Column(Enum(contact_owner), primary_key=True, default=contact_owner.pilot, nullable=False, index=False)
     character_id = Column(Integer, ForeignKey("characters.character_id"), primary_key=True, nullable=False,
                           autoincrement=False)

@@ -24,6 +24,7 @@ class Tokens(dec_Base.Base, sso_base):
     corporation_id = Column(Integer, ForeignKey("corporations.corporation_id"), nullable=True)
     alliance_id = Column(Integer, ForeignKey("alliances.alliance_id"), nullable=True)
     last_updated = Column(DateTime, default=datetime.datetime.utcnow(), nullable=False)
+    last_modified = Column(DateTime, default=datetime.datetime.utcnow(), nullable=False)
     etag_character = Column(String, nullable=True)
     etag_corp = Column(String, nullable=True)
     etag_alliance = Column(String, nullable=True)
@@ -48,8 +49,7 @@ class Tokens(dec_Base.Base, sso_base):
         self.refresh_token = refresh_token
 
     def __str__(self):
-        syncs_with = "TokenID: {} Updated: {}\n".format(str(self.token_id), self.last_updated.replace(microsecond=0))
-        syncs_with += "Pilot: {}\n".format(self.object_pilot.character_name) if self.object_pilot else ""
+        syncs_with = "Pilot: {}\n".format(self.object_pilot.character_name) if self.object_pilot else ""
         syncs_with += "Corp: {}\n".format(self.object_corp.corporation_name) if self.object_corp else ""
         syncs_with += "Alliance: {}\n".format(self.object_alliance.alliance_name) if self.object_alliance else ""
         syncs_with += "Contains {} pilot, {} corp, and {} alliance contacts." \
@@ -57,9 +57,19 @@ class Tokens(dec_Base.Base, sso_base):
                     str(len(self.object_contacts_alliances)))
         return syncs_with
 
+    def str_mod(self):
+        rst = "TokenID: {} Modified: {}\n".format(str(self.token_id), self.last_modified.replace(microsecond=0))
+        rst += self.__str__()
+        return rst
+
+    def str_upd(self):
+        rst = "TokenID: {} Updated: {}\n".format(str(self.token_id), self.last_updated.replace(microsecond=0))
+        rst += self.__str__()
+        return rst
+
     def str_wChcount(self):
         ch_count = "Discord channels using this token: {}".format(str(len(self.object_channels)))
-        return "{}\n{}".format(str(self), ch_count)
+        return "{}\n{}".format(self.str_upd(), ch_count)
 
     def get_affiliation(self, token, service_module):
         char_id = service_module.sso.get_char(token)
@@ -154,6 +164,7 @@ class Tokens(dec_Base.Base, sso_base):
             else:
                 pass
             self.last_updated = datetime.datetime.utcnow()
+            self.last_modified = datetime.datetime.utcnow()
         except ApiException as ex:
             if ex.status == 304:  # nochanges
                 self.last_updated = datetime.datetime.utcnow()

@@ -138,7 +138,7 @@ class service_module(object):
 
     @classmethod
     def get_version(cls):
-        version_str = 'v0.12.0'
+        version_str = 'v0.12.1'
         return LooseVersion(version_str)
 
     @staticmethod

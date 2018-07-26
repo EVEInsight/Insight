@@ -44,10 +44,15 @@ class sqlUpdater(object):
         for i in statements:
             self.connection.execute(i)
 
+    def sqlV_0_12_1(self):
+        """v0.12.1"""
+        for i in self.sqlV_0_12_0():
+            yield i
+
     def sqlV_0_12_0(self):
         """v0.12.0"""
-        changes = "- Delete all access tokens.\n- Require users to readd their standing tokens.\n- Encrypt all " \
-                  "new authorization and access tokens using a generated pass file."
+        changes = "- Delete all access tokens.\n- Require users to readd their standing tokens.\n+ Encrypt all " \
+                  "new access tokens using a generated secret key."
         self.get_approval(changes)
         yield 'DROP TABLE IF EXISTS contacts_alliances;'
         yield 'DROP TABLE IF EXISTS contacts_corporations;'

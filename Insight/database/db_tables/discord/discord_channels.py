@@ -98,7 +98,8 @@ class Channels(dec_Base.Base,discord_channel_base):
                 return_str += str(t) + '\n\n'
             return return_str
         else:
-            return "This channel has no associated tokens to sync ignore lists. You can add one by running command '!sync'"
+            return "This radar feed has no synced contact tokens. Contact tokens block your allies from " \
+                   "appearing as potential targets in a radar feed. You can add one by running the command '!sync'"
 
     def sync_api_contacts(self, service_module):
         db: Session = service_module.get_session()

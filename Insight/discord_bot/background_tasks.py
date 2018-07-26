@@ -24,8 +24,8 @@ class background_tasks(object):
 
     async def sync_contacts(self):
         while True:
-            await asyncio.sleep(36000)  # run every 10 hours, run later instead of start
-            print("Running sync contacts task")
+            await asyncio.sleep(5400)  # run every 1.5 hours, run later instead of start
+            print("Starting sync contacts task")
             try:
                 await self.client.loop.run_in_executor(None, partial(tb_tokens.mass_sync_all, self.client.service))
                 await self.__helper_update_contacts_channels()

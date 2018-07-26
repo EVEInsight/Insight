@@ -69,7 +69,7 @@ class Options_DM(options_base.Options_Base):
             db: Session = self.cfeed.service.get_session()
             try:
                 for token in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).all():
-                    _options.add_option(dOpt.option_returns_object(name=str(token), return_object=token))
+                    _options.add_option(dOpt.option_returns_object(name=token.str_wChcount(), return_object=token))
                 return _options
             except Exception as ex:
                 print(ex)
@@ -93,7 +93,7 @@ class Options_DM(options_base.Options_Base):
             try:
                 for t in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).all():
                     if len(t.object_channels) > 0:
-                        _options.add_header_row(t)
+                        _options.add_header_row(t.str_wChcount())
                         for channel in t.object_channels:
                             _options.add_option(
                                 dOpt.option_returns_object(name=channel.channel_id, return_object=channel))
@@ -110,7 +110,7 @@ class Options_DM(options_base.Options_Base):
         await self.reload(message_object)
 
     async def InsightOption_syncnow(self, message_object: discord.Message):
-        """Force sync - Forces an API pull on all of your tokens. Note: Insight automatically syncs your tokens every 10 hours."""
+        """Force sync - Forces an API pull on all of your tokens. Note: Insight automatically syncs your tokens every 1.5 hours."""
         await message_object.channel.send("Syncing your tokens now")
         await self.cfeed.discord_client.loop.run_in_executor(None, partial(tb_tokens.sync_all_tokens,
                                                                            self.cfeed.user_id, self.cfeed.service))
@@ -137,7 +137,7 @@ class Options_DM(options_base.Options_Base):
             try:
                 _options.add_header_row("Your available tokens")
                 for token in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).all():
-                    _options.add_option(dOpt.option_returns_object(name=str(token), return_object=token))
+                    _options.add_option(dOpt.option_returns_object(name=token.str_wChcount(), return_object=token))
                 return _options
             except Exception as ex:
                 print(ex)

@@ -41,7 +41,7 @@ class Discord_Tokens(dec_Base.Base, discord_channel_base):
             return None
 
     def __str__(self):
-        return str(self.object_token)
+        return str(self.object_token.str_mod())
 
     @classmethod
     def primary_key_row(cls):

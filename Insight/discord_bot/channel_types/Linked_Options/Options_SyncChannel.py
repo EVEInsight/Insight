@@ -11,6 +11,7 @@ class Options_Sync(options_base.Options_Base):
     def __init__(self, insight_channel):
         assert isinstance(insight_channel, capRadar.capRadar)
         super().__init__(insight_channel)
+        self.previous_sync_print = ""
 
     async def InsightOption_addToken(self, message_object: discord.Message):
         """Add new token - Adds a new token for syncing contact information related to pilots, corporations, or alliances."""
@@ -63,23 +64,32 @@ class Options_Sync(options_base.Options_Base):
     async def InsightOption_syncnow(self, message_object: discord.Message = None):
         """Force sync - Updates the channel's allies list if you have SSO tokens assigned to it."""
 
-        def sync_contacts():
+        def sync_contacts(check_modify=False):
             db: Session = self.cfeed.service.get_session()
+            return_str = ""
             try:
                 __row = db.query(tb_channels).filter(tb_channels.channel_id == self.cfeed.channel_id).one()
                 __row.sync_api_contacts(self.cfeed.service)
                 db.commit()
-                return __row.str_tokens()
+                return_str = __row.str_tokens()
+                if check_modify:
+                    if return_str == self.previous_sync_print:
+                        return None
+                return return_str
             except Exception as ex:
                 print(ex)
                 raise InsightExc.Db.DatabaseError
             finally:
                 db.close()
+                self.previous_sync_print = return_str
 
         if message_object is not None:
             await self.cfeed.channel_discord_object.send("Syncing ignored ally capRadar contact lists now")
-        __resp = await self.cfeed.discord_client.loop.run_in_executor(None, sync_contacts)
-        await self.cfeed.channel_discord_object.send(__resp)
+            __resp = await self.cfeed.discord_client.loop.run_in_executor(None, sync_contacts)
+        else:
+            __resp = await self.cfeed.discord_client.loop.run_in_executor(None, partial(sync_contacts, True))
+        if __resp is not None:
+            await self.cfeed.channel_discord_object.send(__resp)
         await self.reload(message_object)
 
 
