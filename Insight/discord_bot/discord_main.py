@@ -20,17 +20,15 @@ class Discord_Insight_Client(discord.Client):
         self.loop.create_task(self.setup_tasks())
 
     async def on_ready(self):
-        print('Logged in as:')
-        print(self.user.name)
-        print('------')
+        print('-------------------')
+        print('Logged in as: {}'.format(str(self.user.name)))
         invite_url = 'https://discordapp.com/api/oauth2/authorize?client_id={}&permissions=149504&scope=bot'.format(
             self.user.id)
         print('Invite Link: {}'.format(invite_url))
-        print(self.user.id)
         print('This bot is a member of:')
         print('Servers: {}'.format(str(len(self.guilds))))
         print('Channels: {}'.format(str(len(list(self.get_all_channels())))))
-        print('------')
+        print('-------------------')
 
     async def setup_tasks(self):
         await self.wait_until_ready()
@@ -38,10 +36,10 @@ class Discord_Insight_Client(discord.Client):
         await self.channel_manager.load_channels()
         await self.post_motd()
         self.__task_backgrounds = self.loop.create_task(self.background_tasks.setup_backgrounds())
-        self.__task_km_enqueue = self.loop.create_task(self.km_enqueue())
         self.__task_km_process = self.loop.create_task(self.km_process())
         self.__task_km_deque_filter = self.loop.create_task(self.km_deque_filter())
         self.__task_km_deque = self.loop.create_task(self.channel_manager.post_all_queued())
+        self.__task_km_enqueue = self.loop.create_task(self.km_enqueue())
 
     async def km_enqueue(self):
         await self.wait_until_ready()

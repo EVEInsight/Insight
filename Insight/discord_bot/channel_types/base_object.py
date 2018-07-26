@@ -9,6 +9,7 @@ import database.db_tables as dbRow
 from sqlalchemy.orm import Session
 from .FiltersVisualsEmbedded import *
 import InsightExc
+from sqlalchemy.orm.exc import NoResultFound
 
 
 class discord_feed_service(object):
@@ -25,6 +26,7 @@ class discord_feed_service(object):
         self.__deque_task = None
         self.linked_options = self.get_linked_options()
         self.setup_table()
+        self.template_loader()
         self.load_table()
 
     def set_deque_task(self,deq_task:asyncio.Task):
@@ -40,7 +42,7 @@ class discord_feed_service(object):
 
     def setup_table(self):
         """make the related table if it does not yet exist"""
-        if self.linked_table().make_row(self.get_object_id(), self.service):
+        if self.linked_table().make_row(self.get_object_id(), self.service, self.get_template_id()):
             pass
         else:
             raise InsightExc.Db.DatabaseError
@@ -51,6 +53,9 @@ class discord_feed_service(object):
     def load_table(self):
         self.cached_feed_table:dbRow.tb_channels = self.general_table().get_row(self.channel_id, self.service)
         # must be set to sqlalchemy channel specific object ex self.cached_feed_specific.object_enfeed
+
+    def template_loader(self):
+        pass
 
     async def async_load_table(self):
         await self.discord_client.loop.run_in_executor(None,self.load_table)
@@ -186,6 +191,14 @@ class discord_feed_service(object):
     async def load_new(cls,channel_object:discord.TextChannel,service_module, discord_client):
         assert isinstance(channel_object,discord.TextChannel)
         return await discord_client.loop.run_in_executor(None, partial(cls,channel_object,service_module))
+
+    @classmethod
+    def get_template_id(cls):
+        return None  # no template id exists
+
+    @classmethod
+    def get_template_desc(cls):
+        return ""
 
     @staticmethod
     def send_km(km,feed_channel):

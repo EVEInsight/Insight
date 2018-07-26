@@ -1,4 +1,5 @@
 from .base_object import *
+import itertools
 
 
 class discord_text_nofeed_exist(discord_feed_service):
@@ -21,6 +22,11 @@ class discord_text_nofeed_exist(discord_feed_service):
             __options.add_option(insightClient.option_calls_coroutine(name=inCR.capRadar.create_new.__doc__,coroutine_object=inCR.capRadar.create_new(message_object,self.service,self.discord_client)))
             __options.add_option(insightClient.option_calls_coroutine(name=inEF.enFeed.create_new.__doc__,coroutine_object=inEF.enFeed.create_new(message_object,self.service,self.discord_client)))
             __options.add_header_row("Preconfigured template feeds")
+            for subc in itertools.chain(inEF.enFeed.__subclasses__(), inCR.capRadar.__subclasses__()):
+                __options.add_option(insightClient.option_calls_coroutine(name=subc.get_template_desc(),
+                                                                          coroutine_object=subc.create_new(
+                                                                              message_object, self.service,
+                                                                              self.discord_client)))
             await __options()
 
     async def command_settings(self,message_object):
@@ -106,16 +112,36 @@ class discord_text_nofeed_exist(discord_feed_service):
         return cls.linked_table().exists(id,service_module)
 
     @classmethod
+    def get_template_subclass(cls, ch_id, service_module):
+        db: Session = service_module.get_session()
+        try:
+            row = db.query(cls.linked_table()).filter(cls.linked_table().channel_id == ch_id).one()
+            template_id = row.template_id
+            for subc in cls.__subclasses__():
+                if subc.get_template_id() == template_id:
+                    return subc
+            return cls
+        except Exception as ex:
+            print(ex)
+            return cls
+        finally:
+            db.close()
+
+    @classmethod
     def get_existing_feed_type(cls,ch_id,service_object):
         if inCR.capRadar.channel_id_is_feed(ch_id,service_object):
-            return inCR.capRadar
+            return inCR.capRadar.get_template_subclass(ch_id, service_object)
         elif inEF.enFeed.channel_id_is_feed(ch_id,service_object):
-            return inEF.enFeed
+            return inEF.enFeed.get_template_subclass(ch_id, service_object)
         else:
             return None
 
     def get_linked_options(self):
         return Linked_Options.opt_blankchannel(self)
+
+    @classmethod
+    def get_template_id(cls):
+        return 0
 
 
 from . import Linked_Options

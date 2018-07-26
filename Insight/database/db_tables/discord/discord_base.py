@@ -35,11 +35,14 @@ class discord_channel_base(object):
             db.close()
 
     @classmethod
-    def make_row(cls,id,service_module):
+    def make_row(cls, id, service_module, template_id=None):
         if not cls.exists(id,service_module):
             db: Session = service_module.get_session()
             try:
-                db.merge(cls(id))
+                row = cls(id)
+                if template_id is not None:
+                    row.template_id = template_id
+                db.merge(row)
                 db.commit()
                 return True
             except Exception as ex:
