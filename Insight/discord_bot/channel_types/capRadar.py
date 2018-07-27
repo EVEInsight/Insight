@@ -24,7 +24,7 @@ class capRadar(noCH.discord_text_nofeed_exist):
 
     @classmethod
     async def create_new(cls,message_object:discord.Message, service_module, discord_client):
-        """Cap Radar - A feed service that tracks hostile supercapital, capital, or blops activity within range of specific base systems."""
+        """Capital Radar - A feed service that tracks hostile supercapital, capital, or blops activity within range of specified base systems."""
         await super(capRadar, cls).create_new(message_object,service_module,discord_client)
 
     async def command_sync(self, message_object):

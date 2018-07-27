@@ -5,3 +5,4 @@ from .OfficerHunter import OfficerHunter
 from .UniverseSupers import UniverseSupers
 from .RareShips import RareShips
 from .Freighters import Freighters
+from .AllianceTournamentStream import AllianceTournamentStreamSystemA, AllianceTournamentStreamSystemB

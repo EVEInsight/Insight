@@ -18,10 +18,10 @@ class discord_text_nofeed_exist(discord_feed_service):
         else:
             __options = insightClient.mapper_index_withAdditional(self.discord_client, message_object)
             __options.set_main_header("Select the new type of feed you wish to add in this channel:")
-            __options.add_header_row("Fully customizable feed services")
+            __options.add_header_row("Fully customizable feeds")
             __options.add_option(insightClient.option_calls_coroutine(name=inCR.capRadar.create_new.__doc__,coroutine_object=inCR.capRadar.create_new(message_object,self.service,self.discord_client)))
             __options.add_option(insightClient.option_calls_coroutine(name=inEF.enFeed.create_new.__doc__,coroutine_object=inEF.enFeed.create_new(message_object,self.service,self.discord_client)))
-            __options.add_header_row("Preconfigured template feeds")
+            __options.add_header_row("Preconfigured derived feeds")
             for subc in itertools.chain(inEF.enFeed.__subclasses__(), inCR.capRadar.__subclasses__()):
                 __options.add_option(insightClient.option_calls_coroutine(name=subc.get_template_desc(),
                                                                           coroutine_object=subc.create_new(
@@ -117,9 +117,12 @@ class discord_text_nofeed_exist(discord_feed_service):
         try:
             row = db.query(cls.linked_table()).filter(cls.linked_table().channel_id == ch_id).one()
             template_id = row.template_id
-            for subc in cls.__subclasses__():
-                if subc.get_template_id() == template_id:
-                    return subc
+            try:
+                for subc in cls.__subclasses__():
+                    if subc.get_template_id() == template_id:
+                        return subc
+            except Exception as ex:
+                print(ex)
             return cls
         except Exception as ex:
             print(ex)

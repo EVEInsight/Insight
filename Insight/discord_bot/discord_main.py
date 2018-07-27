@@ -91,7 +91,6 @@ class Discord_Insight_Client(discord.Client):
             else:
                 print(traceback.print_exc())
 
-
     @staticmethod
     def start_bot(service_module):
         if service_module.config_file["discord"]["token"]:
