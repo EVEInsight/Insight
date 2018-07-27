@@ -86,7 +86,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         await self.reload(message_object)
 
     async def InsightOption_remove(self, message_object: discord.Message):
-        """Remove base system - Removes a selected base system from the feed."""
+        """Remove a base system - Removes a selected base system from the feed."""
         def remove_system(system_id):
             db:Session = self.cfeed.service.get_session()
             try:

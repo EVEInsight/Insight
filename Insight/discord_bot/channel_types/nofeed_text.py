@@ -16,8 +16,8 @@ class discord_text_nofeed_exist(discord_feed_service):
         if not type(self) == discord_text_nofeed_exist:
             await self.command_not_supported_sendmessage(message_object)
         else:
-            __options = insightClient.mapper_index(self.discord_client,message_object)
-            __options.set_main_header("Select the new type of KM feed to wish to create in this channel")
+            __options = insightClient.mapper_index_withAdditional(self.discord_client, message_object)
+            __options.set_main_header("Select the new type of feed you wish to add in this channel:")
             __options.add_header_row("Fully customizable feed services")
             __options.add_option(insightClient.option_calls_coroutine(name=inCR.capRadar.create_new.__doc__,coroutine_object=inCR.capRadar.create_new(message_object,self.service,self.discord_client)))
             __options.add_option(insightClient.option_calls_coroutine(name=inEF.enFeed.create_new.__doc__,coroutine_object=inEF.enFeed.create_new(message_object,self.service,self.discord_client)))

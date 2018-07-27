@@ -17,26 +17,28 @@ class Channels(dec_Base.Base,discord_channel_base):
     object_tokens = relationship("Discord_Tokens", uselist=True, cascade="delete", back_populates="object_channel")
     object_filter_alliances = relationship("Filter_alliances", uselist=True,
                                            cascade="save-update, merge, delete, delete-orphan",
-                                           back_populates="object_channel",
-                                           lazy="subquery")
+                                           back_populates="object_channel", lazy="subquery")
     object_filter_corporations = relationship("Filter_corporations", uselist=True,
                                               cascade="save-update, merge, delete, delete-orphan",
-                                              back_populates="object_channel",
-                                              lazy="subquery")
+                                              back_populates="object_channel", lazy="subquery")
     object_filter_characters = relationship("Filter_characters", uselist=True,
                                             cascade="save-update, merge, delete, delete-orphan",
-                                            back_populates="object_channel",
-                                            lazy="subquery")
-    object_filter_categories = relationship("Filter_categories", uselist=True, cascade="delete", back_populates="object_channel",
-                                            lazy="subquery")
-    object_filter_groups = relationship("Filter_groups", uselist=True, cascade="delete", back_populates="object_channel",
-                                        lazy="subquery")
-    object_filter_types = relationship("Filter_types", uselist=True, cascade="delete", back_populates="object_channel",
-                                       lazy="subquery")
-    object_filter_regions = relationship("Filter_regions", uselist=True, cascade="delete", back_populates="object_channel",
-                                         lazy="subquery")
-    object_filter_systems = relationship("Filter_systems", uselist=True, cascade="delete", back_populates="object_channel",
-                                         lazy="subquery")
+                                            back_populates="object_channel", lazy="subquery")
+    object_filter_categories = relationship("Filter_categories", uselist=True,
+                                            cascade="save-update, merge, delete, delete-orphan",
+                                            back_populates="object_channel", lazy="subquery")
+    object_filter_groups = relationship("Filter_groups", uselist=True,
+                                        cascade="save-update, merge, delete, delete-orphan",
+                                        back_populates="object_channel", lazy="subquery")
+    object_filter_types = relationship("Filter_types", uselist=True,
+                                       cascade="save-update, merge, delete, delete-orphan",
+                                       back_populates="object_channel", lazy="subquery")
+    object_filter_regions = relationship("Filter_regions", uselist=True,
+                                         cascade="save-update, merge, delete, delete-orphan",
+                                         back_populates="object_channel", lazy="subquery")
+    object_filter_systems = relationship("Filter_systems", uselist=True,
+                                         cascade="save-update, merge, delete, delete-orphan",
+                                         back_populates="object_channel", lazy="subquery")
 
     def __init__(self, object_id):
         self.channel_id = object_id
@@ -44,6 +46,25 @@ class Channels(dec_Base.Base,discord_channel_base):
     @classmethod
     def primary_key_row(cls):
         return cls.channel_id
+
+    @classmethod
+    def reset_filters(cls, ch_id, service_module):
+        db: Session = service_module.get_session()
+        try:
+            row: cls = db.query(cls).filter(cls.channel_id == ch_id).one()
+            row.object_filter_alliances = []
+            row.object_filter_corporations = []
+            row.object_filter_characters = []
+            row.object_filter_categories = []
+            row.object_filter_groups = []
+            row.object_filter_types = []
+            row.object_filter_regions = []
+            row.object_filter_systems = []
+            db.commit()
+        except Exception as ex:
+            print(ex)
+        finally:
+            db.close()
 
     @classmethod
     def commit_list_entry(cls,eve_object:tb_alliances,channel_id,service_module,**kwargs):
