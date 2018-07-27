@@ -71,6 +71,9 @@ class visual_enfeed(base_visual):
         if not self.km.filter_loss(self.filters.object_filter_groups,
                                    self.in_victim_ship_group):  # if false/contained in cat blacklist ignore posting
             return False
+        __list_systems = self.filters.object_filter_systems + self.filters.object_filter_regions
+        if not self.km.filter_system(__list_systems, self.in_system_nonly):
+            return False
         __list_aff = self.filters.object_filter_alliances + self.filters.object_filter_corporations + self.filters.object_filter_characters
         if self.km.filter_victim(self.km.object_victim,filter_list=__list_aff,using_blacklist=self.in_victim_affiliation) is None: #affiliated is victim/loss
             self.__set_loss()

@@ -140,6 +140,17 @@ class Kills(dec_Base.Base, table_row):
                     return None
         return None if not using_blacklist else self.object_system
 
+    def filter_system(self, filter_list=[], using_blacklist=False):
+        """whitelist - returns True if in filter, otherwise False
+        blacklist - returns False if km system matches anything in filters, else True"""
+        for system_reg in filter_list:
+            if self.object_system.compare_filter(system_reg):
+                if not using_blacklist:
+                    return True
+                else:
+                    return False
+        return False if not using_blacklist else True
+
     def filter_attackers(self, attacker_list: List[attackers.Attackers], filter_list=[], using_blacklist=False):
         """return a list of attackers filtered using either a blacklist or whitelist
         whitelist - attacker must be in whitelist otherwise not returned

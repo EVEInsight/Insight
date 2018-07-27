@@ -29,6 +29,7 @@ class base_visual(metaclass=ABCMeta):
     @abstractmethod
     def internal_list_options(self):
         self.in_system_ly = internal_options.use_blacklist.value
+        self.in_system_nonly = internal_options.use_blacklist.value
         self.in_attackers_affiliation = internal_options.use_blacklist.value
         self.in_attackers_ships_type = internal_options.use_blacklist.value
         self.in_attackers_ship_group = internal_options.use_blacklist.value

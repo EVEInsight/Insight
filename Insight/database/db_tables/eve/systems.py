@@ -55,10 +55,16 @@ class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating,
         return False
 
     def compare_filter(self, other):
-        if isinstance(other, tb_systems):
+        if isinstance(other, Systems):
             return self.system_id == other.system_id
         if isinstance(other, tb_Filter_systems):
             return self.system_id == other.filter_id
+        if isinstance(other, tb_Filter_regions):
+            try:
+                return self.object_constellation.object_region.region_id == other.filter_id
+            except Exception as ex:
+                print(ex)
+                return False
         return False
 
     @classmethod
