@@ -9,11 +9,13 @@ class internal_options(enum.Enum):
 
 
 class base_visual(metaclass=ABCMeta):
-    def __init__(self,km_row,discord_channel_object,overall_filters,feed_specific_row):
+    def __init__(self, km_row, discord_channel_object, overall_filters, feed_specific_row, feed_object):
         assert isinstance(km_row,tb_kills)
         assert isinstance(discord_channel_object,discord.TextChannel)
         assert isinstance(overall_filters,tb_channels)
         assert isinstance(feed_specific_row,self.feed_specific_row_type())
+        assert isinstance(feed_object, discord_bot.channel_types.insight_feed_service_base)
+        self.feed = feed_object
         self.km = km_row
         self.channel = discord_channel_object
         self.filters = overall_filters
@@ -25,6 +27,20 @@ class base_visual(metaclass=ABCMeta):
 
     def get_load_time(self):
         return self.km.loaded_time
+
+    def extract_mention(self):
+        return enum_mention.noMention
+
+    def mention_method(self):
+        if self.feed.can_mention():
+            try:
+                mention = self.extract_mention()
+                if mention != enum_mention.noMention:
+                    self.feed.mentioned()
+                    return mention.value
+            except Exception as ex:
+                print(ex)
+        return enum_mention.noMention.value
 
     @abstractmethod
     def internal_list_options(self):
@@ -112,3 +128,4 @@ class base_visual(metaclass=ABCMeta):
 
 from database.db_tables import *
 import discord
+import discord_bot.channel_types

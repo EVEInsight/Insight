@@ -11,6 +11,7 @@ class UniverseSupers(capRadar):
             db.merge(row)
             systemR = dbRow.tb_Filter_systems(30000142, self.channel_id)
             systemR.max = 50000
+            db.merge(systemR)
             db.merge(dbRow.tb_Filter_groups(30, self.channel_id))
             db.merge(dbRow.tb_Filter_groups(659, self.channel_id))
             db.commit()

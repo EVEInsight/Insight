@@ -3,8 +3,9 @@ from .FiltersVisualsEmbedded import *
 
 class visual_enfeed(base_visual):
 
-    def __init__(self, km_row, discord_channel_object, overall_filters, feed_specific_row):
-        super(visual_enfeed, self).__init__(km_row, discord_channel_object, overall_filters, feed_specific_row)
+    def __init__(self, km_row, discord_channel_object, overall_filters, feed_specific_row, feed_object):
+        super(visual_enfeed, self).__init__(km_row, discord_channel_object, overall_filters, feed_specific_row,
+                                            feed_object)
         assert isinstance(self.feed_options, tb_enfeed)
         self.is_kill = False
 

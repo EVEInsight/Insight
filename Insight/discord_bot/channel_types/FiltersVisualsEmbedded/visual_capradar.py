@@ -3,8 +3,9 @@ from .FiltersVisualsEmbedded import *
 
 class visual_capradar(base_visual):
 
-    def __init__(self, km_row, discord_channel_object, overall_filters, feed_specific_row):
-        super(visual_capradar, self).__init__(km_row, discord_channel_object, overall_filters, feed_specific_row)
+    def __init__(self, km_row, discord_channel_object, overall_filters, feed_specific_row, feed_object):
+        super(visual_capradar, self).__init__(km_row, discord_channel_object, overall_filters, feed_specific_row,
+                                              feed_object)
         assert isinstance(self.feed_options, tb_capRadar)
 
     def make_links(self):
@@ -45,8 +46,15 @@ class visual_capradar(base_visual):
             format(hSG=self.ha_group, kmSys=self.system_name, kmRg=self.region_name, ly=self._ly_range,
                    bSys=self.base_name)
 
+    def extract_mention(self):
+        assert isinstance(self._highestAT, tb_attackers)
+        for c in self.list_typeGroup:
+            if self._highestAT.compare_filter_list(c):
+                return c.mention
+        return enum_mention.noMention
+
     def make_text_heading(self):
-        self.message_txt = "{} {}".format(self.overview_text, self.min_ago)
+        self.message_txt = "{} {} {}".format(self.mention_method(), self.overview_text, self.min_ago)
 
     def make_header(self):
         self.embed.set_author(name=self.overview_text, url=self.zk_kill)
@@ -104,8 +112,8 @@ class visual_capradar(base_visual):
         self.base_ = self.km.filter_system_ly(self.filters.object_filter_systems, self.in_system_ly)
         if self.base_ is None:
             return False
-        __list_typeGroup = self.filters.object_filter_groups + self.filters.object_filter_types
-        tracked_ships = self.km.filter_attackers(self.km.object_attackers, __list_typeGroup,
+        self.list_typeGroup = self.filters.object_filter_groups + self.filters.object_filter_types
+        tracked_ships = self.km.filter_attackers(self.km.object_attackers, self.list_typeGroup,
                                                  self.in_attackers_ship_group)
         if len(tracked_ships) == 0:
             return False

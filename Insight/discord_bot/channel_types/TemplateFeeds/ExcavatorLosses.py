@@ -30,7 +30,7 @@ class ExcavatorLosses(enFeed):
 
     def linked_visual(self, km_row):
         return VisualExcavatorLosses(km_row, self.channel_discord_object, self.cached_feed_table,
-                                     self.cached_feed_specific)
+                                     self.cached_feed_specific, self)
 
     @classmethod
     def get_template_id(cls):

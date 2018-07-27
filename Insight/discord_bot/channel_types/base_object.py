@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from .FiltersVisualsEmbedded import *
 import InsightExc
 from sqlalchemy.orm.exc import NoResultFound
+import datetime
 
 
 class discord_feed_service(object):
@@ -28,6 +29,13 @@ class discord_feed_service(object):
         self.setup_table()
         self.template_loader()
         self.load_table()
+        self.last_mention = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+
+    def can_mention(self):
+        return (self.last_mention + datetime.timedelta(minutes=15)) <= datetime.datetime.utcnow()
+
+    def mentioned(self):
+        self.last_mention = datetime.datetime.utcnow()
 
     def set_deque_task(self,deq_task:asyncio.Task):
         assert isinstance(deq_task,asyncio.Task)

@@ -30,7 +30,8 @@ class SuperLosses(enFeed):
         return Linked_Options.opt_basicfeed(self)
 
     def linked_visual(self, km_row):
-        return VisualSuperLosses(km_row, self.channel_discord_object, self.cached_feed_table, self.cached_feed_specific)
+        return VisualSuperLosses(km_row, self.channel_discord_object, self.cached_feed_table, self.cached_feed_specific,
+                                 self)
 
     @classmethod
     def get_template_id(cls):

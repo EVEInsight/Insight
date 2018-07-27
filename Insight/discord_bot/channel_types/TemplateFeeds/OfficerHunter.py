@@ -34,7 +34,7 @@ class OfficerHunter(capRadar):
 
     def linked_visual(self, km_row):
         return VisualOfficerHunter(km_row, self.channel_discord_object, self.cached_feed_table,
-                                   self.cached_feed_specific)
+                                   self.cached_feed_specific, self)
 
     async def command_sync(self, message_object):
         await super(capRadar, self).command_sync(message_object)

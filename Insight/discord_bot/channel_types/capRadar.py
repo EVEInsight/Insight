@@ -15,7 +15,8 @@ class capRadar(noCH.discord_text_nofeed_exist):
         self.cached_feed_specific = self.cached_feed_table.object_capRadar
 
     def linked_visual(self, km_row):
-        return visual_capradar(km_row, self.channel_discord_object, self.cached_feed_table, self.cached_feed_specific)
+        return visual_capradar(km_row, self.channel_discord_object, self.cached_feed_table, self.cached_feed_specific,
+                               self)
 
     @classmethod
     def linked_table(cls):

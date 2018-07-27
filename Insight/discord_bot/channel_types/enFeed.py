@@ -12,7 +12,8 @@ class enFeed(noCh.discord_text_nofeed_exist):
         return dbRow.tb_enfeed
 
     def linked_visual(self, km_row):
-        return visual_enfeed(km_row, self.channel_discord_object, self.cached_feed_table, self.cached_feed_specific)
+        return visual_enfeed(km_row, self.channel_discord_object, self.cached_feed_table, self.cached_feed_specific,
+                             self)
 
     def __str__(self):
         return "Entity Feed"
