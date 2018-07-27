@@ -65,7 +65,7 @@ if platform == "win32":
     shutil.move(archive_file,'{}/{}'.format(DISTPATH,archive_file))
 elif platform.startswith('linux'):
     archive_name = 'Insight-{}-Linux'.format(version_str)
-    archive_file = '{}.zip'.format(archive_name)
+    archive_file = '{}.tar.gz'.format(archive_name)
     shutil.move('{}/Insight'.format(DISTPATH),'{}/EVE-Insight/Insight'.format(DISTPATH))
     print("This is Linux. Making a tar of file.")
     shutil.make_archive(archive_name,'gztar','{}'.format(DISTPATH))
