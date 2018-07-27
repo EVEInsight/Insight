@@ -34,7 +34,6 @@ class background_tasks(object):
 
     async def bot_status(self):
         await self.client.wait_until_ready()
-        last_warning = datetime.datetime.utcnow() - datetime.timedelta(minutes=175)
         while True:
             try:
                 update = await self.client.loop.run_in_executor(None, self.client.service.update_available)
@@ -46,24 +45,17 @@ class background_tasks(object):
                                                                               str(self.client.service.get_version()))
                 stats_zk = await self.client.loop.run_in_executor(None, self.client.service.zk_obj.get_stats)
                 d_status = discord.Status.online
-                if stats_zk[0] == 10 or stats_zk[3] >= 6:
+                if stats_zk[0] <= 5 or stats_zk[3] >= 6:
                     d_status = discord.Status.idle
                 if stats_zk[2] > 100:
                     stats_zk[2] = "99+"
-                status_str += '[zK] Add: {}, AVG Delay: {}m(+{}s), AVG Next: {}s '.format(
+                status_str += '[zK] Add: {}, Delay: {}m(+{}s), Next: {}s '.format(
                     str(stats_zk[0]), str(stats_zk[1]), str(stats_zk[2]), str(stats_zk[3]))
                 stats_feeds = await self.client.channel_manager.avg_delay()
                 if stats_feeds[1] >= 30:
                     d_status = discord.Status.dnd
-                    if datetime.datetime.utcnow() >= last_warning + datetime.timedelta(hours=3):
-                        msg = "Service Warning: \nThe average Insight filtering and posting task delay is {} seconds. This " \
-                              "indicates service issues with Discord or the Insight bot could be under heavy load.".format(
-                            stats_feeds[1])
-                        await self.client.loop.run_in_executor(None,
-                                                               partial(self.client.channel_manager.post_message, msg))
-                        last_warning = datetime.datetime.utcnow()
-                status_str += '[Insight] Sent: {}, AVG Delay: {}s '.format(str(stats_feeds[0]),
-                                                                           str(stats_feeds[1]))
+                status_str += '[Insight] Sent: {}, Delay: {}s '.format(str(stats_feeds[0]),
+                                                                       str(stats_feeds[1]))
                 game_act = discord.Activity(name=status_str, type=discord.ActivityType.watching)
                 await self.client.change_presence(activity=game_act, status=d_status)
             except Exception as ex:
