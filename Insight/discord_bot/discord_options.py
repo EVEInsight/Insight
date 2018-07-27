@@ -38,7 +38,7 @@ class option_cancel(option_calls_coroutine):
 
 
 class mapper_index(object):
-    def __init__(self, discord_client_object, message_object, timeout_seconds=60):
+    def __init__(self, discord_client_object, message_object, timeout_seconds=120):
         assert isinstance(message_object,discord.Message)
         assert isinstance(discord_client_object,discord_main.Discord_Insight_Client)
         self.message = message_object
@@ -138,7 +138,7 @@ class mapper_index_withAdditional(mapper_index):
 
 
 class mapper_return_yes_no(mapper_index):
-    def __init__(self, discord_client_object, message_object, timeout_seconds=60):
+    def __init__(self, discord_client_object, message_object, timeout_seconds=120):
         super(mapper_return_yes_no, self).__init__( discord_client_object, message_object, timeout_seconds)
         self.set_footer_text("Enter either '1' for yes or '0' for no:")
         self.add_option(option_returns_object("No",return_object=False))
@@ -157,7 +157,7 @@ class mapper_return_noOptions(mapper_index):
 
 
 class mapper_return_noOptions_requiresInt(mapper_return_noOptions):
-    def __init__(self, discord_client_object, message_object, timeout_seconds=60):
+    def __init__(self, discord_client_object, message_object, timeout_seconds=120):
         super(mapper_return_noOptions_requiresInt, self).__init__( discord_client_object, message_object, timeout_seconds)
         self.set_footer_text("Enter a number:")
 

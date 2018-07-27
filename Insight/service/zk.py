@@ -137,10 +137,10 @@ class zk(object):
                         self.add_delay(self.delay_next, next_delay)
                     next_delay = datetime.datetime.utcnow()
                 else:
-                    time.sleep(.1)
+                    time.sleep(5)
             except Exception as ex:
                 print(ex)
-                time.sleep(.1)
+                time.sleep(5)
 
     def __add_km_to_filter(self,km):
         try:
