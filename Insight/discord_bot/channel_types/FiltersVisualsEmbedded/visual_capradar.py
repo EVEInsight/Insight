@@ -104,7 +104,8 @@ class visual_capradar(base_visual):
         self.base_ = self.km.filter_system_ly(self.filters.object_filter_systems, self.in_system_ly)
         if self.base_ is None:
             return False
-        tracked_ships = self.km.filter_attackers(self.km.object_attackers, self.filters.object_filter_groups,
+        __list_typeGroup = self.filters.object_filter_groups + self.filters.object_filter_types
+        tracked_ships = self.km.filter_attackers(self.km.object_attackers, __list_typeGroup,
                                                  self.in_attackers_ship_group)
         if len(tracked_ships) == 0:
             return False
