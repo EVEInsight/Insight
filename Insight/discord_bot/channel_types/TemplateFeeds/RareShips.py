@@ -7,7 +7,7 @@ class RareShips(capRadar):
         db: Session = self.service.get_session()
         try:
             row = db.query(self.linked_table()).filter(self.linked_table().channel_id == self.channel_id).one()
-            row.max_km_age = 100
+            row.max_km_age = 60
             db.merge(row)
             systemR = dbRow.tb_Filter_systems(30000142, self.channel_id)
             systemR.max = 50000

@@ -34,6 +34,9 @@ class capRadar(noCH.discord_text_nofeed_exist):
             __options.add_option(insightClient.option_calls_coroutine(cor.__doc__, "", cor(message_object)))
         await __options()
 
+    async def background_contact_sync(self, message=None):
+        await self.sync_settings.InsightOption_syncnow(message)
+
     def get_linked_options(self):
         return Linked_Options.opt_capradar(self)
 

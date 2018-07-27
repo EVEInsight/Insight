@@ -18,7 +18,7 @@ class background_tasks(object):
     async def __helper_update_contacts_channels(self):
         async for channel in self.client.channel_manager.get_all_capRadar():
             try:
-                await channel.sync_settings.InsightOption_syncnow(None)
+                await channel.background_contact_sync(None)
             except Exception as ex:
                 print(ex)
 

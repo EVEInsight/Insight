@@ -39,6 +39,9 @@ class OfficerHunter(capRadar):
     async def command_sync(self, message_object):
         await super(capRadar, self).command_sync(message_object)
 
+    async def background_contact_sync(self, message=None):  # override, no contacts to sync
+        pass
+
     @classmethod
     def get_template_id(cls):
         return 4
