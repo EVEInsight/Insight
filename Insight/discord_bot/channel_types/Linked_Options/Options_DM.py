@@ -95,8 +95,16 @@ class Options_DM(options_base.Options_Base):
                     if len(t.object_channels) > 0:
                         _options.add_header_row(t.str_wChcount())
                         for channel in t.object_channels:
-                            _options.add_option(
-                                dOpt.option_returns_object(name=channel.channel_id, return_object=channel))
+                            cinfo = str(channel.channel_id)
+                            try:
+                                ch = self.cfeed.discord_client.get_channel(channel.channel_id)
+                                if ch is not None:
+                                    cname = ch.name
+                                    sname = ch.guild.name
+                                    cinfo = "{}({})".format(str(cname), str(sname))
+                            except Exception as ex:
+                                print(ex)
+                            _options.add_option(dOpt.option_returns_object(name=cinfo, return_object=channel))
             except Exception as ex:
                 print(ex)
                 raise InsightExc.Db.DatabaseError
