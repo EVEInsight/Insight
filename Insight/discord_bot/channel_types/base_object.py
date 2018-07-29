@@ -165,6 +165,7 @@ class discord_feed_service(object):
                 __row = db.query(dbRow.tb_channels).filter(dbRow.tb_channels.channel_id == self.channel_id).one()
                 db.delete(__row)
                 db.commit()
+                print('Deleted {} in {}'.format(str(self), self.str_channel_server()))
                 return True
             except Exception as ex:
                 print(ex)
@@ -172,7 +173,8 @@ class discord_feed_service(object):
                 return False
             finally:
                 db.close()
-        return await self.discord_client.loop.run_in_executor(None,non_async_delete)
+
+        return await self.discord_client.loop.run_in_executor(None, non_async_delete)
 
     async def command_not_supported_sendmessage(self, message_object:discord.Message):
         await message_object.channel.send("{}\nThis command is not supported in channel of type: {}\n".format(message_object.author.mention,str(self)))
@@ -183,6 +185,17 @@ class discord_feed_service(object):
 
     def __str__(self):
         return "Base Insight Object"
+
+    def str_channel_server(self):
+        return_str = "channel_name(server_name)"
+        try:
+            channel_name = str(self.channel_discord_object.name)
+            server_name = str(self.channel_discord_object.guild.name)
+            return_str = '{}({})'.format(channel_name, server_name)
+        except:
+            pass
+        finally:
+            return str(return_str)
 
     @classmethod
     def general_table(cls)->dbRow.tb_channels:
@@ -215,7 +228,6 @@ class discord_feed_service(object):
             feed_channel.add_km(km)
         except Exception as ex:
             print(ex)
-
 
 from . import Linked_Options
 

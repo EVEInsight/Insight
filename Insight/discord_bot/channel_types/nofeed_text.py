@@ -94,12 +94,7 @@ class discord_text_nofeed_exist(discord_feed_service):
             await service_module.channel_manager.add_feed_object(__tmp_feed_object)
             await message_object.channel.send("Created a new feed!")
             await __tmp_feed_object.command_start(message_object)
-            try:
-                channel_name = str(message_object.channel.name)
-                server_name = str(message_object.channel.guild.name)
-                print('New {} in {}({})'.format(str(__tmp_feed_object), channel_name, server_name))
-            except Exception as ex:
-                print(ex)
+            print('New {} in {}'.format(str(__tmp_feed_object), __tmp_feed_object.str_channel_server()))
         except Exception as ex:
             await __tmp_feed_object.delete()
             await message_object.channel.send(
@@ -121,6 +116,8 @@ class discord_text_nofeed_exist(discord_feed_service):
                 for subc in cls.__subclasses__():
                     if subc.get_template_id() == template_id:
                         return subc
+                if isinstance(template_id, int) and template_id != 0:
+                    return invalidF.InvalidFeed
             except Exception as ex:
                 print(ex)
             return cls
@@ -150,3 +147,4 @@ class discord_text_nofeed_exist(discord_feed_service):
 from . import Linked_Options
 from . import capRadar as inCR
 from . import enFeed as inEF
+from . import InvalidFeed as invalidF

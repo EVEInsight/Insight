@@ -3,4 +3,5 @@ from .capRadar import capRadar as insight_capRadar
 from .enFeed import enFeed as insight_enFeed
 from .nofeed_text import discord_text_nofeed_exist as insight_textChannel_NoFeed
 from .direct_message import direct_message as insight_directMessage
+from .InvalidFeed import InvalidFeed as insight_invalidFeed
 from . import TemplateFeeds
