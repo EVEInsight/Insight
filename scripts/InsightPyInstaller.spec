@@ -13,7 +13,7 @@ try:
 except FileNotFoundError:
     print('distTest folder not found!')
 
-version_str = str('v0.13.1')
+version_str = str('v1.0.0')
 
 added_hiddenimports = collect_submodules('sqlalchemy')
 added_hiddenimports.extend(collect_submodules('discord'))
@@ -54,6 +54,7 @@ shutil.copy('LICENSE.md','{}/EVE-Insight/LICENSE.md'.format(DISTPATH))
 shutil.copy('Insight/default-config.ini','{}/EVE-Insight/default-config.ini'.format(DISTPATH))
 shutil.copy('CCP.md','{}/EVE-Insight/CCP.md'.format(DISTPATH))
 shutil.copy('Installation.md','{}/EVE-Insight/Installation.md'.format(DISTPATH))
+shutil.copy('ChangeLog.md','{}/EVE-Insight/ChangeLog.md'.format(DISTPATH))
 shutil.copy('sqlite-latest.sqlite','{}/EVE-Insight/sqlite-latest.sqlite'.format(DISTPATH))
 shutil.copytree('Insight/callback','{}/EVE-Insight/callback'.format(DISTPATH))
 if platform == "win32":

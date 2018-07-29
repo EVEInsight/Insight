@@ -1,4 +1,4 @@
-# Insight v0.13.1
+# Insight v1.0.0
 Insight is a Discord bot that provides various live killmail feeds for ships destroyed within the 
 game EVE Online. Insight can track your personal, corporate, or alliance activity and display information 
 in visually appealing Discord embedded objects. Insight also features a live radar feed capable of
