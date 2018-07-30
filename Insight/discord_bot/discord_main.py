@@ -83,6 +83,8 @@ class Discord_Insight_Client(discord.Client):
                 await (await self.channel_manager.get_channel_feed(message.channel)).command_help(message)
             elif await self.commandLookup.about(message):
                 await (await self.channel_manager.get_channel_feed(message.channel)).command_about(message)
+            elif await self.commandLookup.status(message):
+                await (await self.channel_manager.get_channel_feed(message.channel)).command_status(message)
             else:
                 await self.commandLookup.notfound(message)
         except Exception as ex:

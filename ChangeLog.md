@@ -1,10 +1,20 @@
 # v1.0.0
 v1.0.0 is the initial public release/announcement of the Insight Project. This rewrite of the bot was in progress for the past month and focused on redesigning the original
-project with a clear set direction and purpose. This release of Insight is feature-complete and stable.
+project with a clear set of direction and purpose. This release of Insight is feature-complete and stable.
+## New features
+* Commands
+     * !status - Display information about the currently running feed.
+        * The command is limited in functionality, but will eventually be updated to include more information in a future patch.
 ## Changes
 * Direct Message remove a token from channel option
     * Replaced channel id with channel_name(server_name)
+* ZK module
+    * Added error and more response code checking to prevent needlessly spamming RedisQ when there is a zk outage.
+    * The bot's next delay now accounts for all 200 response codes, even if no package is returned.
 * Added ChangeLog.md to git and binary archive file.
+## Technical
+* Added a Stargate location name importer to import names from the SDE.
+    * Stargate games are NULL in the mapDenormalize SDE datebase table. The SDE only lists stargate names in the invNames table so a custom function was added to import this table.
 
 # v0.13.1
 ## Changes

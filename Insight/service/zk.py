@@ -134,7 +134,7 @@ class zk(object):
                         pass
                     else:
                         self.__km_preProcess.put_nowait(json_data)
-                        self.add_delay(self.delay_next, next_delay)
+                    self.add_delay(self.delay_next, next_delay)
                     next_delay = datetime.datetime.utcnow()
                 elif resp.status_code == 420:  # calm down zKill is probably overloaded
                     print("{} {}".format(str(datetime.datetime.utcnow()), "zKill error 420"))

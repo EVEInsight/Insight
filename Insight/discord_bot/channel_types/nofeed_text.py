@@ -83,6 +83,15 @@ class discord_text_nofeed_exist(discord_feed_service):
             else:
                 await message_object.channel.send("No changes were made")
 
+    async def command_status(self, message_object: discord.Message):
+        """!status - Display information about the currently running feed."""
+        if type(self) == discord_text_nofeed_exist:
+            await self.command_not_supported_sendmessage(message_object)
+        else:
+            resp = "Feed type: {}\n".format(str(self))
+            resp += "Currently running: {}\n".format(str(self.cached_feed_table.feed_running))
+            await message_object.channel.send(resp)
+
     def __str__(self):
         return "channel with no feed"
 

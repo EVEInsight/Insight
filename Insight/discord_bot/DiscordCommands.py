@@ -19,6 +19,7 @@ class DiscordCommands(object):
         self.commands['start'] = ['start']
         self.commands['stop'] = ['stop', 'pause']
         self.commands['remove'] = ['remove', 'delete']
+        self.commands['status'] = ['status']
         for k, v in self.commands.items():
             new_vals = []
             for p in self.prefix:
@@ -57,6 +58,9 @@ class DiscordCommands(object):
 
     async def remove(self, message_object: discord.Message):
         return self.__lookup(message_object.content, self.commands_prefixed.get('remove'))
+
+    async def status(self, message_object: discord.Message):
+        return self.__lookup(message_object.content, self.commands_prefixed.get('status'))
 
     async def is_command(self, message_object: discord.Message):
         return self.__lookup(message_object.content, self.prefix)
