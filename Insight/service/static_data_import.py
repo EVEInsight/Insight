@@ -32,6 +32,7 @@ class static_data_import(object):
             self.groups = sdeBase.classes.invGroups
             self.types = sdeBase.classes.invTypes
             self.locations = sdeBase.classes.mapDenormalize
+            self.stargate_names = sdeBase.classes.invNames
         except Exception as ex:
             print("An error occurred when loading the SDE. Make sure you have downloaded and placed it correctly\n{}".format(ex))
             sys.exit(1)
@@ -44,6 +45,7 @@ class static_data_import(object):
         tb_groups.import_all_sde(self.service,self.sde_session,self.groups)
         tb_types.import_all_sde(self.service,self.sde_session,self.types)
         tb_locations.import_all_sde(self.service,self.sde_session,self.locations)
+        tb_locations.import_stargates(self.service, self.sde_session, self.stargate_names)
 
     def load_indexes(self):
         dbRow.tb_regions.api_import_all_ids(self.service)

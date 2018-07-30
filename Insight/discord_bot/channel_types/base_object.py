@@ -156,7 +156,7 @@ class discord_feed_service(object):
                 print(ex)
 
     async def remove(self):
-        print("feed removed")
+        print('Removed {} in {}'.format(str(self), self.str_channel_server()))
 
     async def delete(self):
         def non_async_delete():

@@ -140,14 +140,16 @@ class zk(object):
                     print("{} {}".format(str(datetime.datetime.utcnow()), "zKill error 420"))
                     time.sleep(45)
                 elif resp.status_code == 429:  # error limited
-                    print("{} {}".format(str(datetime.datetime.utcnow()), "zKill error limited. Are you using more than"
-                                                                          " 1 bot with the same zk queue identifier?"))
+                    print("{} {}".format(str(datetime.datetime.utcnow()),
+                                         "zKill error limited. Are you using more than 1 bot with the same zk queue identifier? Delete your 'zk_identifier.txt' file."))
+                    time.sleep(30)
+                elif resp.status_code == 500 or resp.status_code == 502 or resp.status_code == 503 or resp.status_code == 504:
                     time.sleep(30)
                 else:
-                    time.sleep(10)
+                    time.sleep(15)
             except Exception as ex:
                 print(ex)
-                time.sleep(5)
+                time.sleep(10)
 
     def __add_km_to_filter(self,km):
         try:
@@ -173,7 +175,7 @@ class zk(object):
                 print(ex)
 
     def thread_filters(self):
-        print("Starting zk filter pass")
+        print("Starting zk filter")
         while True:
             try:
                 self.service.channel_manager.send_km(self.__km_postProcess.get(block=True))

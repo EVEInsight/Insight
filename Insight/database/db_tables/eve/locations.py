@@ -48,6 +48,40 @@ class Locations(dec_Base.Base,table_row,sde_impoter):
         return list(set(importing_ids) - set(existing_ids))
 
     @classmethod
+    def import_stargates(cls, service_module, sde_session, sde_base):
+        db: Session = service_module.get_session()
+        try:
+            missing_items = db.query(cls).filter(cls.name == None).all()
+            length_missing_ids = len(missing_items)
+            if length_missing_ids > 0:
+                print("Need to import stargate names for {} {}".format(str(length_missing_ids), cls.__name__))
+            else:
+                return
+            for chunk in name_only.split_lists(missing_items, 75000):
+                start = datetime.datetime.utcnow()
+                try:
+                    for item in chunk:
+                        try:
+                            __row = sde_session.query(sde_base).filter(sde_base.itemID == item.location_id).one()
+                            item.name = __row.itemName
+                            db.merge(item)
+                        except Exception as ex:
+                            print(ex)
+                    db.commit()
+                    print("Imported {} {} from the SDE in {} seconds".format(str(len(chunk)), cls.__name__, str(
+                        (datetime.datetime.utcnow() - start).total_seconds())))
+                except Exception as ex:
+                    print(ex)
+                    db.rollback()
+        except Exception as ex:
+            print(ex)
+            db.rollback()
+            sde_session.rollback()
+        finally:
+            db.close()
+            sde_session.close()
+
+    @classmethod
     def get_query_filter(cls, sde_base):
         return sde_base.itemID
 
