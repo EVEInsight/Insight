@@ -14,7 +14,7 @@ class Options_Sync(options_base.Options_Base):
         self.previous_sync_print = ""
 
     async def InsightOption_addToken(self, message_object: discord.Message):
-        """Add new token - Adds a new token for syncing contact information related to pilots, corporations, or alliances."""
+        """Add new token - Add a new SSO token to sync contact information related to pilots, corporations, and alliances."""
         user_channel: direct_message.direct_message = await self.cfeed.channel_manager.get_user_dm(message_object)
 
         def write_token(token_row):
@@ -62,7 +62,7 @@ class Options_Sync(options_base.Options_Base):
         await self.InsightOption_syncnow(message_object)
 
     async def InsightOption_syncnow(self, message_object: discord.Message = None):
-        """Force sync - Updates the channel's allies list if you have SSO tokens assigned to it."""
+        """Force sync - Update the ally list if you have SSO tokens assigned to it. Note: Insight automatically syncs tokens every 1.5 hours."""
 
         def sync_contacts(check_modify=False):
             db: Session = self.cfeed.service.get_session()
@@ -84,7 +84,7 @@ class Options_Sync(options_base.Options_Base):
                 self.previous_sync_print = return_str
 
         if message_object is not None:
-            await self.cfeed.channel_discord_object.send("Syncing ignored ally capRadar contact lists now")
+            await self.cfeed.channel_discord_object.send("Syncing radar ally contact blacklist now")
             __resp = await self.cfeed.discord_client.loop.run_in_executor(None, sync_contacts)
         else:
             __resp = await self.cfeed.discord_client.loop.run_in_executor(None, partial(sync_contacts, True))

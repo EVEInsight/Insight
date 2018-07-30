@@ -14,11 +14,11 @@ class base_activefeed(options_base.Options_Base):
         await self.cfeed.command_remove(message_object)
 
     async def InsightOption_pause(self,message_object:discord.Message):
-        """Pause Feed  - Pauses the feed if it is running currently."""
+        """Pause Feed  - Pauses the feed if it's currently running."""
         await self.cfeed.command_stop(message_object)
 
     async def InsightOption_start(self,message_object:discord.Message):
-        """Start feed  - Starts the feed if it is currently paused"""
+        """Start feed  - Starts the feed if it's currently paused."""
         await self.cfeed.command_start(message_object)
 
 from .. import nofeed_text

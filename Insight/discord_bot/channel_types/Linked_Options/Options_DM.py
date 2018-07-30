@@ -37,11 +37,11 @@ class Options_DM(options_base.Options_Base):
 
         _options = dOpt.mapper_return_noOptions(self.cfeed.discord_client, message_object, timeout_seconds=400)
         _options.set_main_header(
-            "Open this link and login to EVE's SSO system. After clicking 'Authorize' and being redirected to a blank webpage, copy and paste the content of your browser's "
+            "Open this link and login to EVE's SSO system. After clicking 'Authorize' and being redirected to a blank webpage, copy the content of your browser "
             "address bar into this conversation: \n{}"
             "\n\nThe URL you paste should look similar to this:\n{}"
             .format(self.cfeed.service.sso.get_sso_login(), self.cfeed.service.sso.get_callback_example()))
-        _options.set_footer_text("Please copy and paste the URL in this conversation: ")
+        _options.set_footer_text("Please copy the URL into this conversation: ")
         auth_code = await _options()
         funct_call = partial(tb_tokens.generate_from_auth, self.cfeed.user_id, auth_code, self.cfeed.service)
         __resp = await self.cfeed.discord_client.loop.run_in_executor(None, funct_call)
@@ -61,11 +61,11 @@ class Options_DM(options_base.Options_Base):
             raise ex
 
     async def InsightOption_deleteToken(self, message_object: discord.Message):
-        """Delete token - Deletes one of your added tokens and removes it from all channels that use it."""
+        """Delete token - Delete one of your added tokens and remove it from all channels."""
         def get_options():
             _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
             _options.set_main_header(
-                "These are all the tokens currently in the system. Select one to delete and remove it from all channels.")
+                "These are all the tokens currently in the system. Select one to delete and remove from all channels.")
             db: Session = self.cfeed.service.get_session()
             try:
                 for token in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).all():
@@ -84,12 +84,12 @@ class Options_DM(options_base.Options_Base):
         await self.reload(message_object)
 
     async def InsightOption_removeChannel(self, message_object: discord.Message):
-        """Remove a token from Discord channel - Removes your token from a Discord channel"""
+        """Remove a token from Discord channel - Remove your token from a Discord channel."""
         def get_options():
             db: Session = self.cfeed.service.get_session()
             _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
-            _options.set_main_header("These are your tokens associated with Discord channel IDs. Select a channel id "
-                                     "to remove a given token from.")
+            _options.set_main_header("These are your tokens used by Discord channels. Select a channel  "
+                                     "to remove your token from.")
             try:
                 for t in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).all():
                     if len(t.object_channels) > 0:
@@ -118,14 +118,14 @@ class Options_DM(options_base.Options_Base):
         await self.reload(message_object)
 
     async def InsightOption_syncnow(self, message_object: discord.Message):
-        """Force sync - Forces an API pull on all of your tokens. Note: Insight automatically syncs your tokens every 1.5 hours."""
+        """Force sync - Force an API pull on all of your tokens. Note: Insight automatically syncs your tokens every 1.5 hours."""
         await message_object.channel.send("Syncing your tokens now")
         await self.cfeed.discord_client.loop.run_in_executor(None, partial(tb_tokens.sync_all_tokens,
                                                                            self.cfeed.user_id, self.cfeed.service))
         await self.InsightOption_viewtokens(message_object)
 
     async def InsightOption_viewtokens(self, message_object: discord.Message):
-        """View my tokens - Views information on all tokens you have currently with Insight"""
+        """View my tokens - View information on all tokens you have with Insight."""
         resp = await self.cfeed.discord_client.loop.run_in_executor(None, self.printout_my_tokens)
         await message_object.channel.send("{}\n{}".format(message_object.author.mention, resp))
 
@@ -137,10 +137,10 @@ class Options_DM(options_base.Options_Base):
         def make_options():
             _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
             _options.set_main_header(
-                "Select one of your tokens to add to the feed. If you do not have any tokens created yet select the 'cancel' option"
-                " and do the following:\n\nStep 1. Direct Message this bot with the command '!settings'\n\nStep 2. Select the option"
+                "Select one of your tokens to add to the feed. If you do not have any tokens created yet, select the 'cancel' option"
+                " and do the following:\n\nStep 1. Direct Message this bot with the command '!sync'\n\nStep 2. Select the option"
                 " to add a new token.\n\nStep 3. Follow the steps needed to add a token and then rerun the command '!sync' "
-                "in the channel you wish to sync your contacts with to get back to this step.")
+                "in the channel you wish to sync your contacts with.")
             db: Session = self.cfeed.service.get_session()
             try:
                 _options.add_header_row("Your available tokens")

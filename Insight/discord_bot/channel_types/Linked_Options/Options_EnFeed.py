@@ -16,7 +16,7 @@ class Options_EnFeed(Base_Feed.base_activefeed):
         self.pod_group_ids = [29]
 
     async def InsightOptionRequired_add(self, message_object:discord.Message):
-        """Add tracked entities  - Add an entity (pilot, corp, or alliance) to post their involved kms. You can add more than 1 tracking entities to a channel if you wish."""
+        """Add a new tracked entity  - Add an entity (pilot, corp, or alliance) to track involved PvP activity. You can add more than 1 entity to a channel."""
 
         def make_options(search_str) -> dOpt.mapper_index:
             __options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
@@ -43,8 +43,7 @@ class Options_EnFeed(Base_Feed.base_activefeed):
 
         __search = dOpt.mapper_return_noOptions(self.cfeed.discord_client, message_object)
         __search.set_main_header("Enter the name of an entity you wish to track in this feed.\n\n"
-                                 "An entity is a pilot, corporation, or alliance in which this channel "
-                                 "will stream kms involving.")
+                                 "An entity is a pilot, corporation, or alliance.")
         __search.set_footer_text("Enter a name. Note: partial names are accepted: ")
         __selected_option = None
         while __selected_option is None:
@@ -58,11 +57,11 @@ class Options_EnFeed(Base_Feed.base_activefeed):
         await self.reload(message_object)
 
     async def InsightOption_remove(self,message_object:discord.Message):
-        """Remove tracking  - Removes tracking of km involvement for a pilot, corp, or alliance."""
+        """Remove a tracked entity - Remove tracking of PvP activity for a previously added pilot, corp, or alliance."""
         def get_options():
             db: Session = self.cfeed.service.get_session()
             _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
-            _options.set_main_header("Remove tracking for an entity")
+            _options.set_main_header("Remove an entity from being tracked by this feed:")
             try:
                 for pilot in db.query(tb_Filter_characters).filter(
                         tb_Filter_characters.channel_id == self.cfeed.channel_id).all():
@@ -87,7 +86,7 @@ class Options_EnFeed(Base_Feed.base_activefeed):
         await self.reload(message_object)
 
     async def InsightOptionRequired_tracktype(self, message_object:discord.Message):
-        """Show losses/kills  - Set the feed to one of three modes for tracked entities: show losses only, show kills only, show both kills and losses"""
+        """Show losses/kills  - Set the feed to one of three modes: show losses only, show kills only, or show both kills and losses."""
         def set_mode(option):
             db:Session = self.cfeed.service.get_session()
             try:
@@ -102,22 +101,22 @@ class Options_EnFeed(Base_Feed.base_activefeed):
                 db.close()
 
         __options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
-        __options.set_main_header("Select the KM viewing mode for this entity feed.")
+        __options.set_main_header("Select the killmail viewing mode for this entity feed.")
         __options.add_option(dOpt.option_returns_object(
-            name="Show losses only   - Only losses involving your tracked entities will be posted",
+            name="Show losses only - Only losses involving your tracked entities will be posted.",
             return_object=enum_kmType.losses_only))
         __options.add_option(dOpt.option_returns_object(
-            name="Show kills only   - Only kills where your tracked entities were attackers will be posted",
+            name="Show kills only - Only kills where your tracked entities were attackers will be posted.",
             return_object=enum_kmType.kills_only))
         __options.add_option(dOpt.option_returns_object(
-            name="Show kills and losses   - Both kills and losses involving feed tracked entities will be posted",
+            name="Show kills and losses - Both kills and losses involving tracked entities will be posted.",
             return_object=enum_kmType.show_both))
         __selected_option = await __options()
         await self.cfeed.discord_client.loop.run_in_executor(None, partial(set_mode, __selected_option))
         await self.reload(message_object)
 
     async def InsightOptionRequired_trackpods(self, message_object: discord.Message):
-        """Display POD(capsule) kills/losses - Set the feed to either ignore or display POD killmails."""
+        """Display POD(capsule) kills/losses - Set the feed to either ignore or display POD mails."""
 
         def set_mode(track_pods):
             db: Session = self.cfeed.service.get_session()

@@ -20,7 +20,7 @@ class enFeed(noCh.discord_text_nofeed_exist):
 
     @classmethod
     async def create_new(cls,message_object:discord.Message, service_module, discord_client):
-        """Entity Feed  - A general feed that displays kills/losses involving selected entities (pilots, corps, alliances)."""
+        """Entity Feed  - Displays PvP activity for a set of tracked entities. Entities are characters, corporations, or alliances. This feed type is ideal for personal, corporate, alliance, or coalition killboard streaming. """
         await super().create_new(message_object,service_module,discord_client)
 
     def get_linked_options(self):

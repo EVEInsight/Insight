@@ -38,7 +38,7 @@ class ExcavatorLosses(enFeed):
 
     @classmethod
     def get_template_desc(cls):
-        return "Excavator Losses - A feed that displays all destroyed excavator mining drones."
+        return "Excavator Losses - Displays all excavator mining drone losses."
 
     def __str__(self):
         return "Excavator Feed"

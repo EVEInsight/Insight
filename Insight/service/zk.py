@@ -136,8 +136,15 @@ class zk(object):
                         self.__km_preProcess.put_nowait(json_data)
                         self.add_delay(self.delay_next, next_delay)
                     next_delay = datetime.datetime.utcnow()
+                elif resp.status_code == 420:  # calm down zKill is probably overloaded
+                    print("{} {}".format(str(datetime.datetime.utcnow()), "zKill error 420"))
+                    time.sleep(45)
+                elif resp.status_code == 429:  # error limited
+                    print("{} {}".format(str(datetime.datetime.utcnow()), "zKill error limited. Are you using more than"
+                                                                          " 1 bot with the same zk queue identifier?"))
+                    time.sleep(30)
                 else:
-                    time.sleep(5)
+                    time.sleep(10)
             except Exception as ex:
                 print(ex)
                 time.sleep(5)

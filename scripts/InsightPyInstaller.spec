@@ -57,6 +57,7 @@ shutil.copy('Installation.md','{}/EVE-Insight/Installation.md'.format(DISTPATH))
 shutil.copy('ChangeLog.md','{}/EVE-Insight/ChangeLog.md'.format(DISTPATH))
 shutil.copy('sqlite-latest.sqlite','{}/EVE-Insight/sqlite-latest.sqlite'.format(DISTPATH))
 shutil.copytree('Insight/callback','{}/EVE-Insight/callback'.format(DISTPATH))
+shutil.copytree('docs','{}/EVE-Insight/docs'.format(DISTPATH))
 if platform == "win32":
     archive_name = 'Insight-{}-Windows'.format(version_str)
     archive_file = '{}.zip'.format(archive_name)

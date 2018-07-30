@@ -41,7 +41,7 @@ class AbyssalLosses(enFeed):
 
     @classmethod
     def get_template_desc(cls):
-        return "Abyssal Losses - A feed that displays all Abyssal space losses."
+        return "Abyssal Losses - Displays all losses occurring in Abyssal space."
 
     def __str__(self):
         return "Abyssal Feed"

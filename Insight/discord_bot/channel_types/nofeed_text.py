@@ -12,13 +12,13 @@ class discord_text_nofeed_exist(discord_feed_service):
             super().setup_table()
 
     async def command_create(self, message_object):
-        """!create - Begin setting up a new channel feed service in this channel."""
+        """!create - Begin setting up a new feed service in this channel."""
         if not type(self) == discord_text_nofeed_exist:
             await self.command_not_supported_sendmessage(message_object)
         else:
             __options = insightClient.mapper_index_withAdditional(self.discord_client, message_object)
-            __options.set_main_header("Select the new type of feed you wish to add in this channel:")
-            __options.add_header_row("Fully customizable feeds")
+            __options.set_main_header("Select the new feed type you wish to add in this channel:")
+            __options.add_header_row("Fully customizable base feeds")
             __options.add_option(insightClient.option_calls_coroutine(name=inCR.capRadar.create_new.__doc__,coroutine_object=inCR.capRadar.create_new(message_object,self.service,self.discord_client)))
             __options.add_option(insightClient.option_calls_coroutine(name=inEF.enFeed.create_new.__doc__,coroutine_object=inEF.enFeed.create_new(message_object,self.service,self.discord_client)))
             __options.add_header_row("Preconfigured derived feeds")
@@ -30,14 +30,14 @@ class discord_text_nofeed_exist(discord_feed_service):
             await __options()
 
     async def command_settings(self,message_object):
-        """!settings - Modify feed settings for a channel."""
+        """!settings - Modify feed settings and behavior."""
         if type(self) == discord_text_nofeed_exist:
             await self.command_not_supported_sendmessage(message_object)
         else:
             await super(discord_text_nofeed_exist, self).command_settings(message_object)
 
     async def command_start(self,message_object:discord.Message):
-        """!start - Starts/resumes a channel feed from being paused."""
+        """!start - Start/resume a channel feed from being paused."""
         if type(self) == discord_text_nofeed_exist:
             await self.command_not_supported_sendmessage(message_object)
         else:
@@ -50,10 +50,10 @@ class discord_text_nofeed_exist(discord_feed_service):
                     await message_object.channel.send("Something went wrong when running this command.\n\nException: {}".format(str(ex)))
             else:
                 await message_object.channel.send(
-                    "{}\nThe channel feed is already running".format(message_object.author.mention))
+                    "{}\nThe channel feed is already running.".format(message_object.author.mention))
 
     async def command_stop(self,message_object:discord.Message):
-        """!stop - Pauses a channel feed temporarily."""
+        """!stop - Pause a channel feed temporarily."""
         if type(self) == discord_text_nofeed_exist:
             await self.command_not_supported_sendmessage(message_object)
         else:
@@ -65,7 +65,8 @@ class discord_text_nofeed_exist(discord_feed_service):
                 except Exception as ex:
                     await message_object.channel.send("Something went wrong when running this command.\n\nException: {}".format(str(ex)))
             else:
-                await message_object.channel.send("{}\nThe channel feed is already stopped".format(message_object.author.mention))
+                await message_object.channel.send(
+                    "{}\nThe channel feed is already stopped.".format(message_object.author.mention))
 
     async def command_remove(self,message_object:discord.Message):
         """!remove - Delete the currently configured feed service in this channel."""

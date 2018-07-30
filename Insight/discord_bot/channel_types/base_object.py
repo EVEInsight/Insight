@@ -75,7 +75,7 @@ class discord_feed_service(object):
         await self.command_not_supported_sendmessage(message_object)
 
     async def command_about(self, message_object):
-        """!about - Display Insight credits and version info."""
+        """!about - Display Insight credits and version information."""
         msg = "Insight {} by Nathan-LS. An EVE Online killmail feed" \
               " bot for Discord.\n\nhttps://github.com/Nathan-LS/Insight".format(str(self.service.get_version()))
         await message_object.channel.send(msg)
@@ -90,12 +90,12 @@ class discord_feed_service(object):
                 else:
                     continue
 
-        resp_str = "These are all commands and their descriptions available to be used:\n\n"
+        resp_str = "These are all available commands and their descriptions usable in this channel:\n\n"
         for i in get_commands():
             info = i.__doc__
             if info is not None:
                 resp_str += "{}\n\n".format(info)
-        resp_str += "\nFor more detailed information, check out the project wiki:\nhttps://github.com/Nathan-LS/Insight/wiki"
+        resp_str += "\nFor more detailed command, feed type, or configuration information check out the project wiki:\nhttps://github.com/Nathan-LS/Insight/wiki"
         await message_object.channel.send("{}\n{}".format(message_object.author.mention, resp_str))
 
     async def command_settings(self,message_object):
