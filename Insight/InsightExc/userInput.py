@@ -31,3 +31,8 @@ class InsightProgrammingError(InsightException):
 class TooManyOptions(InsightException):
     def __init__(self, message="There are too many options to show! If you are searching, please refine your search."):
         super().__init__(message)
+
+
+class NewDMError(InsightException):
+    def __init__(self, message="Unable to open a DM. Ensure you can receive direct messages from Insight."):
+        super().__init__(message)

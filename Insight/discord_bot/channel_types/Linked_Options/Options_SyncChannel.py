@@ -15,7 +15,10 @@ class Options_Sync(options_base.Options_Base):
 
     async def InsightOption_addToken(self, message_object: discord.Message):
         """Add new token - Add a new SSO token to sync contact information related to pilots, corporations, and alliances."""
-        user_channel: direct_message.direct_message = await self.cfeed.channel_manager.get_user_dm(message_object)
+        try:
+            user_channel: direct_message.direct_message = await self.cfeed.channel_manager.get_user_dm(message_object)
+        except:
+            raise InsightExc.userInput.NewDMError
 
         def write_token(token_row):
             db: Session = self.cfeed.service.get_session()
@@ -61,7 +64,7 @@ class Options_Sync(options_base.Options_Base):
         await self.delete_row(selected_row)
         await self.InsightOption_syncnow(message_object)
 
-    async def InsightOption_syncnow(self, message_object: discord.Message = None):
+    async def InsightOption_syncnow(self, message_object: discord.Message = None, suppress_notify=False):
         """Force sync - Update the ally list if you have SSO tokens assigned to it. Note: Insight automatically syncs tokens every 1.5 hours."""
 
         def sync_contacts(check_modify=False):
@@ -75,6 +78,8 @@ class Options_Sync(options_base.Options_Base):
                 if check_modify:
                     if return_str == self.previous_sync_print:
                         return None
+                if suppress_notify:
+                    return None
                 return return_str
             except Exception as ex:
                 print(ex)

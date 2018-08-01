@@ -9,6 +9,7 @@ class background_tasks(object):
     def __init__(self, insight_client):
         assert isinstance(insight_client, discord_bot.Discord_Insight_Client)
         self.client: discord_bot.Discord_Insight_Client = insight_client
+        self.suppress_notify = True
 
     async def setup_backgrounds(self):
         await self.client.wait_until_ready()
@@ -18,9 +19,10 @@ class background_tasks(object):
     async def __helper_update_contacts_channels(self):
         async for channel in self.client.channel_manager.get_all_capRadar():
             try:
-                await channel.background_contact_sync(None)
+                await channel.background_contact_sync(message=None, suppress=self.suppress_notify)
             except Exception as ex:
                 print(ex)
+        self.suppress_notify = False
 
     async def sync_contacts(self):
         while True:
@@ -44,14 +46,14 @@ class background_tasks(object):
                                                                               str(self.client.service.get_version()))
                 stats_zk = await self.client.loop.run_in_executor(None, self.client.service.zk_obj.get_stats)
                 d_status = discord.Status.online
-                if stats_zk[0] <= 5 or stats_zk[3] >= 6:
+                if stats_zk[0] <= 5 or stats_zk[3] >= 10:
                     d_status = discord.Status.idle
                 if stats_zk[2] > 100:
                     stats_zk[2] = "99+"
                 status_str += '[zK] Add: {}, Delay: {}m(+{}s), Next: {}s '.format(
                     str(stats_zk[0]), str(stats_zk[1]), str(stats_zk[2]), str(stats_zk[3]))
                 stats_feeds = await self.client.channel_manager.avg_delay()
-                if stats_feeds[1] >= 30:
+                if stats_feeds[1] >= 10:
                     d_status = discord.Status.dnd
                 status_str += '[Insight] Sent: {}, Delay: {}s '.format(str(stats_feeds[0]),
                                                                        str(stats_feeds[1]))

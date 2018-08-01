@@ -100,13 +100,10 @@ class Channel_manager(object):
             return cType.insight_directMessage(channel_object,self.service)
 
     async def get_user_dm(self, message_object: discord.Message):
-        try:
-            assert isinstance(message_object, discord.Message)
-            await message_object.author.send("Opening a new conversation! Hello!")
-            dm = message_object.author.dm_channel
-            return cType.insight_directMessage(dm, self.service)
-        except Exception as ex:
-            print(ex)
+        assert isinstance(message_object, discord.Message)
+        await message_object.author.send("Opening a new conversation! Hello!")
+        dm = message_object.author.dm_channel
+        return cType.insight_directMessage(dm, self.service)
 
     async def remove_feed(self,channel):
         ch_obj = None

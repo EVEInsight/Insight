@@ -1,14 +1,16 @@
 # Insight v1.0.0 Installation Guide
-
-## Executable Requirements
+This guide is for users who downloaded an Insight binary package from [releases.](https://github.com/Nathan-LS/Insight/releases)
+If you are running Insight from source, see [source installation guide.](https://github.com/Nathan-LS/Insight/wiki/Source-Installation)
+## Binary Executable Requirements
 
 ### Windows
 * Windows 10 or Windows Server 2016
 ### Linux
 * GLIBC 2.19 or greater
-    * Run ```ldd --version``` to check
+    * Run ```ldd --version``` to verify
+    * The Linux binary is built using Debian 8 so just about anything besides older versions of CentOS should work.
 ### Mac
-* Not supported
+* Binary not supported
     * Must build from [source](https://github.com/Nathan-LS/Insight/wiki/Installation)
 
 ## Installing
@@ -26,25 +28,25 @@ like this:
     token = YourDiscordAppTokenGoesHereWithoutQuotes
     ;required - Create a new Discord app at https://discordapp.com/developers/applications/me and set token to your App's token
     ```
-6. Go to [CCP Developer](https://developers.eveonline.com/applications/create) and create a new app with the following settings:
+6. Go to [CCP Developers](https://developers.eveonline.com/applications/create) and create a new app with the following settings:
     * **Connection Type** = Authentication & API Access
-    * **Requested Scopes List**
+    * **Requested Scopes List:**
         * esi-characters.read_contacts.v1
         * esi-corporations.read_contacts.v1
         * esi-alliances.read_contacts.v1
-    * For the **callback**, enter ```https://insight.nathan-s.com/Insight/callback``` if you don't plan on personally hosting a callback landing page.
-    Insight does not utilize a callback listener for simplicity so the user must manually copy and paste their returned callback URL into Discord.
-    Feel free the host the contents of /callback/index.html and modify the callback to point to your own landing page.
-7. Create your new CCP App and copy paste the **Client ID**, **Secret Key**, and **Callback URL** into the appropriate sections in your **config** file.
+    * **Callback** = ```https://insight.nathan-s.com/Insight/callback``` if you don't plan on personally hosting a callback landing page.
+        * Insight does not utilize a callback listener for simplicity so the user must manually copy their returned callback URL into Discord.
+    Feel free to the host the contents of /callback/index.html and modify the callback to point to your own landing page. The above URL is hosted on Github and directs users to the contents of ```Insight/callback/index.html```.
+7. Create your new CCP App and copy the **Client ID**, **Secret Key**, and **Callback URL** into the appropriate sections in your **config** file.
 8. Save your config file and rename it from ```default-config.ini``` to ```config.ini```.
 9. Run **Insight.exe** on Windows or **Insight** on Linux.
-Note: On first run, Insight will begin importing data from the SDE database. This could take around 10 minutes so don't close the application.
+Note: On the initial run Insight will begin importing data from the SDE database. Importing static data could upwards of 10 minutes so don't close the application.
 10. See [inviting your bot](#inviting-your-bot) to invite your newly created bot to your Discord server.
 
 ## Updating
-1. Download the latest Insight release archive for your operating system from [github](https://github.com/Nathan-LS/Insight/releases).
-1. Extract the archive overwriting all files in your current EVE-Insight directory except **Database.db** and **config.ini**.
-
+1. Download the latest Insight release archive for your operating system from [Github releases](https://github.com/Nathan-LS/Insight/releases).
+2. Extract the archive, overwriting all files in your current EVE-Insight directory except **Database.db** and **config.ini**.
+    * Be careful to never lose your **config.ini** file as the token column encryption secret is stored in it.
 
 ## Inviting your bot
 1. Find your Discord application's id from [Discord Apps](https://discordapp.com/developers/applications/me).
@@ -52,3 +54,5 @@ Note: On first run, Insight will begin importing data from the SDE database. Thi
     ```
     https://discordapp.com/api/oauth2/authorize?client_id=YourClientIDHere&permissions=149504&scope=bot
     ```
+### or
+1. A link is provided when Insight starts. Check the program console and copy down the **Invite Link**.
