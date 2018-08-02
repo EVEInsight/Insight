@@ -4,9 +4,10 @@ Killmails and intel are presented in visually appealing Discord embedded objects
 
 The bot features an intuitive interface for creating, modifying, and managing isolated feed configurations through simple commands and text dialog. All bot functionality is accessible through [documented commands](https://github.com/Nathan-LS/Insight/wiki/Commands) with no hardcoding or complicated configuration steps.
 
-Simply [invite Insight](#links) to your Discord server and run ```!create``` to begin setting up a feed!
+[Invite Insight](#links) to your Discord server and run ```!create``` to begin setting up a feed!
 
 # Links
+[![Discord Bots](https://discordbots.org/api/widget/463952393206497290.png)](https://discordbots.org/bot/463952393206497290)
 * Insight (with preconfigured role): [Insight Bot Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=463952393206497290&permissions=149504&scope=bot)
 * Insight (without preconfigured role): [Insight Bot Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=463952393206497290&permissions=0&scope=bot)
 
@@ -108,6 +109,8 @@ to host your own Insight copy. Follow the instructions in ```Installation.md```,
 If you wish to run the latest Insight branch from source you will need a Python 3 interpreter and 
 the packages in ```requirements.txt```. The [wiki](https://github.com/Nathan-LS/Insight/wiki/Installation) contains a detailed guide for 
 source installation using a Linux operating system.
+
+# FAQ
     
 # Credits
 * [Fuzzwork](https://www.fuzzwork.co.uk/) - Provides SQLite database conversions of CCP's SDE which Insight references on initial loading.
