@@ -89,7 +89,10 @@ class Discord_Insight_Client(discord.Client):
                 await self.commandLookup.notfound(message)
         except Exception as ex:
             if isinstance(ex, InsightExc.InsightException):
-                await message.channel.send("{}\n{}".format(message.author.mention, str(ex)))
+                try:
+                    await message.channel.send("{}\n{}".format(message.author.mention, str(ex)))
+                except discord.Forbidden:
+                    pass
             else:
                 print(traceback.print_exc())
 
