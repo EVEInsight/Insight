@@ -91,8 +91,10 @@ class Discord_Insight_Client(discord.Client):
             if isinstance(ex, InsightExc.InsightException):
                 try:
                     await message.channel.send("{}\n{}".format(message.author.mention, str(ex)))
-                except discord.Forbidden:
-                    pass
+                except:
+                    return
+            elif isinstance(ex, discord.Forbidden):
+                return  # cant send error message anyway
             else:
                 print(traceback.print_exc())
 

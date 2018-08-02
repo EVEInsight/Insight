@@ -1,6 +1,5 @@
 import discord
 import difflib
-import InsightExc
 
 
 class DiscordCommands(object):
@@ -76,7 +75,4 @@ class DiscordCommands(object):
             for c in similar_commands:
                 resp_text += "'{}'\n".format(str(c))
         resp_text += "\nRun the command '!help' to see a list of available commands."
-        try:
-            await message_object.channel.send('{}\n{}'.format(message_object.author.mention, resp_text))
-        except discord.Forbidden:
-            raise InsightExc.DiscordError.DiscordPermissions
+        await message_object.channel.send('{}\n{}'.format(message_object.author.mention, resp_text))
