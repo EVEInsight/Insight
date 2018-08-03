@@ -47,7 +47,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
             db.close()
 
     async def InsightOptionRequired_add(self, message_object: discord.Message):
-        """Add a new base system - Track targets within a specific LY radius of a system. Multiple systems can be added for a wider spread."""
+        """Add a new base system - Track targets within a specific light-year radius of a system. Multiple systems can be added for a wider spread."""
         def make_options(search_str):
             __options = discord_options.mapper_index(self.cfeed.discord_client, message_object)
             __options.set_main_header("Select the system base you wish to add.")
@@ -70,7 +70,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
                 return __options
 
         __search = discord_options.mapper_return_noOptions(self.cfeed.discord_client, message_object)
-        __search.set_main_header("Enter the name of a new base system to track activity within range of.")
+        __search.set_main_header("Enter the name of a new base system.")
         __search.set_footer_text("Enter a name. Note: partial names are accepted: ")
         __selected_option = None
         while __selected_option is None:
@@ -78,8 +78,8 @@ class Options_CapRadar(Base_Feed.base_activefeed):
             __found_results = await self.cfeed.discord_client.loop.run_in_executor(None,partial(make_options,__search_name))
             __selected_option:tb_systems = await __found_results()
         __ly_range = discord_options.mapper_return_noOptions_requiresInt(self.cfeed.discord_client, message_object)
-        __ly_range.set_main_header("Enter the maximum LY radius for the selected system.\n\n"
-                                   "Only killmails occurring within your chosen LY range will appear in this feed.")
+        __ly_range.set_main_header("Enter the maximum light-year radius for the selected base system.\n\n"
+                                   "Only killmails occurring within the light-year range of your base system will appear in this feed.")
         __range = await __ly_range()
         function_call = partial(tb_channels.commit_list_entry,__selected_option,self.cfeed.channel_id,self.cfeed.service,maxly=__range)
         await self.cfeed.discord_client.loop.run_in_executor(None, function_call)
@@ -148,9 +148,9 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         await self.reload(message_object)
 
     async def InsightOptionRequired_blops(self,message_object:discord.Message):
-        """BLOPS tracking - Enable or disable tracking of blackops battleship targets within range of base systems."""
+        """BLOPS tracking - Enable or disable tracking of black ops battleship targets within range of base systems."""
         __options = discord_options.mapper_return_yes_no(self.cfeed.discord_client, message_object)
-        __options.set_main_header("Track blackops battleship activity in this channel?")
+        __options.set_main_header("Track black ops battleship activity in this channel?")
         __track_group_TF = await __options()
         if __track_group_TF:
             __mention_method = self.mention_options(message_object,"blackops battleships")
@@ -163,7 +163,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         await self.reload(message_object)
 
     async def InsightOptionRequired_maxage(self,message_object:discord.Message):
-        """Set max killmail age - Sets the maximum delay, in minutes, that mails will be posted to the feed. Fetched mails occurring more than the set age will not be pushed to the channel."""
+        """Set maximum killmail age - Sets the maximum delay, in minutes, that mails can be posted to the feed. Fetched mails occurring more than the set age will not be pushed to the channel."""
         def change_limit(new_limit):
             db: Session = self.cfeed.service.get_session()
             try:
@@ -179,7 +179,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
 
         __options = discord_options.mapper_return_noOptions_requiresInt(self.cfeed.discord_client, message_object)
         __options.set_main_header(
-            "Enter the maximum delay, in minutes, that mails can be posted to the feed. Fetched mails occurring more than the set age will not be pushed to the channel.")
+            "Enter the maximum delay, in minutes, that mails can be pushed to the channel. Mails occurring more than the set age will not be pushed to the channel.")
         _max_age = await __options()
         await self.cfeed.discord_client.loop.run_in_executor(None, partial(change_limit, _max_age))
         await self.reload(message_object)

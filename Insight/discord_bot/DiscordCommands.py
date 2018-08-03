@@ -67,7 +67,7 @@ class DiscordCommands(object):
 
     async def notfound(self, message_object: discord.Message):
         similar_commands = self.__similar(message_object.content)
-        resp_text = "The command: '{}' was not found.\n\n".format(str(message_object.content))
+        resp_text = "The command '{}' was not found.\n\n".format(str(message_object.content))
         if len(similar_commands) == 0:
             resp_text += "No similar commands could be found matching what you entered.\n\n"
         else:

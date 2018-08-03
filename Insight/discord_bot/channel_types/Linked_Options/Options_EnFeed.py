@@ -61,7 +61,7 @@ class Options_EnFeed(Base_Feed.base_activefeed):
         def get_options():
             db: Session = self.cfeed.service.get_session()
             _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
-            _options.set_main_header("Remove an entity from being tracked by this feed:")
+            _options.set_main_header("Remove an entity from being tracked in this feed:")
             try:
                 for pilot in db.query(tb_Filter_characters).filter(
                         tb_Filter_characters.channel_id == self.cfeed.channel_id).all():

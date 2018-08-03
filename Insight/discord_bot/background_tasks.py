@@ -6,6 +6,7 @@ import datetime
 import requests
 import json
 
+
 class background_tasks(object):
     def __init__(self, insight_client):
         assert isinstance(insight_client, discord_bot.Discord_Insight_Client)
@@ -90,7 +91,7 @@ class background_tasks(object):
         api_token = self.client.service.config_file.get("discordbots.org", "discordbots_apikey", fallback=None)
         while True:
             api_token = await self.client.loop.run_in_executor(None, partial(api_post, api_token))
-            await asyncio.sleep(600)
+            await asyncio.sleep(900)
 
 
 import discord_bot

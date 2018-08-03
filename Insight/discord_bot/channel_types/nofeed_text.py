@@ -16,9 +16,10 @@ class discord_text_nofeed_exist(discord_feed_service):
         if not type(self) == discord_text_nofeed_exist:
             await self.command_not_supported_sendmessage(message_object)
         else:
-            __options = insightClient.mapper_index_withAdditional(self.discord_client, message_object)
+            __options = insightClient.mapper_index_withAdditional(self.discord_client, message_object,
+                                                                  timeout_seconds=300)
             __options.set_main_header("Select the new feed type you wish to add in this channel:")
-            __options.add_header_row("Fully customizable base feeds")
+            __options.add_header_row("Fully customizable feeds")
             __options.add_option(insightClient.option_calls_coroutine(name=inCR.capRadar.create_new.__doc__,coroutine_object=inCR.capRadar.create_new(message_object,self.service,self.discord_client)))
             __options.add_option(insightClient.option_calls_coroutine(name=inEF.enFeed.create_new.__doc__,coroutine_object=inEF.enFeed.create_new(message_object,self.service,self.discord_client)))
             __options.add_header_row("Preconfigured derived feeds")
@@ -45,7 +46,7 @@ class discord_text_nofeed_exist(discord_feed_service):
                 try:
                     await self.discord_client.loop.run_in_executor(None,partial(dbRow.tb_channels.set_feed_running,self.channel_id,True,self.service))
                     await self.async_load_table()
-                    await message_object.channel.send("Feed service started")
+                    await message_object.channel.send("Feed service started.")
                 except Exception as ex:
                     await message_object.channel.send("Something went wrong when running this command.\n\nException: {}".format(str(ex)))
             else:
@@ -53,7 +54,7 @@ class discord_text_nofeed_exist(discord_feed_service):
                     "{}\nThe channel feed is already running.".format(message_object.author.mention))
 
     async def command_stop(self,message_object:discord.Message):
-        """!stop - Pause a channel feed temporarily."""
+        """!stop - Pause a channel feed."""
         if type(self) == discord_text_nofeed_exist:
             await self.command_not_supported_sendmessage(message_object)
         else:
@@ -61,7 +62,7 @@ class discord_text_nofeed_exist(discord_feed_service):
                 try:
                     await self.discord_client.loop.run_in_executor(None,partial(dbRow.tb_channels.set_feed_running,self.channel_id,False,self.service))
                     await self.async_load_table()
-                    await message_object.channel.send("Feed service stopped")
+                    await message_object.channel.send("Feed service stopped.")
                 except Exception as ex:
                     await message_object.channel.send("Something went wrong when running this command.\n\nException: {}".format(str(ex)))
             else:
@@ -107,9 +108,11 @@ class discord_text_nofeed_exist(discord_feed_service):
             print('New {} in {}'.format(str(__tmp_feed_object), __tmp_feed_object.str_channel_server()))
         except Exception as ex:
             await __tmp_feed_object.delete()
-            await message_object.channel.send(
-                "Something went wrong when creating a new feed. Run the command '!create' "
-                "to start over.")
+            try:
+                await message_object.channel.send(
+                    "Something went wrong when creating a new feed. Run the command '!create' to start over.")
+            except:
+                pass
             raise ex
 
     @classmethod

@@ -81,7 +81,7 @@ class discord_feed_service(object):
         await message_object.channel.send(msg)
 
     async def command_help(self,message_object):
-        """!help - Displays information about available commands."""
+        """!help - Display information about available commands."""
 
         def get_commands():
             for i in dir(self):
@@ -90,7 +90,7 @@ class discord_feed_service(object):
                 else:
                     continue
 
-        resp_str = "These are all available commands and their descriptions usable in this channel:\n\n"
+        resp_str = "These are all of the available commands usable in this channel:\n\n"
         for i in get_commands():
             info = i.__doc__
             if info is not None:
@@ -184,7 +184,7 @@ class discord_feed_service(object):
 
     @classmethod
     def str_more_help(cls):
-        return "For assistance, run the command '!help' to see a list of available commands and their functions or visit:\n\nhttps://github.com/Nathan-LS/Insight"
+        return "Run the command '!help' to see a list of available commands or visit:\n\nhttps://github.com/Nathan-LS/Insight/wiki"
 
     def __str__(self):
         return "Base Insight Object"

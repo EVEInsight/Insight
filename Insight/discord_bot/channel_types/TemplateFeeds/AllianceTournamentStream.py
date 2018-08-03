@@ -39,7 +39,7 @@ class AllianceTournamentStreamSystem(enFeed):
 
     @classmethod
     def get_template_desc(cls):
-        return "Alliance Tournament Stream - Displays all losses occurring in the region UUA-F4 for the alliance tournament."
+        return "Alliance Tournament Stream - Displays all losses occurring in the region UUA-F4 for the Alliance Tournament."
 
     def __str__(self):
         return "Alliance Tournament systems Feed"

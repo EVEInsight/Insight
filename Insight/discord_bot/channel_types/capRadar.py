@@ -24,7 +24,7 @@ class capRadar(noCH.discord_text_nofeed_exist):
 
     @classmethod
     async def create_new(cls,message_object:discord.Message, service_module, discord_client):
-        """Capital Radar - Tracks hostile super, capital, or blops activity within a set lightyear proximity of base systems. Radar feeds are ideal for tracking hostile incursions into friendly space, hunting expensive targets within jump range, or detecting capital escalations."""
+        """Capital Radar - Tracks hostile super, capital, or blops activity within a set light-year proximity of base systems. Radar feeds are ideal for tracking hostile incursions into friendly space, hunting expensive targets within jump range, or detecting capital escalations."""
         await super(capRadar, cls).create_new(message_object,service_module,discord_client)
 
     async def command_sync(self, message_object):

@@ -1,23 +1,23 @@
 # Insight v1.0.0
 Insight provides EVE Online killmail streaming for Discord. Insight can stream personal or corporate killboards, detect supercapitals with a proximity radar, and more!
-Killmails and intel are presented in visually appealing Discord embedded objects consisting of relevant links and images to quickly identify important information.
+Killmails and intel are presented in visual Discord embedded objects containing relevant links and images to quickly identify important information.
 
-The bot features an intuitive interface for creating, modifying, and managing isolated feed configurations through simple commands and text dialog. All bot functionality is accessible through [documented commands](#commands) with no hardcoding or complicated configuration steps.
+This bot features an intuitive interface for creating, modifying, and managing isolated feed configurations through simple commands and text dialog. All bot functionality is accessible through [documented commands](#commands) with no hardcoding or complicated configuration steps.
 
-[Invite Insight](#inviting) to your Discord server and run ```!create``` to begin setting up a feed!
+[Invite Insight](#links) to your Discord server and run ```!create``` to begin setting up a feed!
 
-# Inviting
+# Links
 [![Discord Bots](https://discordbots.org/api/widget/463952393206497290.png)](https://discordbots.org/bot/463952393206497290)
-* Insight (with preconfigured role): [Insight Bot Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=463952393206497290&permissions=149504&scope=bot)
-* Insight (without preconfigured role): [Insight Bot Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=463952393206497290&permissions=0&scope=bot)
+* **Insight** (with preconfigured role): [Insight Bot Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=463952393206497290&permissions=149504&scope=bot)
+* **Insight** (without preconfigured role): [Insight Bot Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=463952393206497290&permissions=0&scope=bot)
 
 Insight is available publicly hosted for invites directly to Discord servers. 
 [Binary releases](https://github.com/Nathan-LS/Insight/releases) or a [source installation guide](https://github.com/Nathan-LS/Insight/wiki/Source-Installation) are available if you wish to host Insight yourself.
 
-If you have any questions, suggestions, or bug reports, feel free to drop by the [project support server.](https://discord.gg/Np3FCUn)
+If you have questions, suggestions, or bug reports feel free to drop by the [project support server.](https://discord.gg/Np3FCUn)
 
 # Table of contents
-- [Inviting](#Inviting)
+- [Links](#links)
 - [Table of contents](#table-of-contents)
 - [Feature Overview](#feature-overview)
 - [Gallery](#gallery)
@@ -72,7 +72,7 @@ Commands can be prefixed with either ```!``` or ```?```.
 More detailed command information is available in the [commands wiki.](https://github.com/Nathan-LS/Insight/wiki/Commands)
 
 # Permissions
-The preconfigured role invite [link](#inviting) creates a server role with necessary permissions already assigned. Using the invite [link](#inviting) without preconfigured roles requires manual permission configuration.
+The preconfigured role invite [link](#links) creates a server role with necessary permissions already assigned. Using the invite [link](#links) without preconfigured roles requires manual permission configuration.
 
 In intended feed channels the bot requires the following permissions:
 
@@ -81,13 +81,13 @@ In intended feed channels the bot requires the following permissions:
 | Read Messages | Allows the bot to read command events.|
 | Send Messages | Allows the bot to communicate and display prompts to users running commands.|
 | Embed Links   | Allows the bot to post Discord embedded content containing images (ship renders, player portraits, corp/alliance logos) and hyperlinks (zKillboard and Dotlan).
-| Mention Everyone | Allows the bot to optionally mention @here or @everyone if configured to do so for alerts in capital radar feeds.
+| Mention Everyone | Allows the bot to optionally mention @here or @everyone for capital radar alerts.
 
 
 # Getting started
 ## Entity Feed
 This quick start guide will help you set up an alliance killboard tracking feed.
-1. Begin by inviting Insight to your Discord server using one of the provided [links](#inviting).
+1. Begin by inviting Insight to your Discord server using one of the provided [links](#links).
 2. Ensure Insight has the correct [permissions](#permissions) in the intended feed channel.
 3. Run the command:
 ``` !create``` and select 'Entity Feed'.
@@ -100,13 +100,13 @@ a tracked entity participates in PvP. You can now run the command ```!settings``
 in your feed. If you wish to remove the feed, run ```!remove```.
 ## Capital Radar Feed
 This quick start guide will help you set up a radar feed for tracking supercapital activity within
-12 lightyears of our base system, Jita.
-1. Begin by inviting Insight to your Discord server using one of the provided [links](#inviting).
+12 light-years of our base system, Jita.
+1. Begin by inviting Insight to your Discord server using one of the provided [links](#links).
 2. Ensure Insight has the correct [permissions](#permissions) in the intended feed channel.
 3. Run the command:
 ``` !create``` and select 'Capital Radar'.
-4. The bot will ask us for the name of a base system. In our example case, enter ```Jita```.
-5. Next, we will be asked for the maximum lightyear range from Jita we wish to track targets. Enter ```12```
+4. The bot will ask for the name of a base system. In our example case, enter ```Jita```.
+5. Next, we will be asked for the maximum light-year range from Jita we wish to track targets. Enter ```12```
 or whichever range you prefer.
 6. We will be shown a few prompts asking if we wish to track black ops, regular capitals, and supers. You 
 can track all of these groups or a subset as in our case. Answer ```no``` to tracking blops
@@ -121,13 +121,13 @@ Packaged binaries are available for Windows and Linux under [releases](https://g
 to host your own Insight copy. Follow the instructions in ```Installation.md```, edit ```default-config.ini``` and you are ready to go! There are no additional downloads or package management systems to deal with.
 
 If you wish to run the latest Insight branch from source you will need a Python 3 interpreter and 
-the packages in ```requirements.txt```. The [wiki](https://github.com/Nathan-LS/Insight/wiki/Installation) contains a detailed guide for 
+the packages in ```requirements.txt```. The [wiki](https://github.com/Nathan-LS/Insight/wiki/Source-Installation) contains a detailed guide for 
 source installation using a Linux operating system.
 
 # Frequently asked questions
 **How do I invite Insight to my Discord server?**
 
-You can invite Insight to any server where you have the **Manage Server** role. Follow the [link](#inviting), select the server, and Insight will be invited.
+You can invite Insight to any server where you have the **Manage Server** role. Follow the [link](#links), select the server, and Insight will be invited.
 
 **What Discord permissions does Insight require?**
 
@@ -149,17 +149,17 @@ Operationally, the publicly hosted bot runs on dedicated, secure hardware to pro
 
 **How do I run more than one feed service?**
 
-Insight can only run one feed service type per Discord channel. If you wish to run more feeds create more text channels and run the ```!create``` command.
+Insight can only run one feed service per Discord channel. Create more text channels and create a feed service in each.
 Note: Insight does not support feeds in direct message or conversations.
 
 
 **How do I add, manage, or remove one of my previously added SSO tokens?**
 
-Direct message the bot with the ```!sync``` command and select an option.
+Direct message the bot with the ```!sync``` command and select an option. You can always revoke tokens under [third party applications.](https://community.eveonline.com/support/third-party-applications/)
 
 
 
-**What do all the stats mean on the bot's currently playing message?**
+**What do all the stats mean on the bot's watching message?**
 
 Insight keeps track of delays for service reliability. See the [wiki article](https://github.com/Nathan-LS/Insight/wiki/Color-codes-and-bot-status) for a detailed description.
 
@@ -185,15 +185,15 @@ Insight follows the same procedure except for step 3. The callback URL must manu
 Insight's ```Watching CPU:15% MEM:1.0GB``` status will change to ```Watching Update available```. The program console will display messages directing to the latest release.
 
 
-**I have an unanswered question, want to request a feature, or report a bug.** 
+**I have an unanswered question, want to request a feature, need help with installation, or report a bug.** 
 
-Check out the public Discord server listed in the [links section.](#inviting)
+Check out the public Discord server listed in the [links section.](#links)
 # Credits
-* [Fuzzwork](https://www.fuzzwork.co.uk/) - Provides SQLite database conversions of CCP's SDE which Insight references on initial loading.
+* [Fuzzwork](https://www.fuzzwork.co.uk/) - Provides SQLite database conversions of CCP's SDE referenced on initial loading.
 * [zKillboard](https://github.com/zKillboard/zKillboard) - Provides a centralized database of killmails for the game EVE Online.
     * [zKillboard RedisQ](https://github.com/zKillboard/RedisQ) - A websocket alternative used to pull mails.
 * [CCP Games](https://www.ccpgames.com/)
-    * [EVE Swagger Interface](https://esi.evetech.net/ui/) - EVE's official API, used by Insight to lookup names, information, and utilize access tokens.
+    * [EVE Swagger Interface](https://esi.evetech.net/ui/) - EVE's official API used by Insight to lookup names, information, and utilize access tokens.
 * [Swagger Codegen](https://github.com/swagger-api/swagger-codegen) - An automatic API client generation tool for services utilizing Swagger definitions.
 
 # Licenses
@@ -207,6 +207,6 @@ Insight development initially began in January 2018 as an introductory project i
 to fill various roles such as: ship dscan intel, killmail feeds, route planning/calculations, and more. The original Insight lacked a clear focus, features were programmed in 
 randomly, and the code base became bulky and confusing. The first writeup of Insight should be taken as a clear example of how not to code with Python asyncio.
 
-Over the last few months I gained a better understanding of asynchronous programming and decided to rewrite the Insight project. This rewrite would have the only goal of providing better, simpler, killmail feed streaming/intel.
+Over the last few months I gained a better understanding of asynchronous programming and decided to rewrite the Insight project. This rewrite would have the only goal to provide better, simpler killmail feed streaming/intel.
 
 I present the Insight rewrite project in the hopes that it's useful and enjoyed by the EVE community.
