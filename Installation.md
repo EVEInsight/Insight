@@ -40,7 +40,7 @@ like this:
 7. Create your new CCP App and copy the **Client ID**, **Secret Key**, and **Callback URL** into the appropriate sections in your **config** file.
 8. Save your config file and rename it from ```default-config.ini``` to ```config.ini```.
 9. Run **Insight.exe** on Windows or **Insight** on Linux.
-Note: On the initial run Insight will begin importing data from the SDE database. Importing static data could upwards of 10 minutes so don't close the application.
+Note: On the initial run Insight will begin importing data from the SDE database. Importing static data could take upwards of 10 minutes so don't close the application.
 10. See [inviting your bot](#inviting-your-bot) to invite your newly created bot to your Discord server.
 
 ## Updating

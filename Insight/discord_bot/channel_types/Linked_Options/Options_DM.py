@@ -25,13 +25,13 @@ class Options_DM(options_base.Options_Base):
             db.close()
 
     async def InsightOption_addToken(self, message_object: discord.Message):
-        """Add new token - Adds a new token for syncing contact information related to pilots, corporations, or alliances."""
+        """Add new token - Add a new token for syncing contact information related to pilots, corporations, or alliances."""
 
         async def track_this(row_object, type_str):
             if row_object is not None:
                 track = dOpt.mapper_return_yes_no(self.cfeed.discord_client, message_object)
                 track.set_main_header(
-                    "Sync standings for {} {} for this token?".format(type_str, row_object.get_name()))
+                    "Sync standings for {} {} with this token?".format(type_str, row_object.get_name()))
                 return await track()
             return False
 
@@ -65,7 +65,7 @@ class Options_DM(options_base.Options_Base):
         def get_options():
             _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
             _options.set_main_header(
-                "These are all the tokens currently in the system. Select one to delete and remove from all channels.")
+                "These are all the tokens currently in the system. Selecting a token will delete and remove it from all channels.")
             db: Session = self.cfeed.service.get_session()
             try:
                 for token in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).all():
@@ -88,8 +88,8 @@ class Options_DM(options_base.Options_Base):
         def get_options():
             db: Session = self.cfeed.service.get_session()
             _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
-            _options.set_main_header("These are your tokens used by Discord channels. Select a channel  "
-                                     "to remove your token from.")
+            _options.set_main_header(
+                "These are your tokens used by Discord channels. Select a channel to remove your token.")
             try:
                 for t in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).all():
                     if len(t.object_channels) > 0:
@@ -138,7 +138,7 @@ class Options_DM(options_base.Options_Base):
             _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
             _options.set_main_header(
                 "Select one of your tokens to add to the feed. If you do not have any tokens created yet, select the 'cancel' option"
-                " and do the following:\n\nStep 1. Direct Message this bot with the command '!sync'\n\nStep 2. Select the option"
+                " and do the following:\n\nStep 1. Direct Message this bot with the command '!sync'.\n\nStep 2. Select the option"
                 " to add a new token.\n\nStep 3. Follow the steps needed to add a token and then rerun the command '!sync' "
                 "in the channel you wish to sync your contacts with.")
             db: Session = self.cfeed.service.get_session()

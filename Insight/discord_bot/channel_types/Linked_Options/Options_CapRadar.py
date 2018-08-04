@@ -50,7 +50,8 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         """Add a new base system - Track targets within a specific light-year radius of a system. Multiple systems can be added for a wider spread."""
         def make_options(search_str):
             __options = discord_options.mapper_index(self.cfeed.discord_client, message_object)
-            __options.set_main_header("Select the system base you wish to add.")
+            __options.set_main_header(
+                "Select the base system you wish to add.\nNote: Additional base systems can be added or removed after feed creation by running the ‘!settings’ command.")
             db: Session = self.cfeed.service.get_session()
 
             def header_make(row_list:List[tb_systems],header_text):
@@ -80,6 +81,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         __ly_range = discord_options.mapper_return_noOptions_requiresInt(self.cfeed.discord_client, message_object)
         __ly_range.set_main_header("Enter the maximum light-year radius for the selected base system.\n\n"
                                    "Only killmails occurring within the light-year range of your base system will appear in this feed.")
+        __ly_range.set_footer_text("Enter an integer:")
         __range = await __ly_range()
         function_call = partial(tb_channels.commit_list_entry,__selected_option,self.cfeed.channel_id,self.cfeed.service,maxly=__range)
         await self.cfeed.discord_client.loop.run_in_executor(None, function_call)
@@ -179,7 +181,8 @@ class Options_CapRadar(Base_Feed.base_activefeed):
 
         __options = discord_options.mapper_return_noOptions_requiresInt(self.cfeed.discord_client, message_object)
         __options.set_main_header(
-            "Enter the maximum delay, in minutes, that mails can be pushed to the channel. Mails occurring more than the set age will not be pushed to the channel.")
+            "Enter the maximum delay, in minutes, that mails can be pushed to the channel. Mails occurring more than the set age will not be posted  to the channel.")
+        __options.set_footer_text("Enter an integer:")
         _max_age = await __options()
         await self.cfeed.discord_client.loop.run_in_executor(None, partial(change_limit, _max_age))
         await self.reload(message_object)

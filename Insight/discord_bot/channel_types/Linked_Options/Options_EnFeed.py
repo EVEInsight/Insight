@@ -20,7 +20,8 @@ class Options_EnFeed(Base_Feed.base_activefeed):
 
         def make_options(search_str) -> dOpt.mapper_index:
             __options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
-            __options.set_main_header("Select the entity you wish to add.")
+            __options.set_main_header(
+                "Select the entity you wish to add.\nNote: Additional entities can be added or removed after feed creation by running the ‘!settings’ command.")
             db: Session = self.cfeed.service.get_session()
 
             def header_make(row_list:List[tb_alliances],header_text):
@@ -42,7 +43,7 @@ class Options_EnFeed(Base_Feed.base_activefeed):
                 return __options
 
         __search = dOpt.mapper_return_noOptions(self.cfeed.discord_client, message_object)
-        __search.set_main_header("Enter the name of an entity you wish to track in this feed.\n\n"
+        __search.set_main_header("Enter the name of an entity you wish to track.\n\n"
                                  "An entity is a pilot, corporation, or alliance.")
         __search.set_footer_text("Enter a name. Note: partial names are accepted: ")
         __selected_option = None
@@ -137,7 +138,7 @@ class Options_EnFeed(Base_Feed.base_activefeed):
                 db.close()
 
         __options = dOpt.mapper_return_yes_no(self.cfeed.discord_client, message_object)
-        __options.set_main_header("Do you want to track pods (capsules) kills/losses in this feed?")
+        __options.set_main_header("Do you want to track pod (capsule) kills/losses in this feed?")
         resp = await __options()
         await self.cfeed.discord_client.loop.run_in_executor(None, partial(set_mode, resp))
         await self.reload(message_object)

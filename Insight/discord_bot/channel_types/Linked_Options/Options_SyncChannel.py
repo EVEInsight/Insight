@@ -43,7 +43,7 @@ class Options_Sync(options_base.Options_Base):
                 await message_object.channel.send("No changes were made to the token configuration for this channel")
 
     async def InsightOption_removeToken(self, message_object: discord.Message):
-        """Remove token - Removes a token from the channel along with any synced contacts associated with it."""
+        """Remove token - Remove a token from the channel along with any synced contacts."""
         def get_options():
             _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
             _options.set_main_header(
@@ -65,7 +65,7 @@ class Options_Sync(options_base.Options_Base):
         await self.InsightOption_syncnow(message_object)
 
     async def InsightOption_syncnow(self, message_object: discord.Message = None, suppress_notify=False):
-        """Force sync - Update the ally list if you have SSO tokens assigned to it. Note: Insight automatically syncs tokens every 1.5 hours."""
+        """Force sync - Update the ally list. Note: Insight automatically syncs tokens every 1.5 hours."""
 
         def sync_contacts(check_modify=False):
             db: Session = self.cfeed.service.get_session()

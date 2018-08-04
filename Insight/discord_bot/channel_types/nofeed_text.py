@@ -103,7 +103,8 @@ class discord_text_nofeed_exist(discord_feed_service):
             async for option in __tmp_feed_object.linked_options.get_option_coroutines(required_only=True):
                 await option(message_object)
             await service_module.channel_manager.add_feed_object(__tmp_feed_object)
-            await message_object.channel.send("Created a new feed!")
+            await message_object.channel.send(
+                "Created a new feed! You can manage feed configuration with the '!settings' command.")
             await __tmp_feed_object.command_start(message_object)
             print('New {} in {}'.format(str(__tmp_feed_object), __tmp_feed_object.str_channel_server()))
         except Exception as ex:
