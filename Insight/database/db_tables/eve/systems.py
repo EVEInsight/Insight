@@ -51,7 +51,7 @@ class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating,
 
     def compare_range(self, other):
         if isinstance(other, tb_Filter_systems):
-            return other.max > self.ly_range(other)
+            return other.max >= self.ly_range(other)
         return False
 
     def compare_filter(self, other):
