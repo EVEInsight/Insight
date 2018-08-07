@@ -97,6 +97,26 @@ class Options_Sync(options_base.Options_Base):
             await self.cfeed.channel_discord_object.send(__resp)
         await self.reload(message_object)
 
+    async def InsightOption_viewtokens(self, message_object: discord.Message):
+        """View linked tokens - View tokens linked to this channel."""
+
+        def view_tokens():
+            db: Session = self.cfeed.service.get_session()
+            return_str = "Channel Tokens:\n\n"
+            try:
+                for token in db.query(tb_discord_tokens).filter(
+                        tb_discord_tokens.channel_id == self.cfeed.channel_id).all():
+                    return_str += str(token) + '\n\n'
+                return return_str
+            except Exception as ex:
+                print(ex)
+                raise InsightExc.Db.DatabaseError
+            finally:
+                db.close()
+
+        resp = await self.cfeed.discord_client.loop.run_in_executor(None, view_tokens)
+        await message_object.channel.send("{}\n{}".format(message_object.author.mention, resp))
+
 
 from discord_bot import discord_options as dOpt
 from database.db_tables import *
