@@ -169,8 +169,12 @@ class Tokens(dec_Base.Base, sso_base):
             if ex.status == 304:  # nochanges
                 self.last_updated = datetime.datetime.utcnow()
             if ex.status == 403:  # changed alliance/corp
-                self.corporation_id = None
-                self.alliance_id = None
+                if enum_owner == contact_owner.pilot:
+                    self.character_id = None
+                if enum_owner == contact_owner.corp:
+                    self.corporation_id = None
+                if enum_owner == contact_owner.alliance:
+                    self.alliance_id = None
                 self.__remove(enum_owner, service_module)
         except Exception as ex:
             print(ex)
