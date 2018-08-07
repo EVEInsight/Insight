@@ -46,6 +46,8 @@ class service_module(object):
                             type=int)
         parser.add_argument("--skip_api_import", "-noapi", action="store_true",
                             help="Skip startup API static data import check.", default=False)
+        parser.add_argument("--defer_tasks", "-defer", action="store_true",
+                            help="Defers slow tasks to run later instead of at startup.", default=False)
         parser.add_argument("--sde_db","-sde",
                             help="Specifies the name of the SDE database file relative to main.py. Download and extract the "
                                  "sqlite-latest.sqlite file from https://www.fuzzwork.co.uk/dump/",

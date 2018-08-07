@@ -29,12 +29,15 @@ class background_tasks(object):
 
     async def sync_contacts(self):
         while True:
-            await asyncio.sleep(5400)  # run every 1.5 hours, run later instead of start
+            if self.client.service.cli_args.defer_tasks:
+                await asyncio.sleep(5400)  # run every 1.5 hours, run later instead of start
             try:
                 await self.client.loop.run_in_executor(None, partial(tb_tokens.mass_sync_all, self.client.service))
                 await self.__helper_update_contacts_channels()
             except Exception as ex:
                 print(ex)
+            if not self.client.service.cli_args.defer_tasks:
+                await asyncio.sleep(5400)  # run every 1.5 hours
 
     async def bot_status(self):
         await self.client.wait_until_ready()

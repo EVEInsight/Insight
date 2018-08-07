@@ -64,8 +64,12 @@ class Channel_manager(object):
             sys.exit(1)
 
     async def load_channels(self):
+        print("Loading feed services...")
+        start = datetime.datetime.utcnow()
         async for i in self.__get_text_channels():
             await self.get_channel_feed(i)
+        print("Loaded {:d} feeds in {:.1f} seconds".format(len(list(self.sy_get_all_channels())),
+                                                           (datetime.datetime.utcnow() - start).total_seconds()))
 
     async def add_feed_object(self,ch_feed_object):
         self.__channel_feed_container[ch_feed_object.channel_id] = ch_feed_object
