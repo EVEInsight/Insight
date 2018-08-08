@@ -66,6 +66,9 @@ class DiscordCommands(object):
         return self.__lookup(message_object.content, self.prefix)
 
     async def notfound(self, message_object: discord.Message):
+        for pref in self.prefix:
+            if message_object.content == pref:
+                return
         similar_commands = self.__similar(message_object.content)
         resp_text = "The command '{}' was not found.\n\n".format(str(message_object.content))
         if len(similar_commands) == 0:
