@@ -60,6 +60,10 @@ class sqlUpdater(object):
         yield 'DROP TABLE IF EXISTS discord_tokens;'
         yield 'DROP TABLE IF EXISTS tokens;'
 
+    def sqlV_1_1_0(self):
+        """v1.1.0"""
+        yield 'ALTER TABLE discord_channels ADD appearance_id INTEGER DEFAULT 0 NOT NULL;'
+
     def sqlV_0_10_1(self):
         """v0.10.1"""
         yield 'ALTER TABLE discord_enFeed ADD template_id INTEGER DEFAULT 0 NOT NULL;'

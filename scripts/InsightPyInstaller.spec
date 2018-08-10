@@ -13,7 +13,7 @@ try:
 except FileNotFoundError:
     print('distTest folder not found!')
 
-version_str = str('v1.0.0')
+version_str = str('v1.1.0')
 
 added_hiddenimports = collect_submodules('sqlalchemy')
 added_hiddenimports.extend(collect_submodules('discord'))

@@ -9,6 +9,7 @@ class Channels(dec_Base.Base,discord_channel_base):
     channel_id = Column(BIGINT,primary_key=True,nullable=False,autoincrement=False)
     feed_running = Column(Boolean,default=False,nullable=False)
     channel_name = Column(String,default="",nullable=False)
+    appearance_id = Column(Integer, default=0, nullable=False)
 
     object_capRadar = relationship("CapRadar", uselist=False, cascade="delete", back_populates="object_channel",
                                    lazy="subquery")

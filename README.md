@@ -1,4 +1,4 @@
-# Insight v1.0.0
+# Insight v1.1.0
 Insight provides EVE Online killmail streaming for Discord. Insight can stream personal or corporate killboards, detect supercapitals with a proximity radar, and more!
 Killmails and intel are presented in visual Discord embedded objects containing relevant links and images to quickly identify important information.
 
