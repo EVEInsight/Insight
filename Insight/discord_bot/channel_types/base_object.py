@@ -130,8 +130,16 @@ class discord_feed_service(object):
             self.kmQueue.put_nowait(message_text)
 
     def linked_visual(self,km_row):
+        subc = self.linked_visual_subc()
+        return subc(km_row, self.channel_discord_object, self.cached_feed_table, self.cached_feed_specific, self)
+
+    def linked_visual_subc(self):
+        bc = self.linked_visual_base()
+        return bc.get_appearance_class(self.cached_feed_table.appearance_id)
+
+    def linked_visual_base(self):
         raise NotImplementedError
-        #return visual_enfeed(km_row,self.channel_discord_object,self.cached_feed_table,self.cached_feed_specific)
+        # return visual_enfeed
 
     async def post_all(self):
         if self.cached_feed_table.feed_running:

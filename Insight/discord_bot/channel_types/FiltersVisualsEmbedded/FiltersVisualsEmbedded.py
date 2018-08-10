@@ -1,5 +1,4 @@
 import enum
-from abc import ABCMeta, abstractmethod
 import datetime
 
 
@@ -8,7 +7,7 @@ class internal_options(enum.Enum):
     use_whitelist = False
 
 
-class base_visual(metaclass=ABCMeta):
+class base_visual(object):
     def __init__(self, km_row, discord_channel_object, overall_filters, feed_specific_row, feed_object):
         assert isinstance(km_row,tb_kills)
         assert isinstance(discord_channel_object,discord.TextChannel)
@@ -42,7 +41,6 @@ class base_visual(metaclass=ABCMeta):
                 print(ex)
         return enum_mention.noMention.value
 
-    @abstractmethod
     def internal_list_options(self):
         self.in_system_ly = internal_options.use_blacklist.value
         self.in_system_nonly = internal_options.use_blacklist.value
@@ -120,10 +118,35 @@ class base_visual(metaclass=ABCMeta):
     async def __call__(self, *args, **kwargs):
         await self.channel.send(content=self.message_txt, embed=self.embed)
 
-    @abstractmethod
     def feed_specific_row_type(cls):
         raise NotImplementedError
         #return tb_enfeed  <example
+
+    @classmethod
+    def get_appearance_class(cls, c_id):
+        try:
+            for ac in cls.appearance_options():
+                if ac.appearance_id() == c_id:
+                    return ac
+            raise NotImplementedError  # id not programmed
+        except Exception as ex:
+            if type(ex) == NotImplementedError:
+                print("Invalid appearance ID")
+            else:
+                print(ex)
+            return cls
+
+    @classmethod
+    def appearance_options(cls):
+        yield cls
+
+    @classmethod
+    def appearance_id(cls):
+        return 0
+
+    @classmethod
+    def get_desc(cls):
+        return "Full Visual - All details"
 
 
 from database.db_tables import *

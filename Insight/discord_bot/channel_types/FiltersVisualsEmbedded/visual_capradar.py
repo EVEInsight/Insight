@@ -126,3 +126,7 @@ class visual_capradar(base_visual):
     @classmethod
     def feed_specific_row_type(cls):
         return tb_capRadar
+
+    @classmethod
+    def appearance_options(cls):
+        yield cls

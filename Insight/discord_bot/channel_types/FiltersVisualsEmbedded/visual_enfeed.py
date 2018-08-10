@@ -12,10 +12,10 @@ class visual_enfeed(base_visual):
     def make_images(self):
         super().make_images()
         if self.km.object_victim.alliance_id is not None:
-            self.__im_victim_corpAli = "https://imageserver.eveonline.com/Alliance/{}_128.png".format\
+            self.im_victim_corpAli = "https://imageserver.eveonline.com/Alliance/{}_128.png".format \
                 (str(self.km.object_victim.alliance_id))
         else:
-            self.__im_victim_corpAli = "https://imageserver.eveonline.com/Corporation/{}_128.png".format(
+            self.im_victim_corpAli = "https://imageserver.eveonline.com/Corporation/{}_128.png".format(
                 str(self.km.object_victim.corporation_id))
 
     def internal_list_options(self):
@@ -35,7 +35,7 @@ class visual_enfeed(base_visual):
         self.author_text = "Kill" if self.is_kill else "Loss"
 
     def make_header(self):
-        self.embed.set_author(name=self.author_text, url=self.zk_kill, icon_url=self.__im_victim_corpAli)
+        self.embed.set_author(name=self.author_text, url=self.zk_kill, icon_url=self.im_victim_corpAli)
         __desc = '**{ship_name}** destroyed in **[{system_name}]' \
                  '({system_link})** ({region_name})\n\n' \
                  '***[{pilot_name}]({victimP_zk}) ' \
@@ -95,3 +95,7 @@ class visual_enfeed(base_visual):
     @classmethod
     def feed_specific_row_type(cls):
         return tb_enfeed
+
+    @classmethod
+    def appearance_options(cls):
+        yield cls
