@@ -30,6 +30,7 @@ class discord_feed_service(object):
         self.template_loader()
         self.load_table()
         self.last_mention = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+        self.appearance_class = None
 
     def can_mention(self):
         return (self.last_mention + datetime.timedelta(minutes=15)) <= datetime.datetime.utcnow()
@@ -133,9 +134,18 @@ class discord_feed_service(object):
         subc = self.linked_visual_subc()
         return subc(km_row, self.channel_discord_object, self.cached_feed_table, self.cached_feed_specific, self)
 
+    def make_derived_visual(self, visual_class):
+        self.appearance_class = visual_class
+
     def linked_visual_subc(self):
-        bc = self.linked_visual_base()
-        return bc.get_appearance_class(self.cached_feed_table.appearance_id)
+        try:
+            if self.appearance_class.appearance_id() != self.cached_feed_table.appearance_id:
+                raise InsightExc.Internal.VisualAppearanceNotEquals
+        except:
+            self.make_derived_visual(
+                self.linked_visual_base().get_appearance_class(self.cached_feed_table.appearance_id))
+        finally:
+            return self.appearance_class
 
     def linked_visual_base(self):
         raise NotImplementedError
