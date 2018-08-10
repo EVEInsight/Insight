@@ -94,6 +94,17 @@ class Discord_Insight_Client(discord.Client):
                     return
             elif isinstance(ex, discord.Forbidden):
                 return  # cant send error message anyway
+            elif isinstance(ex, discord.NotFound):
+                return  # channel deleted
+            elif isinstance(ex, discord.HTTPException):
+                if ex.code == 50035 and ex.status == 400:
+                    try:
+                        await message.channel.send(
+                            "{}\n{}".format(message.author.mention, "Response body content-length too large."))
+                    except:
+                        return
+                else:
+                    print(traceback.print_exc())
             else:
                 print(traceback.print_exc())
 
