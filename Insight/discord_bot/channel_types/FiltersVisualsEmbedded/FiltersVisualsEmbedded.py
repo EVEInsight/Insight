@@ -23,6 +23,7 @@ class base_visual(object):
         self.embed = discord.Embed()
         self.message_txt = ""
         self.color = discord.Color(800680)
+        self.text_only = False
 
     def get_load_time(self):
         return self.km.loaded_time
@@ -116,7 +117,10 @@ class base_visual(object):
             return False
 
     async def __call__(self, *args, **kwargs):
-        await self.channel.send(content=self.message_txt, embed=self.embed)
+        if self.text_only == True:
+            await self.channel.send(content=self.message_txt)
+        else:
+            await self.channel.send(content=self.message_txt, embed=self.embed)
 
     def feed_specific_row_type(cls):
         raise NotImplementedError

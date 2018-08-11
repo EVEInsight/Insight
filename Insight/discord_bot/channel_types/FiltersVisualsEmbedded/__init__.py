@@ -4,3 +4,5 @@ from .visual_capradar import visual_capradar
 from .FiltersVisualsEmbedded import internal_options
 from .VisualEnfeedUltraCompact import VisualEnfeedUltraCompact
 from .VisualCapRadarUltraCompact import VisualCapRadarUltraCompact
+from .VisualEnfeedLinkOnly import VisualEnfeedLinkOnly
+from .VisualCapRadarLinkOnly import VisualCapRadarLinkOnly

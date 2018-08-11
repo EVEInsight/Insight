@@ -104,6 +104,8 @@ class visual_enfeed(base_visual):
     def appearance_options(cls):
         yield cls
         yield VisualEnfeedUltraCompact
+        yield VisualEnfeedLinkOnly
 
 
 from .VisualEnfeedUltraCompact import VisualEnfeedUltraCompact
+from .VisualEnfeedLinkOnly import VisualEnfeedLinkOnly

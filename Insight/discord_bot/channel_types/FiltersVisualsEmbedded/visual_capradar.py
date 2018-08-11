@@ -131,6 +131,7 @@ class visual_capradar(base_visual):
     def appearance_options(cls):
         yield cls
         yield VisualCapRadarUltraCompact
+        yield VisualCapRadarLinkOnly
 
     @classmethod
     def get_desc(cls):
@@ -138,3 +139,4 @@ class visual_capradar(base_visual):
 
 
 from .VisualCapRadarUltraCompact import VisualCapRadarUltraCompact
+from .VisualCapRadarLinkOnly import VisualCapRadarLinkOnly
