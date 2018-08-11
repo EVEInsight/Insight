@@ -130,3 +130,11 @@ class visual_capradar(base_visual):
     @classmethod
     def appearance_options(cls):
         yield cls
+        yield VisualCapRadarUltraCompact
+
+    @classmethod
+    def get_desc(cls):
+        return "Full - Full overview of tracked shiptypes, Dotlan routes, images, color time indicator sidebar, and images. Size: Large"
+
+
+from .VisualCapRadarUltraCompact import VisualCapRadarUltraCompact
