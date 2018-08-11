@@ -97,5 +97,13 @@ class visual_enfeed(base_visual):
         return tb_enfeed
 
     @classmethod
+    def get_desc(cls):
+        return "Full - Detailed killmail overview, pilot and ship images, color sidebar, and zKillboard/Dotlan links. Size: Large"
+
+    @classmethod
     def appearance_options(cls):
         yield cls
+        yield VisualEnfeedUltraCompact
+
+
+from .VisualEnfeedUltraCompact import VisualEnfeedUltraCompact

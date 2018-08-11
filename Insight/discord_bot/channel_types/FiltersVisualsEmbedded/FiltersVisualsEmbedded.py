@@ -146,7 +146,7 @@ class base_visual(object):
 
     @classmethod
     def get_desc(cls):
-        return "Full Visual - All details"
+        return "Full - Detailed overview. Size: Large"
 
 
 from database.db_tables import *
