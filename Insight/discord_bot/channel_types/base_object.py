@@ -135,14 +135,14 @@ class discord_feed_service(object):
         return subc(km_row, self.channel_discord_object, self.cached_feed_table, self.cached_feed_specific, self)
 
     def make_derived_visual(self, visual_class):
-        self.appearance_class = visual_class
+        return visual_class
 
     def linked_visual_subc(self):
         try:
             if self.appearance_class.appearance_id() != self.cached_feed_table.appearance_id:
                 raise InsightExc.Internal.VisualAppearanceNotEquals
         except:
-            self.make_derived_visual(
+            self.appearance_class = self.make_derived_visual(
                 self.linked_visual_base().get_appearance_class(self.cached_feed_table.appearance_id))
         finally:
             return self.appearance_class

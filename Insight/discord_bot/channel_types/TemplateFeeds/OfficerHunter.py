@@ -1,11 +1,6 @@
 from ..capRadar import *
 
 
-class VisualOfficerHunter(visual_capradar):
-    def set_frame_color(self):
-        self.embed.color = discord.Color(12303149)
-
-
 class OfficerHunter(capRadar):
     def template_loader(self):
         self.general_table().reset_filters(self.channel_id, self.service)
@@ -32,10 +27,6 @@ class OfficerHunter(capRadar):
     def get_linked_options(self):
         return Linked_Options.opt_basicfeed(self)
 
-    def linked_visual(self, km_row):
-        return VisualOfficerHunter(km_row, self.channel_discord_object, self.cached_feed_table,
-                                   self.cached_feed_specific, self)
-
     async def command_sync(self, message_object):
         await super(capRadar, self).command_sync(message_object)
 
@@ -53,3 +44,10 @@ class OfficerHunter(capRadar):
 
     def __str__(self):
         return "Officer Hunter Feed"
+
+    def make_derived_visual(self, visual_class):
+        class VisualOfficerHunter(visual_class):
+            def set_frame_color(self):
+                self.embed.color = discord.Color(12303149)
+
+        return VisualOfficerHunter
