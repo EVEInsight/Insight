@@ -31,6 +31,11 @@ class Discord_Insight_Client(discord.Client):
 
     async def setup_tasks(self):
         await self.wait_until_ready()
+        try:
+            game_act = discord.Activity(name="Starting...", type=discord.ActivityType.watching)
+            await self.change_presence(activity=game_act, status=discord.Status.dnd)
+        except Exception as ex:
+            print(ex)
         await self.channel_manager.set_client(self)
         await self.channel_manager.load_channels()
         await self.post_motd()
