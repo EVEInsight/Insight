@@ -1,5 +1,6 @@
 import discord
 import difflib
+import InsightExc
 
 
 class DiscordCommands(object):
@@ -78,4 +79,10 @@ class DiscordCommands(object):
             for c in similar_commands:
                 resp_text += "'{}'\n".format(str(c))
         resp_text += "\nRun the command '!help' to see a list of available commands."
-        await message_object.channel.send('{}\n{}'.format(message_object.author.mention, resp_text))
+        try:
+            await message_object.channel.send('{}\n{}'.format(message_object.author.mention, resp_text))
+        except discord.HTTPException as ex:
+            if ex.code == 50035 and ex.status == 400:
+                raise InsightExc.User.TooManyOptions("Response body content-length too large.")
+            else:
+                raise ex
