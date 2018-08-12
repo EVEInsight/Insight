@@ -2,7 +2,7 @@ from .FiltersVisualsEmbedded import base_visual
 from .visual_enfeed import visual_enfeed
 from .visual_capradar import visual_capradar
 from .FiltersVisualsEmbedded import internal_options
-from .VisualEnfeedUltraCompact import VisualEnfeedUltraCompact
-from .VisualCapRadarUltraCompact import VisualCapRadarUltraCompact
+from .VisualEnfeedCompact import VisualEnfeedCompact
+from .VisualCapRadarCompact import VisualCapRadarCompact
 from .VisualEnfeedLinkOnly import VisualEnfeedLinkOnly
 from .VisualCapRadarLinkOnly import VisualCapRadarLinkOnly

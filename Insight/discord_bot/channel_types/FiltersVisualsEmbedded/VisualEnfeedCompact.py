@@ -1,7 +1,7 @@
 from .visual_enfeed import *
 
 
-class VisualEnfeedUltraCompact(visual_enfeed):
+class VisualEnfeedCompact(visual_enfeed):
     def make_header(self):
         self.embed.set_author(name=self.author_text, url=self.zk_kill, icon_url=self.im_victim_corpAli)
         __desc = '**[{ship_name} destroyed in {system_name}({region_name})]({zk_link})**\n\n' \
@@ -29,4 +29,4 @@ class VisualEnfeedUltraCompact(visual_enfeed):
 
     @classmethod
     def get_desc(cls):
-        return "Ultra Compact - Basic killmail information with value, color sidebar, and zKillboard link. Size: Small"
+        return "Compact - Basic killmail information with value, color sidebar, and zKillboard link. Size: Small"

@@ -1,7 +1,7 @@
 from .visual_capradar import *
 
 
-class VisualCapRadarUltraCompact(visual_capradar):
+class VisualCapRadarCompact(visual_capradar):
     def make_images(self):
         super().make_images()
         self.ship_image = "https://imageserver.eveonline.com/Render/{}_64.png".format(str(self._highestAT.ship_type_id))
@@ -29,4 +29,4 @@ class VisualCapRadarUltraCompact(visual_capradar):
 
     @classmethod
     def get_desc(cls):
-        return "Ultra Compact - Attacker affiliation, shiptype, nearest celestial, color time indicator, and zKillboard link. Size: Small"
+        return "Compact - Attacker affiliation, shiptype, nearest celestial, color time indicator, and zKillboard link. Size: Small"
