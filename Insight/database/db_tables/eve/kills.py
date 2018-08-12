@@ -220,13 +220,13 @@ class Kills(dec_Base.Base, table_row):
             val = self.totalValue
             if val >= 1000000000:
                 num = float(val / 1000000000)
-                return '{:.2f}b'.format(num)
+                return '{:.1f}b'.format(num)
             elif val >= 1000000:
                 num = float(val / 1000000)
-                return '{:.2f}m'.format(num)
+                return '{:.1f}m'.format(num)
             else:
                 num = float(val / 10000)
-                return '{:.2f}k'.format(num)
+                return '{:.1f}k'.format(num)
         except:
             return ""
 

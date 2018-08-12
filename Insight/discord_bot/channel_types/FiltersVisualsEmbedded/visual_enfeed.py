@@ -37,11 +37,11 @@ class visual_enfeed(base_visual):
     def make_header(self):
         self.embed.set_author(name=self.author_text, url=self.zk_kill, icon_url=self.im_victim_corpAli)
         __desc = '**{ship_name}** destroyed in **[{system_name}]' \
-                 '({system_link})** ({region_name})\n\n' \
-                 '***[{pilot_name}]({victimP_zk}) ' \
+                 '({system_link})**({region_name})\n\n' \
+                 '**[{pilot_name}]({victimP_zk})' \
                  '({corp_name})** lost their **{ship_name}** to **[{fb_name}]({fbP_zk})' \
-                 '({fb_corp})** flying in a **{fb_ship}** {inv_str}.*\n\n'\
-                 .format(ship_name=self.ship_name, system_name=self.system_name, system_link=self.system_link,
+                 '({fb_corp})** flying in a **{fb_ship}** {inv_str}.\n\n' \
+            .format(ship_name=self.ship_name, system_name=self.system_name, system_link=self.system_link,
                          region_name=self.region_name, pilot_name=self.pilot_name, victimP_zk=self.victimP_zk,
                          corp_name=self.corp_name, fb_name=self.fb_name,fbP_zk=self.fbP_zk, fb_corp=self.fb_Corp,
                          fb_ship=self.fb_ship,inv_str=self.inv_str)

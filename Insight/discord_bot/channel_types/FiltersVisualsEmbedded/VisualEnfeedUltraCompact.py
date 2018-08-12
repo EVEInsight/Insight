@@ -5,7 +5,7 @@ class VisualEnfeedUltraCompact(visual_enfeed):
     def make_header(self):
         self.embed.set_author(name=self.author_text, url=self.zk_kill, icon_url=self.im_victim_corpAli)
         __desc = '**[{ship_name} destroyed in {system_name}({region_name})]({zk_link})**\n\n' \
-                 '**[{pilot_name}]({victimP_zk}) ' \
+                 '**[{pilot_name}]({victimP_zk})' \
                  '({corp_name})** lost their **{ship_name}** to **[{fb_name}]({fbP_zk})' \
                  '({fb_corp})** flying in a **{fb_ship}** {inv_str}.' \
             .format(ship_name=self.ship_name, system_name=self.system_name, zk_link=self.zk_kill,

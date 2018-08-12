@@ -59,7 +59,7 @@ class visual_capradar(base_visual):
     def make_header(self):
         self.embed.set_author(name=self.overview_text, url=self.zk_kill)
         __desc = '**{ship_name}** destroyed in **[{system_name}]' \
-                 '({system_link})** ({region_name}) {mAgo}{lName}\n\n' \
+                 '({system_link})**({region_name}) {mAgo}{lName}\n\n' \
                  '*Involving **[{hName}]({haZK})({hCorp})**{hAl} in a **{hShip}** {inv}.*' \
             .format(ship_name=self.ship_name, system_name=self.system_name, system_link=self.system_link,
                     region_name=self.region_name, mAgo=self.text_minutes_ago, lName=self.location_name,
