@@ -10,18 +10,18 @@ class visual_capradar(base_visual):
 
     def make_links(self):
         super().make_links()
-        self.haZK = "https://zkillboard.com/character/{}/".format(self.km.fb_pID(self._highestAT))
+        self.haZK = "https://zkillboard.com/character/{}/".format(self.km.fb_pID(self.highestAT))
 
     def make_images(self):
         super().make_images()
-        if self._highestAT.alliance_id is not None:
+        if self.highestAT.alliance_id is not None:
             self.thumbnail = "https://imageserver.eveonline.com/Alliance/{}_128.png".format \
-                (str(self._highestAT.alliance_id))
+                (str(self.highestAT.alliance_id))
         else:
             self.thumbnail = "https://imageserver.eveonline.com/Corporation/{}_128.png".format(
-                str(self._highestAT.corporation_id))
+                str(self.highestAT.corporation_id))
         self.ship_image = "https://imageserver.eveonline.com/Render/{}_128.png".format(
-            str(self._highestAT.ship_type_id))
+            str(self.highestAT.ship_type_id))
 
     def internal_list_options(self):
         super(visual_capradar, self).internal_list_options()
@@ -31,25 +31,25 @@ class visual_capradar(base_visual):
 
     def make_vars(self):
         super(visual_capradar, self).make_vars()
-        self._highestAT = self.km.get_highest_attacker(self.tracked_hostiles)
-        self.haName = self.km.fb_Name(self._highestAT)
-        self.haCorp = self.km.fb_Corp(self._highestAT)
-        self.haAli = self.km.fb_Alliance(self._highestAT, True)
-        self.haShip = self.km.fb_ship(self._highestAT)
-        self.ha_group = self.km.fb_ShipGroup(self._highestAT)
+        self.highestAT = self.km.get_highest_attacker(self.tracked_hostiles)
+        self.haName = self.km.fb_Name(self.highestAT)
+        self.haCorp = self.km.fb_Corp(self.highestAT)
+        self.haAli = self.km.fb_Alliance(self.highestAT, True)
+        self.haShip = self.km.fb_ship(self.highestAT)
+        self.ha_group = self.km.fb_ShipGroup(self.highestAT)
         self.location_name = self.km.str_location_name()
         self.base_name = str(self.base_.name)
-        self._ly_range = self.km.str_ly_range(self.base_)
+        self.ly_range = self.km.str_ly_range(self.base_)
         self._attacking_ships = self.km.str_overview_attacking_capitals(self.tracked_hostiles)
         self.text_minutes_ago = self.km.str_minutes_ago(True)
         self.overview_text = "{hSG} activity in {kmSys}({kmRg}) {ly} LYs from {bSys}". \
-            format(hSG=self.ha_group, kmSys=self.system_name, kmRg=self.region_name, ly=self._ly_range,
+            format(hSG=self.ha_group, kmSys=self.system_name, kmRg=self.region_name, ly=self.ly_range,
                    bSys=self.base_name)
 
     def extract_mention(self):
-        assert isinstance(self._highestAT, tb_attackers)
+        assert isinstance(self.highestAT, tb_attackers)
         for c in self.list_typeGroup:
-            if self._highestAT.compare_filter_list(c):
+            if self.highestAT.compare_filter_list(c):
                 return c.mention
         return enum_mention.noMention
 
