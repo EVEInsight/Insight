@@ -56,7 +56,7 @@ class visual_enfeed(base_visual):
         __field_body = "```{Ship:<14}{ship_name}\n" \
                        "{Name:<14}{pilot_name}\n" \
                        "{Corp:<14}{corp_name}\n{Alliance:<14}{alliance_name}\n{Damage_Taken:<14}{damage_taken}\n" \
-                       "{Involved:<14}{inv}\n{ISK_Lost:<14}{isk_lost}\n{Time:<14}{min_ago}```**{zk}**" \
+                       "{Involved:<14}{inv}\n{ISK_Lost:<14}{isk_lost}\n{Time:<14}{min_ago}```**[zKill KM]({zk})**" \
             .format(Ship='Ship:', Name="Name:", Corp="Corp:", Alliance="Alliance:", Damage_Taken="Damage Taken:",
                     Involved="Involved:", ISK_Lost="ISK Lost:", Time="Time:", zk=self.zk_kill,
                     ship_name=self.ship_name, pilot_name=self.pilot_name, corp_name=self.corp_name,

@@ -10,9 +10,9 @@ class VisualEnfeedCompact(visual_enfeed):
                     corp_name=self.corp_name, fb_name=self.fb_name, fbP_zk=self.fbP_zk, fb_corp=self.fb_Corp,
                     fb_ship=self.fb_ship, inv_str=self.inv_str)
         self.embed.description = __desc
-        self.embed.title = "**{ship_name} destroyed in {system_name}({region_name})**".format(ship_name=self.ship_name,
-                                                                                              system_name=self.system_name,
-                                                                                              region_name=self.region_name)
+        self.embed.title = "{ship_name} destroyed in {system_name}({region_name})".format(ship_name=self.ship_name,
+                                                                                          system_name=self.system_name,
+                                                                                          region_name=self.region_name)
         self.embed.url = self.zk_kill
         self.embed.set_thumbnail(
             url="https://imageserver.eveonline.com/Render/{}_64.png".format(str(self.km.object_victim.ship_type_id)))

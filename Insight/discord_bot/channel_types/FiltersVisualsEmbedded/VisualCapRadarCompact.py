@@ -33,10 +33,10 @@ class VisualCapRadarCompact(visual_capradar):
             .format(vS=self.ship_name, syName=self.system_name, rgName=self.region_name, zkL=self.zk_kill,
                     hName=self.haName, haZK=self.haZK, haAfN=self.haAFFname, hShip=self.haShip, loc=self.location_name)
         self.embed.description = __desc
-        self.embed.title = "**{hShip} destroyed a {vS} in {syName}({rgName})**".format(vS=self.ship_name,
-                                                                                       syName=self.system_name,
-                                                                                       rgName=self.region_name,
-                                                                                       hShip=self.haShip)
+        self.embed.title = "{hShip} destroyed a {vS} in {syName}({rgName})".format(vS=self.ship_name,
+                                                                                   syName=self.system_name,
+                                                                                   rgName=self.region_name,
+                                                                                   hShip=self.haShip)
         self.embed.url = self.zk_kill
         self.embed.set_thumbnail(url=self.ship_image)
         self.embed.timestamp = self.km.killmail_time

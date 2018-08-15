@@ -102,7 +102,7 @@ class visual_capradar(base_visual):
         _return_str += _row.format("Titans/Supers", "", "Avatar")
         _return_str += _row.format("Carriers/Dreads/FAX", "", "Archon")
         _return_str += _row.format("Blops", "", "Redeemer")
-        _return_str += "[```{0:<23}```]({1})\n**{2}**".format("Gates", _dotlan_gates, self.zk_kill)
+        _return_str += "[```{0:<23}```]({1})\n**[zKill KM]({2})**".format("Gates", _dotlan_gates, self.zk_kill)
         return _return_str
 
     def run_filter(self):
