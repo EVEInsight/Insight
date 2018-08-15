@@ -4,15 +4,19 @@ from .visual_capradar import *
 class VisualCapRadarCompact(visual_capradar):
     def make_vars(self):
         super().make_vars()
+        self.dread_route = "http://evemaps.dotlan.net/jump/Revelation,555/{base}:{target}".format(base=self.base_name,
+                                                                                                  target=self.system_name)
         if self.highestAT.alliance_id is not None:
             self.haAFFname = self.km.fb_Alliance(self.highestAT)
         else:
             self.haAFFname = self.haCorp
-
-    def make_links(self):
-        super().make_links()
-        self.dread_route = "http://evemaps.dotlan.net/jump/Revelation,555/{base}:{target}".format(base=self.base_name,
-                                                                                                  target=self.system_name)
+        try:
+            if self.km.object_location.name is not None:
+                self.location_name = " near **[{}]({}).**".format(self.km.object_location.name, self.dread_route)
+            else:
+                self.location_name = " in **[{}]({}).**".format(self.system_name, self.dread_route)
+        except:
+            self.location_name = "."
 
     def make_text_heading(self):
         self.message_txt = "{}".format(self.mention_method())
@@ -22,22 +26,17 @@ class VisualCapRadarCompact(visual_capradar):
         self.ship_image = "https://imageserver.eveonline.com/Render/{}_64.png".format(str(self.highestAT.ship_type_id))
 
     def make_header(self):
-        try:
-            if self.km.object_location.name is not None:
-                self.location_name = " near **[{}]({}).**".format(self.km.object_location.name, self.dread_route)
-            else:
-                self.location_name = " in **[{}]({}).**".format(self.system_name, self.dread_route)
-        except:
-            self.location_name = "."
         autHead = "{tC} of {tI} in tracked ships". \
             format(tC=str(len(self.tracked_hostiles)), tI=str(self.total_involved))
         self.embed.set_author(name=autHead, url=self.zk_kill, icon_url=self.thumbnail)
-        __desc = '**[{hShip} destroyed a {vS} in {syName}({rgName})]({zkL})**\n\n' \
-                 '**[{hName}]({haZK})({haAfN})** in a **{hShip}**{loc}' \
+        __desc = '**[{hName}]({haZK})({haAfN})** in a **{hShip}**{loc}' \
             .format(vS=self.ship_name, syName=self.system_name, rgName=self.region_name, zkL=self.zk_kill,
                     hName=self.haName, haZK=self.haZK, haAfN=self.haAFFname, hShip=self.haShip, loc=self.location_name)
         self.embed.description = __desc
-        self.embed.title = " "
+        self.embed.title = "**{hShip} destroyed a {vS} in {syName}({rgName})**".format(vS=self.ship_name,
+                                                                                       syName=self.system_name,
+                                                                                       rgName=self.region_name,
+                                                                                       hShip=self.haShip)
         self.embed.url = self.zk_kill
         self.embed.set_thumbnail(url=self.ship_image)
         self.embed.timestamp = self.km.killmail_time
