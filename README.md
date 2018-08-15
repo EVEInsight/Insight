@@ -1,6 +1,6 @@
 # Insight v1.1.0
 Insight provides EVE Online killmail streaming for Discord. Insight can stream personal or corporate killboards, detect supercapitals with a proximity radar, and more!
-Killmails and intel are presented in visual Discord embedded objects containing relevant links and images to quickly identify important information.
+Killmails and intel are presented in Discord rich embeds containing relevant links and images to quickly identify important information.
 
 This bot features an intuitive interface for creating, modifying, and managing isolated feed configurations through simple commands and text dialog. All bot functionality is accessible through [documented commands](#commands) with no hardcoding or complicated configuration steps.
 
@@ -37,12 +37,13 @@ If you have questions, suggestions, or bug reports feel free to drop by the [pro
 * Entity feeds ideal for personal, corporate, or alliance killboard streaming.
 * Capital radar feeds ideal for tracking hostile incursions into friendly space, hunting expensive targets within jump range, or detecting capital escalations in real time.
 * Preconfigured feeds offering custom spins such as: Alliance Tournament system feed, npc officer hunter, AT ship radar, and more!
-* Embedded visuals to present mails with artful color sidebars, hyperlinks, and images.
+* Rich embeds to present mails with color indicating sidebars, hyperlinks, and images.
 * Optional mention system to be alerted of activity in radar feeds.
 * SSO token authentication for allied contact blacklisting in radar feeds.
 * Automatic synchronization of SSO tokens and radar blacklists.
 * Instinctual commands and convenient option dialogs for managing settings.
 * Easy server setup with no hardcoding or confusing configuration.
+* Rich embed templates to change visual presentation/appearance.
 * Simultaneous, isolated feeds across multiple servers.
 * Efficient asynchronous design with minimal cpu, memory, disk, and network impact.      
 # Gallery
@@ -80,7 +81,7 @@ In intended feed channels the bot requires the following permissions:
 |---|---|
 | Read Messages | Allows the bot to read command events.|
 | Send Messages | Allows the bot to communicate and display prompts to users running commands.|
-| Embed Links   | Allows the bot to post Discord embedded content containing images (ship renders, player portraits, corp/alliance logos) and hyperlinks (zKillboard and Dotlan).
+| Embed Links   | Allows the bot to post Discord rich embed content containing images (ship renders, player portraits, corp/alliance logos) and hyperlinks (zKillboard and Dotlan).
 | Mention Everyone | Allows the bot to optionally mention @here or @everyone for capital radar alerts.
 
 

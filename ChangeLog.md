@@ -1,3 +1,14 @@
+# v1.1.0
+## New features
+* Rich embed visual switching
+    * Rich embed presentation can be modified for all feed services by using the ```!settings```->```Change visual appearance``` option. See [(#10)](https://github.com/Nathan-LS/Insight/issues/15) and [wiki.](https://github.com/Nathan-LS/Insight/wiki/Rich-Embed-Appearance)
+## Bug Fixes 
+* Token pilots who switch corps won't have their alliance contact syncing dropped if they remain in the alliance. [Commit](https://github.com/Nathan-LS/Insight/commit/80e85c218c1141701d439f191a22f008aa195793)
+## Changes
+* Tokens without any tracked contact type (pilot, corp, and alliance are all set to ignore) are now automatically removed from channels and deleted from the database.
+* Added the ```-defer``` argument to prevent contact syncing from running when the bot starts. Contact syncing now runs on startup by default. [Commit](https://github.com/Nathan-LS/Insight/commit/795523048704225c8b20a1972720158ab6e30bc5) 
+* Added a ```View tokens``` option to radar feeds to see all linked tokens in the channel. [Commit](https://github.com/Nathan-LS/Insight/commit/225e544077bb54b55eff617fe5a10a801b218a00)
+
 # v1.0.0
 v1.0.0 is the initial public release/announcement of the Insight Project. This rewrite of the bot was in progress for the past month and focused on redesigning the original
 project with a clear set of direction and purpose. This release of Insight is feature-complete and stable. v1.0.0 has a few bug fixes and focuses on polishing.
