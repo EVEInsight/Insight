@@ -115,7 +115,7 @@ class Kills(dec_Base.Base, table_row):
         ship_totals.sort(key=operator.itemgetter(1), reverse=True)
         ships_str = ""
         for s in ship_totals:
-            ships_str += "{0:<20}   {1}\n".format(str(s[0]), str(s[1]))
+            ships_str += "{0:<15}   {1}\n".format(str(s[0]), str(s[1]))
         return ships_str
 
     def filter_loss(self, filter_list=[], using_blacklist=False):
@@ -248,6 +248,24 @@ class Kills(dec_Base.Base, table_row):
         except:
             return ""
 
+    def fb_cID(self, final_blow: attackers.Attackers):
+        try:
+            return str(final_blow.corporation_id)
+        except:
+            return ""
+
+    def fb_aID(self, final_blow: attackers.Attackers):
+        try:
+            return str(final_blow.alliance_id)
+        except:
+            return ""
+
+    def fb_shipID(self, final_blow: attackers.Attackers):
+        try:
+            return str(final_blow.ship_type_id)
+        except:
+            return ""
+
     def fb_ship(self,final_blow:attackers.Attackers):
         try:
             return str(final_blow.object_ship.type_name)
@@ -299,9 +317,18 @@ class Kills(dec_Base.Base, table_row):
         except:
             return ""
 
-    def str_location_name(self):
+    def str_location_name(self, name_only=False):
         try:
-            return " near **{}**.".format(
-                str(self.object_location.name)) if self.object_location.name is not None else "."
+            if name_only:
+                return "{}".format(str(self.object_location.name)) if self.object_location.name is not None else ""
+            else:
+                return " near **{}**.".format(
+                    str(self.object_location.name)) if self.object_location.name is not None else "."
         except:
-            return "."
+            return "." if not name_only else ""
+
+    def str_location_id(self):
+        try:
+            return "{}".format(str(self.locationID))
+        except:
+            return ""

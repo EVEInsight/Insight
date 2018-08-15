@@ -40,7 +40,7 @@ class visual_capradar(base_visual):
         self.location_name = self.km.str_location_name()
         self.base_name = str(self.base_.name)
         self.ly_range = self.km.str_ly_range(self.base_)
-        self._attacking_ships = self.km.str_overview_attacking_capitals(self.tracked_hostiles)
+        self.attacking_ships = self.km.str_overview_attacking_capitals(self.tracked_hostiles)
         self.text_minutes_ago = self.km.str_minutes_ago(True)
         self.overview_text = "{hSG} activity in {kmSys}({kmRg}) {ly} LYs from {bSys}". \
             format(hSG=self.ha_group, kmSys=self.system_name, kmRg=self.region_name, ly=self.ly_range,
@@ -75,7 +75,7 @@ class visual_capradar(base_visual):
     def make_body(self):
         __heading = "**{} of {} attackers flying in tracked ships:**".format(str(len(self.tracked_hostiles)),
                                                                              str(self.total_involved))
-        __body = "```{}```".format(self._attacking_ships, zk=self.zk_kill)
+        __body = "```{}```".format(self.attacking_ships, zk=self.zk_kill)
         self.embed.add_field(name=__heading, value=__body, inline=False)
         __heading_routes = "Dotlan routes from {}".format(self.base_name)
         self.embed.add_field(name=__heading_routes, value=self.__helper_routes(), inline=False)
@@ -130,6 +130,7 @@ class visual_capradar(base_visual):
     @classmethod
     def appearance_options(cls):
         yield cls
+        yield VisualCapRadarFunctional
         yield VisualCapRadarCompact
         yield VisualCapRadarLinkOnly
 
@@ -140,3 +141,4 @@ class visual_capradar(base_visual):
 
 from .VisualCapRadarCompact import VisualCapRadarCompact
 from .VisualCapRadarLinkOnly import VisualCapRadarLinkOnly
+from .VisualCapRadarFunctional import VisualCapRadarFunctional

@@ -28,4 +28,4 @@ class VisualEnfeedCompact(visual_enfeed):
 
     @classmethod
     def get_desc(cls):
-        return "Compact - Basic killmail information with value, color sidebar, and zKillboard link. Size: Small"
+        return "Compact <-recommended - Basic killmail information with value, color sidebar, and zKillboard link. Size: Small"

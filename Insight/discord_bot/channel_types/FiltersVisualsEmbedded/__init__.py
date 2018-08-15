@@ -6,3 +6,4 @@ from .VisualEnfeedCompact import VisualEnfeedCompact
 from .VisualCapRadarCompact import VisualCapRadarCompact
 from .VisualEnfeedLinkOnly import VisualEnfeedLinkOnly
 from .VisualCapRadarLinkOnly import VisualCapRadarLinkOnly
+from .VisualCapRadarFunctional import VisualCapRadarFunctional
