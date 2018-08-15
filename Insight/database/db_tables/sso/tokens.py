@@ -245,6 +245,24 @@ class Tokens(dec_Base.Base, sso_base):
         finally:
             db.close()
 
+    @classmethod
+    def delete_noTracking(cls, service_module):
+        """Find tokens that have no tracking targets and delete them."""
+        db: Session = service_module.get_session()
+        try:
+            all_tokens = db.query(cls).all()
+            delete_tokens = []
+            for tok in all_tokens:
+                if tok.character_id is None and tok.corporation_id is None and tok.alliance_id is None:
+                    delete_tokens.append(tok)
+            db.close()
+            for tok in delete_tokens:
+                service_module.sso.delete_token(tok)
+        except Exception as ex:
+            print(ex)
+        finally:
+            db.close()
+
 
 from ..filters import *
 from ..eve import *
