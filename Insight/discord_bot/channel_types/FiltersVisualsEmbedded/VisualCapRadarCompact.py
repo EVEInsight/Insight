@@ -4,8 +4,8 @@ from .visual_capradar import *
 class VisualCapRadarCompact(visual_capradar):
     def make_vars(self):
         super().make_vars()
-        self.dread_route = "http://evemaps.dotlan.net/jump/Revelation,555/{base}:{target}".format(base=self.base_name,
-                                                                                                  target=self.system_name)
+        self.dread_route = "http://evemaps.dotlan.net/jump/Avatar,555/{base}:{target}".format(base=self.base_name,
+                                                                                              target=self.system_name)
         if self.highestAT.alliance_id is not None:
             self.haAFFname = self.km.fb_Alliance(self.highestAT)
         else:
@@ -50,4 +50,4 @@ class VisualCapRadarCompact(visual_capradar):
 
     @classmethod
     def get_desc(cls):
-        return "Compact - Attacker affiliation and ship, nearest celestial, color time indicator, kill link, and dread jump route. Size: Small"
+        return "Compact - Attacker ship/affiliation, nearest celestial, kill link, and super jump route. Size: Small"
