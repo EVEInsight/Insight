@@ -6,3 +6,4 @@ from .UniverseSupers import UniverseSupers
 from .RareShips import RareShips
 from .Freighters import Freighters
 from .AllianceTournamentStream import AllianceTournamentStreamSystem
+from .CapitalLosses import CapitalLosses

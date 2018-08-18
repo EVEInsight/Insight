@@ -1,7 +1,10 @@
 # v1.1.0
 ## New features
-* Rich embed visual switching
-    * Rich embed presentation can be modified for all feed services by using the ```!settings```->```Change visual appearance``` option. See [(#10)](https://github.com/Nathan-LS/Insight/issues/15) and [wiki.](https://github.com/Nathan-LS/Insight/wiki/Rich-Embed-Appearance)
+* Settings
+    * Rich embed visual switching
+        * Rich embed presentation can be modified for all feed services by using the ```!settings```->```Change visual appearance``` option. See [(#10)](https://github.com/Nathan-LS/Insight/issues/15) and [wiki.](https://github.com/Nathan-LS/Insight/wiki/Rich-Embed-Appearance)
+* Preconfigured feeds
+    * New capital losses feed type - Posts all super and capital losses.
 ## Bug Fixes 
 * Token pilots who switch corps won't have their alliance contact syncing dropped if they remain in the alliance. [Commit](https://github.com/Nathan-LS/Insight/commit/80e85c218c1141701d439f191a22f008aa195793)
 ## Changes

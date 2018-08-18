@@ -12,12 +12,12 @@ class OfficerHunter(capRadar):
             systemR = dbRow.tb_Filter_systems(30000142, self.channel_id)
             systemR.max = 50000
             db.merge(systemR)
-            db.merge(dbRow.tb_Filter_groups(553, self.channel_id))
-            db.merge(dbRow.tb_Filter_groups(559, self.channel_id))
-            db.merge(dbRow.tb_Filter_groups(564, self.channel_id))
-            db.merge(dbRow.tb_Filter_groups(569, self.channel_id))
-            db.merge(dbRow.tb_Filter_groups(574, self.channel_id))
-            db.merge(dbRow.tb_Filter_groups(1174, self.channel_id))
+            db.merge(dbRow.tb_Filter_groups(553, self.channel_id))  # angels
+            db.merge(dbRow.tb_Filter_groups(559, self.channel_id))  # br
+            db.merge(dbRow.tb_Filter_groups(564, self.channel_id))  # guristas
+            db.merge(dbRow.tb_Filter_groups(569, self.channel_id))  # sansha
+            db.merge(dbRow.tb_Filter_groups(574, self.channel_id))  # serpentis
+            db.merge(dbRow.tb_Filter_groups(1174, self.channel_id))  # drones
             db.commit()
         except Exception as ex:
             print(ex)
