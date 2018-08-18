@@ -9,6 +9,10 @@ class visual_enfeed(base_visual):
         assert isinstance(self.feed_options, tb_enfeed)
         self.is_kill = False
 
+    def internal_list_options(self):
+        super(visual_enfeed, self).internal_list_options()
+        self.in_attackers_affiliation = internal_options.use_whitelist.value
+
     def make_images(self):
         super().make_images()
         if self.km.object_victim.alliance_id is not None:
@@ -18,9 +22,15 @@ class visual_enfeed(base_visual):
             self.im_victim_corpAli = "https://imageserver.eveonline.com/Corporation/{}_128.png".format(
                 str(self.km.object_victim.corporation_id))
 
-    def internal_list_options(self):
-        super(visual_enfeed, self).internal_list_options()
-        self.in_attackers_affiliation = internal_options.use_whitelist.value
+    def make_vars(self):
+        super().make_vars()
+        self.victim_CorpOrAliName = self.km.victim_allianceName()
+        if not self.victim_CorpOrAliName:
+            self.victim_CorpOrAliName = self.km.victim_corpName()
+        self.fb_CorpOrAliName = self.km.fb_Alliance(self.final_blow)
+        if not self.fb_CorpOrAliName:
+            self.fb_CorpOrAliName = self.km.fb_Corp(self.final_blow)
+        self.author_text = "Kill" if self.is_kill else "Loss"
 
     def __set_loss(self):
         self.is_kill = False
@@ -30,21 +40,17 @@ class visual_enfeed(base_visual):
         self.is_kill = True
         self.color = discord.Color(65299)
 
-    def make_vars(self):
-        super(visual_enfeed, self).make_vars()
-        self.author_text = "Kill" if self.is_kill else "Loss"
-
     def make_header(self):
         self.embed.set_author(name=self.author_text, url=self.zk_kill, icon_url=self.im_victim_corpAli)
         __desc = '**{ship_name}** destroyed in **[{system_name}]' \
                  '({system_link})**({region_name})\n\n' \
                  '**[{pilot_name}]({victimP_zk})' \
-                 '({corp_name})** lost their **{ship_name}** to **[{fb_name}]({fbP_zk})' \
-                 '({fb_corp})** flying in a **{fb_ship}** {inv_str}.\n\n' \
+                 '({vAfi})** lost their **{ship_name}** to **[{fb_name}]({fbP_zk})' \
+                 '({fbAfi})** flying in a **{fb_ship}** {inv_str}.\n\n' \
             .format(ship_name=self.ship_name, system_name=self.system_name, system_link=self.system_link,
-                         region_name=self.region_name, pilot_name=self.pilot_name, victimP_zk=self.victimP_zk,
-                         corp_name=self.corp_name, fb_name=self.fb_name,fbP_zk=self.fbP_zk, fb_corp=self.fb_Corp,
-                         fb_ship=self.fb_ship,inv_str=self.inv_str)
+                    region_name=self.region_name, pilot_name=self.pilot_name, victimP_zk=self.victimP_zk,
+                    vAfi=self.victim_CorpOrAliName, fb_name=self.fb_name, fbP_zk=self.fbP_zk,
+                    fbAfi=self.fb_CorpOrAliName, fb_ship=self.fb_ship, inv_str=self.inv_str)
         self.embed.description = __desc
         self.embed.title = " "
         self.embed.url = self.zk_kill

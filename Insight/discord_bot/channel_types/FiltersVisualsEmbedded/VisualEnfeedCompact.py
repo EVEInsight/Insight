@@ -4,11 +4,11 @@ from .visual_enfeed import *
 class VisualEnfeedCompact(visual_enfeed):
     def make_header(self):
         self.embed.set_author(name=self.author_text, url=self.zk_kill, icon_url=self.im_victim_corpAli)
-        __desc = '**[{pilot_name}]({victimP_zk})({corp_name})** lost their **{ship_name}** to **[{fb_name}]({fbP_zk})' \
-                 '({fb_corp})** flying in a **{fb_ship}** {inv_str}.' \
+        __desc = '**[{pilot_name}]({victimP_zk})({vAfi})** lost their **{ship_name}** to **[{fb_name}]({fbP_zk})' \
+                 '({fbAfi})** flying in a **{fb_ship}** {inv_str}.' \
             .format(ship_name=self.ship_name, pilot_name=self.pilot_name, victimP_zk=self.victimP_zk,
-                    corp_name=self.corp_name, fb_name=self.fb_name, fbP_zk=self.fbP_zk, fb_corp=self.fb_Corp,
-                    fb_ship=self.fb_ship, inv_str=self.inv_str)
+                    vAfi=self.victim_CorpOrAliName, fb_name=self.fb_name, fbP_zk=self.fbP_zk,
+                    fbAfi=self.fb_CorpOrAliName, fb_ship=self.fb_ship, inv_str=self.inv_str)
         self.embed.description = __desc
         self.embed.title = "{ship_name} destroyed in {system_name}({region_name})".format(ship_name=self.ship_name,
                                                                                           system_name=self.system_name,
