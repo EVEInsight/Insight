@@ -21,7 +21,8 @@ class Channel_manager(object):
         zk_module.add_delay(self.__delay_post, other_time)
 
     async def avg_delay(self):
-        result = await self.__discord_client.loop.run_in_executor(None, partial(zk_module.avg_delay, self.__delay_post))
+        result = await self.__discord_client.loop.run_in_executor(None,
+                                                                  partial(zk_module.avg_delay, self.__delay_post, True))
         return result
 
     def get_discord_client(self):

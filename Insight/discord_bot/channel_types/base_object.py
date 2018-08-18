@@ -179,11 +179,11 @@ class discord_feed_service(object):
     async def remove(self):
         """Temp pause an error feed instead of removing it completely. Resume again in 30 minutes."""
         if self.cached_feed_table.feed_running:
-            remaining = 30
+            remaining = 60
             self.cached_feed_table.feed_running = False
             while remaining > 0 and not self.cached_feed_table.feed_running:
                 remaining -= 1
-                await asyncio.sleep(60)
+                await asyncio.sleep(30)
             await self.async_load_table()
 
     async def delete(self):
