@@ -67,7 +67,10 @@ class Channel_manager(object):
         print("Loading feed services...")
         start = datetime.datetime.utcnow()
         async for i in self.__get_text_channels():
-            await self.get_channel_feed(i)
+            try:
+                await self.get_channel_feed(i)
+            except Exception as ex:
+                print(ex)
         print("Loaded {:d} feeds in {:.1f} seconds".format(len(list(self.sy_get_all_channels())),
                                                            (datetime.datetime.utcnow() - start).total_seconds()))
 
@@ -108,15 +111,6 @@ class Channel_manager(object):
         await message_object.author.send("Opening a new conversation! Hello!")
         dm = message_object.author.dm_channel
         return cType.insight_directMessage(dm, self.service)
-
-    async def remove_feed(self,channel):
-        ch_obj = None
-        if isinstance(channel,int):
-            ch_obj = await self.__remove_container(channel)
-        elif isinstance(channel,discord.TextChannel):
-            ch_obj = await self.__remove_container(channel.id)
-        if ch_obj is not None:
-            await ch_obj.remove()
 
     async def delete_feed(self,channel):
         ch_obj = None

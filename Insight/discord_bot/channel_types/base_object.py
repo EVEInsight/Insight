@@ -165,19 +165,26 @@ class discord_feed_service(object):
             except discord.Forbidden:
                 try:
                     await self.channel_discord_object.send(
-                        "Permissions are incorrectly set for the bot. See https://github.com/Nathan-LS/Insight#permissions\n\n\nOnce permissions are correctly set, run the command '!start to resume the feed.'")
+                        "Permissions are incorrectly set for the bot. See https://github.com/Nathan-LS/Insight#permissions\n\nRun the '!start' command to resume the feed once permissions are correctly set.")
                 except:
                     pass
                 finally:
-                    await self.channel_manager.remove_feed(self.channel_id)
+                    await self.remove()
             except discord.HTTPException as ex:
                 if ex.status == 404:  # channel deleted
-                    await self.channel_manager.remove_feed(self.channel_id)
+                    await self.channel_manager.delete_feed(self.channel_id)
             except Exception as ex:
                 print(ex)
 
     async def remove(self):
-        print('Removed {} in {}'.format(str(self), self.str_channel_server()))
+        """Temp pause an error feed instead of removing it completely. Resume again in 30 minutes."""
+        if self.cached_feed_table.feed_running:
+            remaining = 30
+            self.cached_feed_table.feed_running = False
+            while remaining > 0 and not self.cached_feed_table.feed_running:
+                remaining -= 1
+                await asyncio.sleep(60)
+            await self.async_load_table()
 
     async def delete(self):
         def non_async_delete():
