@@ -3,6 +3,7 @@ from . import systems, attackers, victims, locations, types
 from dateutil.parser import parse as dateTimeParser
 from functools import cmp_to_key
 import operator
+import math
 
 
 class Kills(dec_Base.Base, table_row):
@@ -99,6 +100,16 @@ class Kills(dec_Base.Base, table_row):
     def get_row(cls, data, service_module):
         db:Session = service_module.get_session()
         return db.query(cls).filter(cls.primary_key_row() == data.get("killID")).one()
+
+    def get_au_location_distance(self):
+        pos_x = self.object_victim.pos_x
+        pos_y = self.object_victim.pos_y
+        pos_z = self.object_victim.pos_z
+        other_x = self.object_location.pos_x
+        other_y = self.object_location.pos_y
+        other_z = self.object_location.pos_z
+        return math.sqrt(
+            pow(pos_x - other_x, 2) + pow(pos_y - other_y, 2) + pow(pos_z - other_z, 2)) / 1.496e+11
 
     def get_highest_attacker(self, attackers_list):
         top_attacker: attackers.Attackers = attackers_list[0]
@@ -319,11 +330,20 @@ class Kills(dec_Base.Base, table_row):
 
     def str_location_name(self, name_only=False):
         try:
+            distance = 0
+            dist_str = ""
+            try:
+                distance = self.get_au_location_distance()
+            except:
+                pass
+            if distance >= .001:
+                dist_str = "({:.1f} AU)".format(distance)
             if name_only:
-                return "{}".format(str(self.object_location.name)) if self.object_location.name is not None else ""
+                return "{0}{1}".format(str(self.object_location.name),
+                                       dist_str) if self.object_location.name is not None else ""
             else:
-                return " near **{}**.".format(
-                    str(self.object_location.name)) if self.object_location.name is not None else "."
+                return " near **{0}{1}**.".format(
+                    str(self.object_location.name), dist_str) if self.object_location.name is not None else "."
         except:
             return "." if not name_only else ""
 

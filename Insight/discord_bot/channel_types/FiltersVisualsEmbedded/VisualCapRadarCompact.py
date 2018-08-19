@@ -4,19 +4,17 @@ from .visual_capradar import *
 class VisualCapRadarCompact(visual_capradar):
     def make_vars(self):
         super().make_vars()
-        self.dread_route = "http://evemaps.dotlan.net/jump/Avatar,555/{base}:{target}".format(base=self.base_name,
+        self.super_route = "http://evemaps.dotlan.net/jump/Avatar,555/{base}:{target}".format(base=self.base_name,
                                                                                               target=self.system_name)
         if self.highestAT.alliance_id is not None:
             self.haAFFname = self.km.fb_Alliance(self.highestAT)
         else:
             self.haAFFname = self.haCorp
-        try:
-            if self.km.object_location.name is not None:
-                self.location_name = " near **[{}]({}).**".format(self.km.object_location.name, self.dread_route)
-            else:
-                self.location_name = " in **[{}]({}).**".format(self.system_name, self.dread_route)
-        except:
-            self.location_name = "."
+        loc_name = self.km.str_location_name(name_only=True)
+        if loc_name:
+            self.location_name = " near **[{}]({}).**".format(loc_name, self.super_route)
+        else:
+            self.location_name = " in **[{}]({}).**".format(self.system_name, self.super_route)
 
     def make_text_heading(self):
         self.message_txt = "{}".format(self.mention_method())
