@@ -337,7 +337,7 @@ class Kills(dec_Base.Base, table_row):
             except:
                 pass
             if distance >= .001:
-                dist_str = "({:.1f} AU)".format(distance)
+                dist_str = " ({:.1f} AU)".format(distance)
             if name_only:
                 return "{0}{1}".format(str(self.object_location.name),
                                        dist_str) if self.object_location.name is not None else ""
