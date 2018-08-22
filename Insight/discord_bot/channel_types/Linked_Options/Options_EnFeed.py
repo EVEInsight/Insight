@@ -144,10 +144,25 @@ class Options_EnFeed(Base_Feed.base_activefeed):
         await self.reload(message_object)
 
     async def InsightOption_minValue(self, message_object: discord.Message):
-        """Set minimum ISK value - Set the minimum ISK value for posting killmails."""
+        """Set minimum ISK value - Set the minimum ISK value for killmails."""
 
-        def get_number(text):
-            return float(text)
+        def get_number(input_val: str):
+            try:
+                input_val = input_val.strip()
+                num = "".join([c for c in input_val if c.isdigit() or c == '.'])
+                n_modifier = "".join(a.casefold() for a in input_val if a.isalpha())
+                num = float(num)
+                if n_modifier.startswith('b'):
+                    num = num * 1e+9
+                elif n_modifier.startswith('m'):
+                    num = num * 1e+6
+                elif n_modifier.startswith('k'):
+                    num = num * 1e+3
+                else:
+                    pass
+                return num
+            except:
+                raise InsightExc.userInput.NotFloat
 
         def set_min_value(isk_val):
             db: Session = self.cfeed.service.get_session()
@@ -163,10 +178,14 @@ class Options_EnFeed(Base_Feed.base_activefeed):
                 db.close()
 
         options = dOpt.mapper_return_noOptions(self.cfeed.discord_client, message_object)
-        options.set_main_header("Enter ISK floor.")
+        options.set_main_header("Set the minimum isk value for killmails. Mails below this value will not be posted. "
+                                "Enter '0' for no limit.")
+        options.set_footer_text("Enter a number. Examples: 500m, 10 billion, 500,000: ")
         resp = await options()
-        await self.cfeed.discord_client.loop.run_in_executor(None, partial(set_min_value, get_number(resp)))
+        val = get_number(resp)
+        await self.cfeed.discord_client.loop.run_in_executor(None, partial(set_min_value, val))
         await self.reload(message_object)
+        await message_object.channel.send("Minimum ISK value is now set at: {:,.2f} ISK.".format(val))
 
 
 from .. import enFeed

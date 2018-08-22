@@ -36,3 +36,8 @@ class TooManyOptions(InsightException):
 class NewDMError(InsightException):
     def __init__(self, message="Unable to open a DM. Ensure you can receive direct messages from Insight."):
         super().__init__(message)
+
+
+class NotFloat(InsightException):
+    def __init__(self, message="You entered an invalid number."):
+        super().__init__(message)

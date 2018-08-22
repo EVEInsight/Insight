@@ -1,3 +1,7 @@
+# v1.2.0
+## New features
+* Entity feed
+    * Users can now set a minimum ISK value filter. [(#11)](https://github.com/Nathan-LS/Insight/issues/14)
 # v1.1.0
 ## New features
 * Settings
