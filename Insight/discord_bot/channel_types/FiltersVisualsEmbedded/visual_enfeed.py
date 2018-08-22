@@ -75,6 +75,8 @@ class visual_enfeed(base_visual):
             hours=3)  # hardcoded entity feed limits to prevent posting month old KMs
         if tdiff >= self.km.killmail_time:
             return False
+        if self.feed_options.minValue > self.km.totalValue:
+            return False
         if not self.km.filter_loss(self.filters.object_filter_groups,
                                    self.in_victim_ship_group):  # if false/contained in cat blacklist ignore posting
             return False

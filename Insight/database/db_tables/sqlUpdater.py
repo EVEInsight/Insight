@@ -69,6 +69,10 @@ class sqlUpdater(object):
         yield 'ALTER TABLE discord_enFeed ADD template_id INTEGER DEFAULT 0 NOT NULL;'
         yield 'ALTER TABLE discord_capRadar ADD template_id INTEGER DEFAULT 0 NOT NULL;'
 
+    def sqlV_1_2_0(self):
+        """v1.2.0"""
+        yield 'ALTER TABLE discord_enFeed ADD minValue FLOAT DEFAULT 0.0 NOT NULL;'
+
     def update_all(self):
         """Updates tables, returning the latest successful updated version"""
         self.compatibility_check()
