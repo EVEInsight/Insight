@@ -143,6 +143,31 @@ class Options_EnFeed(Base_Feed.base_activefeed):
         await self.cfeed.discord_client.loop.run_in_executor(None, partial(set_mode, resp))
         await self.reload(message_object)
 
+    async def InsightOption_minValue(self, message_object: discord.Message):
+        """Set minimum ISK value - Set the minimum ISK value for posting killmails."""
+
+        def get_number(text):
+            return float(text)
+
+        def set_min_value(isk_val):
+            db: Session = self.cfeed.service.get_session()
+            try:
+                row: tb_enfeed = db.query(tb_enfeed).filter(tb_enfeed.channel_id == self.cfeed.channel_id).one()
+                row.minValue = isk_val
+                db.merge(row)
+                db.commit()
+            except Exception as ex:
+                print(ex)
+                raise InsightExc.Db.DatabaseError
+            finally:
+                db.close()
+
+        options = dOpt.mapper_return_noOptions(self.cfeed.discord_client, message_object)
+        options.set_main_header("Enter ISK floor.")
+        resp = await options()
+        await self.cfeed.discord_client.loop.run_in_executor(None, partial(set_min_value, get_number(resp)))
+        await self.reload(message_object)
+
 
 from .. import enFeed
 from database.db_tables import *
