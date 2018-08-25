@@ -7,7 +7,7 @@ This bot features an intuitive interface for creating, modifying, and managing i
 [Invite Insight](#links) to your Discord server and run ```!create``` to begin setting up a feed!
 
 # Links
-[![Discord Bots](https://discordbots.org/api/widget/463952393206497290.png)](https://discordbots.org/bot/463952393206497290)
+[![Discord Bots](https://discordbots.org/api/widget/463952393206497290.svg)](https://discordbots.org/bot/463952393206497290)
 * **Insight** (with preconfigured role): [Insight Bot Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=463952393206497290&permissions=149504&scope=bot)
 * **Insight** (without preconfigured role): [Insight Bot Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=463952393206497290&permissions=0&scope=bot)
 

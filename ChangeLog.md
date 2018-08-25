@@ -2,6 +2,12 @@
 ## New features
 * Entity feed
     * Users can now set a minimum ISK value filter. [(#11)](https://github.com/Nathan-LS/Insight/issues/14)
+## Changes
+* Feed creation
+    * Option order should flow better when creating feeds.
+* Preconfigured
+    * Universal AT ship and super feeds now list the ```Manage feed sync settings``` option when running the ```!settings``` command.
+    * Discontinued the Alliance Tournament system stream until next year.
 # v1.1.0
 ## New features
 * Settings
