@@ -5,5 +5,5 @@ from .OfficerHunter import OfficerHunter
 from .UniverseSupers import UniverseSupers
 from .RareShips import RareShips
 from .Freighters import Freighters
-from .AllianceTournamentStream import AllianceTournamentStreamSystem
+# from .AllianceTournamentStream import AllianceTournamentStreamSystem # remove until next year
 from .CapitalLosses import CapitalLosses

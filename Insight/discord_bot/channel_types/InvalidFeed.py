@@ -5,8 +5,9 @@ from .base_object import *
 class InvalidFeed(noCH.discord_text_nofeed_exist):
     def __init__(self, channel_discord_object: discord.TextChannel, service_module):
         super(InvalidFeed, self).__init__(channel_discord_object, service_module)
-        self.add_message("This feed service is invalid or is a preconfigured feed that has been discontinued. "
-                         "Deleting this feed now.")
+        self.add_message("The feed service that previously existed in this channel is invalid or is a discontinued "
+                         "preconfigured feed type. The previous feed has been deleted and you may create a new feed "
+                         "by running the '!create' command.")
 
     def setup_table(self):
         pass

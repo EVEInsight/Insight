@@ -1,6 +1,12 @@
 from ..capRadar import *
 
 
+class OptionsUniverseSupers(Linked_Options.opt_capradar):
+    def yield_options(self):
+        yield (self.InsightOption_sync, False)
+        yield from super(Linked_Options.opt_capradar, self).yield_options()
+
+
 class UniverseSupers(capRadar):
     def template_loader(self):
         self.general_table().reset_filters(self.channel_id, self.service)
@@ -21,7 +27,7 @@ class UniverseSupers(capRadar):
             db.close()
 
     def get_linked_options(self):
-        return Linked_Options.opt_basicfeed(self)
+        return OptionsUniverseSupers(self)
 
     @classmethod
     def get_template_id(cls):
@@ -29,7 +35,7 @@ class UniverseSupers(capRadar):
 
     @classmethod
     def get_template_desc(cls):
-        return "Universal Supers - A premade radar feed that displays recent super/titan activity regardless of standings or system."
+        return "Universal Supers - A premade radar feed that displays recent super/titan activity regardless of system."
 
     def __str__(self):
         return "Universal Supers Feed"
