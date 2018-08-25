@@ -15,6 +15,14 @@ class Options_EnFeed(Base_Feed.base_activefeed):
         super().__init__(insight_channel)
         self.pod_group_ids = [29]
 
+    def yield_options(self):
+        yield (self.InsightOptionRequired_add, True)
+        yield (self.InsightOption_remove, False)
+        yield (self.InsightOptionRequired_tracktype, True)
+        yield (self.InsightOptionRequired_trackpods, True)
+        yield (self.InsightOption_minValue, False)
+        yield from super().yield_options()
+
     async def InsightOptionRequired_add(self, message_object:discord.Message):
         """Add a new tracked entity  - Add an entity (pilot, corp, or alliance) to track involved PvP activity. You can add more than 1 entity to a channel."""
 

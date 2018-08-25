@@ -15,6 +15,16 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         self.capital_ids = [547, 485, 1538, 883]
         self.blops_ids = [898]
 
+    def yield_options(self):
+        yield (self.InsightOptionRequired_add, True)
+        yield (self.InsightOption_remove, False)
+        yield (self.InsightOptionRequired_supers, True)
+        yield (self.InsightOptionRequired_capitals, True)
+        yield (self.InsightOptionRequired_blops, True)
+        yield (self.InsightOptionRequired_maxage, True)
+        yield (self.InsightOption_sync, False)
+        yield from super().yield_options()
+
     def mention_options(self,message_object,group_type):
         __options = discord_options.mapper_index(self.cfeed.discord_client, message_object)
         __options.set_main_header("Select the mention mode for this channel. On detected {} activity the bot "

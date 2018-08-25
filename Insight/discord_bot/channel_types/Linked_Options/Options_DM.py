@@ -11,6 +11,14 @@ class Options_DM(options_base.Options_Base):
         assert isinstance(insight_channel, direct_message.direct_message)
         super().__init__(insight_channel)
 
+    def yield_options(self):
+        yield (self.InsightOption_addToken, False)
+        yield (self.InsightOption_deleteToken, False)
+        yield (self.InsightOption_removeChannel, False)
+        yield (self.InsightOption_syncnow, False)
+        yield (self.InsightOption_viewtokens, False)
+        yield from super().yield_options()
+
     def printout_my_tokens(self):
         db: Session = self.cfeed.service.get_session()
         return_str = "My Tokens:\n\n"

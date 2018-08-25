@@ -11,13 +11,16 @@ class Options_Base(object):
         self.cfeed = insight_channel
 
     async def get_option_coroutines(self,required_only=False):
-        for i in dir(self):
-            if required_only and i.startswith("InsightOptionRequired_"):
-                yield getattr(self,i)
-            elif not required_only and (i.startswith("InsightOption_") or i.startswith("InsightOptionRequired_")):
-                yield getattr(self,i)
+        for opt in self.yield_options():
+            if required_only:
+                if opt[1]:
+                    yield opt[0]
             else:
-                continue
+                yield opt[0]
+
+    def yield_options(self):
+        return
+        yield
 
     async def reload(self, message_object):
         await self.cfeed.async_load_table()

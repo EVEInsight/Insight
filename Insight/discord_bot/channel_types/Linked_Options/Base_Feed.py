@@ -15,6 +15,12 @@ class base_activefeed(options_base.Options_Base):
         super().__init__(insight_channel)
 
     # InsightOption_ InsightOptionRequired_
+    def yield_options(self):
+        yield from super().yield_options()
+        yield (self.InsightOptionRequired_setAppearance, True)
+        yield (self.InsightOption_start, False)
+        yield (self.InsightOption_pause, False)
+        yield (self.InsightOption_remove_opt, False)
 
     async def InsightOption_remove_opt(self,message_object:discord.Message):
         """Delete Feed  - Removes the currently active feed from this channel, deleting its configuration."""

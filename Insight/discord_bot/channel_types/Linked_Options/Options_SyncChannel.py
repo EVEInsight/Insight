@@ -13,6 +13,13 @@ class Options_Sync(options_base.Options_Base):
         super().__init__(insight_channel)
         self.previous_sync_print = ""
 
+    def yield_options(self):
+        yield (self.InsightOption_addToken, False)
+        yield (self.InsightOption_removeToken, False)
+        yield (self.InsightOption_syncnow, False)
+        yield (self.InsightOption_viewtokens, False)
+        yield from super().yield_options()
+
     async def InsightOption_addToken(self, message_object: discord.Message):
         """Add new token - Add a new SSO token to sync contact information related to pilots, corporations, and alliances."""
         try:
