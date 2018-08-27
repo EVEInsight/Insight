@@ -1,6 +1,12 @@
 from ..enFeed import *
 
 
+class OptionsCapitalLosses(Linked_Options.opt_enfeed):
+    def yield_options(self):
+        yield (self.InsightOption_minValue, False)
+        yield from super(Linked_Options.opt_enfeed, self).yield_options()
+
+
 class CapitalLosses(enFeed):
     def template_loader(self):
         self.general_table().reset_filters(self.channel_id, self.service)
@@ -23,7 +29,7 @@ class CapitalLosses(enFeed):
             db.close()
 
     def get_linked_options(self):
-        return Linked_Options.opt_basicfeed(self)
+        return OptionsCapitalLosses(self)
 
     @classmethod
     def get_template_id(cls):
