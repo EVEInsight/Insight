@@ -7,7 +7,7 @@ class CapRadar(dec_Base.Base,discord_channel_base):
 
     channel_id = Column(BIGINT,ForeignKey("discord_channels.channel_id"),primary_key=True,nullable=False,autoincrement=False)
     template_id = Column(Integer, default=0, nullable=False)
-    max_km_age = Column(Integer, default=100, nullable=False)
+    max_km_age = Column(Integer, default=25, nullable=False)
     max_mention_age = Column(Integer, default=10, nullable=False)
     object_channel = relationship("Channels", uselist=False, back_populates="object_capRadar", lazy="joined")
 
