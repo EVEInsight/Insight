@@ -3,6 +3,7 @@ from ..capRadar import *
 
 class OptionsUniverseSupers(Linked_Options.opt_capradar):
     def yield_options(self):
+        yield (self.InsightOptionRequired_maxage, False)
         yield (self.InsightOption_sync, False)
         yield from super(Linked_Options.opt_capradar, self).yield_options()
 
