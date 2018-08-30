@@ -116,8 +116,7 @@ class Tokens(dec_Base.Base, sso_base):
             r_items = [] + r[0]
             __index = 2
             while int(number_pages) >= __index:
-                r_items += \
-                self.__alliance_api_call(contacts_api, page=__index, datasource='tranquility', token=self.token)[0]
+                r_items += function_ptr(contacts_api, page=__index, datasource='tranquility', token=self.token)[0]
                 __index += 1
             new_etag_function_ptr(__new_etag)
             return r_items
@@ -176,8 +175,10 @@ class Tokens(dec_Base.Base, sso_base):
                 if enum_owner == contact_owner.alliance:
                     self.alliance_id = None
                 self.__remove(enum_owner, service_module)
+            else:
+                print("Error code {} on token ID: {} when updating contacts.".format(str(ex.status),str(self.token_id)))
         except Exception as ex:
-            print(ex)
+            print("Error: '{}' on token ID: {} when updating contacts.".format(str(ex), str(self.token_id)))
 
     def update_contacts(self, service_):
         if self.token is not None:
