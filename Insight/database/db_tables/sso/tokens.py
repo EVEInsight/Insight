@@ -167,7 +167,7 @@ class Tokens(dec_Base.Base, sso_base):
         except ApiException as ex:
             if ex.status == 304:  # nochanges
                 self.last_updated = datetime.datetime.utcnow()
-            if ex.status == 403:  # changed alliance/corp
+            elif ex.status == 403:  # changed alliance/corp
                 if enum_owner == contact_owner.pilot:
                     self.character_id = None
                 if enum_owner == contact_owner.corp:
