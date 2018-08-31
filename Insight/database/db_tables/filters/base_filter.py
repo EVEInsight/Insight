@@ -36,6 +36,9 @@ class filter_base(object):
     def set_nolist(self):
         self.list_type = listTypeEnum.nolist
 
+    def __str__(self):
+        return str(self.object_item)
+
     @classmethod
     def get_row(cls, channel_id, filter_id, service_module):
         db: Session = service_module.get_session()

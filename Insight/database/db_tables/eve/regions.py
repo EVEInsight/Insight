@@ -3,6 +3,7 @@ from . import constellations
 from .sde_importer import *
 from sqlalchemy import case
 
+
 class Regions(dec_Base.Base,individual_api_pulling,index_api_updating,sde_impoter):
     __tablename__ = 'regions'
 
@@ -28,6 +29,9 @@ class Regions(dec_Base.Base,individual_api_pulling,index_api_updating,sde_impote
 
     def get_id(self):
         return self.region_id
+
+    def __str__(self):
+        return "{}".format(str(self.name))
 
     @classmethod
     def index_swagger_api_call(cls, api, **kwargs):

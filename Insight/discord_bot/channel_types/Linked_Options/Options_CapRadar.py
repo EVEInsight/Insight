@@ -70,7 +70,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
                 if len(row_list) > 0:
                     __options.add_header_row(header_text)
                     for i in row_list:
-                        __options.add_option(discord_options.option_returns_object(name=i.name, return_object=i))
+                        __options.add_option(discord_options.option_returns_object(name=str(i), return_object=i))
             try:
                 header_make(db.query(tb_systems).filter(tb_systems.name.ilike("%{}%".format(search_str))).all(),"Systems")
                 __options.add_header_row("Additional Options")
@@ -119,7 +119,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
             try:
                 __remove.add_header_row("Systems currently set as base systems for this feed")
                 for i in db.query(tb_Filter_systems).filter(tb_Filter_systems.channel_id==self.cfeed.channel_id).all():
-                    __representation = "System: {}-----LY Range: {}".format(str(i.object_item.name),str(i.max))
+                    __representation = "System: {}-----LY Range: {}".format(str(i), str(i.max))
                     __remove.add_option(discord_options.option_returns_object(name=__representation,return_object=i.filter_id))
             except:
                 db.rollback()

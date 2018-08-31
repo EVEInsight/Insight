@@ -38,6 +38,12 @@ class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating,
     def set_name(self, api_name):
         self.name = api_name
 
+    def __str__(self):
+        try:
+            return "{}({})".format(str(self.name), str(self.object_constellation.object_region.name))
+        except:
+            return "{}".format(str(self.name))
+
     def ly_range(self, other):
         other_x = 0
         other_y = 0
