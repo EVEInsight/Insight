@@ -32,6 +32,9 @@ class Groups(dec_Base.Base,individual_api_pulling,index_api_updating,sde_impoter
     def get_id(self):
         return self.group_id
 
+    def get_name(self):
+        return self.name
+
     @classmethod
     def index_swagger_api_call(cls, api, **kwargs):
         return api.get_universe_groups_with_http_info(**kwargs)

@@ -29,6 +29,9 @@ class Types(dec_Base.Base,name_only,index_api_updating,sde_impoter):
     def get_id(self):
         return self.type_id
 
+    def get_name(self):
+        return self.type_name
+
     def set_name(self, api_name):
         self.type_name = api_name
 
