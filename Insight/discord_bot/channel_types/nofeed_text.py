@@ -100,15 +100,15 @@ class discord_text_nofeed_exist(discord_feed_service):
     async def create_new(cls,message_object:discord.Message, service_module, discord_client):
         __tmp_feed_object:cls = await cls.load_new(message_object.channel,service_module,discord_client)
         try:
+            await service_module.channel_manager.add_feed_object(__tmp_feed_object)
             async for option in __tmp_feed_object.linked_options.get_option_coroutines(required_only=True):
                 await option(message_object)
-            await service_module.channel_manager.add_feed_object(__tmp_feed_object)
             await message_object.channel.send(
                 "Created a new feed! You can manage feed configuration with the '!settings' command.")
             await __tmp_feed_object.command_start(message_object)
             print('New {} in {}'.format(str(__tmp_feed_object), __tmp_feed_object.str_channel_server()))
         except Exception as ex:
-            await __tmp_feed_object.delete()
+            await service_module.channel_manager.delete_feed(__tmp_feed_object.channel_id)
             try:
                 await message_object.channel.send(
                     "Something went wrong when creating a new feed. Run the command '!create' to start over.")
