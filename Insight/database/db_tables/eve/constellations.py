@@ -17,7 +17,7 @@ class Constellations(dec_Base.Base,individual_api_pulling,index_api_updating,sde
     api_Expires = Column(DateTime,default=None,nullable=True)
     api_Last_Modified = Column(DateTime,default=None,nullable=True)
 
-    object_region = relationship("Regions", uselist=False, back_populates="object_constellations",lazy="joined")
+    object_region = relationship("Regions", uselist=False, back_populates="object_constellations", lazy="joined")
     object_systems = relationship("Systems",uselist=True, back_populates="object_constellation")
 
     def __init__(self, eve_id: int):
@@ -34,6 +34,12 @@ class Constellations(dec_Base.Base,individual_api_pulling,index_api_updating,sde
 
     def get_id(self):
         return self.constellation_id
+
+    def __str__(self):
+        try:
+            return "{}({})".format(str(self.name), str(self.object_region.name))
+        except:
+            return "{}".format(str(self.name))
 
     @classmethod
     def index_swagger_api_call(cls, api, **kwargs):

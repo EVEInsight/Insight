@@ -5,5 +5,6 @@ from .filter_categories import Filter_categories as tb_Filter_categories
 from .filter_groups import Filter_groups as tb_Filter_groups
 from .filter_types import Filter_types as tb_Filter_types
 from .filter_regions import Filter_regions as tb_Filter_regions
+from .filter_constellations import Filter_constellations as tb_Filter_constellations
 from .filter_systems import Filter_systems as tb_Filter_systems
 from .base_filter import mention_method as enum_mention

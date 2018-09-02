@@ -37,6 +37,9 @@ class Channels(dec_Base.Base,discord_channel_base):
     object_filter_regions = relationship("Filter_regions", uselist=True,
                                          cascade="save-update, merge, delete, delete-orphan",
                                          back_populates="object_channel", lazy="subquery")
+    object_filter_constellations = relationship("Filter_constellations", uselist=True,
+                                         cascade="save-update, merge, delete, delete-orphan",
+                                         back_populates="object_channel", lazy="subquery")
     object_filter_systems = relationship("Filter_systems", uselist=True,
                                          cascade="save-update, merge, delete, delete-orphan",
                                          back_populates="object_channel", lazy="subquery")
@@ -60,6 +63,7 @@ class Channels(dec_Base.Base,discord_channel_base):
             row.object_filter_groups = []
             row.object_filter_types = []
             row.object_filter_regions = []
+            row.object_filter_constellations = []
             row.object_filter_systems = []
             db.commit()
         except Exception as ex:
