@@ -40,3 +40,7 @@ class ExcavatorLosses(enFeed):
                 self.embed.color = discord.Color(665362)
 
         return VisualExcavatorLosses
+
+    @classmethod
+    def is_preconfigured(cls):
+        return True

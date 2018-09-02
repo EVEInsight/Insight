@@ -49,3 +49,7 @@ class AbyssalLosses(enFeed):
                 self.embed.color = discord.Color(659493)
 
         return VisualAbyssalLosses
+
+    @classmethod
+    def is_preconfigured(cls):
+        return True

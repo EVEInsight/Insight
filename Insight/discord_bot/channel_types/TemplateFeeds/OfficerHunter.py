@@ -51,3 +51,7 @@ class OfficerHunter(capRadar):
                 self.embed.color = discord.Color(12303149)
 
         return VisualOfficerHunter
+
+    @classmethod
+    def is_preconfigured(cls):
+        return True

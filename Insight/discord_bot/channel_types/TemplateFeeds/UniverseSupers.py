@@ -39,3 +39,7 @@ class UniverseSupers(capRadar):
 
     def __str__(self):
         return "Universal Supers Feed"
+
+    @classmethod
+    def is_preconfigured(cls):
+        return True

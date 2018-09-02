@@ -20,14 +20,21 @@ class discord_text_nofeed_exist(discord_feed_service):
                                                                   timeout_seconds=300)
             __options.set_main_header("Select the new feed type you wish to add in this channel:")
             __options.add_header_row("Fully customizable feeds")
-            __options.add_option(insightClient.option_calls_coroutine(name=inCR.capRadar.create_new.__doc__,coroutine_object=inCR.capRadar.create_new(message_object,self.service,self.discord_client)))
             __options.add_option(insightClient.option_calls_coroutine(name=inEF.enFeed.create_new.__doc__,coroutine_object=inEF.enFeed.create_new(message_object,self.service,self.discord_client)))
+            __options.add_option(insightClient.option_calls_coroutine(name=inCR.capRadar.create_new.__doc__,coroutine_object=inCR.capRadar.create_new(message_object, self.service,self.discord_client)))
+            for subc in itertools.chain(inEF.enFeed.__subclasses__(), inCR.capRadar.__subclasses__()):
+                if not subc.is_preconfigured():
+                    __options.add_option(insightClient.option_calls_coroutine(name=subc.get_template_desc(),
+                                                                              coroutine_object=subc.create_new(
+                                                                                  message_object, self.service,
+                                                                                  self.discord_client)))
             __options.add_header_row("Preconfigured derived feeds")
             for subc in itertools.chain(inEF.enFeed.__subclasses__(), inCR.capRadar.__subclasses__()):
-                __options.add_option(insightClient.option_calls_coroutine(name=subc.get_template_desc(),
-                                                                          coroutine_object=subc.create_new(
-                                                                              message_object, self.service,
-                                                                              self.discord_client)))
+                if subc.is_preconfigured():
+                    __options.add_option(insightClient.option_calls_coroutine(name=subc.get_template_desc(),
+                                                                              coroutine_object=subc.create_new(
+                                                                                  message_object, self.service,
+                                                                                  self.discord_client)))
             await __options()
 
     async def command_settings(self,message_object):

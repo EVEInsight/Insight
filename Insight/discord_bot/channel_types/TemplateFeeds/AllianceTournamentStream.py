@@ -40,3 +40,7 @@ class AllianceTournamentStreamSystem(enFeed):
                 self.embed.color = discord.Color(659493)
 
         return VisualAllianceTournamentStream
+
+    @classmethod
+    def is_preconfigured(cls):
+        return True

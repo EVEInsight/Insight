@@ -252,6 +252,10 @@ class discord_feed_service(object):
     def get_template_desc(cls):
         return ""
 
+    @classmethod
+    def is_preconfigured(cls):
+        return False
+
     @staticmethod
     def send_km(km,feed_channel):
         try:

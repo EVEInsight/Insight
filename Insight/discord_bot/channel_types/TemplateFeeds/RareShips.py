@@ -41,3 +41,7 @@ class RareShips(capRadar):
 
     def __str__(self):
         return "Alliance Tournament Ship Activity Feed"
+
+    @classmethod
+    def is_preconfigured(cls):
+        return True

@@ -50,3 +50,7 @@ class Freighters(enFeed):
                 self.embed.color = discord.Color(5857901)
 
         return VisualFreighters
+
+    @classmethod
+    def is_preconfigured(cls):
+        return True

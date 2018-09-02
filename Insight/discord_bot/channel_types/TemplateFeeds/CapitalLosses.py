@@ -52,3 +52,7 @@ class CapitalLosses(enFeed):
                 self.embed.color = discord.Color(2640791)
 
         return VisualCapitalLosses
+
+    @classmethod
+    def is_preconfigured(cls):
+        return True

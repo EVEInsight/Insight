@@ -41,3 +41,7 @@ class SuperLosses(enFeed):
                 self.embed.color = discord.Color(2640791)
 
         return VisualSuperLosses
+
+    @classmethod
+    def is_preconfigured(cls):
+        return True
