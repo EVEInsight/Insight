@@ -1,8 +1,9 @@
 from .base_objects import *
 from . import characters,corporations,alliances,types
+from .Base_Str_ATKv import Base_Str_ATKv
 
 
-class Victims(dec_Base.Base, table_row):
+class Victims(dec_Base.Base, table_row, Base_Str_ATKv):
     __tablename__ = 'victims'
 
     kill_id = Column(Integer,ForeignKey("kills.kill_id"), primary_key=True,nullable=False, autoincrement=False)
@@ -68,7 +69,6 @@ class Victims(dec_Base.Base, table_row):
                 print(ex)
                 return False
         return False
-
 
 from ..filters import *
 from ..eve import *

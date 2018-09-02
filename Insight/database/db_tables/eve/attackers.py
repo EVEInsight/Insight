@@ -1,8 +1,9 @@
 from .base_objects import *
 from . import characters,corporations,alliances,types
+from .Base_Str_ATKv import Base_Str_ATKv
 
 
-class Attackers(dec_Base.Base):
+class Attackers(dec_Base.Base, Base_Str_ATKv):
     __tablename__ = 'attackers'
 
     no_pk = Column(Integer,primary_key=True,autoincrement=True,nullable=False)
