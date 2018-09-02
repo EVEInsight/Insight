@@ -65,6 +65,12 @@ class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating,
             return self.system_id == other.system_id
         if isinstance(other, tb_Filter_systems):
             return self.system_id == other.filter_id
+        if isinstance(other, tb_Filter_constellations):
+            try:
+                return self.object_constellation.constellation_id == other.filter_id
+            except Exception as ex:
+                print(ex)
+                return False
         if isinstance(other, tb_Filter_regions):
             try:
                 return self.object_constellation.object_region.region_id == other.filter_id

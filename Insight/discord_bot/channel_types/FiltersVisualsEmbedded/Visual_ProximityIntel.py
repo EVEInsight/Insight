@@ -1,21 +1,24 @@
-from .VisualCapRadarFunctional import *
+from .FiltersVisualsEmbedded import *
 
 
-class Visual_ProximityIntel(VisualCapRadarFunctional):
+class Visual_ProximityIntel(base_visual):
+    def __init__(self, km_row, discord_channel_object, overall_filters, feed_specific_row, feed_object):
+        super().__init__(km_row, discord_channel_object, overall_filters, feed_specific_row, feed_object)
+        self.tracked_hostiles = []
+
     def internal_list_options(self):
-        super(visual_capradar, self).internal_list_options()
+        super().internal_list_options()
         self.in_attackers_affiliation = internal_options.use_blacklist.value
-        self.in_attackers_ship_group = internal_options.use_whitelist.value
         self.in_system_nonly = internal_options.use_whitelist.value
 
     def make_links(self):
-        super(visual_capradar, self).make_links()
+        super().make_links()
 
     def make_images(self):
-        super(visual_capradar, self).make_images()
+        super().make_images()
 
     def make_vars(self):
-        super(visual_capradar, self).make_vars()
+        super().make_vars()
 
     def make_text_heading(self):
         pass
@@ -31,7 +34,7 @@ class Visual_ProximityIntel(VisualCapRadarFunctional):
         tdiff = datetime.datetime.utcnow() - datetime.timedelta(minutes=self.feed_options.max_km_age)
         if tdiff >= self.km.killmail_time:
             return False
-        list_sys_reg = self.filters.object_filter_systems + self.filters.object_filter_regions
+        list_sys_reg = self.filters.object_filter_systems + self.filters.object_filter_constellations + self.filters.object_filter_regions
         if not self.km.filter_system(list_sys_reg, self.in_system_nonly):
             # todo check gate jump distance if fail
             return False
@@ -45,9 +48,19 @@ class Visual_ProximityIntel(VisualCapRadarFunctional):
             return False
         return True
 
+    def set_frame_color(self):
+        s = (datetime.datetime.utcnow() - self.km.killmail_time).total_seconds()
+        if 0 <= s <= 60:
+            self.color = discord.Color(12124259)
+        elif 60 <= s <= 300:
+            self.color = discord.Color(8454210)
+        else:
+            self.color = discord.Color(4128800)
+        super().set_frame_color()
+
     @classmethod
-    def appearance_id(cls):
-        return super(visual_capradar, cls).appearance_id()
+    def feed_specific_row_type(cls):
+        return tb_capRadar
 
     @classmethod
     def appearance_options(cls):
