@@ -20,7 +20,7 @@ class background_tasks(object):
         self.task_discordbots_api = self.client.loop.create_task(self.discordbots_api())
 
     async def __helper_update_contacts_channels(self):
-        async for channel in self.client.channel_manager.get_all_capRadar():
+        async for channel in self.client.channel_manager.get_all_channels():
             try:
                 await channel.background_contact_sync(message=None, suppress=self.suppress_notify)
             except Exception as ex:

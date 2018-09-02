@@ -207,6 +207,9 @@ class discord_feed_service(object):
     async def command_not_supported_sendmessage(self, message_object:discord.Message):
         await message_object.channel.send("{}\nThis command is not supported in channel of type: {}\n".format(message_object.author.mention,str(self)))
 
+    async def background_contact_sync(self, message=None, suppress=False):
+        pass
+
     @classmethod
     def str_more_help(cls):
         return "Run the command '!help' to see a list of available commands or visit:\n\nhttps://github.com/Nathan-LS/Insight/wiki"
