@@ -35,7 +35,8 @@ class Visual_ProximityIntel(base_visual):
         if tdiff >= self.km.killmail_time:
             return False
         list_sys_reg = self.filters.object_filter_systems + self.filters.object_filter_constellations + self.filters.object_filter_regions
-        if not self.km.filter_system(list_sys_reg, self.in_system_nonly):
+        self.base_sysConstReg = self.km.filter_system(list_sys_reg, self.in_system_nonly)
+        if self.base_sysConstReg is None:
             # todo check gate jump distance if fail
             return False
         list_typeGroup = self.filters.object_filter_groups + self.filters.object_filter_types
