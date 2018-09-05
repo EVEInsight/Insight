@@ -136,6 +136,24 @@ class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating,
     def get_query_filter(cls,sde_base):
         return sde_base.solarSystemID
 
+    def str_system_name(self):
+        try:
+            return str(self.name)
+        except:
+            return ""
+
+    def str_region_name(self):
+        try:
+            return str(self.object_constellation.object_region.name)
+        except:
+            return ""
+
+    def str_dotlan(self):
+        try:
+            return"http://evemaps.dotlan.net/system/{}".format(str(self.name).replace(' ', '_'))
+        except:
+            return ""
+
 
 from ..filters import *
 from ..eve import *

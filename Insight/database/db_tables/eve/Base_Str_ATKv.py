@@ -67,21 +67,21 @@ class Base_Str_ATKv(object):
 
     def str_corp_image(self, resolution=256):
         try:
-            return "https://image.eveonline.com/Corporation/{}_{}.jpg".format(str(self.corporation_id), str(resolution))
+            return "https://image.eveonline.com/Corporation/{}_{}.png".format(str(self.corporation_id), str(resolution))
         except:
             return ""
 
     def str_alliance_image(self, resolution=128):
         try:
-            return "https://image.eveonline.com/Alliance/{}_{}.jpg".format(str(self.alliance_id), str(resolution))
+            return "https://image.eveonline.com/Alliance/{}_{}.png".format(str(self.alliance_id), str(resolution))
         except:
             return ""
 
     def str_ship_image(self, resolution=512):
         try:
-            if self.object_ship.object_group.object_category.category_id == 11:
-                return "https://image.eveonline.com/Type/{}_64.jpg".format(str(self.ship_type_id))
-            return "https://image.eveonline.com/Render/{}_{}.jpg".format(str(self.ship_type_id), str(resolution))
+            if self.object_ship.object_group.object_category.category_id == 11 or resolution <= 64:
+                return "https://image.eveonline.com/Type/{}_64.png".format(str(self.ship_type_id))
+            return "https://image.eveonline.com/Render/{}_{}.png".format(str(self.ship_type_id), str(resolution))
         except:
             return ""
 

@@ -111,13 +111,6 @@ class Kills(dec_Base.Base, table_row):
         return math.sqrt(
             pow(pos_x - other_x, 2) + pow(pos_y - other_y, 2) + pow(pos_z - other_z, 2)) / 1.496e+11
 
-    def get_highest_attacker(self, attackers_list):
-        top_attacker: attackers.Attackers = attackers_list[0]
-        for a in attackers_list:
-            if a.compare_ship_value(top_attacker):
-                top_attacker = a
-        return top_attacker
-
     def str_overview_attacking_capitals(self, attackers_list):
         ship_totals = []
         ships = [i.object_ship for i in attackers_list]
@@ -191,7 +184,34 @@ class Kills(dec_Base.Base, table_row):
         for i in self.object_attackers:
             if i.final_blow == True:
                 return i
+        print("Error finding final blow")
         return None
+
+    def get_victim(self):
+        return self.object_victim
+
+    def get_system(self):
+        return self.object_system
+
+    def str_zk_link(self):
+        try:
+            return "https://zkillboard.com/kill/{}/".format(str(self.kill_id))
+        except:
+            return ""
+
+    def str_location_zk(self):
+        try:
+            return "https://zkillboard.com/location/{}/".format(str(self.locationID))
+        except:
+            return ""
+
+    def get_highest_attacker(self, attackers_list):
+        """takes a list of filtered attackers and returns the highest valued based on ship type"""
+        top_attacker: attackers.Attackers = attackers_list[0]
+        for a in attackers_list:
+            if a.compare_ship_value(top_attacker):
+                top_attacker = a
+        return top_attacker
 
     def get_attacker_count(self)->int:
         return len(self.object_attackers)
