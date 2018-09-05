@@ -40,7 +40,7 @@ class visual_capradar(base_visual):
         self.location_name = self.km.str_location_name()
         self.base_name = str(self.base_.name)
         self.ly_range = self.km.str_ly_range(self.base_)
-        self.attacking_ships = self.km.str_overview_attacking_capitals(self.tracked_hostiles)
+        self.attacking_ships = self.km.str_overview(self.tracked_hostiles)
         self.text_minutes_ago = self.km.str_minutes_ago(True)
         self.overview_text = "{hSG} activity in {kmSys}({kmRg}) {ly} LYs from {bSys}". \
             format(hSG=self.ha_group, kmSys=self.system_name, kmRg=self.region_name, ly=self.ly_range,

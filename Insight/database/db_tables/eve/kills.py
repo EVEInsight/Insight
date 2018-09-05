@@ -111,16 +111,44 @@ class Kills(dec_Base.Base, table_row):
         return math.sqrt(
             pow(pos_x - other_x, 2) + pow(pos_y - other_y, 2) + pow(pos_z - other_z, 2)) / 1.496e+11
 
-    def str_overview_attacking_capitals(self, attackers_list):
-        ship_totals = []
-        ships = [i.object_ship for i in attackers_list]
-        for ship in list(set(ships)):
-            ship_totals.append((ship.type_name, ships.count(ship)))
-        ship_totals.sort(key=operator.itemgetter(1), reverse=True)
-        ships_str = ""
-        for s in ship_totals:
-            ships_str += "{0:<15}   {1}\n".format(str(s[0]), str(s[1]))
-        return ships_str
+    def str_overview(self, attackers_list, affiliation=False, other=False):
+        i_totals = []
+        items = []
+        max_len = 0
+        total_len = 0
+        total_attackers = len(attackers_list)
+        other_attackers = 0
+        for i in attackers_list:
+            if affiliation:
+                item = i.str_highest_name()
+            else:
+                item = i.str_ship_name()
+            if item:
+                items.append(item)
+                slen = len(item)
+                if slen > max_len:
+                    max_len = slen if slen <= 25 else 25
+            else:
+                other_attackers += 1
+        for i in list(set(items)):
+            i_totals.append((i, items.count(i)))
+        i_totals.sort(key=operator.itemgetter(1), reverse=True)
+        return_str = ""
+        for s in i_totals:
+            if total_len >= 500:
+                return_str += "{0:<{len}} {1}\n".format("truncated", str(total_attackers), len=max_len+1)
+                total_attackers -= total_attackers
+                break
+            else:
+                line_s = "{0:<{len}} {1}\n".format((str(s[0])[:max_len]), str(s[1]), len=max_len+1)
+                total_len += len(line_s)
+                total_attackers -= s[1]
+                return_str += line_s
+        if other:
+            overflow = (len(self.object_attackers) - len(attackers_list)) + other_attackers
+            if overflow > 0:
+                return_str += "{0:<{len}} {1}\n".format("other", str(overflow), len=max_len+1)
+        return return_str
 
     def filter_loss(self, filter_list=[], using_blacklist=False):
         """whitelist - True=in filter_list, False=not in filter list

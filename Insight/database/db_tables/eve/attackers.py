@@ -38,6 +38,15 @@ class Attackers(dec_Base.Base, Base_Str_ATKv):
 
     def compare_ship_value(self, other):
         try:
+            try:
+                s_cat = self.object_ship.object_group.object_category.category_id
+                o_cat = other.object_ship.object_group.object_category.category_id
+                if o_cat == 6 and s_cat != 6:
+                    return False
+                if s_cat == 6 and o_cat != 6:
+                    return True
+            except:
+                pass
             if self.object_ship is None:
                 return False
             if other.object_ship is None:

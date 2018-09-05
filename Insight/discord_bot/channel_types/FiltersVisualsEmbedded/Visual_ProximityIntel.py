@@ -30,7 +30,10 @@ class Visual_ProximityIntel(base_visual):
     def make_header(self):
         author_header = "{hS} activity in {SysR}".format(hS=self.hv.str_ship_name(), SysR=str(self.system))
         self.embed.set_author(name=author_header, url=self.km.str_zk_link(), icon_url=self.hv.str_highest_image(64))
-        self.embed.add_field(name="Ships", value="```{}```".format(self.km.str_overview_attacking_capitals(self.tracked_hostiles)), inline=True)
+        self.embed.add_field(name="Ships", value="```{}```".format(self.km.str_overview(self.tracked_hostiles, other=True)),
+                             inline=True)
+        self.embed.add_field(name="Affiliation", value="```{}```".format(self.km.str_overview(self.tracked_hostiles, True, True)),
+                             inline=True)
         v_field = "Ship: [{S}]({Sl})\nPilot: [{P}]({Pl})\nCorp: [{C}]({Cl})\nAlliance: [{A}]({Al})".format(
             S=self.vi.str_ship_name(), Sl=self.vi.str_ship_zk(), P=self.vi.str_pilot_name(), Pl=self.vi.str_pilot_zk(), C=self.vi.str_corp_name(), Cl=self.vi.str_corp_zk(),
             A=self.vi.str_alliance_name(), Al=self.vi.str_alliance_zk())
@@ -51,7 +54,13 @@ class Visual_ProximityIntel(base_visual):
         self.embed.timestamp = self.km.killmail_time
 
     def make_body(self):
-        self.embed.set_footer(text="Filter match={}".format(str(self.base_sysConstReg)))
+        if isinstance(self.base_sysConstReg, tb_systems):
+            prefix = "In system:"
+        elif isinstance(self.base_sysConstReg, tb_constellations):
+            prefix = "In constellation:"
+        else:
+            prefix = "In region:"
+        self.embed.set_footer(text="{} {}".format(prefix, str(self.base_sysConstReg)))
 
     def run_filter(self):
         tdiff = datetime.datetime.utcnow() - datetime.timedelta(minutes=self.feed_options.max_km_age)

@@ -15,9 +15,7 @@ class VisualCapRadarFunctional(visual_capradar):
         self.author_header = "{hS} activity in {kmSys}({kmRg})".format(hS=self.haShipName, kmSys=self.system_name,
                                                                        kmRg=self.region_name)
         self.location_name = self.km.str_location_name(name_only=True)
-        remain_untrack = self.km.get_attacker_count() - len(self.tracked_hostiles)
-        if remain_untrack > 0:
-            self.attacking_ships += "{0:<15}   {1}\n".format("Other", str(remain_untrack))
+        self.attacking_ships = self.km.str_overview(self.tracked_hostiles, other=True)
 
     def make_links(self):
         super().make_links()
