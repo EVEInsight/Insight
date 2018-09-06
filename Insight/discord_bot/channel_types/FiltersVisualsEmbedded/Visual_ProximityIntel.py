@@ -12,13 +12,8 @@ class Visual_ProximityIntel(base_visual):
         self.in_attackers_affiliation = internal_options.use_blacklist.value
         self.in_system_nonly = internal_options.use_whitelist.value
 
-    def make_links(self):
-        pass
-
-    def make_images(self):
-        pass
-
     def make_vars(self):
+        super().make_vars()
         self.fb: tb_attackers = self.km.get_final_blow()
         self.vi: tb_victims = self.km.get_victim()
         self.hv: tb_attackers = self.km.get_highest_attacker(self.tracked_hostiles)
@@ -98,7 +93,11 @@ class Visual_ProximityIntel(base_visual):
     @classmethod
     def appearance_options(cls):
         yield cls
+        yield Visual_ProximityIntel_Compact
 
     @classmethod
     def get_desc(cls):
         return "Utility - Null"
+
+
+from .Visual_ProximityIntel_Compact import Visual_ProximityIntel_Compact

@@ -4,13 +4,11 @@ from .FiltersVisualsEmbedded import *
 class visual_enfeed(base_visual):
 
     def __init__(self, km_row, discord_channel_object, overall_filters, feed_specific_row, feed_object):
-        super(visual_enfeed, self).__init__(km_row, discord_channel_object, overall_filters, feed_specific_row,
-                                            feed_object)
-        assert isinstance(self.feed_options, tb_enfeed)
+        super().__init__(km_row, discord_channel_object, overall_filters, feed_specific_row, feed_object)
         self.is_kill = False
 
     def internal_list_options(self):
-        super(visual_enfeed, self).internal_list_options()
+        super().internal_list_options()
         self.in_attackers_affiliation = internal_options.use_whitelist.value
 
     def make_images(self):
@@ -32,11 +30,11 @@ class visual_enfeed(base_visual):
             self.fb_CorpOrAliName = self.km.fb_Corp(self.final_blow)
         self.author_text = "Kill" if self.is_kill else "Loss"
 
-    def __set_loss(self):
+    def set_loss(self):
         self.is_kill = False
         self.color = discord.Color(16711680)
 
-    def __set_kill(self):
+    def set_kill(self):
         self.is_kill = True
         self.color = discord.Color(65299)
 
@@ -86,13 +84,13 @@ class visual_enfeed(base_visual):
             return False
         __list_aff = self.filters.object_filter_alliances + self.filters.object_filter_corporations + self.filters.object_filter_characters
         if self.km.filter_victim(self.km.object_victim,filter_list=__list_aff,using_blacklist=self.in_victim_affiliation) is None: #affiliated is victim/loss
-            self.__set_loss()
+            self.set_loss()
             if self.feed_options.show_mode == enum_kmType.kills_only:
                 return False
             if self.feed_options.show_mode == enum_kmType.losses_only or self.feed_options.show_mode == enum_kmType.show_both:
                 return True
         else: #km victim is not affiliated/kill
-            self.__set_kill()
+            self.set_kill()
             if self.feed_options.show_mode == enum_kmType.losses_only:
                 return False
             if len(self.km.filter_attackers(self.km.object_attackers,filter_list=__list_aff,using_blacklist=self.in_attackers_affiliation)) > 0:
