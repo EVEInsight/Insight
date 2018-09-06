@@ -94,6 +94,7 @@ class Visual_ProximityIntel(base_visual):
     def appearance_options(cls):
         yield cls
         yield Visual_ProximityIntel_Compact
+        yield Visual_ProximityIntel_LinkOnly
 
     @classmethod
     def get_desc(cls):
@@ -101,3 +102,4 @@ class Visual_ProximityIntel(base_visual):
 
 
 from .Visual_ProximityIntel_Compact import Visual_ProximityIntel_Compact
+from .Visual_ProximityIntel_LinkOnly import Visual_ProximityIntel_LinkOnly
