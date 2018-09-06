@@ -150,7 +150,14 @@ class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating,
 
     def str_dotlan(self):
         try:
-            return"http://evemaps.dotlan.net/system/{}".format(str(self.name).replace(' ', '_'))
+            return "http://evemaps.dotlan.net/system/{}".format(self.str_system_name().replace(' ', '_'))
+        except:
+            return ""
+
+    def str_dotlan_map(self):
+        try:
+            return "http://evemaps.dotlan.net/map/{}/{}".format(self.str_region_name().replace(' ', '_'),
+                                                                self.str_system_name().replace(' ', '_'))
         except:
             return ""
 

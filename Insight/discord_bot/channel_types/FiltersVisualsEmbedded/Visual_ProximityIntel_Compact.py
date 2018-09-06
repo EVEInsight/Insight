@@ -1,26 +1,25 @@
 from .Visual_ProximityIntel import *
-from .VisualEnfeedCompact import VisualEnfeedCompact
 
 
-class Visual_ProximityIntel_Compact(VisualEnfeedCompact, Visual_ProximityIntel):
-    def internal_list_options(self):
-        Visual_ProximityIntel.internal_list_options(self)
-
-    def run_filter(self):
-        return Visual_ProximityIntel.run_filter(self)
-
-    def set_frame_color(self):
-        self.set_kill()
-        VisualEnfeedCompact.set_frame_color(self)
-
-    @classmethod
-    def feed_specific_row_type(cls):
-        return Visual_ProximityIntel.feed_specific_row_type()
+class Visual_ProximityIntel_Compact(Visual_ProximityIntel):
+    def make_header(self):
+        h_count = len(self.tracked_hostiles)
+        autHead = "{} hostile{} in {}".format(str(h_count), "s" if h_count > 1 else "", str(self.system))
+        self.embed.set_author(name=autHead, url=self.km.str_zk_link(), icon_url=self.hv.str_highest_image(64))
+        desc = '**[{hName}]({haZK})({haAfN})** in a **{hShip}** near **[{loc}]({locL})**.' \
+            .format(hName=self.hv.str_pilot_name(), haZK=self.hv.str_pilot_zk(), haAfN=self.hv.str_highest_name(),
+                    hShip=self.hv.str_ship_name(), loc=self.km.str_location_name(True), locL=self.system.str_dotlan_map())
+        self.embed.description = desc
+        self.embed.title = "{hShip} destroyed a {vS} in {sysR}".format(hShip=self.hv.str_ship_name(),
+                                                                       vS=self.vi.str_ship_name(),sysR=str(self.system))
+        self.embed.url = self.km.str_zk_link()
+        self.embed.set_thumbnail(url=self.hv.str_ship_image(64))
+        self.embed.timestamp = self.km.killmail_time
 
     @classmethod
     def appearance_id(cls):
-        return 1
+        return 3
 
     @classmethod
     def get_desc(cls):
-        return "Entity Feed Compact - Display as if in entity feed instead of tracking information."
+        return "Compact - Null"

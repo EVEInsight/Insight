@@ -2,11 +2,10 @@ from .FiltersVisualsEmbedded import *
 
 
 class visual_capradar(base_visual):
-
     def __init__(self, km_row, discord_channel_object, overall_filters, feed_specific_row, feed_object):
-        super(visual_capradar, self).__init__(km_row, discord_channel_object, overall_filters, feed_specific_row,
-                                              feed_object)
-        assert isinstance(self.feed_options, tb_capRadar)
+        super().__init__(km_row, discord_channel_object, overall_filters, feed_specific_row, feed_object)
+        self.tracked_hostiles = []
+        self.base_ = None
 
     def make_links(self):
         super().make_links()
