@@ -142,8 +142,8 @@ class Kills(dec_Base.Base, table_row):
         i_totals.sort(key=operator.itemgetter(1), reverse=True)
         return_str = ""
         for s in i_totals:
-            if total_len >= 500:
-                return_str += "{0:<{len}} {1}\n".format("Truncated", str(total_attackers), len=max_len+1)
+            if total_len >= 300:
+                return_str += "{0:<{len}} {1}\n".format("==Truncated", str(total_attackers), len=max_len+1)
                 total_attackers -= total_attackers
                 break
             else:
