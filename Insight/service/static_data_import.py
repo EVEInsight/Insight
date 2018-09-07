@@ -61,6 +61,7 @@ class static_data_import(object):
         dbRow.tb_systems.api_mass_data_resolve(self.service)
         dbRow.tb_categories.api_mass_data_resolve(self.service)
         dbRow.tb_groups.api_mass_data_resolve(self.service)
+        dbRow.tb_types.update_prices(self.service)
 
 
 from database.db_tables import *

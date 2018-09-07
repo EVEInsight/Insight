@@ -76,3 +76,31 @@ class Types(dec_Base.Base,name_only,index_api_updating,sde_impoter):
     def get_query_filter(cls, sde_base):
         return sde_base.typeID
 
+    @classmethod
+    def update_prices(cls, service_module):
+        db: Session = service_module.get_session()
+        try:
+            total_market = 0
+            resp: List[swagger_client.GetMarketsPrices200Ok] = swagger_client.MarketApi().get_markets_prices()
+            item_dict = {}
+            for i in resp:
+                item_dict[i.type_id] = i
+            for t in db.query(cls).all():
+                p = item_dict.get(t.get_id())
+                if p is not None:
+                    if p.average_price is not None:
+                        price = p.average_price
+                    elif p.adjusted_price is not None:
+                        price = p.average_price
+                    else:
+                        price = t.basePrice
+                    t.basePrice = price
+                    total_market += 1
+            db.commit()
+            print("Updated prices for {} items.".format(str(total_market)))
+        except ApiException as ex:
+            print("Error code {} when updating market data.".format(str(ex.status)))
+        except Exception as ex:
+            print(ex)
+
+
