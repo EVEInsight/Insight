@@ -14,10 +14,7 @@ class Visual_ProximityIntel(base_visual):
 
     def make_vars(self):
         super().make_vars()
-        self.fb: tb_attackers = self.km.get_final_blow()
-        self.vi: tb_victims = self.km.get_victim()
         self.hv: tb_attackers = self.km.get_highest_attacker(self.tracked_hostiles)
-        self.system: tb_systems = self.km.get_system()
 
     def make_text_heading(self):
         self.message_txt = "{}".format(self.mention_method())

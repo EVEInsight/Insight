@@ -248,8 +248,8 @@ class Kills(dec_Base.Base, table_row):
                 top_attacker = a
         return top_attacker
 
-    def get_attacker_count(self)->int:
-        return len(self.object_attackers)
+    def str_total_involved(self):
+        return str(len(self.object_attackers))
 
     def victim_pilotID(self):
         try:
@@ -275,13 +275,13 @@ class Kills(dec_Base.Base, table_row):
         except:
             return ""
 
-    def victim_totalDamage(self):
+    def str_damage(self):
         try:
             return str("{:,d}".format(int(self.object_victim.damage_taken)))
         except:
             return ""
 
-    def victim_iskLost(self):
+    def str_isklost(self):
         try:
             val = self.totalValue
             if val >= 1000000000:
@@ -364,7 +364,7 @@ class Kills(dec_Base.Base, table_row):
             return ""
 
     def str_attacker_count(self):
-        count = self.get_attacker_count()
+        count = len(self.object_attackers)
         if count == 1:
             return "solo"
         else:

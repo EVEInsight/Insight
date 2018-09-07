@@ -11,25 +11,6 @@ class visual_enfeed(base_visual):
         super().internal_list_options()
         self.in_attackers_affiliation = internal_options.use_whitelist.value
 
-    def make_images(self):
-        super().make_images()
-        if self.km.object_victim.alliance_id is not None:
-            self.im_victim_corpAli = "https://imageserver.eveonline.com/Alliance/{}_128.png".format \
-                (str(self.km.object_victim.alliance_id))
-        else:
-            self.im_victim_corpAli = "https://imageserver.eveonline.com/Corporation/{}_128.png".format(
-                str(self.km.object_victim.corporation_id))
-
-    def make_vars(self):
-        super().make_vars()
-        self.victim_CorpOrAliName = self.km.victim_allianceName()
-        if not self.victim_CorpOrAliName:
-            self.victim_CorpOrAliName = self.km.victim_corpName()
-        self.fb_CorpOrAliName = self.km.fb_Alliance(self.final_blow)
-        if not self.fb_CorpOrAliName:
-            self.fb_CorpOrAliName = self.km.fb_Corp(self.final_blow)
-        self.author_text = "Kill" if self.is_kill else "Loss"
-
     def set_loss(self):
         self.is_kill = False
         self.color = discord.Color(16711680)
@@ -39,34 +20,32 @@ class visual_enfeed(base_visual):
         self.color = discord.Color(65299)
 
     def make_header(self):
-        self.embed.set_author(name=self.author_text, url=self.zk_kill, icon_url=self.im_victim_corpAli)
-        __desc = '**{ship_name}** destroyed in **[{system_name}]' \
-                 '({system_link})**({region_name})\n\n' \
-                 '**[{pilot_name}]({victimP_zk})' \
-                 '({vAfi})** lost their **{ship_name}** to **[{fb_name}]({fbP_zk})' \
-                 '({fbAfi})** flying in a **{fb_ship}** {inv_str}.\n\n' \
-            .format(ship_name=self.ship_name, system_name=self.system_name, system_link=self.system_link,
-                    region_name=self.region_name, pilot_name=self.pilot_name, victimP_zk=self.victimP_zk,
-                    vAfi=self.victim_CorpOrAliName, fb_name=self.fb_name, fbP_zk=self.fbP_zk,
-                    fbAfi=self.fb_CorpOrAliName, fb_ship=self.fb_ship, inv_str=self.inv_str)
-        self.embed.description = __desc
+        author_text = "Kill" if self.is_kill else "Loss"
+        self.embed.set_author(name=author_text, url=self.km.str_zk_link(), icon_url=self.vi.str_highest_image(64))
+        body_desc = '**{vS}** destroyed in **[{sysN}]({systL})**({rgN})\n\n**[{vP}]({vP_l})' \
+            '({vAfi})** lost their **{vS}** to **[{fbP}]({fbP_l})({fbAfi})** flying in a **{fbS}** {inv_str}.\n\n' \
+            .format(vS=self.vi.str_ship_name(), sysN=self.system.str_system_name(), systL=self.system.str_dotlan_map(),
+                    rgN=self.system.str_region_name(), vP=self.vi.str_pilot_name(), vP_l=self.vi.str_pilot_zk(),
+                    vAfi=self.vi.str_highest_name(), fbP=self.fb.str_pilot_name(), fbP_l=self.fb.str_pilot_zk(),
+                    fbAfi=self.fb.str_highest_name(), fbS=self.fb.str_ship_name(), inv_str=self.km.str_attacker_count())
+        self.embed.description = body_desc
         self.embed.title = " "
-        self.embed.url = self.zk_kill
-        self.embed.set_thumbnail(url="https://imageserver.eveonline.com/Character/{}_64.jpg".format(self.km.victim_pilotID()))
-        self.embed.set_image(url="https://imageserver.eveonline.com/Render/{}_128.png".format(str(self.km.object_victim.ship_type_id)))
+        self.embed.url = self.km.str_zk_link()
+        self.embed.set_thumbnail(url=self.vi.str_pilot_image(64))
+        self.embed.set_image(url=self.vi.str_ship_image(128))
         self.embed.timestamp = self.km.killmail_time
 
     def make_body(self):
-        __field_body = "```{Ship:<14}{ship_name}\n" \
-                       "{Name:<14}{pilot_name}\n" \
-                       "{Corp:<14}{corp_name}\n{Alliance:<14}{alliance_name}\n{Damage_Taken:<14}{damage_taken}\n" \
+        field_body = "```{Ship:<14}{vS}\n" \
+                       "{Name:<14}{vP}\n" \
+                       "{Corp:<14}{vC}\n{Alliance:<14}{vA}\n{Damage_Taken:<14}{damage_taken}\n" \
                        "{Involved:<14}{inv}\n{ISK_Lost:<14}{isk_lost}\n{Time:<14}{min_ago}```**[zKill KM]({zk})**" \
             .format(Ship='Ship:', Name="Name:", Corp="Corp:", Alliance="Alliance:", Damage_Taken="Damage Taken:",
-                    Involved="Involved:", ISK_Lost="ISK Lost:", Time="Time:", zk=self.zk_kill,
-                    ship_name=self.ship_name, pilot_name=self.pilot_name, corp_name=self.corp_name,
-                    alliance_name=self.alliance_name, damage_taken=self.damage_taken, inv=self.total_involved,
-                    isk_lost=self.isk_lost, min_ago=self.min_ago)
-        self.embed.add_field(name="**Details**", value=__field_body,inline=False)
+                    Involved="Involved:", ISK_Lost="ISK Lost:", Time="Time:", zk=self.km.str_zk_link(),
+                    vS=self.vi.str_ship_name(), vP=self.vi.str_pilot_name(), vC=self.vi.str_corp_name(),
+                    vA=self.vi.str_alliance_name(), damage_taken=self.km.str_damage(), inv=self.km.str_total_involved(),
+                    isk_lost=self.km.str_isklost(), min_ago=self.km.str_minutes_ago())
+        self.embed.add_field(name="**Details**", value=field_body, inline=False)
 
     def run_filter(self):
         tdiff = datetime.datetime.utcnow() - datetime.timedelta(

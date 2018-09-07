@@ -26,6 +26,11 @@ class base_visual(object):
         self.color = discord.Color(800680)
         self.text_only = False
 
+        self.fb: tb_attackers = None
+        self.vi: tb_victims = None
+        self.hv: tb_attackers = None
+        self.system: tb_systems = None
+
     def get_load_time(self):
         return self.km.loaded_time
 
@@ -66,6 +71,11 @@ class base_visual(object):
         raise NotImplementedError
 
     def make_vars(self):
+        self.fb: tb_attackers = self.km.get_final_blow()
+        self.vi: tb_victims = self.km.get_victim()
+        self.hv: tb_attackers = self.fb  # change to hv in child classes
+        self.system: tb_systems = self.km.get_system()
+
         __zk_pilot = "https://zkillboard.com/character/{}/"
         self.ship_name = str(self.km.object_victim.object_ship.type_name)
         self.system_name = self.km.systemName()
@@ -80,9 +90,9 @@ class base_visual(object):
         self.fb_Corp = self.km.fb_Corp(self.final_blow)
         self.fb_ship = self.km.fb_ship(self.final_blow)
         self.inv_str = self.km.str_attacker_count()
-        self.damage_taken = self.km.victim_totalDamage()
-        self.isk_lost = self.km.victim_iskLost()
-        self.total_involved = str(self.km.get_attacker_count())
+        self.damage_taken = self.km.str_damage()
+        self.isk_lost = self.km.str_isklost()
+        self.total_involved = str(self.km.str_total_involved())
         self.min_ago = self.km.str_minutes_ago()
 
     def make_text_heading(self):
