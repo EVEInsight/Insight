@@ -136,30 +136,55 @@ class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating,
     def get_query_filter(cls,sde_base):
         return sde_base.solarSystemID
 
-    def str_system_name(self):
+    def str_system_name(self, url_safe=False):
         try:
-            return str(self.name)
+            return str(self.name) if not url_safe else str(self.name).replace(' ', '_')
         except:
             return ""
 
-    def str_region_name(self):
+    def str_region_name(self, url_safe=False):
         try:
-            return str(self.object_constellation.object_region.name)
+            reg = self.object_constellation.object_region
+            return str(reg.name) if not url_safe else str(reg.name).replace(' ', '_')
         except:
             return ""
 
     def str_dotlan(self):
         try:
-            return "http://evemaps.dotlan.net/system/{}".format(self.str_system_name().replace(' ', '_'))
+            return "http://evemaps.dotlan.net/system/{}".format(self.str_system_name(True))
         except:
             return ""
 
     def str_dotlan_map(self):
         try:
-            return "http://evemaps.dotlan.net/map/{}/{}".format(self.str_region_name().replace(' ', '_'),
-                                                                self.str_system_name().replace(' ', '_'))
+            return "http://evemaps.dotlan.net/map/{}/{}".format(self.str_region_name(True), self.str_system_name(True))
         except:
             return ""
+
+    def str_dotlan_jmp(self, to_sys, ship_group=""):
+        try:
+            assert isinstance(to_sys, Systems)
+            return "http://evemaps.dotlan.net/jump/{sg},555/{b}:{t}".format(sg=ship_group, b=self.str_system_name(True),
+                                                                            t=to_sys.str_system_name(True))
+        except:
+            return ""
+
+    def str_dotlan_gates(self, to_sys):
+        try:
+            assert isinstance(to_sys, Systems)
+            return "http://evemaps.dotlan.net/route/{b}:{t}".format(b=self.str_system_name(True),
+                                                                    t=to_sys.str_system_name(True))
+        except:
+            return ""
+
+    def str_jmp_titan(self, to_sys):
+        return self.str_dotlan_jmp(to_sys, "Avatar")
+
+    def str_jmp_carrier(self, to_sys):
+        return self.str_dotlan_jmp(to_sys, "Archon")
+
+    def str_jmp_blops(self, to_sys):
+        return self.str_dotlan_jmp(to_sys, "Redeemer")
 
 
 from ..filters import *

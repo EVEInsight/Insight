@@ -5,22 +5,7 @@ class visual_capradar(base_visual):
     def __init__(self, km_row, discord_channel_object, overall_filters, feed_specific_row, feed_object):
         super().__init__(km_row, discord_channel_object, overall_filters, feed_specific_row, feed_object)
         self.tracked_hostiles = []
-        self.base_ = None
-
-    def make_links(self):
-        super().make_links()
-        self.haZK = "https://zkillboard.com/character/{}/".format(self.km.fb_pID(self.highestAT))
-
-    def make_images(self):
-        super().make_images()
-        if self.highestAT.alliance_id is not None:
-            self.thumbnail = "https://imageserver.eveonline.com/Alliance/{}_128.png".format \
-                (str(self.highestAT.alliance_id))
-        else:
-            self.thumbnail = "https://imageserver.eveonline.com/Corporation/{}_128.png".format(
-                str(self.highestAT.corporation_id))
-        self.ship_image = "https://imageserver.eveonline.com/Render/{}_128.png".format(
-            str(self.highestAT.ship_type_id))
+        self.baseSystem: tb_systems = None
 
     def internal_list_options(self):
         super(visual_capradar, self).internal_list_options()
@@ -29,59 +14,48 @@ class visual_capradar(base_visual):
         self.in_system_ly = internal_options.use_whitelist.value
 
     def make_vars(self):
-        super(visual_capradar, self).make_vars()
-        self.highestAT = self.km.get_highest_attacker(self.tracked_hostiles)
-        self.haName = self.km.fb_Name(self.highestAT)
-        self.haCorp = self.km.fb_Corp(self.highestAT)
-        self.haAli = self.km.fb_Alliance(self.highestAT, True)
-        self.haShip = self.km.fb_ship(self.highestAT)
-        self.ha_group = self.km.fb_ShipGroup(self.highestAT)
-        self.location_name = self.km.str_location_name()
-        self.base_name = str(self.base_.name)
-        self.ly_range = self.km.str_ly_range(self.base_)
-        self.attacking_ships = self.km.str_overview(self.tracked_hostiles)
-        self.text_minutes_ago = self.km.str_minutes_ago(True)
-        self.overview_text = "{hSG} activity in {kmSys}({kmRg}) {ly} LYs from {bSys}". \
-            format(hSG=self.ha_group, kmSys=self.system_name, kmRg=self.region_name, ly=self.ly_range,
-                   bSys=self.base_name)
+        super().make_vars()
+        self.hv: tb_attackers = self.km.get_highest_attacker(self.tracked_hostiles)
 
     def extract_mention(self):
-        assert isinstance(self.highestAT, tb_attackers)
+        assert isinstance(self.hv, tb_attackers)
         for c in self.list_typeGroup:
-            if self.highestAT.compare_filter_list(c):
+            if self.hv.compare_filter_list(c):
                 return c.mention
         return enum_mention.noMention
 
     def make_text_heading(self):
-        self.message_txt = "{} {} {}".format(self.mention_method(), self.overview_text, self.min_ago)
+        overview_text = "{haAfi} {haS} activity in {sysReg}".format(haAfi=self.hv.str_highest_name(), haS=self.hv.str_shipGroup_name(), sysReg=str(self.system))
+        self.message_txt = "{} {} {}".format(self.mention_method(), overview_text, self.km.str_minutes_ago())
 
     def make_header(self):
-        self.embed.set_author(name=self.overview_text, url=self.zk_kill)
-        __desc = '**{ship_name}** destroyed in **[{system_name}]' \
-                 '({system_link})**({region_name}) {mAgo}{lName}\n\n' \
-                 '*Involving **[{hName}]({haZK})({hCorp})**{hAl} in a **{hShip}** {inv}.*' \
-            .format(ship_name=self.ship_name, system_name=self.system_name, system_link=self.system_link,
-                    region_name=self.region_name, mAgo=self.text_minutes_ago, lName=self.location_name,
-                    hName=self.haName,
-                    haZK=self.haZK, hCorp=self.haCorp, hAl=self.haAli, hShip=self.haShip, inv=self.inv_str)
-        self.embed.description = __desc
+        overview_text = "{haS} activity in {sysReg} {ly} LYs from {bSys}".format(haS=self.hv.str_ship_name(), sysReg=str(self.system), ly=self.km.str_ly_range(self.baseSystem), bSys=self.baseSystem.str_system_name())
+        self.embed.set_author(name=overview_text,icon_url=self.hv.str_highest_image(64), url=self.km.str_zk_link())
+        e_desc = '**{vS}** destroyed in **[{sysN}]' \
+                 '({sysL})**({rgN}) {mAgo}{loc}\n\n' \
+                 '*Involving **[{haP}]({haP_l})({haAfi})** in a **{haS}** {inv}.*' \
+            .format(vS=self.vi.str_ship_name(), sysN=self.system.str_system_name(), sysL=self.system.str_dotlan_map(),
+                    rgN=self.system.str_region_name(), mAgo=self.km.str_minutes_ago(True),
+                    loc=self.km.str_location_name(), haP=self.hv.str_pilot_name(), haP_l=self.hv.str_pilot_zk(),
+                    haAfi=self.hv.str_highest_name(), haS=self.hv.str_ship_name(), inv=self.km.str_attacker_count())
+        self.embed.description = e_desc
         self.embed.title = " "
-        self.embed.url = self.zk_kill
-        self.embed.set_thumbnail(url=self.thumbnail)
-        self.embed.set_image(url=self.ship_image)
-        self.embed.timestamp = self.km.killmail_time
+        self.embed.url = self.km.str_zk_link()
+        self.embed.set_thumbnail(url=self.hv.str_ship_image(128))
+        self.embed.timestamp = self.km.get_time()
 
     def make_body(self):
-        __heading = "**{} of {} attackers flying in tracked ships:**".format(str(len(self.tracked_hostiles)),
-                                                                             str(self.total_involved))
-        __body = "```{}```".format(self.attacking_ships, zk=self.zk_kill)
-        self.embed.add_field(name=__heading, value=__body, inline=False)
-        __heading_routes = "Dotlan routes from {}".format(self.base_name)
-        self.embed.add_field(name=__heading_routes, value=self.__helper_routes(), inline=False)
+        heading = "**{} of {} attackers flying in tracked ships**".format(str(len(self.tracked_hostiles)),
+                                                                           self.km.str_total_involved())
+        body = "```{}```".format(self.km.str_overview(self.tracked_hostiles), zk=self.km.str_zk_link())
+        self.embed.add_field(name=heading, value=body, inline=False)
+        heading_routes = "Dotlan routes from {}".format(self.baseSystem.str_system_name())
+        self.embed.add_field(name=heading_routes, value=self.helper_routes(), inline=False)
         self.embed.color = discord.Color(800680)
+        self.embed.set_footer(text="{ly} LYs from {bName}".format(ly=self.km.str_ly_range(self.baseSystem), bName=self.baseSystem.str_system_name()))
 
     def set_frame_color(self):
-        s = (datetime.datetime.utcnow() - self.km.killmail_time).total_seconds()
+        s = (datetime.datetime.utcnow() - self.km.get_time()).total_seconds()
         if 0 <= s <= 60:
             self.color = discord.Color(12124259)
         elif 60 <= s <= 300:
@@ -90,26 +64,22 @@ class visual_capradar(base_visual):
             self.color = discord.Color(4128800)
         super().set_frame_color()
 
-    def __helper_routes(self):
-        _dotlan_link = "http://evemaps.dotlan.net/jump/{ship},555/{base}:{target}".format(ship="{2}",
-                                                                                          base=self.base_name,
-                                                                                          target=self.system_name)
-        _dotlan_gates = "http://evemaps.dotlan.net/route/{base}:{target}".format(base=self.base_name,
-                                                                                 target=self.system_name)
-        _row = "[```{0:<23}{1}```]" + "({})".format(_dotlan_link)
-        _return_str = ""
-        _return_str += _row.format("Titans/Supers", "", "Avatar")
-        _return_str += _row.format("Carriers/Dreads/FAX", "", "Archon")
-        _return_str += _row.format("Blops", "", "Redeemer")
-        _return_str += "[```{0:<23}```]({1})\n**[zKill KM]({2})**".format("Gates", _dotlan_gates, self.zk_kill)
-        return _return_str
+    def helper_routes(self):
+        row_template = "[```{0:<23} ```]" + "({1})"
+        return_str = ""
+        return_str += row_template.format("Titans/Supers", self.baseSystem.str_jmp_titan(self.system))
+        return_str += row_template.format("Carriers/Dreads/FAX", self.baseSystem.str_jmp_carrier(self.system))
+        return_str += row_template.format("Blops", self.baseSystem.str_jmp_blops(self.system))
+        return_str += row_template.format("Gates", self.baseSystem.str_dotlan_gates(self.system))
+        return_str += "\n**[zKill KM]({})**".format(self.km.str_zk_link())
+        return return_str
 
     def run_filter(self):
         tdiff = datetime.datetime.utcnow() - datetime.timedelta(minutes=self.feed_options.max_km_age)
         if tdiff >= self.km.killmail_time:
             return False
-        self.base_ = self.km.filter_system_ly(self.filters.object_filter_systems, self.in_system_ly)
-        if self.base_ is None:
+        self.baseSystem = self.km.filter_system_ly(self.filters.object_filter_systems, self.in_system_ly)
+        if self.baseSystem is None:
             return False
         self.list_typeGroup = self.filters.object_filter_groups + self.filters.object_filter_types
         tracked_ships = self.km.filter_attackers(self.km.object_attackers, self.list_typeGroup,
