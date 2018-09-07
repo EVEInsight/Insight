@@ -7,15 +7,15 @@ class Visual_ProximityIntel_EFCompact(VisualEnfeedCompact, Visual_ProximityIntel
         Visual_ProximityIntel.internal_list_options(self)
 
     def run_filter(self):
-        return Visual_ProximityIntel.run_filter(self)
-
-    def set_frame_color(self):
         self.set_kill()
-        VisualEnfeedCompact.set_frame_color(self)
+        return Visual_ProximityIntel.run_filter(self)
 
     @classmethod
     def feed_specific_row_type(cls):
         return Visual_ProximityIntel.feed_specific_row_type()
+
+    def set_frame_color(self):
+        super(Visual_ProximityIntel, self).set_frame_color()  # call base method
 
     @classmethod
     def appearance_id(cls):
