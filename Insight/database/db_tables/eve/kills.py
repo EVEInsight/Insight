@@ -111,7 +111,9 @@ class Kills(dec_Base.Base, table_row):
         return math.sqrt(
             pow(pos_x - other_x, 2) + pow(pos_y - other_y, 2) + pow(pos_z - other_z, 2)) / 1.496e+11
 
-    def str_overview(self, attackers_list, affiliation=False, other=False, balance=False):
+    def str_overview(self, attackers_list, affiliation=False, other=False, is_blue=False, balance=False):
+        """make an overview of ships/affiliation. If other, include other tag for known ships missing from attacker_list
+        if is_blue, change other tag to blues/allies."""
         i_totals = []
         total_len = 0
         max_len = 5
@@ -126,24 +128,19 @@ class Kills(dec_Base.Base, table_row):
         for i in tmp_items:
             if i:
                 items.append(i)
-        if balance:
-            tmp_counter_list = tmp_ships+tmp_affi
-            if len(tmp_counter_list) > 0:
-                slen = len(max(tmp_counter_list, key=len))
-                max_len = slen if slen <= 25 else 25
-        else:
-            if len(items) > 0:
-                slen = len(max(items, key=len))
-                max_len = slen if slen <= 25 else 25
+        tmp_counter_list = tmp_ships+tmp_affi if balance else tmp_items
+        if len(tmp_counter_list) > 0:
+            slen = len(max(tmp_counter_list, key=len))
+            max_len = slen if slen <= 25 else 25
         max_len = 5 if max_len < 5 else max_len
-        other_attackers = len(attackers_list) - len(items)
+        unknown_attackers = len(attackers_list) - len(items)
         for i in list(set(items)):
             i_totals.append((i, items.count(i)))
         i_totals.sort(key=operator.itemgetter(1), reverse=True)
         return_str = ""
         for s in i_totals:
-            if total_len >= 300:
-                return_str += "{0:<{len}} {1}\n".format("==Truncated", str(total_attackers), len=max_len+1)
+            if total_len >= 350:
+                return_str += "{0:<{len}} {1}\n".format("--Truncated", str(total_attackers), len=max_len+1)
                 total_attackers -= total_attackers
                 break
             else:
@@ -151,10 +148,13 @@ class Kills(dec_Base.Base, table_row):
                 total_len += len(line_s)
                 total_attackers -= s[1]
                 return_str += line_s
+        if unknown_attackers > 0:
+            return_str += "{0:<{len}} {1}\n".format("--Unknown", str(unknown_attackers), len=max_len + 1)
         if other:
-            overflow = (len(self.object_attackers) - len(attackers_list)) + other_attackers
+            overflow = (len(self.object_attackers) - len(attackers_list))
             if overflow > 0:
-                return_str += "{0:<{len}} {1}\n".format("Other", str(overflow), len=max_len+1)
+                display_str = "--Other" if not is_blue else "--Allies/blues"
+                return_str += "{0:<{len}} {1}\n".format(display_str, str(overflow), len=max_len+1)
         return return_str
 
     def filter_loss(self, filter_list=[], using_blacklist=False):

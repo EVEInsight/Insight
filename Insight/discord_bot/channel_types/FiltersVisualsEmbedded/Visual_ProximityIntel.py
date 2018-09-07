@@ -25,10 +25,8 @@ class Visual_ProximityIntel(base_visual):
     def make_header(self):
         author_header = "{hS} activity in {SysR}".format(hS=self.hv.str_ship_name(), SysR=str(self.system))
         self.embed.set_author(name=author_header, url=self.km.str_zk_link(), icon_url=self.hv.str_highest_image(64))
-        self.embed.add_field(name="Ships", value="```{}```".format(self.km.str_overview(self.tracked_hostiles, other=True, balance=True)),
-                             inline=False)
-        self.embed.add_field(name="Affiliation", value="```{}```".format(self.km.str_overview(self.tracked_hostiles, True, True, True)),
-                             inline=False)
+        self.embed.add_field(name="Ships", value="```{}```".format(self.km.str_overview(self.tracked_hostiles, affiliation=False, other=True, is_blue=True, balance=True)), inline=False)
+        self.embed.add_field(name="Affiliation", value="```{}```".format(self.km.str_overview(self.tracked_hostiles, affiliation=True, other=True, is_blue=True, balance=True)), inline=False)
         v_field = "Ship: [{S}]({Sl})\nPilot: [{P}]({Pl})\nCorp: [{C}]({Cl})\nAlliance: [{A}]({Al})".format(
             S=self.vi.str_ship_name(), Sl=self.vi.str_ship_zk(), P=self.vi.str_pilot_name(), Pl=self.vi.str_pilot_zk(), C=self.vi.str_corp_name(), Cl=self.vi.str_corp_zk(),
             A=self.vi.str_alliance_name(), Al=self.vi.str_alliance_zk())
