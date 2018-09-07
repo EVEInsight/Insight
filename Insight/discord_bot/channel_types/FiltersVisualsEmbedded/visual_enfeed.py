@@ -33,7 +33,7 @@ class visual_enfeed(base_visual):
         self.embed.url = self.km.str_zk_link()
         self.embed.set_thumbnail(url=self.vi.str_pilot_image(64))
         self.embed.set_image(url=self.vi.str_ship_image(128))
-        self.embed.timestamp = self.km.killmail_time
+        self.embed.timestamp = self.km.get_time()
 
     def make_body(self):
         field_body = "```{Ship:<14}{vS}\n" \

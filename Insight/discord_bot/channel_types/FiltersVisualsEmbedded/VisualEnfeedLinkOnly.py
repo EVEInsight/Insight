@@ -4,7 +4,7 @@ from .visual_enfeed import *
 class VisualEnfeedLinkOnly(visual_enfeed):
     def make_text_heading(self):
         self.text_only = True
-        self.message_txt = "{} {}".format(self.mention_method(), self.zk_kill)
+        self.message_txt = "{} {}".format(self.mention_method(), self.km.str_zk_link())
 
     def make_header(self):
         pass

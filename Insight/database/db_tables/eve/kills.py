@@ -296,6 +296,13 @@ class Kills(dec_Base.Base, table_row):
         except:
             return ""
 
+    def get_time(self):
+        try:
+            assert isinstance(self.killmail_time, datetime.datetime)
+            return self.killmail_time
+        except:
+            return datetime.datetime.utcnow()
+
     def systemName(self):
         try:
             return str(self.object_system.name)
@@ -368,7 +375,7 @@ class Kills(dec_Base.Base, table_row):
         if count == 1:
             return "solo"
         else:
-            return "and **{}** others".format(str(count-1))
+            return "and **{}** other{}".format(str(count-1), "" if count == 2 else "s")
 
     def str_minutes_ago(self, text_mituntes_ago=False):
         try:
