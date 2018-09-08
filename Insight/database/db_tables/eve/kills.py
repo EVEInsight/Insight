@@ -111,52 +111,6 @@ class Kills(dec_Base.Base, table_row):
         return math.sqrt(
             pow(pos_x - other_x, 2) + pow(pos_y - other_y, 2) + pow(pos_z - other_z, 2)) / 1.496e+11
 
-    def str_overview(self, attackers_list, affiliation=False, other=False, is_blue=False, balance=False):
-        """make an overview of ships/affiliation. If other, include other tag for known ships missing from attacker_list
-        if is_blue, change other tag to blues/allies."""
-        i_totals = []
-        total_len = 0
-        max_len = 8
-        items = []
-        total_attackers = len(attackers_list)
-        tmp_affi = [i.str_highest_name() for i in attackers_list]
-        tmp_ships = [i.str_ship_name() for i in attackers_list]
-        if affiliation:
-            tmp_items = tmp_affi
-        else:
-            tmp_items = tmp_ships
-        for i in tmp_items:
-            if i:
-                items.append(i)
-        tmp_counter_list = tmp_ships+tmp_affi if balance else tmp_items
-        if len(tmp_counter_list) > 0:
-            slen = len(max(tmp_counter_list, key=len))
-            max_len = slen if slen <= 25 else 25
-        max_len = 8 if max_len < 8 else max_len
-        unknown_attackers = len(attackers_list) - len(items)
-        for i in list(set(items)):
-            i_totals.append((i, items.count(i)))
-        i_totals.sort(key=operator.itemgetter(1), reverse=True)
-        return_str = ""
-        for s in i_totals:
-            if total_len >= 350:
-                return_str += "{0:<{len}} {1}\n".format("--Truncated", str(total_attackers), len=max_len+1)
-                total_attackers -= total_attackers
-                break
-            else:
-                line_s = "{0:<{len}} {1}\n".format((str(s[0])[:max_len]), str(s[1]), len=max_len+1)
-                total_len += len(line_s)
-                total_attackers -= s[1]
-                return_str += line_s
-        if unknown_attackers > 0:
-            return_str += "{0:<{len}} {1}\n".format("--Unknown", str(unknown_attackers), len=max_len + 1)
-        if other:
-            overflow = (len(self.object_attackers) - len(attackers_list))
-            if overflow > 0:
-                display_str = "--Other" if not is_blue else "--Allies/blues"
-                return_str += "{0:<{len}} {1}\n".format(display_str, str(overflow), len=max_len+1)
-        return return_str
-
     def filter_loss(self, filter_list=[], using_blacklist=False):
         """whitelist - True=in filter_list, False=not in filter list
         blacklist - True=not in filter_list, False=in filter list"""
@@ -228,6 +182,21 @@ class Kills(dec_Base.Base, table_row):
     def get_system(self):
         return self.object_system
 
+    def get_highest_attacker(self, attackers_list):
+        """takes a list of filtered attackers and returns the highest valued based on ship type"""
+        top_attacker: attackers.Attackers = attackers_list[0]
+        for a in attackers_list:
+            if a.compare_ship_value(top_attacker):
+                top_attacker = a
+        return top_attacker
+
+    def get_time(self):
+        try:
+            assert isinstance(self.killmail_time, datetime.datetime)
+            return self.killmail_time
+        except:
+            return datetime.datetime.utcnow()
+
     def str_zk_link(self):
         try:
             return "https://zkillboard.com/kill/{}/".format(str(self.kill_id))
@@ -240,40 +209,8 @@ class Kills(dec_Base.Base, table_row):
         except:
             return ""
 
-    def get_highest_attacker(self, attackers_list):
-        """takes a list of filtered attackers and returns the highest valued based on ship type"""
-        top_attacker: attackers.Attackers = attackers_list[0]
-        for a in attackers_list:
-            if a.compare_ship_value(top_attacker):
-                top_attacker = a
-        return top_attacker
-
     def str_total_involved(self):
         return str(len(self.object_attackers))
-
-    def victim_pilotID(self):
-        try:
-            return str(self.object_victim.character_id)
-        except:
-            return ""
-
-    def victim_pilotName(self):
-        try:
-            return str(self.object_victim.object_pilot.character_name)
-        except:
-            return ""
-
-    def victim_corpName(self):
-        try:
-            return str(self.object_victim.object_corp.corporation_name)
-        except:
-            return ""
-
-    def victim_allianceName(self):
-        try:
-            return str(self.object_victim.object_alliance.alliance_name)
-        except:
-            return ""
 
     def str_damage(self):
         try:
@@ -293,80 +230,6 @@ class Kills(dec_Base.Base, table_row):
             else:
                 num = float(val / 10000)
                 return '{:.1f}k'.format(num)
-        except:
-            return ""
-
-    def get_time(self):
-        try:
-            assert isinstance(self.killmail_time, datetime.datetime)
-            return self.killmail_time
-        except:
-            return datetime.datetime.utcnow()
-
-    def systemName(self):
-        try:
-            return str(self.object_system.name)
-        except:
-            return ""
-
-    def regionName(self):
-        try:
-            return str(self.object_system.object_constellation.object_region.name)
-        except:
-            return ""
-
-    def fb_pID(self,final_blow:attackers.Attackers):
-        try:
-            return str(final_blow.character_id)
-        except:
-            return ""
-
-    def fb_cID(self, final_blow: attackers.Attackers):
-        try:
-            return str(final_blow.corporation_id)
-        except:
-            return ""
-
-    def fb_aID(self, final_blow: attackers.Attackers):
-        try:
-            return str(final_blow.alliance_id)
-        except:
-            return ""
-
-    def fb_shipID(self, final_blow: attackers.Attackers):
-        try:
-            return str(final_blow.ship_type_id)
-        except:
-            return ""
-
-    def fb_ship(self,final_blow:attackers.Attackers):
-        try:
-            return str(final_blow.object_ship.type_name)
-        except:
-            return ""
-
-    def fb_ShipGroup(self, attacker_: attackers.Attackers):
-        try:
-            return str(attacker_.object_ship.object_group.name)
-        except:
-            return ""
-
-    def fb_Name(self,final_blow:attackers.Attackers):
-        try:
-            return str(final_blow.object_pilot.character_name)
-        except:
-            return ""
-
-    def fb_Corp(self,final_blow:attackers.Attackers):
-        try:
-            return str(final_blow.object_corp.corporation_name)
-        except:
-            return ""
-
-    def fb_Alliance(self, attacker_: attackers.Attackers, brackets=False):
-        try:
-            return str(attacker_.object_alliance.alliance_name) if not brackets else "({})".format(
-                str(attacker_.object_alliance.alliance_name))
         except:
             return ""
 
@@ -409,8 +272,48 @@ class Kills(dec_Base.Base, table_row):
         except:
             return "." if not name_only else ""
 
-    def str_location_id(self):
-        try:
-            return "{}".format(str(self.locationID))
-        except:
-            return ""
+    def str_overview(self, attackers_list, affiliation=False, other=False, is_blue=False, balance=False):
+        """make an overview of ships/affiliation. If other, include other tag for known ships missing from attacker_list
+        if is_blue, change other tag to blues/allies."""
+        i_totals = []
+        total_len = 0
+        max_len = 8
+        items = []
+        total_attackers = len(attackers_list)
+        tmp_affi = [i.str_highest_name() for i in attackers_list]
+        tmp_ships = [i.str_ship_name() for i in attackers_list]
+        if affiliation:
+            tmp_items = tmp_affi
+        else:
+            tmp_items = tmp_ships
+        for i in tmp_items:
+            if i:
+                items.append(i)
+        tmp_counter_list = tmp_ships+tmp_affi if balance else tmp_items
+        if len(tmp_counter_list) > 0:
+            slen = len(max(tmp_counter_list, key=len))
+            max_len = slen if slen <= 25 else 25
+        max_len = 8 if max_len < 8 else max_len
+        unknown_attackers = len(attackers_list) - len(items)
+        for i in list(set(items)):
+            i_totals.append((i, items.count(i)))
+        i_totals.sort(key=operator.itemgetter(1), reverse=True)
+        return_str = ""
+        for s in i_totals:
+            if total_len >= 350:
+                return_str += "{0:<{len}} {1}\n".format("--Truncated", str(total_attackers), len=max_len+1)
+                total_attackers -= total_attackers
+                break
+            else:
+                line_s = "{0:<{len}} {1}\n".format((str(s[0])[:max_len]), str(s[1]), len=max_len+1)
+                total_len += len(line_s)
+                total_attackers -= s[1]
+                return_str += line_s
+        if unknown_attackers > 0:
+            return_str += "{0:<{len}} {1}\n".format("--Unknown", str(unknown_attackers), len=max_len + 1)
+        if other:
+            overflow = (len(self.object_attackers) - len(attackers_list))
+            if overflow > 0:
+                display_str = "--Other" if not is_blue else "--Allies/blues"
+                return_str += "{0:<{len}} {1}\n".format(display_str, str(overflow), len=max_len+1)
+        return return_str
