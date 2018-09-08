@@ -20,6 +20,7 @@ class sde_impoter(object):
     @classmethod
     def get_missing_ids(cls,service_module,sde_session,sde_base):
         raise NotImplementedError
+
     @classmethod
     def get_query_filter(cls,sde_base):
         raise NotImplementedError
@@ -45,7 +46,7 @@ class sde_impoter(object):
                     for sde_id in chunk:
                         try:
                             __row = sde_session.query(sde_base).filter(cls.get_query_filter(sde_base) == sde_id).one()
-                            cls.row_action(cls.make_from_sde(__row),db) #add for locations, merge for everything else
+                            cls.row_action(cls.make_from_sde(__row), db) #add for locations, merge for everything else
                         except Exception as ex:
                             print(ex)
                     db.commit()
