@@ -30,7 +30,7 @@ class visual_capradar(base_visual):
 
     def make_header(self):
         overview_text = "{haS} activity in {sysReg} {ly} LYs from {bSys}".format(haS=self.hv.str_ship_name(), sysReg=str(self.system), ly=self.km.str_ly_range(self.baseSystem), bSys=self.baseSystem.str_system_name())
-        self.embed.set_author(name=overview_text,icon_url=self.hv.str_highest_image(64), url=self.km.str_zk_link())
+        self.embed.set_author(name=overview_text, icon_url=self.hv.str_highest_image(64), url=self.km.str_zk_link())
         e_desc = '**{vS}** destroyed in **[{sysN}]' \
                  '({sysL})**({rgN}) {mAgo}{loc}\n\n' \
                  '*Involving **[{haP}]({haP_l})({haAfi})** in a **{haS}** {inv}.*' \
@@ -40,19 +40,19 @@ class visual_capradar(base_visual):
                     haAfi=self.hv.str_highest_name(), haS=self.hv.str_ship_name(), inv=self.km.str_attacker_count())
         self.embed.description = e_desc
         self.embed.title = " "
-        self.embed.url = self.km.str_zk_link()
         self.embed.set_thumbnail(url=self.hv.str_ship_image(128))
-        self.embed.timestamp = self.km.get_time()
 
     def make_body(self):
         heading = "**{} of {} attackers flying in tracked ships**".format(str(len(self.tracked_hostiles)),
-                                                                           self.km.str_total_involved())
+                                                                          self.km.str_total_involved())
         body = "```{}```".format(self.km.str_overview(self.tracked_hostiles), zk=self.km.str_zk_link())
         self.embed.add_field(name=heading, value=body, inline=False)
         heading_routes = "Dotlan routes from {}".format(self.baseSystem.str_system_name())
         self.embed.add_field(name=heading_routes, value=self.helper_routes(), inline=False)
-        self.embed.color = discord.Color(800680)
-        self.embed.set_footer(text="{ly} LYs from {bName}".format(ly=self.km.str_ly_range(self.baseSystem), bName=self.baseSystem.str_system_name()))
+
+    def make_footer(self):
+        self.embed.set_footer(text="{ly} LYs from {bName}".format(ly=self.km.str_ly_range(self.baseSystem),
+                                                                  bName=self.baseSystem.str_system_name()))
 
     def set_frame_color(self):
         s = (datetime.datetime.utcnow() - self.km.get_time()).total_seconds()

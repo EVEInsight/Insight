@@ -116,7 +116,7 @@ class Kills(dec_Base.Base, table_row):
         if is_blue, change other tag to blues/allies."""
         i_totals = []
         total_len = 0
-        max_len = 5
+        max_len = 8
         items = []
         total_attackers = len(attackers_list)
         tmp_affi = [i.str_highest_name() for i in attackers_list]
@@ -132,7 +132,7 @@ class Kills(dec_Base.Base, table_row):
         if len(tmp_counter_list) > 0:
             slen = len(max(tmp_counter_list, key=len))
             max_len = slen if slen <= 25 else 25
-        max_len = 5 if max_len < 5 else max_len
+        max_len = 8 if max_len < 8 else max_len
         unknown_attackers = len(attackers_list) - len(items)
         for i in list(set(items)):
             i_totals.append((i, items.count(i)))

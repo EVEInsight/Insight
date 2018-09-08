@@ -23,13 +23,10 @@ class VisualCapRadarCompact(visual_capradar):
         self.embed.title = "{haS} destroyed a {viS} in {sysReg}".format(haS=self.hv.str_ship_name(),
                                                                         viS=self.vi.str_ship_name(),
                                                                         sysReg=str(self.system))
-        self.embed.url = self.km.str_zk_link()
         self.embed.set_thumbnail(url=self.hv.str_ship_image(64))
-        self.embed.timestamp = self.km.get_time()
 
     def make_body(self):
-        self.embed.set_footer(text="{ly} LYs from {b}".format(ly=self.km.str_ly_range(self.baseSystem),
-                                                              b=self.baseSystem.str_system_name()))
+        pass
 
     @classmethod
     def appearance_id(cls):

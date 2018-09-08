@@ -75,6 +75,8 @@ class base_visual(object):
         self.vi: tb_victims = self.km.get_victim()
         self.hv: tb_attackers = self.fb  # change to hv in child classes
         self.system: tb_systems = self.km.get_system()
+        self.embed.url = self.km.str_zk_link()
+        self.embed.timestamp = self.km.get_time()
 
         __zk_pilot = "https://zkillboard.com/character/{}/"
         self.ship_name = str(self.km.object_victim.object_ship.type_name)
@@ -104,6 +106,9 @@ class base_visual(object):
     def make_body(self):
         raise NotImplementedError
 
+    def make_footer(self):
+        pass
+
     def set_frame_color(self):
         self.embed.color = self.color
 
@@ -114,6 +119,7 @@ class base_visual(object):
         self.make_text_heading()
         self.make_header()
         self.make_body()
+        self.make_footer()
         self.set_frame_color()
 
     def __bool__(self):

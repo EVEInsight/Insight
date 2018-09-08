@@ -12,6 +12,9 @@ class VisualCapRadarLinkOnly(visual_capradar):
     def make_body(self):
         pass
 
+    def make_footer(self):
+        pass
+
     @classmethod
     def appearance_id(cls):
         return 4
