@@ -91,7 +91,7 @@ class Types(dec_Base.Base,name_only,index_api_updating,sde_impoter):
                     if p.average_price is not None:
                         price = p.average_price
                     elif p.adjusted_price is not None:
-                        price = p.average_price
+                        price = p.adjusted_price
                     else:
                         price = t.basePrice
                     t.basePrice = price

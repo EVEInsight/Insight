@@ -25,22 +25,13 @@ class VisualCapRadarFunctional(visual_capradar):
         self.embed.add_field(name="Victim", value=v_field, inline=True)
         self.embed.add_field(name="Attacker", value=a_field, inline=True)
         self.embed.add_field(name="Details", value=d_field, inline=True)
-        self.embed.add_field(name="Routes", value=self.helper_routes(), inline=True)
+        self.embed.add_field(name="Routes", value=self.helper_routes(no_codeblock=True), inline=True)
         self.embed.description = " "
         self.embed.title = " "
         self.embed.set_thumbnail(url=self.hv.str_ship_image(64))
 
     def make_body(self):
         pass
-
-    def helper_routes(self):
-        row_template = "[{0}]" + "({1})\n"
-        return_str = ""
-        return_str += row_template.format("Titans/Supers", self.baseSystem.str_jmp_titan(self.system))
-        return_str += row_template.format("Carriers/Dreads/FAX", self.baseSystem.str_jmp_carrier(self.system))
-        return_str += row_template.format("Blops", self.baseSystem.str_jmp_blops(self.system))
-        return_str += row_template.format("Gates", self.baseSystem.str_dotlan_gates(self.system))
-        return return_str
 
     @classmethod
     def appearance_id(cls):

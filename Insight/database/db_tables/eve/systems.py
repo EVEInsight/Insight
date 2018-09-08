@@ -203,6 +203,17 @@ class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating,
     def str_jmp_blops(self, to_sys):
         return self.str_dotlan_jmp(to_sys, "Redeemer")
 
+    def str_gates(self, other, service_module, str_jumps=False):
+        try:
+            gates = self.gate_range(other, service_module)
+            if isinstance(gates, int):
+                return "{} jumps".format(gates) if str_jumps else str(gates)
+            else:
+                return "No route" if str_jumps else ""
+        except:
+            return ""
+
+
 
 from ..filters import *
 from ..eve import *

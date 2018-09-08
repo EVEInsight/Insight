@@ -260,7 +260,7 @@ class Kills(dec_Base.Base, table_row):
 
     def str_ly_range(self, other_system):
         try:
-            return "{0:.2f}".format(self.object_system.ly_range(other_system))
+            return "{0:.1f}".format(self.object_system.ly_range(other_system))
         except:
             return ""
 

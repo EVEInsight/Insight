@@ -51,8 +51,7 @@ class visual_capradar(base_visual):
         self.embed.add_field(name=heading_routes, value=self.helper_routes(), inline=False)
 
     def make_footer(self):
-        self.embed.set_footer(text="{ly} LYs from {bName}".format(ly=self.km.str_ly_range(self.baseSystem),
-                                                                  bName=self.baseSystem.str_system_name()))
+        self.embed.set_footer(text="{ly} LY/{j} J from {bName}".format(ly=self.km.str_ly_range(self.baseSystem), j=self.system.str_gates(self.baseSystem, self.feed.service), bName=self.baseSystem.str_system_name()))
 
     def set_frame_color(self):
         s = (datetime.datetime.utcnow() - self.km.get_time()).total_seconds()
@@ -64,14 +63,19 @@ class visual_capradar(base_visual):
             self.color = discord.Color(4128800)
         super().set_frame_color()
 
-    def helper_routes(self):
-        row_template = "[```{0:<23} ```]" + "({1})"
+    def helper_routes(self, no_codeblock=False):
+        if no_codeblock:
+            row_template = "[{0}{1}]" + "({2})\n"
+        else:
+            row_template = "[```{0:<23}{1}```]" + "({2})"
         return_str = ""
-        return_str += row_template.format("Titans/Supers", self.baseSystem.str_jmp_titan(self.system))
-        return_str += row_template.format("Carriers/Dreads/FAX", self.baseSystem.str_jmp_carrier(self.system))
-        return_str += row_template.format("Blops", self.baseSystem.str_jmp_blops(self.system))
-        return_str += row_template.format("Gates", self.baseSystem.str_dotlan_gates(self.system))
-        return_str += "\n**[zKill KM]({})**".format(self.km.str_zk_link())
+        return_str += row_template.format("Titans/Supers", "", self.baseSystem.str_jmp_titan(self.system))
+        return_str += row_template.format("Carriers/Dreads/FAX", "", self.baseSystem.str_jmp_carrier(self.system))
+        return_str += row_template.format("Blops", "", self.baseSystem.str_jmp_blops(self.system))
+        return_str += row_template.format("Gates ", self.system.str_gates(self.baseSystem, self.feed.service, True),
+                                          self.baseSystem.str_dotlan_gates(self.system))
+        if not no_codeblock:
+            return_str += "\n**[zKill KM]({})**".format(self.km.str_zk_link())
         return return_str
 
     def run_filter(self):
