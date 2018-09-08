@@ -1,6 +1,7 @@
 configparser==3.5.0
-cryptography==2.3
+cryptography>=2.3,<2.4
 git+https://github.com/Rapptz/discord.py.git@rewrite#egg=discord.py
+networkx>=2.1,<2.2
 python-dateutil==2.7.3
 psutil==5.4.6
 requests==2.19.1

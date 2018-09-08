@@ -77,7 +77,7 @@ class Options_ProximityIntel(opt_capradar):
             gates = discord_options.mapper_return_noOptions_requiresInt(self.cfeed.discord_client, message_object)
             gates.set_main_header("Gate distance")
             gates.set_footer_text("Enter number:")
-            # dist = await gates() # todo remove once jump calc
+            dist = await gates()
         await self.cfeed.discord_client.loop.run_in_executor(None, partial(add_list, selected_option, dist))
         await self.reload(message_object)
 

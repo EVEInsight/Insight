@@ -133,6 +133,17 @@ class Kills(dec_Base.Base, table_row):
                     return None
         return None if not using_blacklist else self.object_system
 
+    def filter_system_gates(self, filter_list=[], using_blacklist=False, service_module=None):
+        """whitelist - returns the first system within range, otherwise returns None if no systems in filter are within gate range
+        blacklist - returns KM system if it is not within range of any systems in the BL otherwise returns none"""
+        for system in filter_list:
+            if self.object_system.compare_gates(system, service_module):
+                if not using_blacklist:
+                    return system.object_item
+                else:
+                    return None
+        return None if not using_blacklist else self.object_system
+
     def filter_system(self, filter_list=[], using_blacklist=False):
         """whitelist - returns system/region if in filter, otherwise None
         blacklist - returns None if km system matches anything in filters, else system"""

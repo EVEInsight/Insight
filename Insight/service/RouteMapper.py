@@ -49,6 +49,8 @@ class RouteMapper(object):
             print("Route information will cache on access by feed services.")
 
     def __load_route(self, system_id):
+        if system_id is None:
+            return None
         if self.routes.get(system_id) is None:
             try:
                 self.routes[system_id] = nx.single_source_shortest_path_length(self.graph, system_id)

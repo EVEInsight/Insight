@@ -55,10 +55,27 @@ class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating,
         return math.sqrt(
             pow(self.pos_x - other_x, 2) + pow(self.pos_y - other_y, 2) + pow(self.pos_z - other_z, 2)) / 9.4605284e15
 
+    def gate_range(self, other, service_module):
+        try:
+            if isinstance(other, Systems):
+                return service_module.routes.total_jumps(self.system_id, other.system_id)
+            elif isinstance(other, tb_Filter_systems):
+                return service_module.routes.total_jumps(self.system_id, other.object_item.system_id)
+            else:
+                return None
+        except:
+            return None
+
     def compare_range(self, other):
         if isinstance(other, tb_Filter_systems):
             return other.max >= self.ly_range(other)
         return False
+
+    def compare_gates(self, other, service_module):
+        try:
+            return other.max >= self.gate_range(other, service_module)
+        except:
+            return False
 
     def compare_filter(self, other):
         if isinstance(other, Systems):

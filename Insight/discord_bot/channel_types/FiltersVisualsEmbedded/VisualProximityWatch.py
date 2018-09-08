@@ -45,17 +45,26 @@ class VisualProximityWatch(base_visual):
         pass
 
     def make_footer(self):
-        self.embed.set_footer(text=str(self.base_sysConstReg))
+        footer_str = str(self.base_sysConstReg)
+        if isinstance(self.base_sysConstReg, tb_systems):
+            dist = self.system.gate_range(self.base_sysConstReg, self.feed.service)
+            if dist is not None:
+                if dist > 0:
+                    footer_str = "{} jumps from {}".format(str(dist), str(self.base_sysConstReg))
+                else:
+                    footer_str = "In {}".format(str(self.base_sysConstReg))
+        self.embed.set_footer(text=footer_str)
 
     def run_filter(self):
         tdiff = datetime.datetime.utcnow() - datetime.timedelta(minutes=self.feed_options.max_km_age)
         if tdiff >= self.km.killmail_time:
             return False
         list_sys_reg = self.filters.object_filter_systems + self.filters.object_filter_constellations + self.filters.object_filter_regions
-        self.base_sysConstReg = self.km.filter_system(list_sys_reg, self.in_system_nonly)
+        self.base_sysConstReg = self.km.filter_system_gates(self.filters.object_filter_systems, self.in_system_nonly, self.feed.service)
         if self.base_sysConstReg is None:
-            # todo check gate jump distance if fail
-            return False
+            self.base_sysConstReg = self.km.filter_system(list_sys_reg, self.in_system_nonly)
+            if self.base_sysConstReg is None:
+                return False
         list_typeGroup = self.filters.object_filter_groups + self.filters.object_filter_types
         tracked_ships = self.km.filter_attackers(self.km.object_attackers, list_typeGroup, self.in_attackers_ship_group)
         if len(tracked_ships) == 0:
