@@ -4,7 +4,7 @@ from .capRadar import *
 class ProximityWatch(capRadar):
 
     def linked_visual_base(self):
-        return Visual_ProximityIntel
+        return VisualProximityWatch
 
     def get_linked_options(self):
         return Linked_Options.opt_pwatch(self)

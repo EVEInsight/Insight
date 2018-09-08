@@ -1,21 +1,21 @@
-from .Visual_ProximityIntel import *
+from .VisualProximityWatch import *
 from .VisualEnfeedCompact import VisualEnfeedCompact
 
 
-class Visual_ProximityIntel_EFCompact(VisualEnfeedCompact, Visual_ProximityIntel):
+class VisualProximityWatchEFCompact(VisualEnfeedCompact, VisualProximityWatch):
     def internal_list_options(self):
-        Visual_ProximityIntel.internal_list_options(self)
+        VisualProximityWatch.internal_list_options(self)
 
     def run_filter(self):
         self.set_kill()
-        return Visual_ProximityIntel.run_filter(self)
+        return VisualProximityWatch.run_filter(self)
 
     @classmethod
     def feed_specific_row_type(cls):
-        return Visual_ProximityIntel.feed_specific_row_type()
+        return VisualProximityWatch.feed_specific_row_type()
 
     def set_frame_color(self):
-        super(Visual_ProximityIntel, self).set_frame_color()  # call base method
+        super(VisualProximityWatch, self).set_frame_color()  # call base method
 
     @classmethod
     def appearance_id(cls):

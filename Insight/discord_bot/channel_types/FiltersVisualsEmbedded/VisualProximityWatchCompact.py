@@ -1,7 +1,7 @@
-from .Visual_ProximityIntel import *
+from .VisualProximityWatch import *
 
 
-class Visual_ProximityIntel_Compact(Visual_ProximityIntel):
+class VisualProximityWatchCompact(VisualProximityWatch):
     def make_header(self):
         h_count = len(self.tracked_hostiles)
         autHead = "{} hostile{} in {}".format(str(h_count), "s" if h_count > 1 else "", str(self.system))

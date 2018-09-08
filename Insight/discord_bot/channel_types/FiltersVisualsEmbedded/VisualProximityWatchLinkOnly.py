@@ -1,7 +1,7 @@
-from .Visual_ProximityIntel import *
+from .VisualProximityWatch import *
 
 
-class Visual_ProximityIntel_LinkOnly(Visual_ProximityIntel):
+class VisualProximityWatchLinkOnly(VisualProximityWatch):
     def make_text_heading(self):
         self.text_only = True
         self.message_txt = "{} {}".format(self.mention_method(), self.km.str_zk_link())

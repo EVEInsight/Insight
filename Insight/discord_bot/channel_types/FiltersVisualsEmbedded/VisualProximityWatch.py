@@ -1,7 +1,7 @@
 from .FiltersVisualsEmbedded import *
 
 
-class Visual_ProximityIntel(base_visual):
+class VisualProximityWatch(base_visual):
     def __init__(self, km_row, discord_channel_object, overall_filters, feed_specific_row, feed_object):
         super().__init__(km_row, discord_channel_object, overall_filters, feed_specific_row, feed_object)
         self.tracked_hostiles = []
@@ -83,15 +83,15 @@ class Visual_ProximityIntel(base_visual):
     @classmethod
     def appearance_options(cls):
         yield cls
-        yield Visual_ProximityIntel_Compact
-        yield Visual_ProximityIntel_EFCompact
-        yield Visual_ProximityIntel_LinkOnly
+        yield VisualProximityWatchCompact
+        yield VisualProximityWatchEFCompact
+        yield VisualProximityWatchLinkOnly
 
     @classmethod
     def get_desc(cls):
         return "Utility - Null"
 
 
-from .Visual_ProximityIntel_Compact import Visual_ProximityIntel_Compact
-from .Visual_ProximityIntel_EFCompact import Visual_ProximityIntel_EFCompact
-from .Visual_ProximityIntel_LinkOnly import Visual_ProximityIntel_LinkOnly
+from .VisualProximityWatchCompact import VisualProximityWatchCompact
+from .VisualProximityWatchEFCompact import VisualProximityWatchEFCompact
+from .VisualProximityWatchLinkOnly import VisualProximityWatchLinkOnly

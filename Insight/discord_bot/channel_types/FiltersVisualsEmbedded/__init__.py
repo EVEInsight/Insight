@@ -7,5 +7,5 @@ from .VisualCapRadarCompact import VisualCapRadarCompact
 from .VisualEnfeedLinkOnly import VisualEnfeedLinkOnly
 from .VisualCapRadarLinkOnly import VisualCapRadarLinkOnly
 from .VisualCapRadarFunctional import VisualCapRadarFunctional
-from .Visual_ProximityIntel import Visual_ProximityIntel
+from .VisualProximityWatch import VisualProximityWatch
 
