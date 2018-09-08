@@ -53,6 +53,11 @@ class Stargates(dec_Base.Base, sde_impoter, individual_api_pulling):
             # db.commit()
         except Exception as ex:
             print(ex)
+            db.rollback()
+            sde_session.rollback()
+        finally:
+            db.close()
+            sde_session.close()
 
 
 from ..eve import *

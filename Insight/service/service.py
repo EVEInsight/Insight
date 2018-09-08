@@ -3,6 +3,7 @@ from . import channel_manager as cm
 from . import zk as zk
 from . import static_data_import as static_data
 from . import EVEsso
+from . import RouteMapper
 import database
 import argparse
 import configparser
@@ -24,6 +25,7 @@ class service_module(object):
         self.__import_check()
         self.__sc_session: scoped_session = database.setup_database(self).get_scoped_session()
         self.static_data_import = static_data.static_data_import(self,self.__import_everything_flag)
+        self.routes = RouteMapper.RouteMapper(self)
         self.sso = EVEsso.EVEsso(self)
         self.channel_manager = cm.Channel_manager(self)
         self.zk_obj = zk.zk(self)
@@ -48,6 +50,8 @@ class service_module(object):
                             help="Skip startup API static data import check.", default=False)
         parser.add_argument("--defer_tasks", "-defer", action="store_true",
                             help="Defers slow tasks to run later instead of at startup.", default=False)
+        parser.add_argument("--routes_all", "-rall", action="store_true",
+                            help="Load all routes at Insight startup instead of on KM parse.", default=False)
         parser.add_argument("--sde_db","-sde",
                             help="Specifies the name of the SDE database file relative to main.py. Download and extract the "
                                  "sqlite-latest.sqlite file from https://www.fuzzwork.co.uk/dump/",
