@@ -12,9 +12,7 @@ class Visual_ProximityIntel_Compact(Visual_ProximityIntel):
         self.embed.description = desc
         self.embed.title = "{hShip} destroyed a {vS} in {sysR}".format(hShip=self.hv.str_ship_name(),
                                                                        vS=self.vi.str_ship_name(),sysR=str(self.system))
-        self.embed.url = self.km.str_zk_link()
         self.embed.set_thumbnail(url=self.hv.str_ship_image(64))
-        self.embed.timestamp = self.km.killmail_time
 
     @classmethod
     def appearance_id(cls):

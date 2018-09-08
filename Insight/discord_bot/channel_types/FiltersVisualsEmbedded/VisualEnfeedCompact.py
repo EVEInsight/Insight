@@ -12,9 +12,7 @@ class VisualEnfeedCompact(visual_enfeed):
                     fbAfi=self.fb.str_highest_name(), fbS=self.fb.str_ship_name(), inv_str=self.km.str_attacker_count())
         self.embed.description = e_desc
         self.embed.title = "{vS} destroyed in {sysReg}".format(vS=self.vi.str_ship_name(), sysReg=str(self.system))
-        self.embed.url = self.km.str_zk_link()
         self.embed.set_thumbnail(url=self.vi.str_ship_image(64))
-        self.embed.timestamp = self.km.get_time()
         self.embed.set_footer(text="Value: {}".format(self.km.str_isklost()))
 
     def make_body(self):

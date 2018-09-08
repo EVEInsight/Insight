@@ -39,18 +39,13 @@ class Visual_ProximityIntel(base_visual):
         self.embed.add_field(name="Details", value=d_field, inline=True)
         self.embed.description = " "
         self.embed.title = " "
-        self.embed.url = self.km.str_zk_link()
         self.embed.set_thumbnail(url=self.hv.str_ship_image(64))
-        self.embed.timestamp = self.km.killmail_time
 
     def make_body(self):
-        if isinstance(self.base_sysConstReg, tb_systems):
-            prefix = "In system:"
-        elif isinstance(self.base_sysConstReg, tb_constellations):
-            prefix = "In constellation:"
-        else:
-            prefix = "In region:"
-        self.embed.set_footer(text="{} {}".format(prefix, str(self.base_sysConstReg)))
+        pass
+
+    def make_footer(self):
+        self.embed.set_footer(text=str(self.base_sysConstReg))
 
     def run_filter(self):
         tdiff = datetime.datetime.utcnow() - datetime.timedelta(minutes=self.feed_options.max_km_age)

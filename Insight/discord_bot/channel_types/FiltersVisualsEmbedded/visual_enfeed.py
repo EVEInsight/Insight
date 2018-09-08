@@ -30,10 +30,8 @@ class visual_enfeed(base_visual):
                     fbAfi=self.fb.str_highest_name(), fbS=self.fb.str_ship_name(), inv_str=self.km.str_attacker_count())
         self.embed.description = body_desc
         self.embed.title = " "
-        self.embed.url = self.km.str_zk_link()
         self.embed.set_thumbnail(url=self.vi.str_pilot_image(64))
         self.embed.set_image(url=self.vi.str_ship_image(128))
-        self.embed.timestamp = self.km.get_time()
 
     def make_body(self):
         field_body = "```{Ship:<14}{vS}\n" \
@@ -46,6 +44,9 @@ class visual_enfeed(base_visual):
                     vA=self.vi.str_alliance_name(), damage_taken=self.km.str_damage(), inv=self.km.str_total_involved(),
                     isk_lost=self.km.str_isklost(), min_ago=self.km.str_minutes_ago())
         self.embed.add_field(name="**Details**", value=field_body, inline=False)
+
+    def make_footer(self):
+        pass
 
     def run_filter(self):
         tdiff = datetime.datetime.utcnow() - datetime.timedelta(
