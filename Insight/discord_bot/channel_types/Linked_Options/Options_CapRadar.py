@@ -287,7 +287,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         await self.reload(message_object)
 
     async def InsightOption_sync(self, message_object: discord.Message):
-        """Manage feed sync settings - Set up and manage EVE contact syncing to blacklist allies from appearing as targets in this radar feed."""
+        """Manage feed sync settings - Set up and manage EVE contact syncing to blacklist allies from appearing as targets."""
         await self.cfeed.command_sync(message_object)
 
 

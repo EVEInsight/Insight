@@ -78,8 +78,8 @@ class Options_ProximityIntel(opt_capradar):
         dist = None
         if isinstance(selected_option, tb_systems):
             gates = discord_options.mapper_return_noOptions_requiresInt(self.cfeed.discord_client, message_object)
-            gates.set_main_header("Enter the number of jumps from this system to display activity. If hostile activity"
-                                  " occurs within the set 'X' number of jumps away from your system it will be "
+            gates.set_main_header("Enter the number of jumps from this system to display activity. Hostile activity"
+                                  " occurring within the set 'X' number of jumps away from your system will be "
                                   "displayed.\nEnter '0' to only track activity within the system itself.")
             gates.set_footer_text("Enter an integer:")
             dist = await gates()
