@@ -20,4 +20,5 @@ class VisualProximityWatchCompact(VisualProximityWatch):
 
     @classmethod
     def get_desc(cls):
-        return "Compact - Null"
+        return "Compact - Hostile count, highest valued attacker ship/affiliation, nearest celestial, and KM " \
+               "link. Size: Small"

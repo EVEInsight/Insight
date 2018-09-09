@@ -36,6 +36,7 @@ If you have questions, suggestions, or bug reports feel free to drop by the [pro
 # Feature Overview
 * Entity feeds ideal for personal, corporate, or alliance killboard streaming.
 * Capital radar feeds ideal for tracking hostile incursions into friendly space, hunting expensive targets within jump range, or detecting capital escalations in real time.
+* Proximity watches ideal for finding potential fleets to fight, tracking hostile fleet movement within your region, or altering you of nearby hostiles within a few jumps of your base systems.
 * Preconfigured feeds offering custom spins such as: Alliance Tournament system feed, npc officer hunter, AT ship radar, and more!
 * Rich embeds to present mails with color indicating sidebars, hyperlinks, and images.
 * Optional mention system to be alerted of activity in radar feeds.
@@ -47,6 +48,7 @@ If you have questions, suggestions, or bug reports feel free to drop by the [pro
 * Simultaneous, isolated feeds across multiple servers.
 * Efficient asynchronous design with minimal cpu, memory, disk, and network impact.      
 # Gallery
+
 ![](https://github.com/Nathan-LS/Insight/raw/dev/docs/images/overview_entity.png)
 
 ![](https://github.com/Nathan-LS/Insight/raw/dev/docs/images/overview_radar.png)
@@ -99,6 +101,7 @@ entity you wish to track.
 6. The feed service is successfully configured and running! You should start to see activity whenever
 a tracked entity participates in PvP. You can now run the command ```!settings``` to add or remove entities
 in your feed. If you wish to remove the feed, run ```!remove```.
+
 ## Capital Radar Feed
 This quick start guide will help you set up a radar feed for tracking supercapital activity within
 12 light-years of our base system, Jita.
@@ -127,52 +130,43 @@ source installation using a Linux operating system.
 
 # Frequently asked questions
 **How do I invite Insight to my Discord server?**
-
 You can invite Insight to any server where you have the **Manage Server** role. Follow the [link](#links), select the server, and Insight will be invited.
 
 **What Discord permissions does Insight require?**
-
 Insight requires the permissions outlined in the [permissions section.](#permissions)
 
 
 **How do I set up a new feed and manage its settings?**
-
 Creating a feed is as simple as running the command ```!create``` and following the dialog prompts to select a type.
 Running the command ```!settings``` allows you to modify feed configuration and behavior.
 
 
 **What's the difference between hosting Insight myself and using the publicly hosted bot?**
-
 Functionally, there is no difference. Insight is designed to support simultaneous feeds across multiple servers with no configuration hardcoding. 
 Insight provides an isolated service to each Discord channel, separate from the modification or access of other channels/servers.
 
 Operationally, the publicly hosted bot runs on dedicated, secure hardware to provide 24/7 service and reliability. The publicly hosted bot runs the main branch and is updated, maintained, and secured seamlessly. 
 
 **How do I run more than one feed service?**
-
 Insight can only run one feed service per Discord channel. Create more text channels and create a feed service in each.
 Note: Insight does not support feeds in direct message or conversations.
 
 
 **How do I add, manage, or remove one of my previously added SSO tokens?**
-
 Direct message the bot with the ```!sync``` command and select an option. You can always revoke tokens under [third party applications.](https://community.eveonline.com/support/third-party-applications/)
 
 
 
 **What do all the stats mean on the bot's watching message?**
-
 Insight keeps track of delays for service reliability. See the [wiki article](https://github.com/Nathan-LS/Insight/wiki/Color-codes-and-bot-status) for a detailed description.
 
 
 **How do I host Insight myself?**
-
 Download the latest [release](https://github.com/Nathan-LS/Insight/releases) archive for either Linux or Windows, unzip the file, and follow the instructions in ```Installation.md```. 
 There is also a [source installation guide](https://github.com/Nathan-LS/Insight/wiki/Source-Installation) for running Insight on the Python interpreter with any operating system (including Mac).
 
 
 **Why do I have to paste my callback url when using the !sync command?**
-
 For installation simplicity, Insight does not utilize a callback listener. A listener would require a web server and open new security concerns. In general scenarios, authenticating with a third party website works like this:
 1. Be directed to authenticate with EVE by a third-party service.
 2. Login with EVE and be redirected, through a GET request, back to the service's callback landing page.
@@ -182,12 +176,10 @@ Insight follows the same procedure except for step 3. The callback URL must manu
 
 
 **How can I be notified of updates?**
-
 Insight's ```Watching CPU:15% MEM:1.0GB``` status will change to ```Watching Update available```. The program console will display messages directing to the latest release.
 
 
 **I have an unanswered question, want to request a feature, need help with installation, or report a bug.** 
-
 Check out the public Discord server listed in the [links section.](#links)
 # Credits
 * [Fuzzwork](https://www.fuzzwork.co.uk/) - Provides SQLite database conversions of CCP's SDE referenced on initial loading.

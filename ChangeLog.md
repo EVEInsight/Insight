@@ -2,12 +2,34 @@
 ## New features
 * Entity feed
     * Users can now set a minimum ISK value filter. [(#11)](https://github.com/Nathan-LS/Insight/issues/14)
+* Radar
+    * Users can specify custom type/group tracking in addition to supers, caps, or blops. 
+* Proximity watch
+    * A new feed type designed to track hostile activity within systems, constellations, or regions. This feed can also detect activity within a set jump proximity of base systems.
+    The feed is capable of syncing ignore lists with tokens to ignore exclusively friendly mails.
+* Preconfigured
+    * Added options
+        * Some options available to base feeds are now optionally available for configuration in derived feeds. Examples: maximum timeout, minimum ISK value, etc.
+* SDE/data
+    * Market updater
+        * Updates average prices on bot startup for ships.
+    * Stargate/routing module
+        * Gate jump distance calculation has finally arrived to Insight. The routing module calculates and caches the distance between all systems for use in gate calculations.
 ## Changes
 * Feed creation
     * Option order should flow better when creating feeds.
 * Preconfigured
-    * Universal AT ship and super feeds now list the ```Manage feed sync settings``` option when running the ```!settings``` command.
     * Discontinued the Alliance Tournament system stream until next year.
+* Appearances
+    * All radar embeds now list the gate jump distance in the footer.
+    * Radar Full appearance positioning and verbosity has been modified to reduce space and provide a cleaner interface.
+    * Renamed functional appearance to utility.
+    * Add truncating to ship/affiliation overviews.
+## Technical
+* Routing module
+    * The route caching module increases the memory footprint of Insight by 500MB when all systems are loaded. Ensure your machine is capable of handling this additional requirement.
+* Updated requirements.txt
+* Extensive changes to visual embed variables and function calls for easier code navigation.
 # v1.1.0
 ## New features
 * Settings

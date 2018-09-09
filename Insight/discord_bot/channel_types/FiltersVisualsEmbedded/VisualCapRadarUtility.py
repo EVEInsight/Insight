@@ -1,7 +1,7 @@
 from .visual_capradar import *
 
 
-class VisualCapRadarFunctional(visual_capradar):
+class VisualCapRadarUtility(visual_capradar):
     def make_text_heading(self):
         self.message_txt = "{}".format(self.mention_method())
 
@@ -39,4 +39,4 @@ class VisualCapRadarFunctional(visual_capradar):
 
     @classmethod
     def get_desc(cls):
-        return "Functional <-recommended - Less verbosity with all information and available routes. Size: Medium"
+        return "Utility <-recommended - Less verbosity with all information and available routes. Size: Medium"

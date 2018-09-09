@@ -5,7 +5,9 @@ If you are running Insight from source, see [source installation guide.](https:/
 
 ### Windows
 * Windows 10 or Windows Server 2016
+* At least 1GB RAM
 ### Linux
+* At least 1GB RAM
 * GLIBC 2.19 or greater
     * Run ```ldd --version``` to verify
     * The Linux binary is built using Debian 8 so just about anything besides older versions of CentOS should work.

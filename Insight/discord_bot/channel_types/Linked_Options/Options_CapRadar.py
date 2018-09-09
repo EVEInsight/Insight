@@ -177,7 +177,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         await self.reload(message_object)
 
     async def InsightOptionRequired_maxage(self,message_object:discord.Message):
-        """Set maximum killmail age - Sets the maximum delay, in minutes, that mails can be posted to the feed. Fetched mails occurring more than the set age will not be pushed to the channel."""
+        """Set maximum killmail age - Set the maximum delay for killmails. Fetched mails occurring more than the set minutes ago will be ignored."""
         def change_limit(new_limit):
             db: Session = self.cfeed.service.get_session()
             try:
@@ -193,7 +193,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
 
         __options = discord_options.mapper_return_noOptions_requiresInt(self.cfeed.discord_client, message_object)
         __options.set_main_header(
-            "Enter the maximum delay, in minutes, that mails can be pushed to the channel. Mails occurring more than the set age will not be posted  to the channel.")
+            "Enter the maximum killmail occurrence delay(in minutes) before killmails are ignored. A mail that occurred more than your set 'X' many minutes ago will be ignored.")
         __options.set_footer_text("Enter an integer:")
         _max_age = await __options()
         await self.cfeed.discord_client.loop.run_in_executor(None, partial(change_limit, _max_age))
@@ -247,7 +247,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
                 db.close()
 
         search = discord_options.mapper_return_noOptions(self.cfeed.discord_client, message_object)
-        search.set_main_header("Enter the name or ID of a ship/npc type or group to search for.")
+        search.set_main_header("Enter the name or ID of a ship/npc type/group to search for.")
         search.set_footer_text("Enter a name or ID. Note: partial names are accepted: ")
         selected_row = None
         while selected_row is None:
@@ -289,6 +289,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
     async def InsightOption_sync(self, message_object: discord.Message):
         """Manage feed sync settings - Set up and manage EVE contact syncing to blacklist allies from appearing as targets in this radar feed."""
         await self.cfeed.command_sync(message_object)
+
 
 from .. import capRadar
 from discord_bot import discord_options

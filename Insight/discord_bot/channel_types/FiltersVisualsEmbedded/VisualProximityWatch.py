@@ -22,7 +22,8 @@ class VisualProximityWatch(base_visual):
     def make_header(self):
         author_header = "{hS} activity in {SysR}".format(hS=self.hv.str_ship_name(), SysR=str(self.system))
         self.embed.set_author(name=author_header, url=self.km.str_zk_link(), icon_url=self.hv.str_highest_image(64))
-        self.embed.add_field(name="Ships", value="```{}```".format(self.km.str_overview(self.tracked_hostiles, affiliation=False, other=True, is_blue=True, balance=True)), inline=False)
+        s_field = "```{}```".format(self.km.str_overview(self.tracked_hostiles, affiliation=False, other=True, is_blue=True, balance=True))
+        self.embed.add_field(name="Ships - {}".format(self.km.str_total_involved()), value=s_field, inline=False)
         self.embed.add_field(name="Affiliation", value="```{}```".format(self.km.str_overview(self.tracked_hostiles, affiliation=True, other=True, is_blue=True, balance=True)), inline=False)
         v_field = "Ship: [{S}]({Sl})\nPilot: [{P}]({Pl})\nCorp: [{C}]({Cl})\nAlliance: [{A}]({Al})".format(
             S=self.vi.str_ship_name(), Sl=self.vi.str_ship_zk(), P=self.vi.str_pilot_name(), Pl=self.vi.str_pilot_zk(), C=self.vi.str_corp_name(), Cl=self.vi.str_corp_zk(),
@@ -34,7 +35,7 @@ class VisualProximityWatch(base_visual):
         self.embed.add_field(name="Attacker", value=a_field, inline=True)
         d_field = "System: [{SysName}]({SysLink})({RgName})\nCelestial: [{cName}]({cLink})\nTime: {mAgo}\nKill: **[KM]({kLi})**".format(
             SysName=self.system.str_system_name(),
-            SysLink=self.system.str_dotlan(), RgName=self.system.str_region_name(), cName=self.km.str_location_name(True), cLink=self.km.str_location_zk(),
+            SysLink=self.system.str_dotlan_map(), RgName=self.system.str_region_name(), cName=self.km.str_location_name(True), cLink=self.km.str_location_zk(),
             mAgo=self.km.str_minutes_ago(True), kLi=self.km.str_zk_link())
         self.embed.add_field(name="Details", value=d_field, inline=True)
         self.embed.description = " "
@@ -98,7 +99,8 @@ class VisualProximityWatch(base_visual):
 
     @classmethod
     def get_desc(cls):
-        return "Utility - Null"
+        return "Utility <-recommended - Detailed ship/affiliation count breakdown, victim, highest valued attacker," \
+               " celestial, and KM link. Size: Medium"
 
 
 from .VisualProximityWatchCompact import VisualProximityWatchCompact

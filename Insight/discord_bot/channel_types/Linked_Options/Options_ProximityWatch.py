@@ -17,11 +17,11 @@ class Options_ProximityIntel(opt_capradar):
         yield from super(opt_capradar, self).yield_options()
 
     async def InsightOptionRequired_addRegSys(self, message_object: discord.Message):
-        """Add a new system, constellation, or region watch - Null"""
+        """Add a new system, constellation, or region watch - Add a new watch to display hostile activity occurring near you."""
         def make_options(search_str):
             options = discord_options.mapper_index(self.cfeed.discord_client, message_object)
             options.set_main_header(
-                "Select system, constellation, or region you wish to watch.\nNote: Additional watches can be added or removed after feed creation by running the ‘!settings’ command.")
+                "Select a system, constellation, or region you wish to watch.")
             db: Session = self.cfeed.service.get_session()
 
             def header_make(row_list, header_text):
@@ -65,7 +65,10 @@ class Options_ProximityIntel(opt_capradar):
                 db.close()
 
         search_opt = discord_options.mapper_return_noOptions(self.cfeed.discord_client, message_object)
-        search_opt.set_main_header("Enter the name of a system, constellation, or region.")
+        search_opt.set_main_header("Enter the name of a system, constellation, or region.\nHostile activity occurring "
+                                   "within your selection will be posted to the proximity watch.\nNote: Additional "
+                                   "watches can be added or removed after feed creation by running the "
+                                   "‘!settings’ command.")
         search_opt.set_footer_text("Enter a name. Note: partial names are accepted: ")
         selected_option = None
         while selected_option is None:
@@ -75,18 +78,20 @@ class Options_ProximityIntel(opt_capradar):
         dist = None
         if isinstance(selected_option, tb_systems):
             gates = discord_options.mapper_return_noOptions_requiresInt(self.cfeed.discord_client, message_object)
-            gates.set_main_header("Gate distance")
-            gates.set_footer_text("Enter number:")
+            gates.set_main_header("Enter the number of jumps from this system to display activity. If hostile activity"
+                                  " occurs within the set 'X' number of jumps away from your system it will be "
+                                  "displayed.\nEnter '0' to only track activity within the system itself.")
+            gates.set_footer_text("Enter an integer:")
             dist = await gates()
         await self.cfeed.discord_client.loop.run_in_executor(None, partial(add_list, selected_option, dist))
         await self.reload(message_object)
 
     async def InsightOption_rmRegSys(self, message_object: discord.Message):
-        """Remove a system, constellation, or region watch - Null"""
+        """Remove a system, constellation, or region watch - Remove a previously added watch."""
         def make_options():
             db: Session = self.cfeed.service.get_session()
             remove_opt = discord_options.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
-            remove_opt.set_main_header("Select the system or region watch you wish to remove.")
+            remove_opt.set_main_header("Select the item you wish to remove.")
             try:
                 remove_opt.add_header_row("Watched systems for this feed")
                 for i in db.query(tb_Filter_systems).filter(tb_Filter_systems.channel_id==self.cfeed.channel_id).all():

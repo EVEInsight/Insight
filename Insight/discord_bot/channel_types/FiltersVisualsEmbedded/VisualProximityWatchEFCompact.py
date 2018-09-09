@@ -23,4 +23,5 @@ class VisualProximityWatchEFCompact(VisualEnfeedCompact, VisualProximityWatch):
 
     @classmethod
     def get_desc(cls):
-        return "Entity Feed Compact - Display as if in entity feed instead of tracking information."
+        return "Entity Feed Compact - Use entity feed compact appearance to display killmail instead of " \
+               "tracking info. Size: Small "
