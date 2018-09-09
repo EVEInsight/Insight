@@ -48,7 +48,8 @@ If you have questions, suggestions, or bug reports feel free to drop by the [pro
 * Easy server setup with no hardcoding or confusing configuration.
 * Rich embed templates to change visual presentation/appearance.
 * Simultaneous, isolated feeds across multiple servers.
-* Efficient asynchronous design with minimal cpu, memory, disk, and network impact.      
+* Efficient asynchronous design with minimal cpu, memory, disk, and network impact.   
+   
 # Gallery
 
 ![](https://github.com/Nathan-LS/Insight/raw/dev/docs/images/overview_entity.png)
@@ -123,7 +124,7 @@ to blacklist from appearing on the radar, accessible by the ```!sync``` command.
 # Branch overview
 | Branch | Purpose |
 |---|---|
-| main | Release branch. Releases are snapshots of merges into this branch.|
+| main | Release branch. Releases are snapshots of merges into this branch. |
 | dev | Stable with latest features. The [public bot](#links) runs this branch. |
 | experimental | Latest unstable features. You can invite the [public experimental bot](https://discordapp.com/api/oauth2/authorize?client_id=477314845608378369&permissions=149504&scope=bot), but there are no guarantees of uptime or stability. |
 
