@@ -207,12 +207,11 @@ class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating,
         try:
             gates = self.gate_range(other, service_module)
             if isinstance(gates, int):
-                return "{} jumps".format(gates) if str_jumps else str(gates)
+                return "{} jump{}".format(gates, "" if gates == 1 else "s") if str_jumps else str(gates)
             else:
                 return "No route" if str_jumps else ""
         except:
             return ""
-
 
 
 from ..filters import *

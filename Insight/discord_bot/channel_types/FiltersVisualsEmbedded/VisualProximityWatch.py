@@ -51,7 +51,7 @@ class VisualProximityWatch(base_visual):
             dist = self.system.gate_range(self.base_sysConstReg, self.feed.service)
             if dist is not None:
                 if dist > 0:
-                    footer_str = "{} jumps from {}".format(str(dist), str(self.base_sysConstReg))
+                    footer_str = "{} jump{} from {}".format(str(dist), "" if dist == 1 else "s", str(self.base_sysConstReg))
                 else:
                     footer_str = "In {}".format(str(self.base_sysConstReg))
         self.embed.set_footer(text=footer_str)

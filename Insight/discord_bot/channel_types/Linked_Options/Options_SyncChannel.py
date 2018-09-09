@@ -96,7 +96,7 @@ class Options_Sync(options_base.Options_Base):
                 self.previous_sync_print = return_str
 
         if message_object is not None:
-            await self.cfeed.channel_discord_object.send("Syncing radar ally contact blacklist now")
+            await self.cfeed.channel_discord_object.send("Syncing ally contact blacklist now")
             __resp = await self.cfeed.discord_client.loop.run_in_executor(None, sync_contacts)
         else:
             __resp = await self.cfeed.discord_client.loop.run_in_executor(None, partial(sync_contacts, True))

@@ -26,6 +26,7 @@ If you have questions, suggestions, or bug reports feel free to drop by the [pro
 - [Getting started](#getting-started)
   * [Entity Feed](#entity-feed)
   * [Capital Radar Feed](#capital-radar-feed)
+- [Branch overview](#branch-overview)
 - [Installation](#installation)
 - [FAQ](#frequently-asked-questions)
 - [Credits](#credits)
@@ -39,6 +40,7 @@ If you have questions, suggestions, or bug reports feel free to drop by the [pro
 * Proximity watches ideal for finding potential fleets to fight, tracking hostile fleet movement within your region, or alerting you of nearby hostiles within a few jumps of your base systems.
 * Preconfigured feeds offering custom spins such as: Alliance Tournament system feed, npc officer hunter, AT ship radar, and more!
 * Rich embeds to present mails with color indicating sidebars, hyperlinks, and images.
+* Multiple embed appearance styles varying in size and verbosity.
 * Optional mention system to be alerted of activity in radar feeds.
 * SSO token authentication for allied contact blacklisting in radar feeds.
 * Automatic synchronization of SSO tokens and radar blacklists.
@@ -53,7 +55,7 @@ If you have questions, suggestions, or bug reports feel free to drop by the [pro
 
 ![](https://github.com/Nathan-LS/Insight/raw/dev/docs/images/overview_radar.png)
 
-![](https://github.com/Nathan-LS/Insight/raw/dev/docs/images/overview_new.png)
+![](https://github.com/Nathan-LS/Insight/raw/dev/docs/images/overview_pwatch.png)
 
 # Commands
 When in doubt, run ```!help```. The ```!help``` command guides you to every possible command, feature, and modifiable option.
@@ -86,7 +88,6 @@ In intended feed channels the bot requires the following permissions:
 | Embed Links   | Allows the bot to post Discord rich embed content containing images (ship renders, player portraits, corp/alliance logos) and hyperlinks (zKillboard and Dotlan).
 | Mention Everyone | Allows the bot to optionally mention @here or @everyone for capital radar alerts.
 
-
 # Getting started
 ## Entity Feed
 This quick start guide will help you set up an alliance killboard tracking feed.
@@ -118,6 +119,13 @@ and normal capitals, selecting ```yes``` to track supercapitals.
 8. The feed service is now fully configured! You can manage settings, add or remove base systems, and more 
 by running the ```!settings``` command. Radar feeds feature an optional API synchronized list of allies
 to blacklist from appearing on the radar, accessible by the ```!sync``` command.
+
+# Branch overview
+| Branch | Purpose |
+|---|---|
+| main | Release branch. Releases are snapshots of merges into this branch.|
+| dev | Stable with latest features. The [public bot](#links) runs this branch. |
+| experimental | Latest unstable features. You can invite the [public experimental bot](https://discordapp.com/api/oauth2/authorize?client_id=477314845608378369&permissions=149504&scope=bot), but there are no guarantees of uptime or stability. |
 
 # Installation
 Packaged binaries are available for Windows and Linux under [releases](https://github.com/Nathan-LS/Insight/releases). Binary releases are the simplest way 
