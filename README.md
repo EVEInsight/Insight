@@ -36,7 +36,7 @@ If you have questions, suggestions, or bug reports feel free to drop by the [pro
 # Feature Overview
 * Entity feeds ideal for personal, corporate, or alliance killboard streaming.
 * Capital radar feeds ideal for tracking hostile incursions into friendly space, hunting expensive targets within jump range, or detecting capital escalations in real time.
-* Proximity watches ideal for finding potential fleets to fight, tracking hostile fleet movement within your region, or altering you of nearby hostiles within a few jumps of your base systems.
+* Proximity watches ideal for finding potential fleets to fight, tracking hostile fleet movement within your region, or alerting you of nearby hostiles within a few jumps of your base systems.
 * Preconfigured feeds offering custom spins such as: Alliance Tournament system feed, npc officer hunter, AT ship radar, and more!
 * Rich embeds to present mails with color indicating sidebars, hyperlinks, and images.
 * Optional mention system to be alerted of activity in radar feeds.
