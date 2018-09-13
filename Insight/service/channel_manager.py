@@ -65,11 +65,28 @@ class Channel_manager(object):
             sys.exit(1)
 
     async def load_channels(self):
+
+        def get_ids():
+            db = self.service.get_session()
+            try:
+                ids = [i.channel_id for i in db.query(tb_channels).all()]
+                return ids
+            except Exception as ex:
+                print(ex)
+                return None
+            finally:
+                db.close()
+
         print("Loading feed services...")
         start = datetime.datetime.utcnow()
+        existing_ids = await self.__discord_client.loop.run_in_executor(None, get_ids)
         async for i in self.__get_text_channels():
             try:
-                await self.get_channel_feed(i)
+                if existing_ids is not None:
+                    if i.id in existing_ids:
+                        await self.get_channel_feed(i)
+                else:
+                    await self.get_channel_feed(i)
             except Exception as ex:
                 print(ex)
         print("Loaded {:d} feeds in {:.1f} seconds".format(len(list(self.sy_get_all_channels())),
@@ -152,4 +169,5 @@ class Channel_manager(object):
 
 
 from database.db_tables.eve import tb_kills
+from database.db_tables.discord import tb_channels
 from service.zk import zk as zk_module
