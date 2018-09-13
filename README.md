@@ -46,7 +46,6 @@ If you have questions, suggestions, or bug reports feel free to drop by the [pro
 * Automatic synchronization of SSO tokens and radar blacklists.
 * Instinctual commands and convenient option dialogs for managing settings.
 * Easy server setup with no hardcoding or confusing configuration.
-* Rich embed templates to change visual presentation/appearance.
 * Simultaneous, isolated feeds across multiple servers.
 * Efficient asynchronous design with minimal cpu, memory, disk, and network impact.   
    
