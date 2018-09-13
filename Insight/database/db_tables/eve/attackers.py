@@ -95,6 +95,17 @@ class Attackers(dec_Base.Base, Base_Str_ATKv):
                 return False
         return False
 
+    def is_alive_nonnpc(self):
+        try:
+            if self.ship_type_id is None:
+                return False
+            elif self.object_ship.get_category() != 6:
+                return False
+            else:
+                return True
+        except Exception as ex:
+            print(ex)
+            return False
 
 
 from ..filters import *

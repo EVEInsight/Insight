@@ -74,6 +74,8 @@ class VisualProximityWatch(base_visual):
         self.tracked_hostiles = self.km.filter_attackers(tracked_ships, list_aff, self.in_attackers_affiliation)
         if len(self.tracked_hostiles) == 0:
             return False
+        if self.km.get_alive_nonnpc_count(self.tracked_hostiles) == 0:
+            return False
         return True
 
     def set_frame_color(self):

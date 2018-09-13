@@ -35,6 +35,12 @@ class Types(dec_Base.Base,name_only,index_api_updating,sde_impoter):
     def set_name(self, api_name):
         self.type_name = api_name
 
+    def get_category(self):
+        try:
+            return self.object_group.object_category.category_id
+        except:  # no category or object error
+            return None
+
     @classmethod
     def index_swagger_api_call(cls, api, **kwargs):
         return api.get_universe_types_with_http_info(**kwargs)

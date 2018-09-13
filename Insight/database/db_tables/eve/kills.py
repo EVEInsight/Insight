@@ -201,6 +201,13 @@ class Kills(dec_Base.Base, table_row):
                 top_attacker = a
         return top_attacker
 
+    def get_alive_nonnpc_count(self, attackers_list):
+        count = 0
+        for a in attackers_list:
+            if a.is_alive_nonnpc():
+                count += 1
+        return count
+
     def get_time(self):
         try:
             assert isinstance(self.killmail_time, datetime.datetime)
