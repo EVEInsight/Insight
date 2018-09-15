@@ -97,12 +97,13 @@ class Attackers(dec_Base.Base, Base_Str_ATKv):
 
     def is_alive_nonnpc(self):
         try:
-            if self.ship_type_id is None:
+            if self.object_ship is None:
                 return False
-            elif self.object_ship.get_category() != 6:
+            if self.object_ship.group_id == 29:  # capsule check
                 return False
-            else:
-                return True
+            if self.object_ship.get_category() != 6:
+                return False
+            return True
         except Exception as ex:
             print(ex)
             return False

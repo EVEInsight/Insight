@@ -6,8 +6,11 @@ class VisualCapRadarUtility(visual_capradar):
         self.message_txt = "{}".format(self.mention_method())
 
     def field_overview(self):
-        ov_field = "```{}```".format(self.km.str_overview(self.tracked_hostiles, other=True))
-        self.embed.add_field(name="Overview", value=ov_field, inline=False)
+        s_field = "```{}```".format(self.km.str_overview(self.tracked_hostiles, other=True, balance=True))
+        af_field = "```{}```".format(
+            self.km.str_overview(self.tracked_hostiles, affiliation=True, other=False, balance=True))
+        self.embed.add_field(name="Ships - {}".format(self.km.str_total_involved()), value=s_field, inline=False)
+        self.embed.add_field(name="Affiliation", value=af_field, inline=False)
 
     def field_victim(self):
         v_field = "Ship: [{S}]({Sl})\nPilot: [{P}]({Pl})\nCorp: [{C}]({Cl})\nAlliance: [{A}]({Al})".format(
@@ -24,10 +27,10 @@ class VisualCapRadarUtility(visual_capradar):
         self.embed.add_field(name="Attacker", value=a_field, inline=True)
 
     def field_details(self):
-        d_field = "System: [{sN}]({sL})({rgN})\nCelestial: [{locN}]({loc_l})\nTime: {mAgo}\nKill: **[KM]({kL})**".\
+        d_field = "System: [{sN}]({sL})({rgN})\nCelestial: [{locN}]({loc_l})\nTime: {mAgo}\nKill: **[{shipN}]({kL})**".\
             format(sN=self.system.str_system_name(), sL=self.system.str_dotlan_map(), rgN=self.system.str_region_name(),
                    locN=self.km.str_location_name(True), loc_l=self.km.str_location_zk(),
-                   mAgo=self.km.str_minutes_ago(True), kL=self.km.str_zk_link())
+                   mAgo=self.km.str_minutes_ago(True), shipN=self.vi.str_ship_name(), kL=self.km.str_zk_link())
         self.embed.add_field(name="Details", value=d_field, inline=True)
 
     def field_routes(self):
@@ -54,4 +57,5 @@ class VisualCapRadarUtility(visual_capradar):
 
     @classmethod
     def get_desc(cls):
-        return "Utility - Less verbosity with all information and available routes. Size: Medium"
+        return "Utility - Detailed tracked ship/affiliation count breakdown, victim, highest valued attacker," \
+               " system/location details, and generated Dotlan routes from base system. Size: Medium"

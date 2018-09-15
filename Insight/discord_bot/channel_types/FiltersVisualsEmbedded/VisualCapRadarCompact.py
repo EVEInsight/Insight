@@ -34,4 +34,5 @@ class VisualCapRadarCompact(visual_capradar):
 
     @classmethod
     def get_desc(cls):
-        return "Compact - Attacker ship/affiliation, nearest celestial, kill link, and super jump route. Size: Small"
+        return "Compact - Highest valued attacker ship/affiliation, system/location details, and supercarrier/titan" \
+               " generated Dotlan route from base system. Size: Small"

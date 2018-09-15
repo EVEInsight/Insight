@@ -40,10 +40,12 @@ class VisualProximityWatch(base_visual):
         self.embed.add_field(name="Attacker", value=a_field, inline=True)
 
     def field_details(self):
-        d_field = "System: [{SysName}]({SysLink})({RgName})\nCelestial: [{cName}]({cLink})\nTime: {mAgo}\nKill: **[KM]({kLi})**".format(
-            SysName=self.system.str_system_name(),
-            SysLink=self.system.str_dotlan_map(), RgName=self.system.str_region_name(), cName=self.km.str_location_name(True), cLink=self.km.str_location_zk(),
-            mAgo=self.km.str_minutes_ago(True), kLi=self.km.str_zk_link())
+        d_field = "System: [{SysName}]({SysLink})({RgName})\nCelestial: [{cName}]({cLink})\nTime: {mAgo}\nKill: " \
+                  "**[{shipN}]({kLi})**".format(
+                    SysName=self.system.str_system_name(), SysLink=self.system.str_dotlan_map(),
+                    RgName=self.system.str_region_name(), cName=self.km.str_location_name(True),
+                    cLink=self.km.str_location_zk(), mAgo=self.km.str_minutes_ago(True), shipN=self.vi.str_ship_name(),
+                    kLi=self.km.str_zk_link())
         self.embed.add_field(name="Details", value=d_field, inline=True)
 
     def make_header(self):
@@ -118,7 +120,7 @@ class VisualProximityWatch(base_visual):
     @classmethod
     def get_desc(cls):
         return "Utility - Detailed ship/affiliation count breakdown, victim, highest valued attacker," \
-               " celestial, and KM link. Size: Medium"
+               " and system/location details. Size: Medium"
 
 
 from .VisualProximityWatchCompact import VisualProximityWatchCompact
