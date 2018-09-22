@@ -3,6 +3,10 @@
 * Preconfigured
     * Big Kills feed
         * Added a new feed that displays all kills valued more than a customized minimum value.
+## Technical
+* RouteMapper
+    * Increased speed and memory optimization improvements.
+    
 # v1.2.0
 ## New features
 * Entity feed

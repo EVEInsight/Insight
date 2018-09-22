@@ -50,8 +50,6 @@ class service_module(object):
                             help="Skip startup API static data import check.", default=False)
         parser.add_argument("--defer_tasks", "-defer", action="store_true",
                             help="Defers slow tasks to run later instead of at startup.", default=False)
-        parser.add_argument("--routes_all", "-rall", action="store_true",
-                            help="Load all routes at Insight startup instead of on KM parse.", default=False)
         parser.add_argument("--sde_db","-sde",
                             help="Specifies the name of the SDE database file relative to main.py. Download and extract the "
                                  "sqlite-latest.sqlite file from https://www.fuzzwork.co.uk/dump/",
