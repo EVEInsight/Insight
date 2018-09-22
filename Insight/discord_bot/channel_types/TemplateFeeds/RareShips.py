@@ -37,7 +37,7 @@ class RareShips(capRadar):
 
     @classmethod
     def get_template_desc(cls):
-        return "Alliance Tournament Ship Radar - A modified radar feed that tracks universal Alliance Tournament ship activity."
+        return "Alliance Tournament Ship Radar - A radar feed that tracks universal AT ship activity."
 
     def __str__(self):
         return "Alliance Tournament Ship Activity Feed"

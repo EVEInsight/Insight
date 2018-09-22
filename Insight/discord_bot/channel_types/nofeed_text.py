@@ -28,7 +28,7 @@ class discord_text_nofeed_exist(discord_feed_service):
                                                                               coroutine_object=subc.create_new(
                                                                                   message_object, self.service,
                                                                                   self.discord_client)))
-            __options.add_header_row("Preconfigured derived feeds")
+            __options.add_header_row("Preconfigured/other feeds")
             for subc in itertools.chain(inEF.enFeed.__subclasses__(), inCR.capRadar.__subclasses__()):
                 if subc.is_preconfigured():
                     __options.add_option(insightClient.option_calls_coroutine(name=subc.get_template_desc(),

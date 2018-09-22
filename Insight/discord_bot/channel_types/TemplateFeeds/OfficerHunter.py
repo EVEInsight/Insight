@@ -39,8 +39,7 @@ class OfficerHunter(capRadar):
 
     @classmethod
     def get_template_desc(cls):
-        return "Officer Hunter - A modified radar feed that displays universal officer activity" \
-               " when an npc officer is involved in a killmail."
+        return "Officer Hunter - A radar feed that displays officer activity when an npc officer is on a killmail."
 
     def __str__(self):
         return "Officer Hunter Feed"

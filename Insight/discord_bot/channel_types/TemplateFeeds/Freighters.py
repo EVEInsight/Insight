@@ -34,7 +34,7 @@ class Freighters(enFeed):
 
     @classmethod
     def get_template_desc(cls):
-        return "Freighter Ganks - Displays all freighters and jump freighters destroyed in high-security space."
+        return "Freighter Ganks - Displays freighter and jump freighter losses in high-security space."
 
     def __str__(self):
         return "Freighter Ganks Feed"

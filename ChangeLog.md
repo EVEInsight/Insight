@@ -1,3 +1,8 @@
+# v1.3.0
+## New features
+* Preconfigured
+    * Big Kills feed
+        * Added a new feed that displays all kills valued more than a customized minimum value.
 # v1.2.0
 ## New features
 * Entity feed

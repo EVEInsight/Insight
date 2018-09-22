@@ -26,7 +26,7 @@ class SuperLosses(enFeed):
 
     @classmethod
     def get_template_desc(cls):
-        return "Super Losses - Exclusively displays titan or supercarrier losses."
+        return "Super Losses - Displays titan and supercarrier losses."
 
     def __str__(self):
         return "Super Losses Feed"
