@@ -1,21 +1,20 @@
 import random
-import time
 import string
-import requests
 import queue
 import datetime
 import service
 from sqlalchemy.orm import Session
 import database.db_tables as dbRow
 import statistics
+import traceback
+import aiohttp
+import asyncio
 
 
 class zk(object):
     def __init__(self, service_module):
         assert isinstance(service_module,service.ServiceModule)
         self.service = service_module
-
-        self.rSession: requests.Session = self.make_session()
         identifier = str(self.generate_identifier())
         self.zk_stream_url = str("https://redisq.zkillboard.com/listen.php?queueID={}".format(identifier))
         self.run = True
@@ -78,11 +77,8 @@ class zk(object):
                 f.write(random_s)
                 return random_s
 
-    def make_session(self):
-        ses = requests.Session()
-        ses.headers.update({
-                               'User-Agent': "InsightDiscordKillfeeds https://github.com/Nathan-LS/Insight Maintainer:Nathan nathan@nathan-s.com"})
-        return ses
+    def get_headers(self):
+        return {'User-Agent': "InsightDiscordKillfeeds https://github.com/Nathan-LS/Insight Maintainer:Nathan nathan@nathan-s.com"}
 
     def __make_km(self, km_json):
         db:Session = self.service.get_session()
@@ -119,37 +115,39 @@ class zk(object):
             except Exception as ex:
                 print(ex)
             self.service.channel_manager.post_message("Debugging is now finished. Switching back to streaming live kms.")
-            time.sleep(5)
 
-    def thread_pull_km(self):
-        print("Starting zk puller")
-        self.__debug_simulate()
-        next_delay = datetime.datetime.utcnow()
-        while self.run:
-            try:
-                resp = self.rSession.get(self.zk_stream_url, verify=True, timeout=45)
-                if resp.status_code == 200:
-                    json_data = resp.json()['package']
-                    if json_data == None:
-                        pass
-                    else:
-                        self.__km_preProcess.put_nowait(json_data)
-                    self.add_delay(self.delay_next, next_delay)
-                    next_delay = datetime.datetime.utcnow()
-                elif resp.status_code == 420:  # calm down zKill is probably overloaded
-                    print("{} {}".format(str(datetime.datetime.utcnow()), "zKill error 420"))
-                    time.sleep(45)
-                elif resp.status_code == 429:  # error limited
-                    print("{} {}".format(str(datetime.datetime.utcnow()),
-                                         "zKill error limited. Are you using more than 1 bot with the same zk queue identifier? Delete your 'zk_identifier.txt' file."))
-                    time.sleep(30)
-                elif resp.status_code == 500 or resp.status_code == 502 or resp.status_code == 503 or resp.status_code == 504:
-                    time.sleep(30)
-                else:
-                    time.sleep(15)
-            except Exception as ex:
-                print(ex)
-                time.sleep(10)
+    async def pull_kms_redisq(self):
+        """pulls kms using redisq"""
+        async with aiohttp.ClientSession(headers=self.get_headers()) as client:
+            print("Starting zk stream (RedisQ)")
+            next_delay = datetime.datetime.utcnow()
+            while self.run:
+                try:
+                    async with client.get(url=self.zk_stream_url, timeout=30) as resp:
+                        if resp.status == 200:
+                            data = await resp.json()
+                            package = data.get('package')
+                            if package is not None:
+                                self.__km_preProcess.put_nowait(package)
+                            self.add_delay(self.delay_next, next_delay)
+                            next_delay = datetime.datetime.utcnow()
+                        elif resp.status == 420:  # calm down zKill is probably overloaded
+                            print("{} {}".format(str(datetime.datetime.utcnow()), "zKill error 420"))
+                            await asyncio.sleep(45)
+                        elif resp.status == 429:  # error limited
+                            print("{} {}".format(str(datetime.datetime.utcnow()),
+                                                 "zKill error limited. Are you using more than 1 bot with the same zk queue identifier? Delete your 'zk_identifier.txt' file."))
+                            await asyncio.sleep(30)
+                        elif resp.status == 500 or resp.status == 502 or resp.status == 503 or resp.status == 504:
+                            await asyncio.sleep(30)
+                        else:
+                            await asyncio.sleep(15)
+                except asyncio.TimeoutError:
+                    await asyncio.sleep(10)
+                except Exception as ex:
+                    print(ex)
+                    traceback.print_exc()
+                    await asyncio.sleep(10)
 
     def __add_km_to_filter(self,km):
         try:
@@ -176,6 +174,7 @@ class zk(object):
 
     def thread_filters(self):
         print("Starting zk filter")
+        self.__debug_simulate()
         while True:
             try:
                 self.service.channel_manager.send_km(self.__km_postProcess.get(block=True))

@@ -16,7 +16,7 @@ class Discord_Insight_Client(discord.Client):
         self.channel_manager: service.Channel_manager = self.service.channel_manager
         self.commandLookup = DiscordCommands()
         self.background_tasks = background_tasks(self)
-        self.loop.set_default_executor(ThreadPoolExecutor(max_workers=6))
+        self.loop.set_default_executor(ThreadPoolExecutor(max_workers=5))
         self.loop.create_task(self.setup_tasks())
 
     async def on_ready(self):
@@ -43,11 +43,11 @@ class Discord_Insight_Client(discord.Client):
         self.__task_km_process = self.loop.create_task(self.km_process())
         self.__task_km_deque_filter = self.loop.create_task(self.km_deque_filter())
         self.__task_km_deque = self.loop.create_task(self.channel_manager.post_all_queued())
-        self.__task_km_enqueue = self.loop.create_task(self.km_enqueue())
+        await self.km_enqueue()
 
     async def km_enqueue(self):
         await self.wait_until_ready()
-        await self.loop.run_in_executor(None, self.service.zk_obj.thread_pull_km)
+        await self.loop.create_task(self.service.zk_obj.pull_kms_redisq())
 
     async def km_process(self):
         await self.wait_until_ready()
