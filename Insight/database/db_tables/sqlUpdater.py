@@ -73,6 +73,10 @@ class sqlUpdater(object):
         """v1.2.0"""
         yield 'ALTER TABLE discord_enFeed ADD minValue FLOAT DEFAULT 0.0 NOT NULL;'
 
+    def sqlV_1_3_0(self):
+        """v1.3.0"""
+        yield 'CREATE INDEX ix_attackers_kill_id on attackers (kill_id);'
+
     def update_all(self):
         """Updates tables, returning the latest successful updated version"""
         self.compatibility_check()

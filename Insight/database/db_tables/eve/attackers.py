@@ -7,7 +7,7 @@ class Attackers(dec_Base.Base, Base_Str_ATKv):
     __tablename__ = 'attackers'
 
     no_pk = Column(Integer,primary_key=True,autoincrement=True,nullable=False)
-    kill_id = Column(Integer,ForeignKey("kills.kill_id"),nullable=False, autoincrement=False)
+    kill_id = Column(Integer,ForeignKey("kills.kill_id"),nullable=False, index=True, autoincrement=False)
     character_id = Column(Integer,ForeignKey("characters.character_id"),default=None, nullable=True)
     corporation_id = Column(Integer,ForeignKey("corporations.corporation_id"), default=None, nullable=True)
     alliance_id = Column(Integer,ForeignKey("alliances.alliance_id"), default=None, nullable=True)

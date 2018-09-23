@@ -6,6 +6,7 @@
 ## Technical
 * RouteMapper
     * Increased speed and memory optimization improvements.
+* Add index on attacker KM id foreign key to speed up SQLAlchemy object refreshing.
     
 # v1.2.0
 ## New features
