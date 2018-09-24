@@ -25,6 +25,7 @@ class zk(object):
         self.delay_km = queue.Queue()  # delay from occurrence to load
         self.delay_process = queue.Queue()  # process/name resolve delay
         self.delay_next = queue.Queue()  # delay between zk requests
+        self.run_websocket = self.service.cli_args.websocket
 
     @staticmethod
     def add_delay(q, other_time, minutes=False):
@@ -129,8 +130,9 @@ class zk(object):
                             package = data.get('package')
                             if package is not None:
                                 self.__km_preProcess.put_nowait(package)
-                            self.add_delay(self.delay_next, next_delay)
-                            next_delay = datetime.datetime.utcnow()
+                            if not self.run_websocket:
+                                self.add_delay(self.delay_next, next_delay)
+                                next_delay = datetime.datetime.utcnow()
                         elif resp.status == 420:  # calm down zKill is probably overloaded
                             print("{} {}".format(str(datetime.datetime.utcnow()), "zKill error 420"))
                             await asyncio.sleep(45)
@@ -148,6 +150,46 @@ class zk(object):
                     print(ex)
                     traceback.print_exc()
                     await asyncio.sleep(10)
+
+    def ws_extract(self, data):
+        new_res = {}
+        try:
+            new_res['killID'] = data['killmail_id']
+            new_res['killmail'] = data
+            new_res['zkb'] = data['zkb']
+        except Exception as ex:
+            traceback.print_exc()
+            print(ex)
+            new_res = {}
+        finally:
+            return new_res
+
+    async def pull_kms_ws(self):
+        if self.run_websocket:
+            async with aiohttp.ClientSession(headers=self.get_headers()) as client:
+                while self.run:
+                    next_delay = datetime.datetime.utcnow()
+                    try:
+                        async with client.ws_connect('wss://zkillboard.com:2096', heartbeat=10) as ws:
+                            await ws.send_json(data={"action": "sub", "channel": "killstream"})
+                            print("ZK websocket connection established.")
+                            async for msg in ws:
+                                if msg.type == aiohttp.WSMsgType.TEXT:
+                                    package = self.ws_extract(msg.json())
+                                    if package:
+                                        self.__km_preProcess.put_nowait(package)
+                                        self.add_delay(self.delay_next, next_delay)
+                                        next_delay = datetime.datetime.utcnow()
+                                    else:
+                                        print("WS package error")
+                                elif msg.type == aiohttp.WSMsgType.ERROR:
+                                    print("ZK WS error response.")
+                                else:
+                                    print("ZK WS unknown response.")
+                    except Exception as ex:
+                        print("ZK websocket error: {}".format(ex))
+                    await asyncio.sleep(10)
+                    print("ZK websocket closed. Attempting to reconnect...")
 
     def __add_km_to_filter(self,km):
         try:

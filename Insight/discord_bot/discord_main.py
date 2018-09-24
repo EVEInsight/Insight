@@ -47,7 +47,8 @@ class Discord_Insight_Client(discord.Client):
 
     async def km_enqueue(self):
         await self.wait_until_ready()
-        await self.loop.create_task(self.service.zk_obj.pull_kms_redisq())
+        self.loop.create_task(self.service.zk_obj.pull_kms_redisq())
+        self.loop.create_task(self.service.zk_obj.pull_kms_ws())
 
     async def km_process(self):
         await self.wait_until_ready()

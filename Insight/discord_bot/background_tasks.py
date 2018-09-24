@@ -53,10 +53,8 @@ class background_tasks(object):
                                                                               str(self.client.service.get_version()))
                 stats_zk = await self.client.loop.run_in_executor(None, self.client.service.zk_obj.get_stats)
                 d_status = discord.Status.online
-                if stats_zk[0] <= 5 or stats_zk[3] >= 10:
+                if stats_zk[0] <= 10:
                     d_status = discord.Status.idle
-                if stats_zk[2] > 100:
-                    stats_zk[2] = "99+"
                 status_str += '[zK] Add: {}, Delay: {}m(+{}s), Next: {}s '.format(
                     str(stats_zk[0]), str(stats_zk[1]), str(stats_zk[2]), str(stats_zk[3]))
                 stats_feeds = await self.client.channel_manager.avg_delay()

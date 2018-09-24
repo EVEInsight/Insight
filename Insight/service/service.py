@@ -48,6 +48,8 @@ class service_module(object):
                             type=int)
         parser.add_argument("--skip_api_import", "-noapi", action="store_true",
                             help="Skip startup API static data import check.", default=False)
+        parser.add_argument("--websocket", "-ws", action="store_true",
+                            help="Enable the experimental secondary ZK websocket connection.", default=False)
         parser.add_argument("--defer_tasks", "-defer", action="store_true",
                             help="Defers slow tasks to run later instead of at startup.", default=False)
         parser.add_argument("--sde_db","-sde",
