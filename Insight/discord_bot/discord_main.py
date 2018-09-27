@@ -7,6 +7,7 @@ import sys
 from functools import partial
 import InsightExc
 import traceback
+from .UnboundUtilityCommands import UnboundUtilityCommands
 
 
 class Discord_Insight_Client(discord.Client):
@@ -16,6 +17,7 @@ class Discord_Insight_Client(discord.Client):
         self.channel_manager: service.Channel_manager = self.service.channel_manager
         self.commandLookup = DiscordCommands()
         self.background_tasks = background_tasks(self)
+        self.unbound_commands = UnboundUtilityCommands(self)
         self.loop.set_default_executor(ThreadPoolExecutor(max_workers=5))
         self.loop.create_task(self.setup_tasks())
 
@@ -90,6 +92,10 @@ class Discord_Insight_Client(discord.Client):
                 await (await self.channel_manager.get_channel_feed(message.channel)).command_about(message)
             elif await self.commandLookup.status(message):
                 await (await self.channel_manager.get_channel_feed(message.channel)).command_status(message)
+            elif await self.commandLookup.eightball(message):
+                await self.unbound_commands.command_8ball(message)
+            elif await self.commandLookup.dscan(message):
+                await self.unbound_commands.command_dscan(message)
             else:
                 await self.commandLookup.notfound(message)
         except Exception as ex:
