@@ -120,7 +120,7 @@ class zk(object):
     async def pull_kms_redisq(self):
         """pulls kms using redisq"""
         async with aiohttp.ClientSession(headers=self.get_headers()) as client:
-            print("Starting zk stream (RedisQ)")
+            print("Starting zk stream (RedisQ/polling)")
             next_delay = datetime.datetime.utcnow()
             while self.run:
                 try:
@@ -147,8 +147,7 @@ class zk(object):
                 except asyncio.TimeoutError:
                     await asyncio.sleep(10)
                 except Exception as ex:
-                    print(ex)
-                    traceback.print_exc()
+                    print('ZK RedisQ(polling) error: {}'.format(ex))
                     await asyncio.sleep(10)
 
     def ws_extract(self, data):
@@ -168,11 +167,11 @@ class zk(object):
         if self.run_websocket:
             async with aiohttp.ClientSession(headers=self.get_headers()) as client:
                 while self.run:
+                    print("Starting zk stream (websocket)")
                     next_delay = datetime.datetime.utcnow()
                     try:
                         async with client.ws_connect('wss://zkillboard.com:2096', heartbeat=10) as ws:
                             await ws.send_json(data={"action": "sub", "channel": "killstream"})
-                            print("ZK websocket connection established.")
                             async for msg in ws:
                                 if msg.type == aiohttp.WSMsgType.TEXT:
                                     package = self.ws_extract(msg.json())
@@ -187,9 +186,8 @@ class zk(object):
                                 else:
                                     print("ZK WS unknown response.")
                     except Exception as ex:
-                        print("ZK websocket error: {}".format(ex))
+                        print('ZK Websocket error: {}'.format(ex))
                     await asyncio.sleep(10)
-                    print("ZK websocket closed. Attempting to reconnect...")
 
     def __add_km_to_filter(self,km):
         try:

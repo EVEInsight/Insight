@@ -109,7 +109,7 @@ class Discord_Insight_Client(discord.Client):
             elif isinstance(ex, discord.NotFound):
                 return  # channel deleted
             else:
-                print(traceback.print_exc())
+                traceback.print_exc()
                 try:
                     await message.channel.send(
                         "{}\nUncaught exception: '{}'.".format(message.author.mention, str(ex.__class__.__name__)))

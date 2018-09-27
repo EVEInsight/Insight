@@ -104,7 +104,7 @@ class base_visual(object):
             return __resp
         except Exception as ex:
             print(ex)
-            print(traceback.print_exc())
+            traceback.print_exc()
             return False
 
     async def __call__(self, *args, **kwargs):
