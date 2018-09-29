@@ -25,6 +25,14 @@ class Channel_manager(object):
                                                                   partial(zk_module.avg_delay, self.__delay_post, True))
         return result
 
+    def exists(self, feed_object):
+        try:
+            assert isinstance(feed_object, cType.insight_feed_service_base)
+            return self.__channel_feed_container.get(feed_object.channel_id) == feed_object
+        except Exception as ex:
+            print(ex)
+            return False
+
     def get_discord_client(self):
         assert isinstance(self.__discord_client,discord_bot.Discord_Insight_Client)
         return self.__discord_client
@@ -57,7 +65,7 @@ class Channel_manager(object):
             for channel in guild.text_channels:
                 yield channel
 
-    async def set_client(self,client_object):
+    def set_client(self, client_object):
         try:
             assert isinstance(client_object,discord_bot.Discord_Insight_Client)
             self.__discord_client = client_object
@@ -94,6 +102,7 @@ class Channel_manager(object):
 
     async def add_feed_object(self,ch_feed_object):
         self.__channel_feed_container[ch_feed_object.channel_id] = ch_feed_object
+        await self.refresh_post_all_tasks()
         return ch_feed_object
 
     async def __add_channel(self,discord_channel_object,ch_feed_object_type):
@@ -157,15 +166,21 @@ class Channel_manager(object):
             except Exception as ex:
                 print(ex)
 
-    async def post_all_queued(self):
-        while True:
+    async def refresh_post_all_tasks(self):
+        try:
             async for feed in self.get_all_channels():
                 try:
                     if feed.deque_done():
                         feed.set_deque_task(self.__discord_client.loop.create_task(feed.post_all()))
                 except Exception as ex:
                     print(ex)
-            await asyncio.sleep(.1)
+        except Exception as ex:
+            print(ex)
+
+    async def auto_refresh(self):
+        while True:
+            await self.refresh_post_all_tasks()
+            await asyncio.sleep(60)
 
 
 from database.db_tables.eve import tb_kills

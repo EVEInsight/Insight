@@ -15,6 +15,7 @@ class Discord_Insight_Client(discord.Client):
         super().__init__()
         self.service: service_module = service_module
         self.channel_manager: service.Channel_manager = self.service.channel_manager
+        self.channel_manager.set_client(self)
         self.commandLookup = DiscordCommands()
         self.background_tasks = background_tasks(self)
         self.unbound_commands = UnboundUtilityCommands(self)
@@ -38,19 +39,14 @@ class Discord_Insight_Client(discord.Client):
             await self.change_presence(activity=game_act, status=discord.Status.dnd)
         except Exception as ex:
             print(ex)
-        await self.channel_manager.set_client(self)
         await self.channel_manager.load_channels()
         await self.post_motd()
-        self.__task_backgrounds = self.loop.create_task(self.background_tasks.setup_backgrounds())
-        self.__task_km_process = self.loop.create_task(self.km_process())
-        self.__task_km_deque_filter = self.loop.create_task(self.km_deque_filter())
-        self.__task_km_deque = self.loop.create_task(self.channel_manager.post_all_queued())
-        await self.km_enqueue()
-
-    async def km_enqueue(self):
-        await self.wait_until_ready()
+        self.loop.create_task(self.background_tasks.setup_backgrounds())
+        self.loop.create_task(self.km_process())
+        self.loop.create_task(self.km_deque_filter())
         self.loop.create_task(self.service.zk_obj.pull_kms_redisq())
         self.loop.create_task(self.service.zk_obj.pull_kms_ws())
+        self.loop.create_task(self.channel_manager.auto_refresh())
 
     async def km_process(self):
         await self.wait_until_ready()

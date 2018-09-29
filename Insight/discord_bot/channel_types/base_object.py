@@ -11,6 +11,8 @@ from .FiltersVisualsEmbedded import *
 import InsightExc
 from sqlalchemy.orm.exc import NoResultFound
 import datetime
+import janus
+import traceback
 
 
 class discord_feed_service(object):
@@ -22,8 +24,7 @@ class discord_feed_service(object):
         self.channel_manager = self.service.channel_manager
         self.discord_client = self.service.channel_manager.get_discord_client()
 
-        self.kmQueue = queue.Queue()
-        self.messageQueue = queue.Queue()
+        self.kmQueue = janus.Queue(loop=self.discord_client.loop)
         self.__deque_task = None
         self.linked_options = self.get_linked_options()
         self.setup_table()
@@ -124,11 +125,11 @@ class discord_feed_service(object):
             assert isinstance(km,dbRow.tb_kills)
             __visual = self.linked_visual(km)
             if __visual:
-                self.kmQueue.put_nowait(__visual)
+                self.kmQueue.sync_q.put_nowait(__visual)
 
     def add_message(self,message_text):
         if self.cached_feed_table.feed_running:
-            self.kmQueue.put_nowait(message_text)
+            self.kmQueue.sync_q.put_nowait(message_text)
 
     def linked_visual(self,km_row):
         subc = self.linked_visual_subc()
@@ -152,39 +153,50 @@ class discord_feed_service(object):
         # return visual_enfeed
 
     async def post_all(self):
-        if self.cached_feed_table.feed_running:
-            try:
-                __item = self.kmQueue.get_nowait()
-                if isinstance(__item, base_visual):
-                    await __item()
-                    await self.channel_manager.add_delay(__item.get_load_time())
-                else:
-                    await self.channel_discord_object.send(str(__item))
-            except queue.Empty:
-                pass
-            except discord.Forbidden:
+        while self.channel_manager.exists(self):
                 try:
-                    await self.channel_discord_object.send(
-                        "Permissions are incorrectly set for the bot. See https://github.com/Nathan-LS/Insight#permissions\n\nRun the '!start' command to resume the feed once permissions are correctly set.")
-                except:
-                    pass
-                finally:
-                    await self.remove()
-            except discord.HTTPException as ex:
-                if ex.status == 404:  # channel deleted
-                    await self.channel_manager.delete_feed(self.channel_id)
-            except Exception as ex:
-                print(ex)
+                    __item = await asyncio.wait_for(self.kmQueue.async_q.get(), timeout=3600)
+                    if self.cached_feed_table.feed_running and self.channel_manager.exists(self):
+                        if isinstance(__item, base_visual):
+                            await __item()
+                            await self.channel_manager.add_delay(__item.get_load_time())
+                        else:
+                            await self.channel_discord_object.send(str(__item))
+                except asyncio.TimeoutError:
+                    continue
+                except discord.Forbidden:
+                    try:
+                        await self.channel_discord_object.send(
+                            "Permissions are incorrectly set for the bot. See https://github.com/Nathan-LS/Insight#permissions\n\nRun the '!start' command to resume the feed once permissions are correctly set.")
+                    except:
+                        pass
+                    finally:
+                        await self.remove()
+                except discord.HTTPException as ex:
+                    try:
+                        if ex.status == 404:  # channel deleted
+                            await self.channel_manager.delete_feed(self.channel_id)
+                        else:
+                            print(ex)
+                    except Exception as ex:
+                        print(ex)
+                except Exception as ex:
+                    print(ex)
+                    traceback.print_exc()
+                await asyncio.sleep(.1)
 
     async def remove(self):
         """Temp pause an error feed instead of removing it completely. Resume again in 30 minutes."""
-        if self.cached_feed_table.feed_running:
-            remaining = 60
-            self.cached_feed_table.feed_running = False
-            while remaining > 0 and not self.cached_feed_table.feed_running:
-                remaining -= 1
-                await asyncio.sleep(30)
-            await self.async_load_table()
+        try:
+            if self.cached_feed_table.feed_running:
+                remaining = 60
+                self.cached_feed_table.feed_running = False
+                while remaining > 0 and not self.cached_feed_table.feed_running:
+                    remaining -= 1
+                    await asyncio.sleep(30)
+                await self.async_load_table()
+        except Exception as ex:
+            print(ex)
 
     async def delete(self):
         def non_async_delete():
