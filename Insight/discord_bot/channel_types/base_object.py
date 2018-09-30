@@ -177,7 +177,7 @@ class discord_feed_service(object):
                         if ex.status == 404:  # channel deleted
                             await self.channel_manager.delete_feed(self.channel_id)
                         else:
-                            print(ex)
+                            print('{} - when sending KM.'.format(ex.status))
                     except Exception as ex:
                         print(ex)
                 except Exception as ex:
