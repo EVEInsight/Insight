@@ -13,15 +13,13 @@ class RareShips(capRadar):
         self.general_table().reset_filters(self.channel_id, self.service)
         db: Session = self.service.get_session()
         try:
-            row = db.query(self.linked_table()).filter(self.linked_table().channel_id == self.channel_id).one()
-            db.merge(row)
-            systemR = dbRow.tb_Filter_systems(30000142, self.channel_id)
+            systemR = dbRow.tb_Filter_systems(30000142, self.channel_id, load_fk=False)
             systemR.max = 50000
-            db.merge(systemR)
+            db.add(systemR)
             ships = [2836, 11936, 11938, 42246, 32788, 33675, 33397, 32790, 35781, 32207, 11940, 11011, 35779, 3516,
                      13202, 32209, 33395, 635, 42245, 26840, 11942, 26842, 2834, 3518, 33673, 45530, 45531]
             for s in ships:
-                db.merge(dbRow.tb_Filter_types(s, self.channel_id))
+                db.add(dbRow.tb_Filter_types(s, self.channel_id, load_fk=False))
             db.commit()
         except Exception as ex:
             print(ex)

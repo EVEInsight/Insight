@@ -8,9 +8,8 @@ class SuperLosses(enFeed):
         try:
             row = db.query(self.linked_table()).filter(self.linked_table().channel_id == self.channel_id).one()
             row.show_mode = dbRow.enum_kmType.show_both
-            db.merge(row)
-            db.merge(dbRow.tb_Filter_groups(659, self.channel_id))
-            db.merge(dbRow.tb_Filter_groups(30, self.channel_id))
+            db.add(dbRow.tb_Filter_groups(659, self.channel_id, load_fk=False))
+            db.add(dbRow.tb_Filter_groups(30, self.channel_id, load_fk=False))
             db.commit()
         except Exception as ex:
             print(ex)

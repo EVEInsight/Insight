@@ -1,6 +1,7 @@
 from .discord_base import *
 from ..eve import tb_alliances
 import InsightExc
+import traceback
 
 
 class Channels(dec_Base.Base,discord_channel_base):
@@ -68,6 +69,7 @@ class Channels(dec_Base.Base,discord_channel_base):
             db.commit()
         except Exception as ex:
             print(ex)
+            traceback.print_exc()
         finally:
             db.close()
 

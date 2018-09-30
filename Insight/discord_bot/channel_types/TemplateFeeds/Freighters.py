@@ -14,11 +14,10 @@ class Freighters(enFeed):
         try:
             row = db.query(self.linked_table()).filter(self.linked_table().channel_id == self.channel_id).one()
             row.show_mode = dbRow.enum_kmType.show_both
-            db.merge(row)
             for r in db.query(dbRow.tb_systems).filter(dbRow.tb_systems.security_status >= .45).all():
-                db.merge(dbRow.tb_Filter_systems(r.system_id, self.channel_id))
-            db.merge(dbRow.tb_Filter_groups(513, self.channel_id))
-            db.merge(dbRow.tb_Filter_groups(902, self.channel_id))
+                db.add(dbRow.tb_Filter_systems(r.system_id, self.channel_id, load_fk=False))
+            db.add(dbRow.tb_Filter_groups(513, self.channel_id, load_fk=False))
+            db.add(dbRow.tb_Filter_groups(902, self.channel_id, load_fk=False))
             db.commit()
         except Exception as ex:
             print(ex)

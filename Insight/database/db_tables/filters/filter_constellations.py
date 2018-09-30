@@ -15,10 +15,11 @@ class Filter_constellations(dec_Base.Base,filter_base):
     object_channel = relationship("Channels",uselist=False,back_populates="object_filter_constellations")
     object_item = relationship("Constellations",uselist=False,lazy="joined")
 
-    def __init__(self, eve_id: int, discord_channel_id):
+    def __init__(self, eve_id: int, discord_channel_id, load_fk=True):
         self.filter_id = eve_id
         self.channel_id = discord_channel_id
-        self.load_fk_objects()
+        if load_fk:
+            self.load_fk_objects()
 
     def load_fk_objects(self):
         self.object_channel = discord_channels.Channels(self.channel_id) if self.channel_id else None

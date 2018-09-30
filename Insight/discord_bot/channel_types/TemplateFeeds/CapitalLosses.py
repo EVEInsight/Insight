@@ -14,14 +14,13 @@ class CapitalLosses(enFeed):
         try:
             row = db.query(self.linked_table()).filter(self.linked_table().channel_id == self.channel_id).one()
             row.show_mode = dbRow.enum_kmType.show_both
-            db.merge(row)
-            db.merge(dbRow.tb_Filter_groups(659, self.channel_id))  # sc
-            db.merge(dbRow.tb_Filter_groups(30, self.channel_id))  # titan
-            db.merge(dbRow.tb_Filter_groups(547, self.channel_id))  # carrier
-            db.merge(dbRow.tb_Filter_groups(485, self.channel_id))  # dread
-            db.merge(dbRow.tb_Filter_groups(1538, self.channel_id))  # fax
-            db.merge(dbRow.tb_Filter_groups(902, self.channel_id))  # jf
-            db.merge(dbRow.tb_Filter_groups(883, self.channel_id))  # rorq
+            db.add(dbRow.tb_Filter_groups(659, self.channel_id, load_fk=False))  # sc
+            db.add(dbRow.tb_Filter_groups(30, self.channel_id, load_fk=False))  # titan
+            db.add(dbRow.tb_Filter_groups(547, self.channel_id, load_fk=False))  # carrier
+            db.add(dbRow.tb_Filter_groups(485, self.channel_id, load_fk=False))  # dread
+            db.add(dbRow.tb_Filter_groups(1538, self.channel_id, load_fk=False))  # fax
+            db.add(dbRow.tb_Filter_groups(902, self.channel_id, load_fk=False))  # jf
+            db.add(dbRow.tb_Filter_groups(883, self.channel_id, load_fk=False))  # rorq
             db.commit()
         except Exception as ex:
             print(ex)

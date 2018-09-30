@@ -8,8 +8,7 @@ class AllianceTournamentStreamSystem(enFeed):
         try:
             row = db.query(self.linked_table()).filter(self.linked_table().channel_id == self.channel_id).one()
             row.show_mode = dbRow.enum_kmType.show_both
-            db.merge(row)
-            db.merge(dbRow.tb_Filter_regions(10000004, self.channel_id))
+            db.add(dbRow.tb_Filter_regions(10000004, self.channel_id, load_fk=False))
             db.commit()
         except Exception as ex:
             print(ex)

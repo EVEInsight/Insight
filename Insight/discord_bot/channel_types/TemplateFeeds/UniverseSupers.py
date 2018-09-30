@@ -13,13 +13,11 @@ class UniverseSupers(capRadar):
         self.general_table().reset_filters(self.channel_id, self.service)
         db: Session = self.service.get_session()
         try:
-            row = db.query(self.linked_table()).filter(self.linked_table().channel_id == self.channel_id).one()
-            db.merge(row)
-            systemR = dbRow.tb_Filter_systems(30000142, self.channel_id)
+            systemR = dbRow.tb_Filter_systems(30000142, self.channel_id, load_fk=False)
             systemR.max = 50000
-            db.merge(systemR)
-            db.merge(dbRow.tb_Filter_groups(30, self.channel_id))
-            db.merge(dbRow.tb_Filter_groups(659, self.channel_id))
+            db.add(systemR)
+            db.add(dbRow.tb_Filter_groups(30, self.channel_id, load_fk=False))
+            db.add(dbRow.tb_Filter_groups(659, self.channel_id, load_fk=False))
             db.commit()
         except Exception as ex:
             print(ex)

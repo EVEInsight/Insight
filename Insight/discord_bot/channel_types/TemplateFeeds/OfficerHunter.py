@@ -1,23 +1,26 @@
 from ..capRadar import *
 
 
+class OptionsOfficerHunter(Linked_Options.opt_capradar):
+    def yield_options(self):
+        yield (self.InsightOptionRequired_maxage, False)
+        yield from super(Linked_Options.opt_capradar, self).yield_options()
+
+
 class OfficerHunter(capRadar):
     def template_loader(self):
         self.general_table().reset_filters(self.channel_id, self.service)
         db: Session = self.service.get_session()
         try:
-            row = db.query(self.linked_table()).filter(self.linked_table().channel_id == self.channel_id).one()
-            row.max_km_age = 120
-            db.merge(row)
-            systemR = dbRow.tb_Filter_systems(30000142, self.channel_id)
+            systemR = dbRow.tb_Filter_systems(30000142, self.channel_id, load_fk=False)
             systemR.max = 50000
-            db.merge(systemR)
-            db.merge(dbRow.tb_Filter_groups(553, self.channel_id))  # angels
-            db.merge(dbRow.tb_Filter_groups(559, self.channel_id))  # br
-            db.merge(dbRow.tb_Filter_groups(564, self.channel_id))  # guristas
-            db.merge(dbRow.tb_Filter_groups(569, self.channel_id))  # sansha
-            db.merge(dbRow.tb_Filter_groups(574, self.channel_id))  # serpentis
-            db.merge(dbRow.tb_Filter_groups(1174, self.channel_id))  # drones
+            db.add(systemR)
+            db.add(dbRow.tb_Filter_groups(553, self.channel_id, load_fk=False))  # angels
+            db.add(dbRow.tb_Filter_groups(559, self.channel_id, load_fk=False))  # br
+            db.add(dbRow.tb_Filter_groups(564, self.channel_id, load_fk=False))  # guristas
+            db.add(dbRow.tb_Filter_groups(569, self.channel_id, load_fk=False))  # sansha
+            db.add(dbRow.tb_Filter_groups(574, self.channel_id, load_fk=False))  # serpentis
+            db.add(dbRow.tb_Filter_groups(1174, self.channel_id, load_fk=False))  # drones
             db.commit()
         except Exception as ex:
             print(ex)
@@ -25,7 +28,7 @@ class OfficerHunter(capRadar):
             db.close()
 
     def get_linked_options(self):
-        return Linked_Options.opt_basicfeed(self)
+        return OptionsOfficerHunter(self)
 
     async def command_sync(self, message_object):
         await super(capRadar, self).command_sync(message_object)
