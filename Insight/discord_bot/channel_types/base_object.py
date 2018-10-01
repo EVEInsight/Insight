@@ -154,36 +154,47 @@ class discord_feed_service(object):
 
     async def post_all(self):
         while self.channel_manager.exists(self):
+            try:
+                __item = await asyncio.wait_for(self.kmQueue.async_q.get(), timeout=3600)
+            except asyncio.TimeoutError:
+                continue
+            except Exception as ex:
+                print(ex)
+                traceback.print_exc()
+                continue
+            try:
+                if self.cached_feed_table.feed_running and self.channel_manager.exists(self):
+                    if isinstance(__item, base_visual):
+                        await __item()
+                        await self.channel_manager.add_delay(__item.get_load_time())
+                    else:
+                        await self.channel_discord_object.send(str(__item))
+            except discord.Forbidden:
                 try:
-                    __item = await asyncio.wait_for(self.kmQueue.async_q.get(), timeout=3600)
-                    if self.cached_feed_table.feed_running and self.channel_manager.exists(self):
+                    await self.channel_discord_object.send(
+                        "Permissions are incorrectly set for the bot. See https://github.com/Nathan-LS/Insight#permissions\n\nRun the '!start' command to resume the feed once permissions are correctly set.")
+                except:
+                    pass
+                finally:
+                    await self.remove()
+            except discord.HTTPException as ex:
+                try:
+                    if ex.status == 404:  # channel deleted
+                        await self.channel_manager.delete_feed(self.channel_id)
+                    elif 500 <= ex.status < 600:
                         if isinstance(__item, base_visual):
-                            await __item()
-                            await self.channel_manager.add_delay(__item.get_load_time())
-                        else:
-                            await self.channel_discord_object.send(str(__item))
-                except asyncio.TimeoutError:
-                    continue
-                except discord.Forbidden:
-                    try:
-                        await self.channel_discord_object.send(
-                            "Permissions are incorrectly set for the bot. See https://github.com/Nathan-LS/Insight#permissions\n\nRun the '!start' command to resume the feed once permissions are correctly set.")
-                    except:
-                        pass
-                    finally:
-                        await self.remove()
-                except discord.HTTPException as ex:
-                    try:
-                        if ex.status == 404:  # channel deleted
-                            await self.channel_manager.delete_feed(self.channel_id)
-                        else:
-                            print('{} - when sending KM.'.format(ex.status))
-                    except Exception as ex:
-                        print(ex)
+                            await self.kmQueue.async_q.put(__item)
+                    else:
+                        print('Error {} - when sending KM.'.format(ex.status))
                 except Exception as ex:
                     print(ex)
-                    traceback.print_exc()
-                await asyncio.sleep(.1)
+            except InsightExc.DiscordError.MessageMaxRetryExceed:
+                print('Error - max message retry limit exceeded when sending KM.')
+                continue
+            except Exception as ex:
+                print(ex)
+                traceback.print_exc()
+            await asyncio.sleep(.1)
 
     async def remove(self):
         """Temp pause an error feed instead of removing it completely. Resume again in 30 minutes."""

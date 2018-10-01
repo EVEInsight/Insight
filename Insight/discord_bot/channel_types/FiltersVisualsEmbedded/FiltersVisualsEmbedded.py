@@ -1,6 +1,8 @@
 import enum
 import datetime
 import traceback
+import InsightExc
+import asyncio
 
 
 class internal_options(enum.Enum):
@@ -25,6 +27,7 @@ class base_visual(object):
         self.message_txt = ""
         self.color = discord.Color(800680)
         self.text_only = False
+        self.send_attempt_count = 0
 
         self.fb: tb_attackers = None
         self.vi: tb_victims = None
@@ -108,10 +111,16 @@ class base_visual(object):
             return False
 
     async def __call__(self, *args, **kwargs):
-        if self.text_only:
-            await self.channel.send(content=self.message_txt)
+        if self.send_attempt_count >= 4:
+            raise InsightExc.DiscordError.MessageMaxRetryExceed
         else:
-            await self.channel.send(content=self.message_txt, embed=self.embed)
+            if self.send_attempt_count != 0:
+                await asyncio.sleep(10)
+            self.send_attempt_count += 1
+            if self.text_only:
+                await self.channel.send(content=self.message_txt)
+            else:
+                await self.channel.send(content=self.message_txt, embed=self.embed)
 
     def feed_specific_row_type(cls):
         raise NotImplementedError
