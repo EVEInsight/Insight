@@ -192,8 +192,7 @@ class discord_feed_service(object):
                 print('Error - max message retry limit exceeded when sending KM.')
                 continue
             except Exception as ex:
-                print(ex)
-                traceback.print_exc()
+                print('Error {} - when sending KM'.format(ex))
             await asyncio.sleep(.1)
 
     async def remove(self):
