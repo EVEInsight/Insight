@@ -5,6 +5,8 @@ import psutil
 import datetime
 import requests
 import json
+import aiohttp
+import traceback
 
 
 class background_tasks(object):
@@ -69,31 +71,30 @@ class background_tasks(object):
             await asyncio.sleep(300)
 
     async def discordbots_api(self):
-        def api_post(token):
-            if token:
-                try:
-                    db_url = "https://discordbots.org/api/bots/{}/stats".format(str(self.client.user.id))
-                    headers = {"Content-Type": "application/json", "Authorization": str(token),
-                               "User-Agent": "InsightDiscordKillfeeds"}
-                    payload = {"server_count": len(self.client.guilds)}
-                    r = requests.post(url=db_url, data=json.dumps(payload), headers=headers, timeout=45, verify=True)
-                    if r.status_code == 200:
-                        return token
-                    elif r.status_code == 401:
-                        return None
-                    else:
-                        return token
-                except Exception as ex:
-                    print(ex)
-                    return token
-            else:
-                return token
-
         await self.client.wait_until_ready()
         api_token = self.client.service.config_file.get("discordbots.org", "discordbots_apikey", fallback=None)
-        while True:
-            api_token = await self.client.loop.run_in_executor(None, partial(api_post, api_token))
-            await asyncio.sleep(900)
+        db_url = "https://discordbots.org/api/bots/{}/stats".format(str(self.client.user.id))
+        db_headers = {"Content-Type": "application/json", "Authorization": str(api_token),
+                   "User-Agent": "InsightDiscordKillfeeds"}
+        if api_token:
+            async with aiohttp.ClientSession(headers=db_headers) as client:
+                while True:
+                    try:
+                        payload = {"server_count": len(self.client.guilds)}
+                        async with client.post(url=db_url, data=json.dumps(payload), timeout=45) as r:
+                            if r.status == 200:
+                                pass
+                            elif r.status == 401:
+                                print('Error 401 for DiscordBots API. DiscordBots posting will now stop.')
+                                break
+                            else:
+                                print('Error: {} - when posting to DiscordBots API'.format(r.status))
+                    except asyncio.TimeoutError:
+                        print('DiscordBots API timeout.')
+                    except Exception as ex:
+                        print(ex)
+                        traceback.print_exc()
+                    await asyncio.sleep(900)
 
 
 import discord_bot
