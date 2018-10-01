@@ -83,6 +83,13 @@ class Types(dec_Base.Base,name_only,index_api_updating,sde_impoter):
         return sde_base.typeID
 
     @classmethod
+    def auto_adjust_helper(cls, current_price, if_less_than_this, set_to_this):
+        if current_price is None or current_price <= if_less_than_this:
+            return set_to_this
+        else:
+            return current_price
+
+    @classmethod
     def update_prices(cls, service_module):
         db: Session = service_module.get_session()
         try:
@@ -102,6 +109,21 @@ class Types(dec_Base.Base,name_only,index_api_updating,sde_impoter):
                         price = t.basePrice
                     t.basePrice = price
                     total_market += 1
+                try:
+                    if t.group_id == 30:  # faction titan price auto adjust
+                        t.basePrice = cls.auto_adjust_helper(t.basePrice, 30e9, 300e9)
+                    elif t.group_id == 659:  # super
+                        t.basePrice = cls.auto_adjust_helper(t.basePrice, 8e9, 95e9)
+                    elif t.group_id == 1538:  # fax
+                        t.basePrice = cls.auto_adjust_helper(t.basePrice, .7e9, 10e9)
+                    elif t.group_id == 485:  # dread
+                        t.basePrice = cls.auto_adjust_helper(t.basePrice, .7e9, 15e9)
+                    elif t.group_id == 547:  # carrier
+                        t.basePrice = cls.auto_adjust_helper(t.basePrice, .7e9, 13e9)
+                    else:
+                        pass
+                except Exception as ex:
+                    print(ex)
             db.commit()
             print("Updated prices for {} items.".format(str(total_market)))
         except ApiException as ex:
