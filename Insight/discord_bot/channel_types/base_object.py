@@ -185,14 +185,14 @@ class discord_feed_service(object):
                         if isinstance(__item, base_visual):
                             await self.kmQueue.async_q.put(__item)
                     else:
-                        print('Error {} - when sending KM.'.format(ex.status))
+                        print('Error {} - when sending KM. discord.HTTPException'.format(ex.status))
                 except Exception as ex:
                     print(ex)
             except InsightExc.DiscordError.MessageMaxRetryExceed:
                 print('Error - max message retry limit exceeded when sending KM.')
                 continue
             except Exception as ex:
-                print('Error {} - when sending KM'.format(ex))
+                print('Error {} - when sending KM. Other'.format(ex))
             await asyncio.sleep(.1)
 
     async def remove(self):

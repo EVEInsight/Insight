@@ -16,15 +16,45 @@ class RareShips(capRadar):
             systemR = dbRow.tb_Filter_systems(30000142, self.channel_id, load_fk=False)
             systemR.max = 50000
             db.add(systemR)
-            ships = [2836, 11936, 11938, 42246, 32788, 33675, 33397, 32790, 35781, 32207, 11940, 11011, 35779, 3516,
-                     13202, 32209, 33395, 635, 42245, 26840, 11942, 26842, 2834, 3518, 33673, 45530, 45531]
-            for s in ships:
+            for s in self.at_ship_ids():
                 db.add(dbRow.tb_Filter_types(s, self.channel_id, load_fk=False))
             db.commit()
         except Exception as ex:
             print(ex)
         finally:
             db.close()
+
+    @classmethod
+    def at_ship_ids(cls):
+        yield 2836   # Adrestia
+        yield 11936  # Apocalypse Imperial Issue
+        yield 11938  # Armageddon Imperial Issue
+        yield 42246  # Caedes
+        yield 32788  # Cambion
+        yield 33675  # Chameleon
+        yield 33397  # Chremoas
+        yield 32790  # Etana
+        yield 35781  # Fiend
+        yield 32207  # Freki
+        yield 11940  # Gold Magnate
+        yield 11011  # Guardian-Vexor
+        yield 35779  # Imp
+        yield 3516   # Malice
+        yield 13202  # Megathron Federate Issue
+        yield 32209  # Mimir
+        yield 33395  # Moracha
+        yield 635    # Opux Luxury Yacht
+        yield 42245  # Rabisu
+        yield 26840  # Raven State Issue
+        yield 11942  # Silver Magnate
+        yield 26842  # Tempest Tribal Issue
+        yield 2834   # Utu
+        yield 3518   # Vangel
+        yield 33673  # Whiptail
+        yield 45530  # Virtuoso
+        yield 45531  # Victor
+        yield 48636  # Hydra
+        yield 48635  # Tiamat
 
     def get_linked_options(self):
         return OptionsRareShips(self)
