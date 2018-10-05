@@ -258,10 +258,15 @@ class Kills(dec_Base.Base, table_row):
         else:
             return "and **{}** other{}".format(str(count-1), "" if count == 2 else "s")
 
-    def str_minutes_ago(self, text_mituntes_ago=False):
+    def str_minutes_ago(self, text_ago=False):
         try:
-            minutes_ago = round(((datetime.datetime.utcnow() - self.killmail_time).total_seconds() / 60), 1)
-            return str(minutes_ago) + " m/ago" if not text_mituntes_ago else str(minutes_ago) + " minutes ago"
+            total_seconds = (datetime.datetime.utcnow() - self.killmail_time).total_seconds()
+            if total_seconds <= 60:
+                seconds_ago = int(total_seconds)
+                return str(seconds_ago) + " s/ago" if not text_ago else str(seconds_ago) + " seconds ago"
+            else:
+                minutes_ago = round((total_seconds / 60), 1)
+                return str(minutes_ago) + " m/ago" if not text_ago else str(minutes_ago) + " minutes ago"
         except:
             return ""
 
