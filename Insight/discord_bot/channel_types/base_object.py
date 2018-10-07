@@ -13,6 +13,7 @@ from sqlalchemy.orm.exc import NoResultFound
 import datetime
 import janus
 import traceback
+import errno
 
 
 class discord_feed_service(object):
@@ -191,6 +192,12 @@ class discord_feed_service(object):
             except InsightExc.DiscordError.MessageMaxRetryExceed:
                 print('Error - max message retry limit exceeded when sending KM.')
                 continue
+            except OSError as ex:
+                if ex.errno == errno.ECONNRESET or ex.errno == errno.ENETRESET:
+                    if isinstance(__item, base_visual):
+                        await self.kmQueue.async_q.put(__item)
+                else:
+                    print('Error {} - when sending KM. OSError'.format(ex))
             except Exception as ex:
                 print('Error {} - when sending KM. Other'.format(ex))
             await asyncio.sleep(.1)

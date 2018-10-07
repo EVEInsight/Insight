@@ -111,7 +111,7 @@ class base_visual(object):
             return False
 
     async def __call__(self, *args, **kwargs):
-        if self.send_attempt_count >= 4:
+        if self.send_attempt_count >= 3:
             raise InsightExc.DiscordError.MessageMaxRetryExceed
         else:
             if self.send_attempt_count != 0:
