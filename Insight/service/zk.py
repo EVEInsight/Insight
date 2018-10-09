@@ -154,6 +154,7 @@ class zk(object):
                 except Exception as ex:
                     print('ZK RedisQ(polling) error: {}'.format(ex))
                     await asyncio.sleep(10)
+                await asyncio.sleep(.1)
 
     def ws_extract(self, data):
         new_res = {}
