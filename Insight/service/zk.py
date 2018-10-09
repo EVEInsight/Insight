@@ -83,19 +83,24 @@ class zk(object):
 
     def __make_km(self, km_json):
         db:Session = self.service.get_session()
-        __row = dbRow.tb_kills.make_row(km_json, self.service)
-        if __row is not None:
-            try:
-                db.commit()
-                self.error_ids = dbRow.name_resolver.api_mass_name_resolve(self.service, error_ids=self.error_ids)
-                return True
-            except Exception as ex:
-                db.rollback()
-                print(ex)
-                return False
-            finally:
+        try:
+            __row = dbRow.tb_kills.make_row(km_json, self.service)
+            if __row is not None:
+                try:
+                    db.commit()
+                    self.error_ids = dbRow.name_resolver.api_mass_name_resolve(self.service, error_ids=self.error_ids)
+                    return True
+                except Exception as ex:
+                    db.rollback()
+                    print(ex)
+                    return False
+                finally:
+                    db.close()
+            else:
                 db.close()
-        else:
+                return False
+        except Exception as ex:
+            print("make_km error: {}".format(ex))
             db.close()
             return False
 

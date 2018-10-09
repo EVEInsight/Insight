@@ -94,6 +94,7 @@ class Kills(dec_Base.Base, table_row):
                 service_module.get_session().merge(__row)
                 return __row
         else:
+            print('KM missing ID for SQLalchemy make KM. JSON response was: {}'.format(data))
             return None
 
     @classmethod
