@@ -129,7 +129,7 @@ class zk(object):
             next_delay = datetime.datetime.utcnow()
             while self.run:
                 try:
-                    async with client.get(url=self.zk_stream_url, timeout=30) as resp:
+                    async with client.get(url=self.zk_stream_url, timeout=45) as resp:
                         if resp.status == 200:
                             data = await resp.json()
                             package = data.get('package')
@@ -138,22 +138,24 @@ class zk(object):
                             if not self.run_websocket:
                                 self.add_delay(self.delay_next, next_delay)
                                 next_delay = datetime.datetime.utcnow()
-                        elif resp.status == 420:  # calm down zKill is probably overloaded
-                            print("{} {}".format(str(datetime.datetime.utcnow()), "zKill error 420"))
-                            await asyncio.sleep(45)
                         elif resp.status == 429:  # error limited
                             print("{} {}".format(str(datetime.datetime.utcnow()),
                                                  "zKill error limited. Are you using more than 1 bot with the same zk queue identifier? Delete your 'zk_identifier.txt' file."))
-                            await asyncio.sleep(30)
-                        elif resp.status == 500 or resp.status == 502 or resp.status == 503 or resp.status == 504:
-                            await asyncio.sleep(30)
+                            await asyncio.sleep(180)
+                        elif 400 <= resp.status < 500:  # calm down zKill is probably overloaded
+                            print("{} - RedisQ zk error code: {}".format(str(datetime.datetime.utcnow()), resp.status))
+                            await asyncio.sleep(90)
+                        elif 500 <= resp.status < 600:
+                            print("{} - RedisQ zk error code: {}".format(str(datetime.datetime.utcnow()), resp.status))
+                            await asyncio.sleep(60)
                         else:
-                            await asyncio.sleep(15)
+                            print("{} - RedisQ zk error code: {}".format(str(datetime.datetime.utcnow()), resp.status))
+                            await asyncio.sleep(60)
                 except asyncio.TimeoutError:
-                    await asyncio.sleep(10)
+                    await asyncio.sleep(15)
                 except Exception as ex:
                     print('ZK RedisQ(polling) error: {}'.format(ex))
-                    await asyncio.sleep(10)
+                    await asyncio.sleep(30)
                 await asyncio.sleep(.1)
 
     def ws_extract(self, data):
@@ -193,7 +195,7 @@ class zk(object):
                                     print("ZK WS unknown response.")
                     except Exception as ex:
                         print('ZK Websocket error: {}'.format(ex))
-                    await asyncio.sleep(10)
+                    await asyncio.sleep(25)
 
     def __add_km_to_filter(self,km):
         try:
