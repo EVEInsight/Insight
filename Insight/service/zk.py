@@ -125,7 +125,7 @@ class zk(object):
     async def pull_kms_redisq(self):
         """pulls kms using redisq"""
         async with aiohttp.ClientSession(headers=self.get_headers()) as client:
-            print("Starting zk stream (RedisQ/polling)")
+            print("Started zk stream (RedisQ/polling) coroutine.")
             next_delay = datetime.datetime.utcnow()
             while self.run:
                 try:
@@ -173,12 +173,13 @@ class zk(object):
 
     async def pull_kms_ws(self):
         if self.run_websocket:
+            print("Started zk stream (WebSocket) coroutine.")
             async with aiohttp.ClientSession(headers=self.get_headers()) as client:
                 while self.run:
-                    print("Starting zk stream (websocket)")
                     next_delay = datetime.datetime.utcnow()
                     try:
                         async with client.ws_connect('wss://zkillboard.com:2096', heartbeat=10) as ws:
+                            print('{} - ZK WebSocket connection established.'.format(str(datetime.datetime.utcnow())))
                             await ws.send_json(data={"action": "sub", "channel": "killstream"})
                             async for msg in ws:
                                 if msg.type == aiohttp.WSMsgType.TEXT:
@@ -188,13 +189,13 @@ class zk(object):
                                         self.add_delay(self.delay_next, next_delay)
                                         next_delay = datetime.datetime.utcnow()
                                     else:
-                                        print("WS package error")
+                                        print("ZK WebSocket package error.")
                                 elif msg.type == aiohttp.WSMsgType.ERROR:
                                     print("ZK WS error response.")
                                 else:
-                                    print("ZK WS unknown response.")
+                                    print("ZK WebSocket unknown response.")
                     except Exception as ex:
-                        print('ZK Websocket error: {}'.format(ex))
+                        print('{} - ZK WebSocket error: {}'.format(str(datetime.datetime.utcnow()), ex))
                     await asyncio.sleep(25)
 
     def __add_km_to_filter(self,km):
@@ -207,7 +208,7 @@ class zk(object):
             print(ex)
 
     def thread_process_json(self):
-        print('Starting zk data processor')
+        print('Started zk data processing thread.')
         while True:
             try:
                 json_data = self.__km_preProcess.get(block=True)
@@ -221,7 +222,7 @@ class zk(object):
                 print(ex)
 
     def thread_filters(self):
-        print("Starting zk filter")
+        print("Started zk filter thread.")
         self.__debug_simulate()
         while True:
             try:
