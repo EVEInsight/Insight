@@ -200,6 +200,7 @@ class discord_feed_service(object):
                     print('Error {} - when sending KM. OSError'.format(ex))
             except Exception as ex:
                 print('Error {} - when sending KM. Other'.format(ex))
+                traceback.print_exc()
             await asyncio.sleep(.1)
 
     async def remove(self):
