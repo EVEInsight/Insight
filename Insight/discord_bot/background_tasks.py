@@ -7,6 +7,7 @@ import requests
 import json
 import aiohttp
 import traceback
+import time
 
 
 class background_tasks(object):
@@ -50,7 +51,7 @@ class background_tasks(object):
                 if update:
                     status_str = 'Update available. See console. '
                 else:
-                    status_str = 'CPU:{}% MEM:{:.1f}GB {} Feeds:{} [Stats 5m] '.format(str(int(psutil.cpu_percent())),
+                    status_str = 'CPU:{}% MEM:{:.1f}GB {} Feeds: {} [Stats 5m] '.format(str(int(psutil.cpu_percent())),
                                                                                        psutil.virtual_memory()[3] / 2. ** 30,
                                                                                        str(self.client.service.get_version()),
                                                                                        self.client.channel_manager.feed_count())
@@ -68,7 +69,9 @@ class background_tasks(object):
                 await self.client.change_presence(activity=game_act, status=d_status)
             except Exception as ex:
                 print(ex)
-            await asyncio.sleep(300)
+            next_five = 300 - (time.time() % 300)  # get time to next 5 minute interval
+            next_five = next_five if next_five >= 10 else 300
+            await asyncio.sleep(next_five)
 
     async def discordbots_api(self):
         await self.client.wait_until_ready()
