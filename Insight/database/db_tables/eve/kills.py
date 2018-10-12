@@ -4,6 +4,8 @@ from dateutil.parser import parse as dateTimeParser
 from functools import cmp_to_key
 import operator
 import math
+from sqlalchemy import exists
+import traceback
 
 
 class Kills(dec_Base.Base, table_row):
@@ -82,25 +84,32 @@ class Kills(dec_Base.Base, table_row):
 
     @classmethod
     def make_row(cls, data, service_module):
-        id = data.get("killID")
-        if id:
-            db: Session = service_module.get_session()
-            try:
-                __row = db.query(cls).filter(cls.primary_key_row() == id).one()
-                return None
-            except NoResultFound:
-                __row = cls(data)
-                __row.load_fk_objects()
-                service_module.get_session().merge(__row)
-                return __row
-        else:
-            print('KM missing ID for SQLalchemy make KM. JSON response was: {}'.format(data))
-            return None
+        """returns a sqlalchemy object if it does not exist otherwise returns none if error or already exists"""
+        db: Session = service_module.get_session()
+        result = None
+        try:
+            k_id = data.get("killID")
+            if k_id:
+                if not db.query(exists().where(cls.kill_id == k_id)).scalar():
+                    __row = cls(data)
+                    __row.load_fk_objects()
+                    db.merge(__row)
+                    db.commit()
+                    result = __row
+            else:
+                print('KM missing ID for SQLalchemy make KM. JSON response was: {}'.format(data))
+                raise KeyError
+        except Exception as ex:
+            print(ex)
+            traceback.print_exc()
+        finally:
+            db.close()
+            return result
 
     @classmethod
     def get_row(cls, data, service_module):
-        db:Session = service_module.get_session()
-        return db.query(cls).filter(cls.primary_key_row() == data.get("killID")).one()
+        db: Session = service_module.get_session()
+        return db.query(cls).filter(cls.primary_key_row() == data.get("killID")).one_or_none()
 
     def get_au_location_distance(self):
         pos_x = self.object_victim.pos_x

@@ -1,6 +1,7 @@
 from .base_objects import *
 from . import characters,corporations,alliances,types,systems
 import requests
+import traceback
 
 
 class name_resolve(name_only):
@@ -23,29 +24,32 @@ class name_resolve(name_only):
     def api_mass_name_resolve(cls, service_module, error_ids=[]):
         ids_404 = []
         db: Session = service_module.get_session()
-        missing_object_dict = {}
-        for row in cls.__get_objects_with_missing_names(service_module):
-            missing_object_dict[row.get_id()] = row
-        id_keys = list(missing_object_dict.keys())
-        id_keys = list(set(id_keys) - set(error_ids))
-        for id_list in cls.split_lists(id_keys,cls.missing_id_chunk_size()):
-            try:
-                response = requests.post(url=cls.post_url(), headers=service_module.get_headers(lib_requests=True),
-                                         json=id_list, timeout=3)
-                if response.status_code == 200:
-                    for search_result in response.json():
-                        selected_item = missing_object_dict.get(search_result.get('id'))
-                        if selected_item is not None:
-                            selected_item.set_name(search_result.get('name'))
-                else:
-                    ids_404.extend(id_list)
-            except:
-                ids_404.extend(id_list)
         try:
+            missing_object_dict = {}
+            for row in cls.__get_objects_with_missing_names(service_module):
+                missing_object_dict[row.get_id()] = row
+            id_keys = list(missing_object_dict.keys())
+            id_keys = list(set(id_keys) - set(error_ids))
+            for id_list in cls.split_lists(id_keys, cls.missing_id_chunk_size()):
+                try:
+                    response = requests.post(url=cls.post_url(), headers=service_module.get_headers(lib_requests=True),
+                                             json=id_list, timeout=3)
+                    if response.status_code == 200:
+                        for search_result in response.json():
+                            selected_item = missing_object_dict.get(search_result.get('id'))
+                            if selected_item is not None:
+                                selected_item.set_name(search_result.get('name'))
+                    else:
+                        ids_404.extend(id_list)
+                except requests.exceptions.Timeout:
+                    ids_404.extend(id_list)
+                except Exception as ex:
+                    print('Error: {} when resolving char names.'.format(ex))
+                    ids_404.extend(id_list)
             db.commit()
         except Exception as ex:
             print(ex)
-            db.rollback()
+            traceback.print_exc()
         finally:
             db.close()
             ids_404.extend(error_ids)

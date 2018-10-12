@@ -19,9 +19,9 @@ class zk(object):
         self.zk_stream_url = str("https://redisq.zkillboard.com/listen.php?queueID={}".format(identifier))
         self.run = True
         self.error_ids = []
+        self.error_ids_last_reset = datetime.datetime.utcnow()
         self.__km_preProcess = queue.Queue()  # raw json, before insertion to database
         self.__km_postProcess = queue.Queue()  # fully finished sqlalchemy objects with names resolved
-        self.__error_km_json = queue.Queue()  # todo
         self.delay_km = queue.Queue()  # delay from occurrence to load
         self.delay_process = queue.Queue()  # process/name resolve delay
         self.delay_next = queue.Queue()  # delay between zk requests
@@ -80,27 +80,31 @@ class zk(object):
                 return random_s
 
     def __make_km(self, km_json):
-        db:Session = self.service.get_session()
+        """returns the cached km object if it does not exist, returns none if error or already exists"""
+        result = None
+        pull_start_time = datetime.datetime.utcnow()
         try:
-            __row = dbRow.tb_kills.make_row(km_json, self.service)
-            if __row is not None:
+            if dbRow.tb_kills.make_row(km_json, self.service) is not None:
+                if datetime.datetime.utcnow() >= self.error_ids_last_reset:  # clear error char name ids every hour
+                    self.error_ids = []
+                    self.error_ids_last_reset = (datetime.datetime.utcnow() + datetime.timedelta(hours=1))
+                self.error_ids = dbRow.name_resolver.api_mass_name_resolve(self.service, error_ids=self.error_ids)
+                db: Session = self.service.get_session()
                 try:
-                    db.commit()
-                    self.error_ids = dbRow.name_resolver.api_mass_name_resolve(self.service, error_ids=self.error_ids)
-                    return True
+                    result = dbRow.tb_kills.get_row(km_json, self.service)
+                    self.add_delay(self.delay_km, result.killmail_time, minutes=True)
+                    result.loaded_time = datetime.datetime.utcnow()  # adjust for name resolve
+                    self.add_delay(self.delay_process, pull_start_time)
                 except Exception as ex:
-                    db.rollback()
                     print(ex)
-                    return False
+                    traceback.print_exc()
                 finally:
                     db.close()
-            else:
-                db.close()
-                return False
         except Exception as ex:
             print("make_km error: {}".format(ex))
-            db.close()
-            return False
+            traceback.print_exc()
+        finally:
+            return result
 
     def __debug_simulate(self):
         if self.service.cli_args.debug_km:
@@ -115,7 +119,7 @@ class zk(object):
                 for km in results:
                     if self.service.cli_args.force_ctime:
                         km.killmail_time = datetime.datetime.utcnow()
-                    self.__add_km_to_filter(km)
+                    self.__km_postProcess.put_nowait(km)
             except Exception as ex:
                 print(ex)
             self.service.channel_manager.post_message("Debugging is now finished. Switching back to streaming live kms.")
@@ -196,26 +200,13 @@ class zk(object):
                         print('{} - ZK WebSocket error: {}'.format(str(datetime.datetime.utcnow()), ex))
                     await asyncio.sleep(25)
 
-    def __add_km_to_filter(self,km):
-        try:
-            assert isinstance(km,dbRow.tb_kills)
-            self.add_delay(self.delay_km, km.killmail_time, minutes=True)
-            km.loaded_time = datetime.datetime.utcnow()  # adjust for name resolve
-            self.__km_postProcess.put_nowait(km)
-        except Exception as ex:
-            print(ex)
-
     def thread_process_json(self):
         print('Started zk data processing thread.')
         while True:
             try:
-                json_data = self.__km_preProcess.get(block=True)
-                pull_start_time = datetime.datetime.utcnow()
-                if self.__make_km(json_data):
-                    __km = dbRow.tb_kills.get_row(json_data, self.service)
-                    self.service.get_session().close()
-                    self.__add_km_to_filter(__km)
-                    self.add_delay(self.delay_process, pull_start_time)
+                km = self.__make_km(self.__km_preProcess.get(block=True))
+                if km is not None:
+                    self.__km_postProcess.put_nowait(km)
             except Exception as ex:
                 print(ex)
 
