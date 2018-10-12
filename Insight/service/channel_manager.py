@@ -25,6 +25,9 @@ class Channel_manager(object):
                                                                   partial(zk_module.avg_delay, self.__delay_post, True))
         return result
 
+    def feed_count(self):
+        return len(self.__channel_feed_container)
+
     def exists(self, feed_object):
         try:
             assert isinstance(feed_object, cType.insight_feed_service_base)
@@ -97,8 +100,8 @@ class Channel_manager(object):
                     await self.get_channel_feed(i)
             except Exception as ex:
                 print(ex)
-        print("Loaded {:d} feeds in {:.1f} seconds".format(len(list(self.sy_get_all_channels())),
-                                                           (datetime.datetime.utcnow() - start).total_seconds()))
+        print("Loaded {} feeds in {:.1f} seconds".format(self.feed_count(),
+                                                         (datetime.datetime.utcnow() - start).total_seconds()))
 
     async def add_feed_object(self,ch_feed_object):
         self.__channel_feed_container[ch_feed_object.channel_id] = ch_feed_object

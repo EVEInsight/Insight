@@ -50,15 +50,15 @@ class background_tasks(object):
                 if update:
                     status_str = 'Update available. See console. '
                 else:
-                    status_str = 'CPU:{}% MEM:{:.1f}GB {} [Stats 5m] '.format(str(int(psutil.cpu_percent())),
-                                                                              psutil.virtual_memory()[3] / 2. ** 30,
-                                                                              str(self.client.service.get_version()))
+                    status_str = 'CPU:{}% MEM:{:.1f}GB {} Feeds:{} [Stats 5m] '.format(str(int(psutil.cpu_percent())),
+                                                                                       psutil.virtual_memory()[3] / 2. ** 30,
+                                                                                       str(self.client.service.get_version()),
+                                                                                       self.client.channel_manager.feed_count())
                 stats_zk = await self.client.loop.run_in_executor(None, self.client.service.zk_obj.get_stats)
                 d_status = discord.Status.online
                 if stats_zk[0] <= 10:
                     d_status = discord.Status.idle
-                status_str += '[zK] Add: {}, Delay: {}m(+{}s), Next: {}s '.format(
-                    str(stats_zk[0]), str(stats_zk[1]), str(stats_zk[2]), str(stats_zk[3]))
+                status_str += '[zK] Add: {}, Delay: {}m(+{}s) '.format(stats_zk[0], stats_zk[1], stats_zk[2])
                 stats_feeds = await self.client.channel_manager.avg_delay()
                 if stats_feeds[1] >= 10:
                     d_status = discord.Status.dnd

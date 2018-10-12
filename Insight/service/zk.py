@@ -60,10 +60,11 @@ class zk(object):
             return (total, round(avg, 1))
 
     def get_stats(self):
-        _km_delay = self.avg_delay(self.delay_km, median=True)
-        _km_process = self.avg_delay(self.delay_process)
-        _km_next = self.avg_delay(self.delay_next)
-        return (_km_delay[0], _km_delay[1], _km_process[1], _km_next[1])
+        _tmp_km_delay = self.avg_delay(self.delay_km, median=True)
+        km_delay = (_tmp_km_delay[0], _tmp_km_delay[1] if _tmp_km_delay[1] <= 100 else 99)
+        km_process = self.avg_delay(self.delay_process)
+        km_next = self.avg_delay(self.delay_next)
+        return (km_delay[0], km_delay[1], km_process[1], km_next[1])
 
     @staticmethod
     def generate_identifier():
