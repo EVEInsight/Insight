@@ -76,7 +76,7 @@ class service_module(object):
                           "your webmaster email to include in HTTP request headers from Insight.")
                 tmp_dict['Maintainer'] = 'nathan@nathan-s.com (https://github.com/Nathan-LS/Insight)'
                 web_lib = 'requests/{}'.format(requests.__version__) if lib_requests else 'aiohttp/{}'.format(aiohttp.__version__)
-                tmp_dict['User-Agent'] = 'Insight/{} ({}; {}) Python/{}'.format(str(self.get_version()), platform.platform(aliased=True), web_lib, platform.python_version())
+                tmp_dict['User-Agent'] = 'Insight/{} ({}; {}) Python/{}'.format(str(self.get_version()), platform.platform(aliased=True, terse=True), web_lib, platform.python_version())
                 self.__header_dict[key] = tmp_dict
             except Exception as ex:
                 print('{} error when loading request headers.'.format(ex))
@@ -145,7 +145,7 @@ class service_module(object):
         """Prints a welcome message with current version and displays alerts if new project updates are available."""
         div = '================================================================================='
         print(div)
-        print('Insight {}'.format(str(self.get_version())))
+        print('Insight {} on {} with Python/{}'.format(str(self.get_version()), platform.platform(aliased=True, terse=True), platform.python_version()))
         self.update_available()
         print(div)
 

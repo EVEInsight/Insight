@@ -139,7 +139,7 @@ class zk(object):
                         elif resp.status == 429:  # error limited
                             print("{} {}".format(str(datetime.datetime.utcnow()),
                                                  "zKill error limited. Are you using more than 1 bot with the same zk queue identifier? Delete your 'zk_identifier.txt' file."))
-                            await asyncio.sleep(180)
+                            await asyncio.sleep(300)
                         elif 400 <= resp.status < 500:  # calm down zKill is probably overloaded
                             print("{} - RedisQ zk error code: {}".format(str(datetime.datetime.utcnow()), resp.status))
                             await asyncio.sleep(90)
