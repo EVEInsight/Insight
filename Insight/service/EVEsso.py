@@ -50,7 +50,7 @@ class EVEsso(object):
 
     def get_token_from_auth(self, auth_code):
         auth_header = (HTTPBasicAuth(self.__client_id, self.__client_secret))
-        headers = {"Content-Type": "application/json", "User-Agent": "InsightDiscordKillfeeds"}
+        headers = {"Content-Type": "application/json", **self.service.get_headers(lib_requests=True)}
         payload = {"grant_type": "authorization_code", "code": auth_code}
         response = requests.post(url=self._token_url, auth=auth_header, data=json.dumps(payload), headers=headers,
                                  timeout=60)
@@ -65,7 +65,7 @@ class EVEsso(object):
         db: Session = self.service.get_session()
         auth_header = (
             HTTPBasicAuth(self.__client_id, self.__client_secret))
-        headers = {"Content-Type": "application/json", "User-Agent": "InsightDiscordKillfeeds"}
+        headers = {"Content-Type": "application/json", **self.service.get_headers(lib_requests=True)}
         payload = {"grant_type": "refresh_token", "refresh_token": token_row.refresh_token}
         try:
             response = requests.post(url=self._token_url, auth=auth_header, data=json.dumps(payload), headers=headers,
@@ -95,7 +95,7 @@ class EVEsso(object):
             try:
                 auth_header = (
                     HTTPBasicAuth(self.__client_id, self.__client_secret))
-                headers = {"Content-Type": "application/json", "User-Agent": "InsightDiscordKillfeeds"}
+                headers = {"Content-Type": "application/json", **self.service.get_headers(lib_requests=True)}
                 payload = {"token_type_hint": "refresh_token", "token": ref_token}
                 response = requests.post(url=self._revoke_url, auth=auth_header, data=json.dumps(payload),
                                          headers=headers, timeout=60, verify=True)
@@ -108,7 +108,7 @@ class EVEsso(object):
 
     def get_char(self, token):
         headers = {"Authorization": "Bearer {}".format(token), "Content-Type": "application/json",
-                   "User-Agent": "InsightDiscordKillfeeds"}
+                   **self.service.get_headers(lib_requests=True)}
         try:
             response = requests.get(url=self._verify_url, headers=headers)
             if response.status_code == 200:

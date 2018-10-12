@@ -74,8 +74,7 @@ class background_tasks(object):
         await self.client.wait_until_ready()
         api_token = self.client.service.config_file.get("discordbots.org", "discordbots_apikey", fallback=None)
         db_url = "https://discordbots.org/api/bots/{}/stats".format(str(self.client.user.id))
-        db_headers = {"Content-Type": "application/json", "Authorization": str(api_token),
-                   "User-Agent": "InsightDiscordKillfeeds"}
+        db_headers = {"Content-Type": "application/json", "Authorization": str(api_token), **self.client.service.get_headers()}
         if api_token:
             async with aiohttp.ClientSession(headers=db_headers) as client:
                 while True:

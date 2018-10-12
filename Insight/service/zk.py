@@ -79,9 +79,6 @@ class zk(object):
                 f.write(random_s)
                 return random_s
 
-    def get_headers(self):
-        return {'User-Agent': "InsightDiscordKillfeeds https://github.com/Nathan-LS/Insight Maintainer:Nathan nathan@nathan-s.com"}
-
     def __make_km(self, km_json):
         db:Session = self.service.get_session()
         try:
@@ -125,7 +122,7 @@ class zk(object):
 
     async def pull_kms_redisq(self):
         """pulls kms using redisq"""
-        async with aiohttp.ClientSession(headers=self.get_headers()) as client:
+        async with aiohttp.ClientSession(headers=self.service.get_headers()) as client:
             print("Started zk stream (RedisQ/polling) coroutine.")
             next_delay = datetime.datetime.utcnow()
             while self.run:
@@ -175,7 +172,7 @@ class zk(object):
     async def pull_kms_ws(self):
         if self.run_websocket:
             print("Started zk stream (WebSocket) coroutine.")
-            async with aiohttp.ClientSession(headers=self.get_headers()) as client:
+            async with aiohttp.ClientSession(headers=self.service.get_headers()) as client:
                 while self.run:
                     next_delay = datetime.datetime.utcnow()
                     try:

@@ -9,11 +9,6 @@ class name_resolve(name_only):
         return "https://esi.evetech.net/latest/universe/names/?datasource=tranquility"
 
     @classmethod
-    def get_headers(cls):
-        return {
-            'User-Agent': "InsightDiscordKillfeeds https://github.com/Nathan-LS/Insight Maintainer:Nathan nathan@nathan-s.com"}
-
-    @classmethod
     def __get_objects_with_missing_names(cls,service_module):
         __missing_objects = []
         __missing_objects += characters.Characters.missing_name_objects(service_module)
@@ -35,7 +30,8 @@ class name_resolve(name_only):
         id_keys = list(set(id_keys) - set(error_ids))
         for id_list in cls.split_lists(id_keys,cls.missing_id_chunk_size()):
             try:
-                response = requests.post(url=cls.post_url(), headers=cls.get_headers(), json=id_list, timeout=3)
+                response = requests.post(url=cls.post_url(), headers=service_module.get_headers(lib_requests=True),
+                                         json=id_list, timeout=3)
                 if response.status_code == 200:
                     for search_result in response.json():
                         selected_item = missing_object_dict.get(search_result.get('id'))

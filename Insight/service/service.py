@@ -11,16 +11,21 @@ import sys
 from distutils.version import LooseVersion
 import requests
 import secrets
+import aiohttp
+import platform
+import traceback
+import sys
 
 __passkey = None
 
 
 class service_module(object):
     def __init__(self):
-        self.welcome()
         self.config_file = configparser.ConfigParser()
         self.cli_args = self.__read_cli_args()
         self.config_file.read(self.read_config_file(self.cli_args.config))
+        self.__header_dict = {}
+        self.welcome()
         self.__import_everything_flag = False
         self.__import_check()
         self.__sc_session: scoped_session = database.setup_database(self).get_scoped_session()
@@ -57,6 +62,27 @@ class service_module(object):
                                  "sqlite-latest.sqlite file from https://www.fuzzwork.co.uk/dump/",
                             type=str, default="sqlite-latest.sqlite")
         return parser.parse_args()
+
+    def get_headers(self, lib_requests=False) ->dict:
+        key = 'requests' if lib_requests else 'aiohttp'
+        if self.__header_dict.get(key) is None:
+            try:
+                tmp_dict = {}
+                from_field = self.config_file.get('headers', 'from', fallback='')
+                if from_field:
+                    tmp_dict['From'] = from_field
+                else:
+                    print("You are missing the 'from' email field in your config file. It is recommend to set this to "
+                          "your webmaster email to include in HTTP request headers from Insight.")
+                tmp_dict['Maintainer'] = 'nathan@nathan-s.com (https://github.com/Nathan-LS/Insight)'
+                web_lib = 'requests/{}'.format(requests.__version__) if lib_requests else 'aiohttp/{}'.format(aiohttp.__version__)
+                tmp_dict['User-Agent'] = 'Insight/{} ({}; {}) Python/{}'.format(str(self.get_version()), platform.platform(aliased=True), web_lib, platform.python_version())
+                self.__header_dict[key] = tmp_dict
+            except Exception as ex:
+                print('{} error when loading request headers.'.format(ex))
+                traceback.print_exc()
+                sys.exit(1)
+        return self.__header_dict[key]
 
     @classmethod
     def read_config_file(cls, fname, newkey=False):
@@ -123,15 +149,14 @@ class service_module(object):
         self.update_available()
         print(div)
 
-    @classmethod
-    def update_available(cls):
+    def update_available(self):
         giturl = 'https://api.github.com/repos/Nathan-LS/Insight/releases/latest'
         try:
-            resp = requests.get(url=giturl, timeout=25, verify=True)
+            resp = requests.get(url=giturl, headers=self.get_headers(lib_requests=True), timeout=25, verify=True)
             if resp.status_code == 200:
                 data = resp.json()
                 new_version = LooseVersion(data.get('tag_name'))
-                if new_version > cls.get_version():
+                if new_version > self.get_version():
                     print('A new version is available. Please visit {} to update.'.format(data.get('html_url')))
                     return True
                 else:
