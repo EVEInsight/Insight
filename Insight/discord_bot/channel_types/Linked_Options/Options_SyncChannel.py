@@ -72,7 +72,7 @@ class Options_Sync(options_base.Options_Base):
         await self.InsightOption_syncnow(message_object)
 
     async def InsightOption_syncnow(self, message_object: discord.Message = None, suppress_notify=False):
-        """Force sync - Update the ally list. Note: Insight automatically syncs tokens every 1.5 hours."""
+        """Force sync - Update the ally list. Note: Insight automatically syncs tokens every 3 hours."""
 
         def sync_contacts(check_modify=False):
             db: Session = self.cfeed.service.get_session()

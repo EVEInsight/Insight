@@ -32,16 +32,20 @@ class background_tasks(object):
 
     async def sync_contacts(self):
         while True:
-            if self.client.service.cli_args.defer_tasks:
-                await asyncio.sleep(5400)  # run every 1.5 hours, run later instead of start
+            if self.client.service.cli_args.defer_tasks:  # run later
+                next_run = 10800 - (time.time() % 10800)  # get time to next 3 hour interval
+                next_run = next_run if next_run >= 3600 else 7200
+                await asyncio.sleep(next_run)
             try:
                 await self.client.loop.run_in_executor(None, partial(tb_tokens.mass_sync_all, self.client.service))
                 await self.client.loop.run_in_executor(None, partial(tb_tokens.delete_noTracking, self.client.service))
                 await self.__helper_update_contacts_channels()
             except Exception as ex:
                 print(ex)
-            if not self.client.service.cli_args.defer_tasks:
-                await asyncio.sleep(5400)  # run every 1.5 hours
+            if not self.client.service.cli_args.defer_tasks:  # run startup
+                next_run = 10800 - (time.time() % 10800)  # get time to next 3 hour interval
+                next_run = next_run if next_run >= 3600 else 7200
+                await asyncio.sleep(next_run)
 
     async def bot_status(self):
         await self.client.wait_until_ready()
@@ -69,9 +73,9 @@ class background_tasks(object):
                 await self.client.change_presence(activity=game_act, status=d_status)
             except Exception as ex:
                 print(ex)
-            next_five = 300 - (time.time() % 300)  # get time to next 5 minute interval
-            next_five = next_five if next_five >= 10 else 300
-            await asyncio.sleep(next_five)
+            next_run = 300 - (time.time() % 300)  # get time to next 5 minute interval
+            next_run = next_run if next_run >= 100 else 200
+            await asyncio.sleep(next_run)
 
     async def discordbots_api(self):
         await self.client.wait_until_ready()
