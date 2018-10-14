@@ -7,6 +7,8 @@ import asyncio
 import datetime
 import queue
 import sys
+import traceback
+import InsightExc
 
 
 class Channel_manager(object):
@@ -75,7 +77,7 @@ class Channel_manager(object):
         except AssertionError:
             sys.exit(1)
 
-    async def load_channels(self):
+    async def load_channels(self, load_message=True):
 
         def get_ids():
             db = self.service.get_session()
@@ -88,20 +90,24 @@ class Channel_manager(object):
             finally:
                 db.close()
 
-        print("Loading feed services...")
+        if load_message:
+            print('Loading feed services... This could take some time depending on the number of feeds.')
         start = datetime.datetime.utcnow()
         existing_ids = await self.__discord_client.loop.run_in_executor(None, get_ids)
+        get_channel_tasks = []
         async for i in self.__get_text_channels():
             try:
                 if existing_ids is not None:
-                    if i.id in existing_ids:
-                        await self.get_channel_feed(i)
+                    if i.id in existing_ids and self.__channel_feed_container.get(i.id) is None:
+                        get_channel_tasks.append(self.get_channel_feed(i))
                 else:
-                    await self.get_channel_feed(i)
+                    get_channel_tasks.append(self.get_channel_feed(i))
             except Exception as ex:
                 print(ex)
-        print("Loaded {} feeds in {:.1f} seconds".format(self.feed_count(),
-                                                         (datetime.datetime.utcnow() - start).total_seconds()))
+        if len(get_channel_tasks) > 0:
+            await asyncio.gather(*get_channel_tasks, return_exceptions=True)
+            print("Loaded {} feeds in {:.1f} seconds".format(len(get_channel_tasks),
+                                                             (datetime.datetime.utcnow() - start).total_seconds()))
 
     async def add_feed_object(self,ch_feed_object):
         self.__channel_feed_container[ch_feed_object.channel_id] = ch_feed_object
@@ -120,7 +126,21 @@ class Channel_manager(object):
         except Exception as ex:
             print(ex)
 
-    async def get_channel_feed(self,channel_object:discord.TextChannel):
+    async def get_channel_feed(self,channel_object: discord.TextChannel):
+        retry_count = 2
+        while retry_count > 0:
+            try:
+                feed = await self.__get_channel_feed(channel_object)
+                retry_count = 0
+                return feed
+            except Exception as ex:
+                print('An error occurred when loading a channel feed: {}'.format(ex))
+                traceback.print_exc()
+            retry_count -= 1
+            await asyncio.sleep(1)
+        raise InsightExc.DiscordError.ChannelLoaderError
+
+    async def __get_channel_feed(self,channel_object: discord.TextChannel):
         try:
             assert isinstance(channel_object,discord.TextChannel)
             __feed_obj = self.__channel_feed_container.get(channel_object.id)
@@ -184,6 +204,11 @@ class Channel_manager(object):
         while True:
             await self.refresh_post_all_tasks()
             await asyncio.sleep(60)
+
+    async def auto_channel_refresh(self):
+        while True:
+            await self.load_channels(load_message=False)
+            await asyncio.sleep(3600)
 
 
 from database.db_tables.eve import tb_kills

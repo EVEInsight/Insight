@@ -28,8 +28,7 @@ class Discord_Insight_Client(discord.Client):
         invite_url = 'https://discordapp.com/api/oauth2/authorize?client_id={}&permissions=149504&scope=bot'.format(
             self.user.id)
         print('Invite Link: {}'.format(invite_url))
-        print('This bot is a member of:')
-        print('Servers: {}'.format(str(len(self.guilds))))
+        print('This bot is a member of {} servers.'.format(str(len(self.guilds))))
         print('-------------------')
 
     async def setup_tasks(self):
@@ -39,14 +38,15 @@ class Discord_Insight_Client(discord.Client):
             await self.change_presence(activity=game_act, status=discord.Status.dnd)
         except Exception as ex:
             print(ex)
+        self.loop.create_task(self.service.zk_obj.pull_kms_redisq())
+        self.loop.create_task(self.service.zk_obj.pull_kms_ws())
         await self.channel_manager.load_channels()
         await self.post_motd()
         self.loop.create_task(self.background_tasks.setup_backgrounds())
         self.loop.create_task(self.km_process())
         self.loop.create_task(self.km_deque_filter())
-        self.loop.create_task(self.service.zk_obj.pull_kms_redisq())
-        self.loop.create_task(self.service.zk_obj.pull_kms_ws())
         self.loop.create_task(self.channel_manager.auto_refresh())
+        self.loop.create_task(self.channel_manager.auto_channel_refresh())
 
     async def km_process(self):
         await self.wait_until_ready()

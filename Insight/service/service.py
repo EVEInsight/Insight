@@ -72,7 +72,7 @@ class service_module(object):
                 if from_field:
                     tmp_dict['From'] = from_field
                 else:
-                    print("You are missing the 'from' email field in your config file. It is recommend to set this to "
+                    print("You are missing the 'from' email field in your config file. It is recommended to set this to "
                           "your webmaster email to include in HTTP request headers from Insight.")
                 tmp_dict['Maintainer'] = 'nathan@nathan-s.com (https://github.com/Nathan-LS/Insight)'
                 web_lib = 'requests/{}'.format(requests.__version__) if lib_requests else 'aiohttp/{}'.format(aiohttp.__version__)

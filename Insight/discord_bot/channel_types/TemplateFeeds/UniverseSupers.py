@@ -21,6 +21,7 @@ class UniverseSupers(capRadar):
             db.commit()
         except Exception as ex:
             print(ex)
+            raise ex
         finally:
             db.close()
 

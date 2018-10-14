@@ -9,3 +9,8 @@ class DiscordPermissions(InsightException):
 class MessageMaxRetryExceed(InsightException):
     def __init__(self, message="Max retry exceeded for message."):
         super().__init__(message)
+
+
+class ChannelLoaderError(InsightException):
+    def __init__(self, message="Fatal error when attempting to load your channel feed. Contact Insight admin for help."):
+        super().__init__(message)
