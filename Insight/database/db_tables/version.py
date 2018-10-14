@@ -19,7 +19,7 @@ class Version(versionBase):
         self.set_version()
 
     def set_version(self):
-        self.database_version = str(service.ServiceModule.get_version())
+        self.database_version = str(service.ServiceModule.get_db_version())
 
     def get_version(self):
         return LooseVersion(self.database_version)

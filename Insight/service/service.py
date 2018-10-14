@@ -145,7 +145,10 @@ class service_module(object):
         """Prints a welcome message with current version and displays alerts if new project updates are available."""
         div = '================================================================================='
         print(div)
-        print('Insight {} on {} with Python/{}'.format(str(self.get_version()), platform.platform(aliased=True, terse=True), platform.python_version()))
+        print('Insight {} (Database {}) on {} with Python/{}'.format(str(self.get_version()),
+                                                                     str(self.get_db_version()),
+                                                                     platform.platform(aliased=True, terse=True),
+                                                                     platform.python_version()))
         self.update_available()
         print(div)
 
@@ -170,6 +173,11 @@ class service_module(object):
     @classmethod
     def get_version(cls):
         version_str = 'v1.3.0'
+        return LooseVersion(version_str)
+
+    @classmethod
+    def get_db_version(cls):
+        version_str = 'v2.0.0'
         return LooseVersion(version_str)
 
     @staticmethod

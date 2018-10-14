@@ -10,11 +10,12 @@ class sqlUpdater(object):
         self.updated_version = current_version
 
     def compatibility_check(self):
-        if self.current_version > service.ServiceModule.get_version():
-            print("You cannot downgrade to a version of Insight below {0} as there will be"
+        if self.current_version > service.ServiceModule.get_db_version():
+            print("You cannot downgrade to a version of Insight with a database version below {0} as there will be"
                   " database compatibility issues. Insight releases are forward compatible, but in this case"
-                  " only backward compatible to version {0}. If you wish to downgrade to an older version"
-                  " you must first delete your database file.".format(str(self.current_version)))
+                  " only backward compatible to a release with database version {0}. If you wish to downgrade to an "
+                  "older version that uses a database version below {0} you must first delete your database file."
+                  .format(str(self.current_version)))
             sys.exit(1)
 
     def get_approval(self, changes):
