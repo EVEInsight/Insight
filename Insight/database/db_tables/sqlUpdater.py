@@ -96,6 +96,7 @@ class sqlUpdater(object):
                 print('Updating database to version: {}'.format(i.__doc__))
                 self.__execute_statements(results)
                 self.updated_version = i.__doc__
+                print('DB patch ok')
             except Exception as ex:
                 print(ex)
                 error = True
