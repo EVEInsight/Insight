@@ -7,7 +7,7 @@ class Constellations(dec_Base.Base,individual_api_pulling,index_api_updating,sde
     __tablename__ = 'constellations'
 
     constellation_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
-    name = Column(String,default=None,nullable=True)
+    name = Column(String,default=None,nullable=True, index=True)
     pos_x = Column(Float,default=None,nullable=True)
     pos_y = Column(Float, default=None, nullable=True)
     pos_z = Column(Float, default=None, nullable=True)

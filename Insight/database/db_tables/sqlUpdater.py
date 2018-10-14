@@ -78,6 +78,14 @@ class sqlUpdater(object):
         """v1.3.0"""
         yield 'CREATE INDEX ix_attackers_kill_id on attackers (kill_id);'
 
+    def sqlV_2_1_0(self):
+        """v2.1.0"""
+        yield 'CREATE INDEX ix_regions_name on regions (name);'
+        yield 'CREATE INDEX ix_constellations_name on constellations (name);'
+        yield 'CREATE INDEX ix_categories_name on categories (name);'
+        yield 'CREATE INDEX ix_groups_name on groups (name);'
+        yield 'CREATE INDEX ix_types_type_name on types (type_name);'
+
     def update_all(self):
         """Updates tables, returning the latest successful updated version"""
         self.compatibility_check()

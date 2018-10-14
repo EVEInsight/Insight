@@ -7,7 +7,7 @@ class Categories(dec_Base.Base,individual_api_pulling,index_api_updating,sde_imp
     __tablename__ = 'categories'
 
     category_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
-    name = Column(String,default=None,nullable=True)
+    name = Column(String,default=None,nullable=True, index=True)
     published = Column(Boolean,default=True)
     api_ETag = Column(String, default=None, nullable=True)
     api_Expires = Column(DateTime,default=None,nullable=True)

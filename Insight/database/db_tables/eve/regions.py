@@ -8,7 +8,7 @@ class Regions(dec_Base.Base,individual_api_pulling,index_api_updating,sde_impote
     __tablename__ = 'regions'
 
     region_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
-    name = Column(String,default=None,nullable=True)
+    name = Column(String,default=None,nullable=True, index=True)
     description = Column(String,default=None,nullable=True)
 
     api_ETag = Column(String,default=None,nullable=True)

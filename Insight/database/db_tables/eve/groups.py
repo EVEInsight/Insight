@@ -7,7 +7,7 @@ class Groups(dec_Base.Base,individual_api_pulling,index_api_updating,sde_impoter
     __tablename__ = 'groups'
 
     group_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
-    name = Column(String,default=None,nullable=True)
+    name = Column(String,default=None,nullable=True, index=True)
     category_id = Column(Integer,ForeignKey("categories.category_id"),nullable=True)
     published = Column(Boolean,default=True)
     api_ETag = Column(String, default=None, nullable=True)

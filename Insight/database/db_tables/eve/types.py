@@ -7,7 +7,7 @@ class Types(dec_Base.Base,name_only,index_api_updating,sde_impoter):
     __tablename__ = 'types'
 
     type_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
-    type_name = Column(String,default=None,nullable=True)
+    type_name = Column(String,default=None,nullable=True, index=True)
     description = Column(String,default="")
     basePrice = Column(DECIMAL(19,4),default=None,nullable=True)
     group_id = Column(Integer,ForeignKey("groups.group_id"),nullable=True)
