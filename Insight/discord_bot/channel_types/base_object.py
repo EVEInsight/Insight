@@ -81,6 +81,11 @@ class discord_feed_service(object):
 
     async def proxy_lock(self, awaitable_coro):
         """call a command coroutine by proxy with a lock to prevent multiple commands running at once i.e: !settings"""
+        time_limit = datetime.datetime.utcnow() + datetime.timedelta(seconds=15)
+        while self.lock.locked():  # timeout after 15 seconds of waiting. async wait_for has issues in 3.6
+            if datetime.datetime.utcnow() >= time_limit:
+                raise InsightExc.DiscordError.LockTimeout
+            await asyncio.sleep(2)
         async with self.lock:
             await awaitable_coro
 

@@ -14,3 +14,8 @@ class MessageMaxRetryExceed(InsightException):
 class ChannelLoaderError(InsightException):
     def __init__(self, message="Fatal error when attempting to load your channel feed. Contact Insight admin for help."):
         super().__init__(message)
+
+
+class LockTimeout(InsightException):
+    def __init__(self, message="Lock timeout"):  # todo
+        super().__init__(message)
