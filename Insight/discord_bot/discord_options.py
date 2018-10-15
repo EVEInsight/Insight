@@ -2,6 +2,7 @@ from . import discord_main
 import discord
 import asyncio
 import InsightExc
+import datetime
 
 
 class option_calls_coroutine(object):
@@ -49,6 +50,9 @@ class mapper_index(object):
         self.__footer_text = "Select an option by entering its number:"
         self.__timeout_seconds = int(timeout_seconds)
         self.discord_client = discord_client_object
+        self.e_header_container = ['Options']
+        self.e_body_container = []
+        self.header_index = 0
         self.maxbitlength = 16
 
     def set_main_header(self,main_header_txt:str):
@@ -60,8 +64,13 @@ class mapper_index(object):
     def add_blank_line(self):
         self.__printout_format.append("")
 
-    def add_header_row(self,header_txt):
+    def add_header_row(self, header_txt):
         self.__printout_format.append("\n-----{}-----".format(str(header_txt)))
+        if self.header_index == 0 and len(self.e_body_container) == 0:
+            self.e_header_container = [str(header_txt)]
+        else:
+            self.e_header_container.append(str(header_txt))
+            self.header_index += 1
 
     def __current_option_index(self)->int:
         return int(len(self.__option_container))
@@ -74,8 +83,49 @@ class mapper_index(object):
             mapper_option_obj.set_index(self.__current_option_index())
             self.__option_container.append(mapper_option_obj)
             self.__printout_format.append("{}".format(str(mapper_option_obj)))
+            try:
+                self.e_body_container[self.header_index].append(str(mapper_option_obj))
+            except IndexError:
+                self.e_body_container.append([str(mapper_option_obj)])
         else:
             raise AssertionError
+
+    def get_embed(self):
+        embed = discord.Embed()
+        embed.title = ""
+        embed.color = discord.Color(659493)
+        embed.timestamp = datetime.datetime.utcnow()
+        embed.set_author(name=self.__class__.__name__)
+        embed.set_footer(text='Timeout: {}s'.format(self.__timeout_seconds))
+        embed.description = self.__header_text
+        for index, h in enumerate(self.e_header_container):
+            try:
+                results = self.e_body_container[index]
+            except IndexError:
+                break
+            results.reverse()
+            options_str = ""
+            total_len = 0
+            pg_count = 0
+            while len(results) != 0:
+                if pg_count > 20:
+                    raise InsightExc.User.TooManyOptions
+                add_str = "{}\n\n".format(str(results.pop()))
+                if total_len + len(add_str) > 950:
+                    options_str = '```{}```'.format(options_str) if options_str else '```empty```'
+                    h = '{}'.format(h) if pg_count == 0 else '{} - Continued ({})'.format(h, pg_count)
+                    embed.add_field(name=h, value=options_str, inline=False)
+                    options_str = ""
+                    pg_count += 1
+                    total_len = 0
+                options_str += add_str
+                total_len += len(add_str)
+            if options_str:
+                options_str = '```{}```'.format(options_str) if options_str else '```empty```'
+                h = '{}'.format(h) if pg_count == 0 else '{} - Continued ({})'.format(h, pg_count)
+                embed.add_field(name=h, value=options_str, inline=False)
+        embed.add_field(name='Info', value=self.__footer_text)
+        return embed
 
     def __str__(self):
         __str_item = self.__mention + "\n" + self.__header_text + "\n\n"
@@ -124,7 +174,14 @@ class mapper_index(object):
         try:
             await self.add_additional()
             await self.check_conditions()
-            await self.message.channel.send(str(self))
+            try:
+                await self.message.channel.send(embed=self.get_embed())
+            except discord.HTTPException as ex:
+                if ex.code == 50035 and ex.status == 400:
+                    raise InsightExc.User.TooManyOptions
+            except Exception as ex:
+                print(ex)
+                await self.message.channel.send(str(self))
             __response = await self.discord_client.wait_for('message', check=is_author, timeout=self.__timeout_seconds)
             return await self.response_action(__response.content)
         except asyncio.TimeoutError:

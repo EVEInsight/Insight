@@ -101,7 +101,7 @@ class Options_DM(options_base.Options_Base):
             try:
                 for t in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).all():
                     if len(t.object_channels) > 0:
-                        _options.add_header_row(t.str_wChcount())
+                        _options.add_header_row('Token ID: {}'.format(t.token_id))
                         for channel in t.object_channels:
                             cinfo = str(channel.channel_id)
                             try:
