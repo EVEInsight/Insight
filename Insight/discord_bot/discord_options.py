@@ -49,6 +49,7 @@ class mapper_index(object):
         self.__footer_text = "Select an option by entering its number:"
         self.__timeout_seconds = int(timeout_seconds)
         self.discord_client = discord_client_object
+        self.maxbitlength = 16
 
     def set_main_header(self,main_header_txt:str):
         self.__header_text = main_header_txt
@@ -64,6 +65,9 @@ class mapper_index(object):
 
     def __current_option_index(self)->int:
         return int(len(self.__option_container))
+
+    def set_bit_length(self, bit_l: int):
+        self.maxbitlength = bit_l
 
     def add_option(self, mapper_option_obj:option_calls_coroutine):
         if isinstance(mapper_option_obj, option_calls_coroutine) or isinstance(mapper_option_obj,option_returns_object):
@@ -88,6 +92,8 @@ class mapper_index(object):
 
     def isInt(self,value):
         try:
+            if len(value) > self.maxbitlength:
+                raise InsightExc.User.BitLengthExceeded
             int(value)
             return True
         except ValueError:
@@ -158,8 +164,8 @@ class mapper_return_noOptions(mapper_index):
 
 class mapper_return_noOptions_requiresInt(mapper_return_noOptions):
     def __init__(self, discord_client_object, message_object, timeout_seconds=120):
-        super(mapper_return_noOptions_requiresInt, self).__init__( discord_client_object, message_object, timeout_seconds)
-        self.set_footer_text("Enter a number:")
+        super().__init__(discord_client_object, message_object, timeout_seconds)
+        self.set_footer_text("Enter an integer number: Ex: 5, 10, 0, etc.")
 
     async def check_response(self,response):
         if not self.isInt(response):
@@ -169,7 +175,31 @@ class mapper_return_noOptions_requiresInt(mapper_return_noOptions):
 
     async def response_action(self, response):
         await self.check_response(response)
-        return response
+        return str(abs(int(response)))
+
+
+class mapper_return_noOptions_requiresFloat(mapper_return_noOptions):
+    def __init__(self, discord_client_object, message_object, timeout_seconds=120):
+        super().__init__(discord_client_object, message_object, timeout_seconds)
+        self.set_footer_text("Enter a number: Ex: 5.2, 1.3, 5, 0, etc.")
+
+    def isFloat(self, value):
+        try:
+            if len(value) > self.maxbitlength:
+                raise InsightExc.User.BitLengthExceeded
+            float(value)
+            return True
+        except ValueError:
+            return False
+
+    async def check_response(self,response):
+        if not self.isFloat(response):
+            raise InsightExc.User.NotFloat("You entered an invalid number. You must enter a float, but you inputted"
+                                           " '{}' which is not a float.".format(str(response)))
+
+    async def response_action(self, response):
+        await self.check_response(response)
+        return str(abs(float(response)))
 
 
 

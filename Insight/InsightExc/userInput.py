@@ -13,6 +13,16 @@ class NotInteger(InsightException):
         super().__init__(message)
 
 
+class NotFloat(InsightException):
+    def __init__(self, message=""):
+        super().__init__(message)
+
+
+class BitLengthExceeded(InsightException):
+    def __init__(self, message="You entered an invalid number that is not recognized by Insight since it is too big."):
+        super().__init__(message)
+
+
 class InvalidIndex(InsightException):
     def __init__(self, message="You entered an invalid index."):
         super().__init__(message)
