@@ -33,6 +33,7 @@ class discord_feed_service(object):
         self.load_table()
         self.last_mention = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
         self.appearance_class = None
+        self.lock = asyncio.Lock(loop=self.discord_client.loop)
 
     def can_mention(self):
         return (self.last_mention + datetime.timedelta(minutes=self.mention_next())) <= datetime.datetime.utcnow()
@@ -77,6 +78,11 @@ class discord_feed_service(object):
 
     async def async_load_table(self):
         await self.discord_client.loop.run_in_executor(None,self.load_table)
+
+    async def proxy_lock(self, awaitable_coro):
+        """call a command coroutine by proxy with a lock to prevent multiple commands running at once i.e: !settings"""
+        async with self.lock:
+            await awaitable_coro
 
     async def command_create(self, message_object):
         await self.command_not_supported_sendmessage(message_object)
@@ -173,8 +179,9 @@ class discord_feed_service(object):
             try:
                 if self.cached_feed_table.feed_running and self.channel_manager.exists(self):
                     if isinstance(__item, base_visual):
-                        await __item()
-                        await self.channel_manager.add_delay(__item.get_load_time())
+                        async with self.lock:
+                            await __item()
+                            await self.channel_manager.add_delay(__item.get_load_time())
                     else:
                         await self.channel_discord_object.send(str(__item))
             except discord.Forbidden:

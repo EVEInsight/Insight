@@ -70,24 +70,33 @@ class Discord_Insight_Client(discord.Client):
                 return
             if not await self.commandLookup.is_command(message):
                 return
-            elif await self.commandLookup.create(message):
-                await (await self.channel_manager.get_channel_feed(message.channel)).command_create(message)
+            if await self.commandLookup.create(message):
+                feed = await self.channel_manager.get_channel_feed(message.channel)
+                await feed.proxy_lock(feed.command_create(message))
             elif await self.commandLookup.settings(message):
-                await (await self.channel_manager.get_channel_feed(message.channel)).command_settings(message)
+                feed = await self.channel_manager.get_channel_feed(message.channel)
+                await feed.proxy_lock(feed.command_settings(message))
             elif await self.commandLookup.start(message):
-                await (await self.channel_manager.get_channel_feed(message.channel)).command_start(message)
+                feed = await self.channel_manager.get_channel_feed(message.channel)
+                await feed.proxy_lock(feed.command_start(message))
             elif await self.commandLookup.stop(message):
-                await (await self.channel_manager.get_channel_feed(message.channel)).command_stop(message)
+                feed = await self.channel_manager.get_channel_feed(message.channel)
+                await feed.proxy_lock(feed.command_stop(message))
             elif await self.commandLookup.sync(message):
-                await (await self.channel_manager.get_channel_feed(message.channel)).command_sync(message)
+                feed = await self.channel_manager.get_channel_feed(message.channel)
+                await feed.proxy_lock(feed.command_sync(message))
             elif await self.commandLookup.remove(message):
-                await (await self.channel_manager.get_channel_feed(message.channel)).command_remove(message)
+                feed = await self.channel_manager.get_channel_feed(message.channel)
+                await feed.proxy_lock(feed.command_remove(message))
             elif await self.commandLookup.help(message):
-                await (await self.channel_manager.get_channel_feed(message.channel)).command_help(message)
+                feed = await self.channel_manager.get_channel_feed(message.channel)
+                await feed.proxy_lock(feed.command_help(message))
             elif await self.commandLookup.about(message):
-                await (await self.channel_manager.get_channel_feed(message.channel)).command_about(message)
+                feed = await self.channel_manager.get_channel_feed(message.channel)
+                await feed.proxy_lock(feed.command_about(message))
             elif await self.commandLookup.status(message):
-                await (await self.channel_manager.get_channel_feed(message.channel)).command_status(message)
+                feed = await self.channel_manager.get_channel_feed(message.channel)
+                await feed.proxy_lock(feed.command_status(message))
             elif await self.commandLookup.eightball(message):
                 await self.unbound_commands.command_8ball(message)
             elif await self.commandLookup.dscan(message):
