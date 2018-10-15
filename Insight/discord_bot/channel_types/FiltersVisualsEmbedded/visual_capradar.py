@@ -18,6 +18,9 @@ class visual_capradar(base_visual):
         self.hv: tb_attackers = self.km.get_highest_attacker(self.tracked_hostiles)
 
     def extract_mention(self):
+        global_mention = super().extract_mention()
+        if global_mention != enum_mention.noMention:
+            return global_mention
         assert isinstance(self.hv, tb_attackers)
         for c in self.list_typeGroup:
             if self.hv.compare_filter_list(c):

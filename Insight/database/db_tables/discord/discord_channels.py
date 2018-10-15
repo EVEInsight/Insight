@@ -2,6 +2,7 @@ from .discord_base import *
 from ..eve import tb_alliances
 import InsightExc
 import traceback
+from ..filters import enum_mention
 
 
 class Channels(dec_Base.Base,discord_channel_base):
@@ -11,6 +12,8 @@ class Channels(dec_Base.Base,discord_channel_base):
     feed_running = Column(Boolean,default=False,nullable=False)
     channel_name = Column(String,default="",nullable=False)
     appearance_id = Column(Integer, default=0, nullable=False)
+    mention = Column(Enum(enum_mention), default=enum_mention.noMention, nullable=False)
+    mention_every = Column(Float, default=15.0, nullable=False)
 
     object_capRadar = relationship("CapRadar", uselist=False, cascade="delete", back_populates="object_channel",
                                    lazy="subquery")

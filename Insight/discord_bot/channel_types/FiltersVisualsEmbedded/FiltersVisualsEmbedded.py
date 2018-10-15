@@ -38,7 +38,7 @@ class base_visual(object):
         return self.km.loaded_time
 
     def extract_mention(self):
-        return enum_mention.noMention
+        return self.filters.mention
 
     def mention_method(self):
         if self.feed.can_mention():

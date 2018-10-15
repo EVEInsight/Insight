@@ -31,14 +31,21 @@ class discord_feed_service(object):
         self.setup_table()
         self.template_loader()
         self.load_table()
-        self.last_mention = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+        self.last_mention = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
         self.appearance_class = None
 
     def can_mention(self):
-        return (self.last_mention + datetime.timedelta(minutes=15)) <= datetime.datetime.utcnow()
+        return (self.last_mention + datetime.timedelta(minutes=self.mention_next())) <= datetime.datetime.utcnow()
 
     def mentioned(self):
         self.last_mention = datetime.datetime.utcnow()
+
+    def mention_next(self)->int:
+        try:
+            return abs(self.cached_feed_table.mention_every)
+        except Exception as ex:
+            print(ex)
+            return 15
 
     def set_deque_task(self,deq_task:asyncio.Task):
         assert isinstance(deq_task,asyncio.Task)

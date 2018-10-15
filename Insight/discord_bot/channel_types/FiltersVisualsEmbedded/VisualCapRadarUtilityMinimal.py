@@ -2,6 +2,9 @@ from .VisualCapRadarUtility import *
 
 
 class VisualCapRadarUtilityMinimal(VisualCapRadarUtility):
+    def make_text_heading(self):
+        self.message_txt = "{}".format(self.mention_method())
+
     def make_header(self):
         authorH = "{haS} activity in {sysReg}".format(haS=self.hv.str_ship_name(), sysReg=str(self.system))
         self.embed.set_author(name=authorH, url=self.km.str_zk_link(), icon_url=self.hv.str_highest_image(64))

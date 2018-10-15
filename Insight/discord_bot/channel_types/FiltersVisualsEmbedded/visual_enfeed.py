@@ -19,6 +19,9 @@ class visual_enfeed(base_visual):
         self.is_kill = True
         self.color = discord.Color(65299)
 
+    def make_text_heading(self):
+        self.message_txt = "{}".format(self.mention_method())
+
     def make_header(self):
         author_text = "Kill" if self.is_kill else "Loss"
         self.embed.set_author(name=author_text, url=self.km.str_zk_link(), icon_url=self.vi.str_highest_image(64))

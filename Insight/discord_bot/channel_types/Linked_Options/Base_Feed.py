@@ -17,6 +17,8 @@ class base_activefeed(options_base.Options_Base):
     # InsightOption_ InsightOptionRequired_
     def yield_options(self):
         yield from super().yield_options()
+        yield (self.InsightOption_setMention, False)
+        yield (self.InsightOption_setMentionEvery, False)
         yield (self.InsightOptionRequired_setAppearance, True)
         yield (self.InsightOption_start, False)
         yield (self.InsightOption_pause, False)
@@ -60,6 +62,28 @@ class base_activefeed(options_base.Options_Base):
             _options.add_option(dOpt.option_returns_object(name=ap.get_desc(), return_object=ap.appearance_id()))
         a_id = await _options()
         await self.cfeed.discord_client.loop.run_in_executor(None, partial(set_appearance, a_id))
+        await self.reload(message_object)
+
+    async def InsightOption_setMention(self, message_object: discord.Message):
+        """Set global mention - NULL"""
+        options = dOpt.mapper_index(self.cfeed.discord_client, message_object)
+        options.set_main_header("Select mention mode.")
+        options.add_option(dOpt.option_returns_object("No mention", return_object=enum_mention.noMention))
+        options.add_option(dOpt.option_returns_object("@ here", return_object=enum_mention.here))
+        options.add_option(dOpt.option_returns_object("@ everyone", return_object=enum_mention.everyone))
+        row = await self.get_cached_copy()
+        row.mention = await options()
+        await self.save_row(row)
+        await self.reload(message_object)
+
+    async def InsightOption_setMentionEvery(self, message_object: discord.Message):
+        """Set mention rate - NULL"""
+        options = dOpt.mapper_return_noOptions_requiresFloat(self.cfeed.discord_client, message_object)
+        options.set_main_header("Mention every: ")
+        options.set_bit_length(5)
+        row = await self.get_cached_copy()
+        row.mention_every = await options()
+        await self.save_row(row)
         await self.reload(message_object)
 
 

@@ -43,6 +43,7 @@ class sqlUpdater(object):
 
     def __execute_statements(self, statements):
         for i in statements:
+            print('Executing statement: {}'.format(str(i)))
             self.connection.execute(i)
 
     def sqlV_0_12_1(self):
@@ -85,6 +86,11 @@ class sqlUpdater(object):
         yield 'CREATE INDEX ix_categories_name on categories (name);'
         yield 'CREATE INDEX ix_groups_name on groups (name);'
         yield 'CREATE INDEX ix_types_type_name on types (type_name);'
+
+    def sqlV_2_2_0(self):
+        """v2.2.0"""
+        yield "alter table discord_channels add mention VARCHAR(9) DEFAULT 'noMention' not null;"
+        yield 'alter table discord_channels add mention_every FLOAT DEFAULT 15.0 not null;'
 
     def update_all(self):
         """Updates tables, returning the latest successful updated version"""
