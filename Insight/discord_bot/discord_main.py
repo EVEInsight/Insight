@@ -113,6 +113,12 @@ class Discord_Insight_Client(discord.Client):
                 elif await self.commandLookup.status(message):
                     feed = await self.channel_manager.get_channel_feed(message.channel)
                     await feed.proxy_lock(feed.command_status(message))
+                elif await self.commandLookup.lock(message):
+                    feed = await self.channel_manager.get_channel_feed(message.channel)
+                    await feed.proxy_lock(feed.command_lock(message))
+                elif await self.commandLookup.unlock(message):
+                    feed = await self.channel_manager.get_channel_feed(message.channel)
+                    await feed.proxy_lock(feed.command_unlock(message))
                 elif await self.commandLookup.eightball(message):
                     await self.unbound_commands.command_8ball(message)
                 elif await self.commandLookup.dscan(message):

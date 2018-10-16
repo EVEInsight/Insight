@@ -100,6 +100,20 @@ class discord_text_nofeed_exist(discord_feed_service):
             resp += "Currently running: {}\n".format(str(self.cached_feed_table.feed_running))
             await message_object.channel.send(resp)
 
+    async def command_lock(self, message_object: discord.Message):
+        """!lock - Lock a feed service from being modified by users without the Discord channel role: Manage Channel"""
+        if type(self) == discord_text_nofeed_exist:
+            await self.command_not_supported_sendmessage(message_object)
+        else:
+            await self.linked_options.InsightOption_lockfeed(message_object)
+
+    async def command_unlock(self, message_object: discord.Message):
+        """!unlock - Unlock a previously locked feed service to allow any Discord channel user to modify configuration."""
+        if type(self) == discord_text_nofeed_exist:
+            await self.command_not_supported_sendmessage(message_object)
+        else:
+            await self.linked_options.InsightOption_unlockfeed(message_object)
+
     def __str__(self):
         return "channel with no feed"
 
@@ -160,7 +174,7 @@ class discord_text_nofeed_exist(discord_feed_service):
             return None
 
     def get_linked_options(self):
-        return Linked_Options.opt_blankchannel(self)
+        return Linked_Options.opt_basicfeed(self)
 
     @classmethod
     def get_template_id(cls):

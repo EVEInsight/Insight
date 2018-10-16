@@ -24,3 +24,8 @@ class LockTimeout(InsightException):
 class UnboundFeed(InsightException):
     def __init__(self, message="Unbound feed"):  # todo
         super().__init__(message)
+
+
+class NonFatalExit(InsightException):
+    def __init__(self, message="Missing error text"):  # todo
+        super().__init__(message)

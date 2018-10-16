@@ -23,6 +23,8 @@ class base_activefeed(options_base.Options_Base):
         yield (self.InsightOption_start, False)
         yield (self.InsightOption_pause, False)
         yield (self.InsightOption_remove_opt, False)
+        yield (self.InsightOption_lockfeed, False)
+        yield (self.InsightOption_unlockfeed, False)
 
     async def InsightOption_remove_opt(self,message_object:discord.Message):
         """Delete Feed  - Removes the currently active feed from this channel, deleting its configuration."""
@@ -84,6 +86,34 @@ class base_activefeed(options_base.Options_Base):
         row = await self.get_cached_copy()
         row.mention_every = await options()
         await self.save_row(row)
+        await self.reload(message_object)
+
+    async def InsightOption_lockfeed(self, message_object: discord.Message):
+        """Lock feed - NULL"""
+        if self.cfeed.cached_feed_table.modification_lock:
+            raise InsightExc.DiscordError.NonFatalExit('This channel feed is already locked from unauthorized modifications.')
+        options = dOpt.mapper_return_yes_no(self.cfeed.discord_client, message_object)
+        options.set_main_header("Lock? NULL")  # todo
+        resp = await options()
+        if resp:
+            row = await self.get_cached_copy()
+            row.modification_lock = True
+            await self.save_row(row)
+        await self.reload(message_object)
+
+    async def InsightOption_unlockfeed(self, message_object: discord.Message):
+        """Unlock feed - NULL"""
+        if not self.cfeed.cached_feed_table.modification_lock:
+            raise InsightExc.DiscordError.NonFatalExit("This channel feed is already unlocked. You can lock this"
+                                                       " feed from unauthorized modifications with "
+                                                       "the '!lock' command.")
+        options = dOpt.mapper_return_yes_no(self.cfeed.discord_client, message_object)
+        options.set_main_header("Unlock? NULL")  # todo
+        resp = await options()
+        if resp:
+            row = await self.get_cached_copy()
+            row.modification_lock = False
+            await self.save_row(row)
         await self.reload(message_object)
 
 

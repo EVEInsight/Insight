@@ -23,6 +23,8 @@ class DiscordCommands(object):
         self.commands['status'] = ['status']
         self.commands['8ball'] = ['ball', '8ball', 'magic', '8']
         self.commands['dscan'] = ['dscan', 'localscan', 'shipscan', 'scan']
+        self.commands['lock'] = ['lock']
+        self.commands['unlock'] = ['unlock']
         for k, v in self.commands.items():
             new_vals = []
             for p in self.prefix:
@@ -70,6 +72,12 @@ class DiscordCommands(object):
 
     async def dscan(self, message_object: discord.Message):
         return self.__lookup(message_object.content, self.commands_prefixed.get('dscan'))
+
+    async def lock(self, message_object: discord.Message):
+        return self.__lookup(message_object.content, self.commands_prefixed.get('lock'))
+
+    async def unlock(self, message_object: discord.Message):
+        return self.__lookup(message_object.content, self.commands_prefixed.get('unlock'))
 
     async def is_command(self, message_object: discord.Message):
         return self.__lookup(message_object.content, self.prefix)

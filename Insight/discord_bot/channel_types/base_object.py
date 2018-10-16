@@ -141,6 +141,12 @@ class discord_feed_service(object):
     async def command_status(self, message_object: discord.Message):
         await self.command_not_supported_sendmessage(message_object)
 
+    async def command_lock(self, message_object):
+        await self.command_not_supported_sendmessage(message_object)
+
+    async def command_unlock(self, message_object):
+        await self.command_not_supported_sendmessage(message_object)
+
     def add_km(self,km):
         if self.cached_feed_table.feed_running:
             assert isinstance(km,dbRow.tb_kills)
