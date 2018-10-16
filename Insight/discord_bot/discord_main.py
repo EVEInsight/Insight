@@ -20,7 +20,9 @@ class Discord_Insight_Client(discord.Client):
         self.commandLookup = DiscordCommands()
         self.background_tasks = background_tasks(self)
         self.unbound_commands = UnboundUtilityCommands(self)
-        self.loop.set_default_executor(ThreadPoolExecutor(max_workers=5))
+        self.__threadpool_insight = ThreadPoolExecutor(max_workers=5)
+        self.__threadpool_zk = ThreadPoolExecutor(max_workers=2)
+        self.loop.set_default_executor(self.__threadpool_insight)
         self.loop.create_task(self.setup_tasks())
         self.__id_semaphores = {}
 
@@ -40,27 +42,21 @@ class Discord_Insight_Client(discord.Client):
             await self.change_presence(activity=game_act, status=discord.Status.dnd)
         except Exception as ex:
             print(ex)
+        await self.service.zk_obj.make_queues()
         self.loop.create_task(self.service.zk_obj.pull_kms_redisq())
         self.loop.create_task(self.service.zk_obj.pull_kms_ws())
         await self.channel_manager.load_channels()
         await self.post_motd()
         self.loop.create_task(self.background_tasks.setup_backgrounds())
-        self.loop.create_task(self.km_process())
-        self.loop.create_task(self.km_deque_filter())
+        self.loop.create_task(self.service.zk_obj.coroutine_filters(self.__threadpool_zk))
+        await self.loop.run_in_executor(None, self.service.zk_obj.debug_simulate)
+        self.loop.create_task(self.service.zk_obj.coroutine_process_json(self.__threadpool_zk))
         self.loop.create_task(self.channel_manager.auto_refresh())
         self.loop.create_task(self.channel_manager.auto_channel_refresh())
 
-    async def km_process(self):
-        await self.wait_until_ready()
-        await self.loop.run_in_executor(None, self.service.zk_obj.thread_process_json)
-
-    async def km_deque_filter(self):
-        await self.wait_until_ready()
-        await self.loop.run_in_executor(None, self.service.zk_obj.thread_filters)
-
     async def post_motd(self):
-        div = '=================================\n'
-        motd = (div + 'Insight server message of the day:\n\n{}\n'.format(str(self.service.motd)) + div)
+        div = '================================='
+        motd = (div + '\nInsight server message of the day:\n\n{}\n'.format(str(self.service.motd)) + div)
         print(motd)
         if self.service.motd:
             await self.loop.run_in_executor(None, partial(self.channel_manager.post_message, motd))

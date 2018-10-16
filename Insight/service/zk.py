@@ -9,6 +9,9 @@ import statistics
 import traceback
 import aiohttp
 import asyncio
+import janus
+from functools import partial
+from concurrent.futures import ThreadPoolExecutor
 
 
 class zk(object):
@@ -20,8 +23,8 @@ class zk(object):
         self.run = True
         self.error_ids = []
         self.error_ids_last_reset = datetime.datetime.utcnow()
-        self.__km_preProcess = queue.Queue()  # raw json, before insertion to database
-        self.__km_postProcess = queue.Queue()  # fully finished sqlalchemy objects with names resolved
+        self.__km_preProcess: janus.Queue = None  # raw json, before insertion to database
+        self.__km_postProcess: janus.Queue = None  # fully finished sqlalchemy objects with names resolved
         self.delay_km = queue.Queue()  # delay from occurrence to load
         self.delay_process = queue.Queue()  # process/name resolve delay
         self.delay_next = queue.Queue()  # delay between zk requests
@@ -106,23 +109,28 @@ class zk(object):
         finally:
             return result
 
-    def __debug_simulate(self):
+    def debug_simulate(self):
         if self.service.cli_args.debug_km:
-            self.service.channel_manager.post_message("Starting debug mode.\n"
-                                "Starting KM ID: {}\n"
-                                "Force time to now: {}\n"
-                                "KM Limit: {}\n".format(str(self.service.cli_args.debug_km),str(self.service.cli_args.force_ctime),str(self.service.cli_args.debug_limit)))
-            db:Session = self.service.get_session()
+            msg = "Starting debug mode.\nStarting KM ID: {}\nForce time to now: {}\nKM Limit: {}\n".format(
+                str(self.service.cli_args.debug_km), str(self.service.cli_args.force_ctime),
+                str(self.service.cli_args.debug_limit))
+            print(msg)
+            self.service.channel_manager.post_message(msg)
+            db: Session = self.service.get_session()
             try:
                 results = db.query(dbRow.tb_kills).filter(dbRow.tb_kills.kill_id >=self.service.cli_args.debug_km).limit(self.service.cli_args.debug_limit).all()
                 db.close()
                 for km in results:
                     if self.service.cli_args.force_ctime:
                         km.killmail_time = datetime.datetime.utcnow()
-                    self.__km_postProcess.put_nowait(km)
+                    self.__km_postProcess.sync_q.put_nowait(km)
             except Exception as ex:
                 print(ex)
-            self.service.channel_manager.post_message("Debugging is now finished. Switching back to streaming live kms.")
+            finally:
+                db.close()
+            msg = "Debugging is now finished. Switching back to streaming live kms."
+            print(msg)
+            self.service.channel_manager.post_message(msg)
 
     async def pull_kms_redisq(self):
         """pulls kms using redisq"""
@@ -136,7 +144,7 @@ class zk(object):
                             data = await resp.json()
                             package = data.get('package')
                             if package is not None:
-                                self.__km_preProcess.put_nowait(package)
+                                await self.__km_preProcess.async_q.put(package)
                             if not self.run_websocket:
                                 self.add_delay(self.delay_next, next_delay)
                                 next_delay = datetime.datetime.utcnow()
@@ -187,7 +195,7 @@ class zk(object):
                                 if msg.type == aiohttp.WSMsgType.TEXT:
                                     package = self.ws_extract(msg.json())
                                     if package:
-                                        self.__km_preProcess.put_nowait(package)
+                                        await self.__km_preProcess.async_q.put(package)
                                         self.add_delay(self.delay_next, next_delay)
                                         next_delay = datetime.datetime.utcnow()
                                     else:
@@ -200,21 +208,28 @@ class zk(object):
                         print('{} - ZK WebSocket error: {}'.format(str(datetime.datetime.utcnow()), ex))
                     await asyncio.sleep(25)
 
-    def thread_process_json(self):
-        print('Started zk data processing thread.')
+    async def coroutine_process_json(self, zk_thread_pool: ThreadPoolExecutor):
+        print('Started zk data processing coroutine.')
+        loop = asyncio.get_event_loop()
         while True:
             try:
-                km = self.__make_km(self.__km_preProcess.get(block=True))
+                json_data = await self.__km_preProcess.async_q.get()
+                km = await loop.run_in_executor(zk_thread_pool, partial(self.__make_km, json_data))
                 if km is not None:
-                    self.__km_postProcess.put_nowait(km)
+                    await self.__km_postProcess.async_q.put(km)
             except Exception as ex:
                 print(ex)
 
-    def thread_filters(self):
-        print("Started zk filter thread.")
-        self.__debug_simulate()
+    async def coroutine_filters(self, zk_thread_pool: ThreadPoolExecutor):
+        print("Started zk filter coroutine.")
+        loop = asyncio.get_event_loop()
         while True:
             try:
-                self.service.channel_manager.send_km(self.__km_postProcess.get(block=True))
+                km = await self.__km_postProcess.async_q.get()
+                await loop.run_in_executor(zk_thread_pool, partial(self.service.channel_manager.send_km, km))
             except Exception as ex:
                 print(ex)
+
+    async def make_queues(self):
+        self.__km_preProcess = janus.Queue()
+        self.__km_postProcess = janus.Queue()
