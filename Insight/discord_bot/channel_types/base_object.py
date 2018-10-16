@@ -77,10 +77,36 @@ class discord_feed_service(object):
         pass
 
     async def async_load_table(self):
-        await self.discord_client.loop.run_in_executor(None,self.load_table)
+        await self.discord_client.loop.run_in_executor(None, self.load_table)
 
-    async def proxy_lock(self, awaitable_coro):
+    def check_permission(self, user_author: discord.User, required_level, ignore_channel_setting=False):
+        """
+        :param user_author: discord user author or channel member
+        :param required_level: level checked against. 0-no permission needed, 1-channel manage, 2-console/server admin
+        :param ignore_channel_setting: Check permission even if channel is unlocked
+        :return: void() else raise InsightExc.DiscordError.LackPermission on unauthorized access
+        """
+        if required_level == 0:
+            return
+        if not ignore_channel_setting and not self.is_loadable_feed():
+            return
+        if not ignore_channel_setting and not self.cached_feed_table.modification_lock:
+            return
+        p: discord.Permissions = user_author.permissions_in(self.channel_discord_object)
+        if required_level == 1:
+            if p.administrator or p.manage_roles or p.manage_messages or p.manage_guild or p.manage_channels or p.manage_webhooks:
+                return
+            else:
+                raise InsightExc.DiscordError.LackPermission
+        elif required_level == 2:
+            raise InsightExc.DiscordError.LackPermission
+        else:
+            print('Unknown permission level {}'.format(required_level))
+            raise InsightExc.DiscordError.LackPermission
+
+    async def proxy_lock(self, awaitable_coro, user_author, required_level, ignore_channel_setting=False):
         """call a command coroutine by proxy with a lock to prevent multiple commands running at once i.e: !settings"""
+        self.check_permission(user_author, required_level, ignore_channel_setting)
         time_limit = datetime.datetime.utcnow() + datetime.timedelta(seconds=15)
         while self.lock.locked():  # timeout after 15 seconds of waiting. async wait_for has issues in 3.6
             if datetime.datetime.utcnow() >= time_limit:

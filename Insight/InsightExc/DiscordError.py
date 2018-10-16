@@ -29,3 +29,8 @@ class UnboundFeed(InsightException):
 class NonFatalExit(InsightException):
     def __init__(self, message="Missing error text"):  # todo
         super().__init__(message)
+
+
+class LackPermission(InsightException):
+    def __init__(self, message="Unauthorized"):  # todo
+        super().__init__(message)
