@@ -12,8 +12,8 @@ import asyncio
 
 
 class Discord_Insight_Client(discord.Client):
-    def __init__(self,service_module):
-        super().__init__()
+    def __init__(self, service_module):
+        super().__init__(fetch_offline_members=True, heartbeat_timeout=20)
         self.service: service_module = service_module
         self.channel_manager: service.Channel_manager = self.service.channel_manager
         self.channel_manager.set_client(self)

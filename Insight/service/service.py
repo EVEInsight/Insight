@@ -8,6 +8,7 @@ import database
 import argparse
 import configparser
 import sys
+import discord
 from distutils.version import LooseVersion
 import requests
 import secrets
@@ -143,12 +144,13 @@ class service_module(object):
 
     def welcome(self):
         """Prints a welcome message with current version and displays alerts if new project updates are available."""
-        div = '================================================================================='
+        div = '==============================================================================================='
         print(div)
-        print('Insight {} (Database {}) on {} with Python/{}'.format(str(self.get_version()),
-                                                                     str(self.get_db_version()),
-                                                                     platform.platform(aliased=True, terse=True),
-                                                                     platform.python_version()))
+        print('Insight {} (Database {}) (discord.py v{}) on {} with Python/{}'.format(str(self.get_version()),
+                                                                                      str(self.get_db_version()),
+                                                                                      str(discord.__version__),
+                                                                                      platform.platform(aliased=True, terse=True),
+                                                                                      platform.python_version()))
         self.update_available()
         print(div)
 
