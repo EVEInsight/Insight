@@ -8,6 +8,7 @@ from functools import partial
 import InsightExc
 import traceback
 from .UnboundUtilityCommands import UnboundUtilityCommands
+import asyncio
 
 
 class Discord_Insight_Client(discord.Client):
@@ -21,6 +22,7 @@ class Discord_Insight_Client(discord.Client):
         self.unbound_commands = UnboundUtilityCommands(self)
         self.loop.set_default_executor(ThreadPoolExecutor(max_workers=5))
         self.loop.create_task(self.setup_tasks())
+        self.__id_semaphores = {}
 
     async def on_ready(self):
         print('-------------------')
@@ -63,46 +65,62 @@ class Discord_Insight_Client(discord.Client):
         if self.service.motd:
             await self.loop.run_in_executor(None, partial(self.channel_manager.post_message, motd))
 
+    async def get_semaphore(self, channel_object) ->asyncio.Semaphore:
+        try:
+            assert channel_object.id is not None
+            cSem = self.__id_semaphores.get(channel_object.id)
+            if not isinstance(cSem, asyncio.Semaphore):
+                cSem = asyncio.Semaphore(value=3)
+                self.__id_semaphores[channel_object.id] = cSem
+            return cSem
+        except Exception as ex:
+            print('Error when getting semaphore: {}'.format(ex))
+            return asyncio.Semaphore(value=3)
+
     async def on_message(self, message):
         await self.wait_until_ready()
         try:
-            if message.author.id == self.user.id:
+            if message.author.id == self.user.id or message.author.bot:
                 return
             if not await self.commandLookup.is_command(message):
                 return
-            if await self.commandLookup.create(message):
-                feed = await self.channel_manager.get_channel_feed(message.channel)
-                await feed.proxy_lock(feed.command_create(message))
-            elif await self.commandLookup.settings(message):
-                feed = await self.channel_manager.get_channel_feed(message.channel)
-                await feed.proxy_lock(feed.command_settings(message))
-            elif await self.commandLookup.start(message):
-                feed = await self.channel_manager.get_channel_feed(message.channel)
-                await feed.proxy_lock(feed.command_start(message))
-            elif await self.commandLookup.stop(message):
-                feed = await self.channel_manager.get_channel_feed(message.channel)
-                await feed.proxy_lock(feed.command_stop(message))
-            elif await self.commandLookup.sync(message):
-                feed = await self.channel_manager.get_channel_feed(message.channel)
-                await feed.proxy_lock(feed.command_sync(message))
-            elif await self.commandLookup.remove(message):
-                feed = await self.channel_manager.get_channel_feed(message.channel)
-                await feed.proxy_lock(feed.command_remove(message))
-            elif await self.commandLookup.help(message):
-                feed = await self.channel_manager.get_channel_feed(message.channel)
-                await feed.proxy_lock(feed.command_help(message))
-            elif await self.commandLookup.about(message):
-                feed = await self.channel_manager.get_channel_feed(message.channel)
-                await feed.proxy_lock(feed.command_about(message))
-            elif await self.commandLookup.status(message):
-                feed = await self.channel_manager.get_channel_feed(message.channel)
-                await feed.proxy_lock(feed.command_status(message))
-            elif await self.commandLookup.eightball(message):
-                await self.unbound_commands.command_8ball(message)
-            elif await self.commandLookup.dscan(message):
-                await self.unbound_commands.command_dscan(message)
-            else:
-                await self.commandLookup.notfound(message)
+            sem = await self.get_semaphore(message.channel)
+            async with sem:
+                if await self.commandLookup.create(message):
+                    feed = await self.channel_manager.get_channel_feed(message.channel)
+                    await feed.proxy_lock(feed.command_create(message))
+                elif await self.commandLookup.settings(message):
+                    feed = await self.channel_manager.get_channel_feed(message.channel)
+                    await feed.proxy_lock(feed.command_settings(message))
+                elif await self.commandLookup.start(message):
+                    feed = await self.channel_manager.get_channel_feed(message.channel)
+                    await feed.proxy_lock(feed.command_start(message))
+                elif await self.commandLookup.stop(message):
+                    feed = await self.channel_manager.get_channel_feed(message.channel)
+                    await feed.proxy_lock(feed.command_stop(message))
+                elif await self.commandLookup.sync(message):
+                    feed = await self.channel_manager.get_channel_feed(message.channel)
+                    await feed.proxy_lock(feed.command_sync(message))
+                elif await self.commandLookup.remove(message):
+                    feed = await self.channel_manager.get_channel_feed(message.channel)
+                    await feed.proxy_lock(feed.command_remove(message))
+                elif await self.commandLookup.help(message):
+                    feed = await self.channel_manager.get_channel_feed(message.channel)
+                    await feed.proxy_lock(feed.command_help(message))
+                elif await self.commandLookup.about(message):
+                    feed = await self.channel_manager.get_channel_feed(message.channel)
+                    await feed.proxy_lock(feed.command_about(message))
+                elif await self.commandLookup.status(message):
+                    feed = await self.channel_manager.get_channel_feed(message.channel)
+                    await feed.proxy_lock(feed.command_status(message))
+                elif await self.commandLookup.eightball(message):
+                    await self.unbound_commands.command_8ball(message)
+                elif await self.commandLookup.dscan(message):
+                    await self.unbound_commands.command_dscan(message)
+                else:
+                    await self.commandLookup.notfound(message)
+                    await asyncio.sleep(3)
+                await asyncio.sleep(2)
         except Exception as ex:
             if isinstance(ex, InsightExc.InsightException):
                 try:

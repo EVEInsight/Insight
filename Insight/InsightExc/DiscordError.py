@@ -19,3 +19,8 @@ class ChannelLoaderError(InsightException):
 class LockTimeout(InsightException):
     def __init__(self, message="Lock timeout"):  # todo
         super().__init__(message)
+
+
+class UnboundFeed(InsightException):
+    def __init__(self, message="Unbound feed"):  # todo
+        super().__init__(message)

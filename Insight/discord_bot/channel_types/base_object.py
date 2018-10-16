@@ -85,8 +85,10 @@ class discord_feed_service(object):
         while self.lock.locked():  # timeout after 15 seconds of waiting. async wait_for has issues in 3.6
             if datetime.datetime.utcnow() >= time_limit:
                 raise InsightExc.DiscordError.LockTimeout
-            await asyncio.sleep(2)
+            await asyncio.sleep(1)
         async with self.lock:
+            if not self.channel_manager.exists(self) and self.is_loadable_feed():
+                raise InsightExc.DiscordError.UnboundFeed
             await awaitable_coro
 
     async def command_create(self, message_object):
@@ -182,13 +184,13 @@ class discord_feed_service(object):
                 traceback.print_exc()
                 continue
             try:
-                if self.cached_feed_table.feed_running and self.channel_manager.exists(self):
-                    if isinstance(__item, base_visual):
-                        async with self.lock:
+                async with self.lock:
+                    if self.cached_feed_table.feed_running and self.channel_manager.exists(self):
+                        if isinstance(__item, base_visual):
                             await __item()
                             await self.channel_manager.add_delay(__item.get_load_time())
-                    else:
-                        await self.channel_discord_object.send(str(__item))
+                        else:
+                            await self.channel_discord_object.send(str(__item))
             except discord.Forbidden:
                 try:
                     await self.channel_discord_object.send(
@@ -223,10 +225,10 @@ class discord_feed_service(object):
             await asyncio.sleep(.1)
 
     async def remove(self):
-        """Temp pause an error feed instead of removing it completely. Resume again in 30 minutes."""
+        """Temp pause an error feed instead of removing it completely. Resume again in 45 minutes."""
         try:
             if self.cached_feed_table.feed_running:
-                remaining = 60
+                remaining = 90
                 self.cached_feed_table.feed_running = False
                 while remaining > 0 and not self.cached_feed_table.feed_running:
                     remaining -= 1
@@ -312,6 +314,10 @@ class discord_feed_service(object):
             feed_channel.add_km(km)
         except Exception as ex:
             print(ex)
+
+    @classmethod
+    def is_loadable_feed(cls):
+        return False
 
 from . import Linked_Options
 
