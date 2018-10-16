@@ -174,6 +174,16 @@ class discord_feed_service(object):
     async def command_unlock(self, message_object):
         await self.command_not_supported_sendmessage(message_object)
 
+    async def command_quit(self, message_object):
+        """!quit - Close and shutdown the Insight application service."""
+        options = insightClient.mapper_return_yes_no(self.discord_client, message_object)
+        options.set_main_header("Are you sure you want to shutdown Insight? This will close the Insight "
+                                "server application. Note: You may get a 'CancelledError' message in Discord which "
+                                "you can safely ignore.")
+        resp = await options()
+        if resp:
+            await self.discord_client.shutdown_self()
+
     def add_km(self,km):
         if self.cached_feed_table.feed_running:
             assert isinstance(km,dbRow.tb_kills)

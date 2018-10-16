@@ -13,8 +13,8 @@ class setup_database(object):
         self.engine = create_engine('sqlite:///{}'.format(service_module.config_file['sqlite_database']['filename']),
                                     connect_args={'check_same_thread':False,'timeout':3000}, echo=False)
         DB.Base.Base.metadata.create_all(self.engine)
-        Session = sessionmaker(bind=self.engine)
-        self.sc_session = scoped_session(Session)
+        self._dbSession = sessionmaker(bind=self.engine)
+        self.sc_session = scoped_session(self._dbSession)
         self.verify_tokens()
 
     def initial_load(self):
@@ -57,6 +57,14 @@ class setup_database(object):
             else:
                 print("Unknown response. No changes were made.")
                 sys.exit(1)
+
+    def shutdown(self):
+        try:
+            self._dbSession.close_all()
+            self.engine.dispose()
+            print('Successfully closed the database.')
+        except Exception as ex:
+            print('Error when closing database: {}'.format(ex))
 
 
 from .db_tables import tb_contacts_alliances, tb_contacts_corps, tb_contacts_pilots, tb_tokens, tb_discord_tokens

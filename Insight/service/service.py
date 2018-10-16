@@ -30,7 +30,8 @@ class service_module(object):
         self.welcome()
         self.__import_everything_flag = False
         self.__import_check()
-        self.__sc_session: scoped_session = database.setup_database(self).get_scoped_session()
+        self.__db_manager = database.setup_database(self)
+        self.__sc_session: scoped_session = self.__db_manager.get_scoped_session()
         self.static_data_import = static_data.static_data_import(self,self.__import_everything_flag)
         self.routes = RouteMapper.RouteMapper(self)
         self.sso = EVEsso.EVEsso(self)
@@ -176,6 +177,10 @@ class service_module(object):
 
     def is_admin(self, user_id):
         return self.__admin_module.is_admin(user_id)
+
+    def shutdown(self):
+        print('Attempting to shutdown the database...')
+        self.__db_manager.shutdown()
 
     @classmethod
     def get_version(cls):

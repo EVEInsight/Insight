@@ -61,6 +61,20 @@ class Discord_Insight_Client(discord.Client):
         if self.service.motd:
             await self.loop.run_in_executor(None, partial(self.channel_manager.post_message, motd))
 
+    def close_threads(self):
+        print('Closing Insight thread pool...')
+        self.__threadpool_insight.shutdown(wait=True)
+        print('Closing zKillboard thread pool...')
+        self.__threadpool_zk.shutdown(wait=True)
+
+    async def shutdown_self(self):
+        try:
+            game_act = discord.Activity(name="Shutting down...", type=discord.ActivityType.watching)
+            await self.change_presence(activity=game_act, status=discord.Status.dnd)
+        except Exception as ex:
+            print(ex)
+        await self.logout()
+
     async def get_semaphore(self, channel_object) ->asyncio.Semaphore:
         try:
             assert channel_object.id is not None
@@ -115,6 +129,9 @@ class Discord_Insight_Client(discord.Client):
                 elif await self.commandLookup.unlock(message):
                     feed = await self.channel_manager.get_channel_feed(message.channel)
                     await feed.proxy_lock(feed.command_unlock(message), message.author, 1, ignore_channel_setting=True)
+                elif await self.commandLookup.quit(message):
+                    feed = await self.channel_manager.get_channel_feed(message.channel)
+                    await feed.proxy_lock(feed.command_quit(message), message.author, 2, ignore_channel_setting=True)
                 elif await self.commandLookup.eightball(message):
                     await self.unbound_commands.command_8ball(message)
                 elif await self.commandLookup.dscan(message):
@@ -146,6 +163,10 @@ class Discord_Insight_Client(discord.Client):
         if service_module.config_file["discord"]["token"]:
             client = Discord_Insight_Client(service_module)
             client.run(service_module.config_file["discord"]["token"])
+            client.loop.close()
+            client.close_threads()
+            service_module.shutdown()
+            print('Insight successfully shut down.')
         else:
             print("Missing a Discord Application token. Please make sure to set this variable in the config file '{}'".format(service_module.cli_args.config))
             sys.exit(1)
