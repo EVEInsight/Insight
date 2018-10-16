@@ -14,6 +14,7 @@ class Channels(dec_Base.Base,discord_channel_base):
     appearance_id = Column(Integer, default=0, nullable=False)
     mention = Column(Enum(enum_mention), default=enum_mention.noMention, nullable=False)
     mention_every = Column(Float, default=15.0, nullable=False)
+    modification_lock = Column(Boolean, default=False, nullable=False)
 
     object_capRadar = relationship("CapRadar", uselist=False, cascade="delete", back_populates="object_channel",
                                    lazy="subquery")

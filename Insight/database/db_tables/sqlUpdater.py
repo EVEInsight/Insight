@@ -92,6 +92,10 @@ class sqlUpdater(object):
         yield "alter table discord_channels add mention VARCHAR(9) DEFAULT 'noMention' not null;"
         yield 'alter table discord_channels add mention_every FLOAT DEFAULT 15.0 not null;'
 
+    def sqlV_2_3_0(self):
+        """v2.3.0"""
+        yield "alter table discord_channels add modification_lock BOOLEAN DEFAULT 0 not null;"
+
     def update_all(self):
         """Updates tables, returning the latest successful updated version"""
         self.compatibility_check()
