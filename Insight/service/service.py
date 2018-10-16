@@ -4,6 +4,7 @@ from . import zk as zk
 from . import static_data_import as static_data
 from . import EVEsso
 from . import RouteMapper
+from . import InsightAdmins
 import database
 import argparse
 import configparser
@@ -35,6 +36,7 @@ class service_module(object):
         self.sso = EVEsso.EVEsso(self)
         self.channel_manager = cm.Channel_manager(self)
         self.zk_obj = zk.zk(self)
+        self.__admin_module = InsightAdmins.InsightAdmins()
         self.motd = self.__read_motd()
 
     def __read_cli_args(self):
@@ -171,6 +173,9 @@ class service_module(object):
         except Exception as ex:
             print(ex)
             return False
+
+    def is_admin(self, user_id):
+        return self.__admin_module.is_admin(user_id)
 
     @classmethod
     def get_version(cls):

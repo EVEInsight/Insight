@@ -99,7 +99,8 @@ class discord_feed_service(object):
             else:
                 raise InsightExc.DiscordError.LackPermission
         elif required_level == 2:
-            raise InsightExc.DiscordError.LackPermission
+            if not self.service.is_admin(user_author.id):
+                raise InsightExc.DiscordError.LackPermission('You must be an Insight admin to use this command.')
         else:
             print('Unknown permission level {}'.format(required_level))
             raise InsightExc.DiscordError.LackPermission
