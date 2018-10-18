@@ -61,11 +61,15 @@ class Discord_Insight_Client(discord.Client):
         if self.service.motd:
             await self.loop.run_in_executor(None, partial(self.channel_manager.post_message, motd))
 
-    def close_threads(self):
+    def cleanup_close(self):
+        print('Closing event loop...')
+        asyncio.get_event_loop().close()
         print('Closing Insight thread pool...')
         self.__threadpool_insight.shutdown(wait=True)
         print('Closing zKillboard thread pool...')
         self.__threadpool_zk.shutdown(wait=True)
+        self.service.shutdown()
+        print('Insight successfully shut down.')
 
     async def shutdown_self(self):
         try:
@@ -162,11 +166,11 @@ class Discord_Insight_Client(discord.Client):
     def start_bot(service_module):
         if service_module.config_file["discord"]["token"]:
             client = Discord_Insight_Client(service_module)
-            client.run(service_module.config_file["discord"]["token"])
-            client.loop.close()
-            client.close_threads()
-            service_module.shutdown()
-            print('Insight successfully shut down.')
+            try:
+                client.run(service_module.config_file["discord"]["token"])
+                client.cleanup_close()
+            except KeyboardInterrupt:
+                client.cleanup_close()
         else:
             print("Missing a Discord Application token. Please make sure to set this variable in the config file '{}'".format(service_module.cli_args.config))
             sys.exit(1)
