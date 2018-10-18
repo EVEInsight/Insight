@@ -174,6 +174,12 @@ class discord_feed_service(object):
     async def command_unlock(self, message_object):
         await self.command_not_supported_sendmessage(message_object)
 
+    async def command_8ball(self, message_object):
+        await self.discord_client.unbound_commands.command_8ball(message_object)
+
+    async def command_dscan(self, message_object):
+        await self.discord_client.unbound_commands.command_dscan(message_object)
+
     async def command_quit(self, message_object):
         """!quit - Close and shutdown the Insight application service."""
         options = insightClient.mapper_return_yes_no(self.discord_client, message_object)
