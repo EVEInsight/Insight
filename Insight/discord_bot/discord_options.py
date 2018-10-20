@@ -95,7 +95,7 @@ class mapper_index(object):
         embed.title = ""
         embed.color = discord.Color(659493)
         embed.timestamp = datetime.datetime.utcnow()
-        embed.set_author(name=self.__class__.__name__)
+        embed.set_author(name=self.name())
         embed.set_footer(text='Timeout: {}s'.format(self.__timeout_seconds))
         embed.description = self.__header_text
         for index, h in enumerate(self.e_header_container):
@@ -193,6 +193,9 @@ class mapper_index(object):
             else:
                 raise ex
 
+    def name(self):
+        return "Option Selection"
+
 
 class mapper_index_withAdditional(mapper_index):
     async def add_additional(self):
@@ -218,6 +221,9 @@ class mapper_return_noOptions(mapper_index):
     async def response_action(self, response):
         return response
 
+    def name(self):
+        return "Input/Search"
+
 
 class mapper_return_noOptions_requiresInt(mapper_return_noOptions):
     def __init__(self, discord_client_object, message_object, timeout_seconds=120):
@@ -233,6 +239,9 @@ class mapper_return_noOptions_requiresInt(mapper_return_noOptions):
     async def response_action(self, response):
         await self.check_response(response)
         return str(abs(int(response)))
+
+    def name(self):
+        return "Integer Input"
 
 
 class mapper_return_noOptions_requiresFloat(mapper_return_noOptions):
@@ -257,6 +266,9 @@ class mapper_return_noOptions_requiresFloat(mapper_return_noOptions):
     async def response_action(self, response):
         await self.check_response(response)
         return str(abs(float(response)))
+
+    def name(self):
+        return "Decimal Input"
 
 
 
