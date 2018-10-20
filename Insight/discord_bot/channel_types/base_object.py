@@ -175,9 +175,11 @@ class discord_feed_service(object):
         await self.command_not_supported_sendmessage(message_object)
 
     async def command_8ball(self, message_object):
+        """!8ball - Shake the 8ball."""
         await self.discord_client.unbound_commands.command_8ball(message_object)
 
     async def command_dscan(self, message_object):
+        """!dscan - Coming soon!"""
         await self.discord_client.unbound_commands.command_dscan(message_object)
 
     async def command_quit(self, message_object):

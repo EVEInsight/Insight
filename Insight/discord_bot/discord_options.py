@@ -174,14 +174,14 @@ class mapper_index(object):
         try:
             await self.add_additional()
             await self.check_conditions()
-            try:
+            if isinstance(self.message.channel, discord.TextChannel):
+                p: discord.Permissions = self.message.channel.permissions_for(self.message.channel.guild.me)
+                if p.embed_links:
+                    await self.message.channel.send(embed=self.get_embed())
+                else:
+                    await self.message.channel.send(str(self))
+            else:
                 await self.message.channel.send(embed=self.get_embed())
-            except discord.HTTPException as ex:
-                if ex.code == 50035 and ex.status == 400:
-                    raise InsightExc.User.TooManyOptions
-            except Exception as ex:
-                print(ex)
-                await self.message.channel.send(str(self))
             __response = await self.discord_client.wait_for('message', check=is_author, timeout=self.__timeout_seconds)
             return await self.response_action(__response.content)
         except asyncio.TimeoutError:

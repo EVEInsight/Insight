@@ -33,6 +33,9 @@ class Discord_Insight_Client(discord.Client):
             self.user.id)
         print('Invite Link: {}'.format(invite_url))
         print('This bot is a member of {} servers.'.format(str(len(self.guilds))))
+        print('Loaded Discord cache with: {} servers, {} channels, {} users.'.format(len(self.guilds),
+                                                                        len(list(self.get_all_channels())),
+                                                                        len(self.users)))
         print('-------------------')
 
     async def setup_tasks(self):
@@ -90,6 +93,33 @@ class Discord_Insight_Client(discord.Client):
         except Exception as ex:
             print('Error when getting semaphore: {}'.format(ex))
             return asyncio.Semaphore(value=3)
+
+    async def on_guild_join(self, guild: discord.Guild):
+        print('Joined server ({}) with {} members.'.format(guild.name, guild.member_count))
+        channel: discord.TextChannel = guild.system_channel
+        if channel is not None:
+            permissions: discord.Permissions = channel.permissions_for(channel.guild.me)
+            message = "Hi!\n\nI am an EVE Online killmail streaming bot offering various feed types and " \
+                      "utilities. Run the **!create** command in a Discord channel to quickly begin setting up a feed." \
+                      " Run the **!help** command to see all of my available commands. You can read more about my " \
+                      "functionality and follow development on [GitHub](https://github.com/Nathan-LS/Insight).\n\n" \
+                      "Thank you for choosing Insight!"
+            if permissions.embed_links and permissions.send_messages:
+                embed = discord.Embed()
+                embed.title = ""
+                embed.color = discord.Color(659493)
+                embed.set_author(name='Insight welcome message')
+                embed.description = message
+                await channel.send(embed=embed)
+            elif permissions.send_messages:
+                message = message.replace('**', "'")
+                message = message.replace('[GitHub]', " ")
+                await channel.send(content=message)
+            else:
+                return
+
+    async def on_guild_remove(self, guild: discord.Guild):
+        print('Removed from server ({}) with {} members.'.format(guild.name, guild.member_count))
 
     async def on_message(self, message):
         await self.wait_until_ready()
