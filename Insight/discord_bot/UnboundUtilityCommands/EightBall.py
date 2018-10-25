@@ -1,12 +1,9 @@
-from . import *
-import discord
-import random
-import traceback
+from .UnboundCommandBase import *
 
 
-class EightBall(object):
+class EightBall(UnboundCommandBase):
     def __init__(self, unbound_service):
-        self.unbound: UnboundUtilityCommands = unbound_service
+        super().__init__(unbound_service)
         self.responses = list(self.__response_generator())
 
     def __response_generator(self):
@@ -32,6 +29,7 @@ class EightBall(object):
             traceback.print_exc()
             yield from responses
 
-    async def command_8ball(self, message_object: discord.Message, message_text: str):
-        await message_object.channel.send('{}\n{}'.format(message_object.author.mention, random.choice(self.responses)))
+    def get_text(self, message_text: str)->str:
+        return str(random.choice(self.responses))
+
 

@@ -1,13 +1,12 @@
-from . import *
-import discord
+from .UnboundCommandBase import *
 
 
-class Dscan(object):
+class Dscan(UnboundCommandBase):
     def __init__(self, unbound_service):
-        self.unbound: UnboundUtilityCommands = unbound_service
+        super().__init__(unbound_service)
         self.resp = "The Dscan service is currently in development!"
 
-    async def command_dscan(self, message_object: discord.Message, message_text: str):
-        await message_object.channel.send('{}\n{}'.format(message_object.author.mention, self.resp))
+    def get_text(self, message_text: str)->str:
+        return self.resp
 
 
