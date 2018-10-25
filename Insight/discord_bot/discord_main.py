@@ -46,10 +46,10 @@ class Discord_Insight_Client(discord.Client):
         except Exception as ex:
             print(ex)
         await self.service.zk_obj.make_queues()
-        self.loop.create_task(self.service.zk_obj.pull_kms_redisq())
         self.loop.create_task(self.service.zk_obj.pull_kms_ws())
         await self.channel_manager.load_channels()
         await self.post_motd()
+        self.loop.create_task(self.service.zk_obj.pull_kms_redisq())
         self.loop.create_task(self.background_tasks.setup_backgrounds())
         self.loop.create_task(self.service.zk_obj.coroutine_filters(self.__threadpool_zk))
         await self.loop.run_in_executor(None, self.service.zk_obj.debug_simulate)
