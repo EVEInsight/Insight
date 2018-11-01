@@ -358,6 +358,11 @@ class discord_feed_service(object):
     def is_preconfigured(cls):
         return False
 
+    @classmethod
+    def feed_category(cls):
+        """0 - not a feed, 1 valid feed"""
+        return 0
+
     @staticmethod
     def send_km(km,feed_channel):
         try:

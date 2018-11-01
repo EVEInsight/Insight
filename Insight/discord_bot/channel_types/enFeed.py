@@ -29,5 +29,9 @@ class enFeed(noCh.discord_text_nofeed_exist):
     def is_loadable_feed(cls):
         return True
 
+    @classmethod
+    def feed_category(cls):
+        return 1
+
 
 from . import Linked_Options

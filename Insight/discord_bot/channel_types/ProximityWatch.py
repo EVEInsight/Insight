@@ -23,3 +23,6 @@ class ProximityWatch(capRadar):
     def __str__(self):
         return "Proximity Watch"
 
+    @classmethod
+    def feed_category(cls):
+        return 1

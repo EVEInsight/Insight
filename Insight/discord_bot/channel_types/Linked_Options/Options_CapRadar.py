@@ -14,6 +14,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         self.super_ids = [30,659]
         self.capital_ids = [547, 485, 1538, 883]
         self.blops_ids = [898]
+        self.at_ids = list(self.at_ship_ids())
 
     def yield_options(self):
         yield (self.InsightOptionRequired_add, True)
@@ -21,6 +22,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         yield (self.InsightOptionRequired_supers, True)
         yield (self.InsightOptionRequired_capitals, True)
         yield (self.InsightOptionRequired_blops, True)
+        yield (self.InsightOptionRequired_atships, True)
         yield (self.InsightOptionRequired_maxage, True)
         yield (self.InsightOption_addcustom, False)
         yield (self.InsightOption_removecustom, False)
@@ -39,18 +41,24 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         __options.add_option(discord_options.option_returns_object("@ everyone", return_object=enum_mention.everyone))
         return __options
 
-    def modify_groups(self,group_ids,mention_method,remove=False):
+    def modify_groups(self, item_ids, mention_method, remove=False, type_mode=False):
         db: Session = self.cfeed.service.get_session()
         try:
             if not remove:
-                for i in group_ids:
-                    __row: tb_Filter_groups = tb_Filter_groups.get_row(self.cfeed.channel_id,i,self.cfeed.service)
+                for i in item_ids:
+                    if type_mode:
+                        __row: tb_Filter_types = tb_Filter_types.get_row(self.cfeed.channel_id, i, self.cfeed.service)
+                    else:
+                        __row: tb_Filter_groups = tb_Filter_groups.get_row(self.cfeed.channel_id,i,self.cfeed.service)
                     __row.mention = mention_method
                     db.merge(__row)
                 db.commit()
             else:
-                for i in group_ids:
-                    tb_Filter_groups.get_remove(self.cfeed.channel_id,i,self.cfeed.service)
+                for i in item_ids:
+                    if type_mode:
+                        tb_Filter_types.get_remove(self.cfeed.channel_id, i, self.cfeed.service)
+                    else:
+                        tb_Filter_groups.get_remove(self.cfeed.channel_id,i,self.cfeed.service)
                 db.commit()
         except Exception as ex:
             print(ex)
@@ -176,6 +184,22 @@ class Options_CapRadar(Base_Feed.base_activefeed):
                                                                                enum_mention.noMention, remove=True))
         await self.reload(message_object)
 
+    async def InsightOptionRequired_atships(self,message_object:discord.Message):
+        """Alliance Tournament ship tracking - Enable or disable tracking of AT ship targets within range of base systems."""
+        __options = discord_options.mapper_return_yes_no(self.cfeed.discord_client, message_object)
+        __options.set_main_header("Track Alliance Tournament ship activity in this channel?")
+        __track_group_TF = await __options()
+        if __track_group_TF:
+            __mention_method = self.mention_options(message_object, "Alliance Tournament ships")
+            __mention_enum = await __mention_method()
+            await self.cfeed.discord_client.loop.run_in_executor(None, partial(self.modify_groups, self.at_ids,
+                                                                               __mention_enum, type_mode=True))
+        else:
+            await self.cfeed.discord_client.loop.run_in_executor(None, partial(self.modify_groups, self.at_ids,
+                                                                               enum_mention.noMention, remove=True,
+                                                                               type_mode=True))
+        await self.reload(message_object)
+
     async def InsightOptionRequired_maxage(self,message_object:discord.Message):
         """Set maximum killmail age - Set the maximum delay for killmails. Fetched mails occurring more than the set minutes ago will be ignored."""
         def change_limit(new_limit):
@@ -289,6 +313,37 @@ class Options_CapRadar(Base_Feed.base_activefeed):
     async def InsightOption_sync(self, message_object: discord.Message):
         """Manage feed sync settings - Set up and manage EVE contact syncing to blacklist allies from appearing as targets."""
         await self.cfeed.command_sync(message_object)
+
+    def at_ship_ids(self):
+        yield 2836   # Adrestia
+        yield 11936  # Apocalypse Imperial Issue
+        yield 11938  # Armageddon Imperial Issue
+        yield 42246  # Caedes
+        yield 32788  # Cambion
+        yield 33675  # Chameleon
+        yield 33397  # Chremoas
+        yield 32790  # Etana
+        yield 35781  # Fiend
+        yield 32207  # Freki
+        yield 11940  # Gold Magnate
+        yield 11011  # Guardian-Vexor
+        yield 35779  # Imp
+        yield 3516   # Malice
+        yield 13202  # Megathron Federate Issue
+        yield 32209  # Mimir
+        yield 33395  # Moracha
+        yield 635    # Opux Luxury Yacht
+        yield 42245  # Rabisu
+        yield 26840  # Raven State Issue
+        yield 11942  # Silver Magnate
+        yield 26842  # Tempest Tribal Issue
+        yield 2834   # Utu
+        yield 3518   # Vangel
+        yield 33673  # Whiptail
+        yield 45530  # Virtuoso
+        yield 45531  # Victor
+        yield 48636  # Hydra
+        yield 48635  # Tiamat
 
 
 from .. import capRadar

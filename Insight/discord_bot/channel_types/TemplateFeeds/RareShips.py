@@ -1,4 +1,5 @@
 from ..capRadar import *
+import InsightExc
 
 
 class OptionsRareShips(Linked_Options.opt_capradar):
@@ -13,12 +14,20 @@ class RareShips(capRadar):
         self.general_table().reset_filters(self.channel_id, self.service)
         db: Session = self.service.get_session()
         try:
+            row = db.query(self.linked_table()).filter(self.linked_table().channel_id == self.channel_id).one()
+            row.template_id = 0
             systemR = dbRow.tb_Filter_systems(30000142, self.channel_id, load_fk=False)
             systemR.max = 50000
             db.add(systemR)
             for s in self.at_ship_ids():
                 db.add(dbRow.tb_Filter_types(s, self.channel_id, load_fk=False))
             db.commit()
+            msg = "This Alliance Tournament ship radar feed has been converted to a full radar feed. " \
+                  "The functionality of Alliance ship tracking is now integrated within the full radar service. You" \
+                  " now enjoy the following features: \n\n Customizable base systems\n\n Additional optional " \
+                  "tracking types/groups\n\n Mention modes"
+            self.discord_client.loop.create_task(self.channel_discord_object.send(content=msg))
+            raise InsightExc.DiscordError.InsightException("AT radar to capital radar conversion non-exception.")
         except Exception as ex:
             print(ex)
             raise ex
@@ -74,3 +83,7 @@ class RareShips(capRadar):
     @classmethod
     def is_preconfigured(cls):
         return True
+
+    @classmethod
+    def feed_category(cls):
+        return 0
