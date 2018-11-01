@@ -98,11 +98,8 @@ class DiscordCommands(object):
             resp_text += "Did you mean?\n\n"
             for c in similar_commands:
                 resp_text += "'{}'\n".format(str(c))
-        resp_text += "\nRun the command '!help' to see a list of available commands."
-        try:
-            await message_object.channel.send('{}\n{}'.format(message_object.author.mention, resp_text))
-        except discord.HTTPException as ex:
-            if ex.code == 50035 and ex.status == 400:
-                raise InsightExc.User.TooManyOptions("Response body content-length too large.")
-            else:
-                raise ex
+        resp_text += "\nRun the '!help' command to see a list of available commands."
+        if len(resp_text) >= 750:
+            raise InsightExc.userInput.CommandNotFound
+        else:
+            raise InsightExc.userInput.CommandNotFound(str(resp_text))

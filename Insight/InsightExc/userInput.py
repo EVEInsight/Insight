@@ -13,11 +13,6 @@ class NotInteger(InsightException):
         super().__init__(message)
 
 
-class NotFloat(InsightException):
-    def __init__(self, message=""):
-        super().__init__(message)
-
-
 class BitLengthExceeded(InsightException):
     def __init__(self, message="You entered an invalid number that is not recognized by Insight since it is too big."):
         super().__init__(message)
@@ -50,4 +45,9 @@ class NewDMError(InsightException):
 
 class NotFloat(InsightException):
     def __init__(self, message="You entered an invalid number."):
+        super().__init__(message)
+
+
+class CommandNotFound(InsightException):
+    def __init__(self, message="Command not found."):
         super().__init__(message)

@@ -123,13 +123,13 @@ class Discord_Insight_Client(discord.Client):
 
     async def on_message(self, message):
         await self.wait_until_ready()
-        try:
-            if message.author.id == self.user.id or message.author.bot:
-                return
-            if not await self.commandLookup.is_command(message):
-                return
-            sem = await self.get_semaphore(message.channel)
-            async with sem:
+        if message.author.id == self.user.id or message.author.bot:
+            return
+        if not await self.commandLookup.is_command(message):
+            return
+        sem = await self.get_semaphore(message.channel)
+        async with sem:
+            try:
                 feed = await self.channel_manager.get_channel_feed(message.channel)
                 if await self.commandLookup.create(message):
                     await feed.proxy_lock(feed.command_create(message), message.author, 1)
@@ -161,25 +161,25 @@ class Discord_Insight_Client(discord.Client):
                     await feed.proxy_lock(feed.command_dscan(message), message.author, 0)
                 else:
                     await self.commandLookup.notfound(message)
-                    await asyncio.sleep(15)
-        except Exception as ex:
-            if isinstance(ex, InsightExc.InsightException):
-                try:
-                    await message.channel.send("{}\n{}".format(message.author.mention, str(ex)))
-                except:
-                    pass
-            elif isinstance(ex, discord.Forbidden):
-                pass  # cant send error message anyway
-            elif isinstance(ex, discord.NotFound):
-                pass  # channel deleted
-            else:
-                traceback.print_exc()
-                try:
-                    await message.channel.send(
-                        "{}\nUncaught exception: '{}'.".format(message.author.mention, str(ex.__class__.__name__)))
-                except:
-                    pass
-        await asyncio.sleep(4)
+                await asyncio.sleep(3)
+            except Exception as ex:
+                if isinstance(ex, InsightExc.InsightException):
+                    try:
+                        await message.channel.send("{}\n{}".format(message.author.mention, str(ex)))
+                    except:
+                        pass
+                elif isinstance(ex, discord.Forbidden):
+                    pass  # cant send error message anyway
+                elif isinstance(ex, discord.NotFound):
+                    pass  # channel deleted
+                else:
+                    traceback.print_exc()
+                    try:
+                        await message.channel.send(
+                            "{}\nUncaught exception: '{}'.".format(message.author.mention, str(ex.__class__.__name__)))
+                    except:
+                        pass
+                await asyncio.sleep(20)
 
     @staticmethod
     def start_bot(service_module):
