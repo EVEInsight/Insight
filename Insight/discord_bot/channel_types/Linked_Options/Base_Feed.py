@@ -90,6 +90,7 @@ class base_activefeed(options_base.Options_Base):
 
     async def InsightOption_lockfeed(self, message_object: discord.Message):
         """Lock feed - NULL"""
+        self.cfeed.check_permission(message_object.author, required_level=1, ignore_channel_setting=True)
         if self.cfeed.cached_feed_table.modification_lock:
             raise InsightExc.DiscordError.NonFatalExit('This channel feed is already locked from unauthorized modifications.')
         options = dOpt.mapper_return_yes_no(self.cfeed.discord_client, message_object)
@@ -103,6 +104,7 @@ class base_activefeed(options_base.Options_Base):
 
     async def InsightOption_unlockfeed(self, message_object: discord.Message):
         """Unlock feed - NULL"""
+        self.cfeed.check_permission(message_object.author, required_level=1, ignore_channel_setting=True)
         if not self.cfeed.cached_feed_table.modification_lock:
             raise InsightExc.DiscordError.NonFatalExit("This channel feed is already unlocked. You can lock this"
                                                        " feed from unauthorized modifications with "
