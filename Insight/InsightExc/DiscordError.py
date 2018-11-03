@@ -17,13 +17,16 @@ class ChannelLoaderError(InsightException):
 
 
 class LockTimeout(InsightException):
-    def __init__(self, message="Lock timeout"):  # todo
-        super().__init__(message)
+    def __init__(self):
+        msg = "Another user is currently running a command in this feed. Try running this command once the current " \
+              "active task is complete."
+        super().__init__(msg)
 
 
 class UnboundFeed(InsightException):
-    def __init__(self, message="Unbound feed"):  # todo
-        super().__init__(message)
+    def __init__(self):
+        msg = "This feed has been removed. You are unable to make changes to a deallocated feed."
+        super().__init__(msg)
 
 
 class NonFatalExit(InsightException):
@@ -31,6 +34,22 @@ class NonFatalExit(InsightException):
         super().__init__(message)
 
 
-class LackPermission(InsightException):
-    def __init__(self, message="Unauthorized"):  # todo
-        super().__init__(message)
+class LackChannelPermission(InsightException):
+    def __init__(self):
+        msg = "You are unauthorized to use this command in this channel. This channel is potentially locked by " \
+              "a feed user. You must have at least one of the following Discord channel/server roles to execute " \
+              "this command:\n\nAdministrator\nManage Roles\nManage Messages\nManage Guild\nManage Channel" \
+              "\nManage webhooks\n\nYou can request a channel moderator with one of these roles to remove " \
+              "the restriction by granting you one of these roles. The moderator can remove this restriction for " \
+              "all channel users by executing the '!unlock' command. Receiving this error in a private message " \
+              "indicates the command is not supported in direct messages."
+        super().__init__(msg)
+
+
+class LackInsightAdmin(InsightException):
+    def __init__(self, user_id=None):
+        msg = "You are unauthorized to execute this command as you are not an Insight super admin. Execution of this " \
+              "command requires your Discord user ID: '{}' to be in the 'InsightAdmins.txt' file. This file is " \
+              "located next to your 'config.ini' file. You may execute this command after editing the file " \
+              "and restarting Insight.".format(str(user_id))
+        super().__init__(msg)

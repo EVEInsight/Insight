@@ -84,7 +84,7 @@ class discord_feed_service(object):
         :param user_author: discord user author or channel member
         :param required_level: level checked against. 0-no permission needed, 1-channel manage, 2-console/server admin
         :param ignore_channel_setting: Check permission even if channel is unlocked
-        :return: void() else raise InsightExc.DiscordError.LackPermission on unauthorized access
+        :return: void() else raise InsightExc.DiscordError.LackChannelPermission on unauthorized access
         """
         if required_level == 0:
             return
@@ -97,13 +97,13 @@ class discord_feed_service(object):
             if p.administrator or p.manage_roles or p.manage_messages or p.manage_guild or p.manage_channels or p.manage_webhooks:
                 return
             else:
-                raise InsightExc.DiscordError.LackPermission
+                raise InsightExc.DiscordError.LackChannelPermission
         elif required_level == 2:
             if not self.service.is_admin(user_author.id):
-                raise InsightExc.DiscordError.LackPermission('You must be an Insight admin to use this command.')
+                raise InsightExc.DiscordError.LackInsightAdmin(user_author.id)
         else:
             print('Unknown permission level {}'.format(required_level))
-            raise InsightExc.DiscordError.LackPermission
+            raise InsightExc.DiscordError.LackChannelPermission
 
     async def proxy_lock(self, awaitable_coro, user_author, required_level, ignore_channel_setting=False):
         """call a command coroutine by proxy with a lock to prevent multiple commands running at once i.e: !settings"""
