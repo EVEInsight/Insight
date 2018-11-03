@@ -25,6 +25,7 @@ class Discord_Insight_Client(discord.Client):
         self.loop.set_default_executor(self.__threadpool_insight)
         self.loop.create_task(self.setup_tasks())
         self.__id_semaphores = {}
+        self.__id_create_locks = {}
 
     async def on_ready(self):
         print('-------------------')
@@ -95,6 +96,18 @@ class Discord_Insight_Client(discord.Client):
             print('Error when getting semaphore: {}'.format(ex))
             return asyncio.Semaphore(value=3)
 
+    async def get_create_lock(self, channel_object) ->asyncio.Lock:
+        try:
+            assert channel_object.id is not None
+            cLock = self.__id_create_locks.get(channel_object.id)
+            if not isinstance(cLock, asyncio.Lock):
+                cLock = asyncio.Lock()
+                self.__id_create_locks[channel_object.id] = cLock
+            return cLock
+        except Exception as ex:
+            print('Error when getting create lock: {}'.format(ex))
+            return asyncio.Lock()
+
     async def on_guild_join(self, guild: discord.Guild):
         print('Joined server ({}) with {} members.'.format(guild.name, guild.member_count))
         channel: discord.TextChannel = guild.system_channel
@@ -133,7 +146,10 @@ class Discord_Insight_Client(discord.Client):
             try:
                 feed = await self.channel_manager.get_channel_feed(message.channel)
                 if await self.commandLookup.create(message):
-                    await feed.proxy_lock(feed.command_create(message), message.author, 1)
+                    loc = await self.get_create_lock(message.channel)
+                    async with loc:
+                        feed = await self.channel_manager.get_channel_feed(message.channel)
+                        await feed.proxy_lock(feed.command_create(message), message.author, 1)
                 elif await self.commandLookup.settings(message):
                     await feed.proxy_lock(feed.command_settings(message), message.author, 1)
                 elif await self.commandLookup.start(message):
