@@ -36,6 +36,7 @@ class Discord_Insight_Client(discord.Client):
         print('Loaded Discord cache with: {} servers, {} channels, {} users.'.format(len(self.guilds),
                                                                         len(list(self.get_all_channels())),
                                                                         len(self.users)))
+        print("Use 'CTRL-C' to shutdown Insight from the console or run the '!quit' command from any Discord channel.")
         print('-------------------')
 
     async def setup_tasks(self):
@@ -162,23 +163,29 @@ class Discord_Insight_Client(discord.Client):
                 else:
                     await self.commandLookup.notfound(message)
                 await asyncio.sleep(3)
+            except InsightExc.InsightException as ex:
+                try:
+                    await message.channel.send("{}\n{}".format(message.author.mention, str(ex)))
+                except:
+                    pass
+                await asyncio.sleep(20)
+            except discord.Forbidden:
+                await asyncio.sleep(30)
+            except discord.NotFound:
+                await asyncio.sleep(60)
+            except asyncio.CancelledError:
+                try:
+                    await message.channel.send("{}\nInsight is shutting down. This coroutine has been canceled."
+                                               .format(message.author.mention))
+                except:
+                    pass
             except Exception as ex:
-                if isinstance(ex, InsightExc.InsightException):
-                    try:
-                        await message.channel.send("{}\n{}".format(message.author.mention, str(ex)))
-                    except:
-                        pass
-                elif isinstance(ex, discord.Forbidden):
-                    pass  # cant send error message anyway
-                elif isinstance(ex, discord.NotFound):
-                    pass  # channel deleted
-                else:
-                    traceback.print_exc()
-                    try:
-                        await message.channel.send(
-                            "{}\nUncaught exception: '{}'.".format(message.author.mention, str(ex.__class__.__name__)))
-                    except:
-                        pass
+                traceback.print_exc()
+                try:
+                    await message.channel.send(
+                        "{}\nUncaught exception: '{}'.".format(message.author.mention, str(ex.__class__.__name__)))
+                except:
+                    pass
                 await asyncio.sleep(20)
 
     @staticmethod

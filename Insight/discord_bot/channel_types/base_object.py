@@ -230,6 +230,8 @@ class discord_feed_service(object):
                 __item = await asyncio.wait_for(self.kmQueue.async_q.get(), timeout=3600)
             except asyncio.TimeoutError:
                 continue
+            except asyncio.CancelledError:
+                break
             except Exception as ex:
                 print(ex)
                 traceback.print_exc()
