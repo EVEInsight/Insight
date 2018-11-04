@@ -10,12 +10,14 @@ import traceback
 from .UnboundUtilityCommands import UnboundUtilityCommands
 import asyncio
 import InsightLogger
+import logging
 
 
 class Discord_Insight_Client(discord.Client):
     def __init__(self, service_module):
         super().__init__(fetch_offline_members=True, heartbeat_timeout=20)
-        self.logger = InsightLogger.InsightLogger.get_logger('Insight.main', 'Insight_main.log', console_print=True)
+        self.logger = InsightLogger.InsightLogger.get_logger('Insight.main', 'Insight_main.log', console_print=True,
+                                                             console_level=logging.INFO)
         self.service: service_module = service_module
         self.channel_manager: service.Channel_manager = self.service.channel_manager
         self.channel_manager.set_client(self)

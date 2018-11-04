@@ -14,13 +14,16 @@ import datetime
 import janus
 import traceback
 import errno
+import InsightLogger
 
 
 class discord_feed_service(object):
     def __init__(self,channel_discord_object:discord.TextChannel, service_object):
-        assert isinstance(service_object,Service.ServiceModule)
+        st = InsightLogger.InsightLogger.time_start()
+        assert isinstance(service_object, Service.ServiceModule)
         self.channel_discord_object = channel_discord_object
         self.channel_id = channel_discord_object.id
+        self.logger = InsightLogger.InsightLogger.get_logger('Insight.feed.{}.{}'.format(str(self).replace(' ', ''), self.channel_id), 'Insight_feed.log', child=True)
         self.service = service_object
         self.channel_manager = self.service.channel_manager
         self.discord_client = self.service.channel_manager.get_discord_client()
@@ -34,6 +37,7 @@ class discord_feed_service(object):
         self.last_mention = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
         self.appearance_class = None
         self.lock = asyncio.Lock(loop=self.discord_client.loop)
+        InsightLogger.InsightLogger.time_log(self.logger, st, 'Feed loading and setup')
 
     def can_mention(self):
         return (self.last_mention + datetime.timedelta(minutes=self.mention_next())) <= datetime.datetime.utcnow()
@@ -239,13 +243,16 @@ class discord_feed_service(object):
             try:
                 async with self.lock:
                     if self.cached_feed_table.feed_running and self.channel_manager.exists(self):
+                        st = InsightLogger.InsightLogger.time_start()
                         if isinstance(__item, base_visual):
                             await __item()
                             await self.channel_manager.add_delay(__item.get_load_time())
                         else:
                             await self.channel_discord_object.send(str(__item))
-            except discord.Forbidden:
+                        InsightLogger.InsightLogger.time_log(self.logger, st, 'Send message/KM')
+            except discord.Forbidden as ex:
                 try:
+                    self.logger.warning('Status: {} Code: {} Text: {}'.format(ex.status, ex.code, ex.text))
                     await self.channel_discord_object.send(
                         "Permissions are incorrectly set for the bot. See https://github.com/Nathan-LS/Insight#permissions\n\nRun the '!start' command to resume the feed once permissions are correctly set.")
                 except:
@@ -254,6 +261,7 @@ class discord_feed_service(object):
                     await self.remove()
             except discord.HTTPException as ex:
                 try:
+                    self.logger.warning('Status: {} Code: {} Text: {}'.format(ex.status, ex.code, ex.text))
                     if ex.status == 404:  # channel deleted
                         await self.channel_manager.delete_feed(self.channel_id)
                     elif 500 <= ex.status < 600:
@@ -265,8 +273,10 @@ class discord_feed_service(object):
                     print(ex)
             except InsightExc.DiscordError.MessageMaxRetryExceed:
                 print('Error - max message retry limit exceeded when sending KM.')
+                self.logger.error('Max message retry limit exceeded when sending KM.')
                 continue
             except OSError as ex:
+                self.logger.warning(str(ex))
                 if ex.errno == errno.ECONNRESET or ex.errno == errno.ENETRESET:
                     if isinstance(__item, base_visual):
                         await self.kmQueue.async_q.put(__item)
@@ -274,7 +284,7 @@ class discord_feed_service(object):
                     print('Error {} - when sending KM. OSError'.format(ex))
             except Exception as ex:
                 print('Error {} - when sending KM. Other'.format(ex))
-                traceback.print_exc()
+                self.logger.exception(ex)
             await asyncio.sleep(.1)
 
     async def remove(self):

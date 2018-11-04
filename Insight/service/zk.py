@@ -12,11 +12,13 @@ import asyncio
 import janus
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
+import InsightLogger
 
 
 class zk(object):
     def __init__(self, service_module):
         assert isinstance(service_module,service.ServiceModule)
+        self.logger = InsightLogger.InsightLogger.get_logger('ZK', 'ZK.log', console_print=True)
         self.service = service_module
         identifier = str(self.generate_identifier())
         self.zk_stream_url = str("https://redisq.zkillboard.com/listen.php?queueID={}".format(identifier))
@@ -209,24 +211,34 @@ class zk(object):
                     await asyncio.sleep(25)
 
     async def coroutine_process_json(self, zk_thread_pool: ThreadPoolExecutor):
-        print('Started zk data processing coroutine.')
+        lg = InsightLogger.InsightLogger.get_logger('ZK.json', 'ZK.log', console_print=True, child=True)
+        msg = 'Started zk data processing coroutine.'
+        print(msg)
+        lg.info(msg)
         loop = asyncio.get_event_loop()
         while True:
             try:
                 json_data = await self.__km_preProcess.async_q.get()
+                st = InsightLogger.InsightLogger.time_start()
                 km = await loop.run_in_executor(zk_thread_pool, partial(self.__make_km, json_data))
                 if km is not None:
                     await self.__km_postProcess.async_q.put(km)
+                    InsightLogger.InsightLogger.time_log(lg, st, 'JSON parse km_id: {}'.format(km.kill_id), 2500)
             except Exception as ex:
                 print(ex)
 
     async def coroutine_filters(self, zk_thread_pool: ThreadPoolExecutor):
-        print("Started zk filter coroutine.")
+        lg = InsightLogger.InsightLogger.get_logger('ZK.filters', 'ZK.log', console_print=True, child=True)
+        msg = "Started zk filter coroutine."
+        print(msg)
+        lg.info(msg)
         loop = asyncio.get_event_loop()
         while True:
             try:
                 km = await self.__km_postProcess.async_q.get()
+                st = InsightLogger.InsightLogger.time_start()
                 await loop.run_in_executor(zk_thread_pool, partial(self.service.channel_manager.send_km, km))
+                InsightLogger.InsightLogger.time_log(lg, st, 'Filer pass km_id: {}'.format(km.kill_id), 2500)
             except Exception as ex:
                 print(ex)
 
