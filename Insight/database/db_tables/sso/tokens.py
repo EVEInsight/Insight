@@ -29,6 +29,7 @@ class Tokens(dec_Base.Base, sso_base):
     etag_character = Column(String, nullable=True)
     etag_corp = Column(String, nullable=True)
     etag_alliance = Column(String, nullable=True)
+    error_count = Column(Integer, default=0, nullable=False)
 
     object_user = relationship("Users", uselist=False, back_populates="object_tokens")
     object_channels = relationship("Discord_Tokens", uselist=True, cascade="delete", back_populates="object_token")

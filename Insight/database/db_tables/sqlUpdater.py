@@ -96,6 +96,10 @@ class sqlUpdater(object):
         """v2.3.0"""
         yield "alter table discord_channels add modification_lock BOOLEAN DEFAULT 0 not null;"
 
+    def sqlV_2_4_0(self):
+        """v2.4.0"""
+        yield "ALTER TABLE tokens ADD error_count INTEGER DEFAULT 0 NOT NULL;"
+
     def update_all(self):
         """Updates tables, returning the latest successful updated version"""
         self.compatibility_check()
