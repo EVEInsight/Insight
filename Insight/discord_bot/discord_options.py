@@ -108,13 +108,13 @@ class mapper_index(object):
             total_len = 0
             pg_count = 0
             while len(results) != 0:
-                if pg_count > 20:
+                if pg_count >= 20:
                     raise InsightExc.User.TooManyOptions
                 add_str = "{}\n\n".format(str(results.pop()))
                 if total_len + len(add_str) > 950:
                     options_str = '```{}```'.format(options_str) if options_str else '```empty```'
-                    h = '{}'.format(h) if pg_count == 0 else '{} - Continued ({})'.format(h, pg_count)
-                    embed.add_field(name=h, value=options_str, inline=False)
+                    t_h = '{}'.format(h) if pg_count == 0 else '{} - continued ({})'.format(h, pg_count)
+                    embed.add_field(name=t_h, value=options_str, inline=False)
                     options_str = ""
                     pg_count += 1
                     total_len = 0
@@ -122,8 +122,8 @@ class mapper_index(object):
                 total_len += len(add_str)
             if options_str:
                 options_str = '```{}```'.format(options_str) if options_str else '```empty```'
-                h = '{}'.format(h) if pg_count == 0 else '{} - Continued ({})'.format(h, pg_count)
-                embed.add_field(name=h, value=options_str, inline=False)
+                t_h = '{}'.format(h) if pg_count == 0 else '{} - continued ({})'.format(h, pg_count)
+                embed.add_field(name=t_h, value=options_str, inline=False)
         embed.add_field(name='Info', value=self.__footer_text)
         return embed
 
@@ -132,6 +132,8 @@ class mapper_index(object):
         for i in self.__printout_format:
             __str_item += (str(i) + "\n\n")
         __str_item += "\n\n" + self.__footer_text
+        if len(__str_item) >= 1950:
+            raise InsightExc.User.TooManyOptions
         return __str_item + "\n"
 
     async def check_conditions(self):

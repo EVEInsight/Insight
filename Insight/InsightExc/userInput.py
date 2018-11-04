@@ -34,7 +34,9 @@ class InsightProgrammingError(InsightException):
 
 
 class TooManyOptions(InsightException):
-    def __init__(self, message="There are too many options to show! If you are searching, please refine your search."):
+    def __init__(self, message="There are too many options to show! If you are searching, please refine your search. "
+                               "Ensure Insight has the 'Embed Links' role in this channel as more options can be "
+                               "displayed through Discord rich embeds."):
         super().__init__(message)
 
 

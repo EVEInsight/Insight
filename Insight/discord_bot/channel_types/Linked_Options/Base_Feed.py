@@ -27,15 +27,15 @@ class base_activefeed(options_base.Options_Base):
         yield (self.InsightOption_unlockfeed, False)
 
     async def InsightOption_remove_opt(self,message_object:discord.Message):
-        """Delete Feed  - Removes the currently active feed from this channel, deleting its configuration."""
+        """Delete Feed - Removes and deletes the currently active feed in this channel."""
         await self.cfeed.command_remove(message_object)
 
     async def InsightOption_pause(self,message_object:discord.Message):
-        """Pause Feed  - Pauses the feed if it's currently running."""
+        """Pause Feed - Pauses the feed."""
         await self.cfeed.command_stop(message_object)
 
     async def InsightOption_start(self,message_object:discord.Message):
-        """Start feed  - Starts the feed if it's currently paused."""
+        """Start feed - Starts the feed."""
         await self.cfeed.command_start(message_object)
 
     async def InsightOptionRequired_setAppearance(self, message_object: discord.Message):
@@ -67,9 +67,10 @@ class base_activefeed(options_base.Options_Base):
         await self.reload(message_object)
 
     async def InsightOption_setMention(self, message_object: discord.Message):
-        """Set global mention - NULL"""
+        """Set overall mention mode - Select the mention mode for any killmail posted to this feed."""
         options = dOpt.mapper_index(self.cfeed.discord_client, message_object)
-        options.set_main_header("Select mention mode.")
+        options.set_main_header("Select the mention mode for this feed. Any killmail posted to this feed can optionally "
+                                "mention Discord channel users.")
         options.add_option(dOpt.option_returns_object("No mention", return_object=enum_mention.noMention))
         options.add_option(dOpt.option_returns_object("@ here", return_object=enum_mention.here))
         options.add_option(dOpt.option_returns_object("@ everyone", return_object=enum_mention.everyone))
@@ -79,9 +80,12 @@ class base_activefeed(options_base.Options_Base):
         await self.reload(message_object)
 
     async def InsightOption_setMentionEvery(self, message_object: discord.Message):
-        """Set mention rate - NULL"""
+        """Set mention rate - Set the delay between mentions."""
         options = dOpt.mapper_return_noOptions_requiresFloat(self.cfeed.discord_client, message_object)
-        options.set_main_header("Mention every: ")
+        options.set_main_header("Select the limit between mentions in minutes. If the limit is exceeded, killmails will "
+                                "be posted without mentions. Set this to '0' to have no limit where every killmail "
+                                "will mention according to your set mention mode. Example: Setting this to '1' will "
+                                "mention at most every 1 minute.")
         options.set_bit_length(5)
         row = await self.get_cached_copy()
         row.mention_every = await options()
@@ -89,12 +93,16 @@ class base_activefeed(options_base.Options_Base):
         await self.reload(message_object)
 
     async def InsightOption_lockfeed(self, message_object: discord.Message):
-        """Lock feed - NULL"""
+        """Lock feed - Lock a feed service from being modified by users without certain Discord channel roles."""
         self.cfeed.check_permission(message_object.author, required_level=1, ignore_channel_setting=True)
         if self.cfeed.cached_feed_table.modification_lock:
             raise InsightExc.DiscordError.NonFatalExit('This channel feed is already locked from unauthorized modifications.')
         options = dOpt.mapper_return_yes_no(self.cfeed.discord_client, message_object)
-        options.set_main_header("Lock? NULL")  # todo
+        options.set_main_header("Lock this feed from unauthorized access? Locking a feed prevents users lacking Discord channel "
+                                "permissions from accessing or modifying feed settings. A locked feed can only be unlocked, modified, "
+                                "or removed by a Discord channel user with at least one of the following "
+                                "permissions:\n\nAdministrator\nManage Roles\nManage Messages\nManage Guild\n"
+                                "Manage Channel\nManage webhooks\n\n")
         resp = await options()
         if resp:
             row = await self.get_cached_copy()
@@ -103,14 +111,15 @@ class base_activefeed(options_base.Options_Base):
         await self.reload(message_object)
 
     async def InsightOption_unlockfeed(self, message_object: discord.Message):
-        """Unlock feed - NULL"""
+        """Unlock feed - Unlock a previously locked feed service to allow any Discord channel user to modify settings."""
         self.cfeed.check_permission(message_object.author, required_level=1, ignore_channel_setting=True)
         if not self.cfeed.cached_feed_table.modification_lock:
             raise InsightExc.DiscordError.NonFatalExit("This channel feed is already unlocked. You can lock this"
                                                        " feed from unauthorized modifications with "
                                                        "the '!lock' command.")
         options = dOpt.mapper_return_yes_no(self.cfeed.discord_client, message_object)
-        options.set_main_header("Unlock? NULL")  # todo
+        options.set_main_header("Unlock this channel feed? Unlocking a channel feed allows anyone in the channel to "
+                                "modify feed behavior and settings.")
         resp = await options()
         if resp:
             row = await self.get_cached_copy()

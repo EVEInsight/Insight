@@ -179,7 +179,7 @@ class service_module(object):
         return self.__admin_module.is_admin(user_id)
 
     def shutdown(self):
-        print('Attempting to shutdown the database...')
+        print('Attempting to shut down the database...')
         self.__db_manager.shutdown()
 
     @classmethod

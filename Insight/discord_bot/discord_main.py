@@ -37,7 +37,7 @@ class Discord_Insight_Client(discord.Client):
         print('Loaded Discord cache with: {} servers, {} channels, {} users.'.format(len(self.guilds),
                                                                         len(list(self.get_all_channels())),
                                                                         len(self.users)))
-        print("Use 'CTRL-C' to shutdown Insight from the console or run the '!quit' command from any Discord channel.")
+        print("Use 'CTRL-C' to shut down Insight from the console or run the '!quit' command from any Discord channel.")
         print('-------------------')
 
     async def setup_tasks(self):
@@ -186,6 +186,13 @@ class Discord_Insight_Client(discord.Client):
                     pass
                 await asyncio.sleep(20)
             except discord.Forbidden:
+                if isinstance(message.channel, discord.TextChannel) and \
+                        message.channel.permissions_for(message.channel.guild.me).send_messages:
+                    try:
+                        msg = "Insight received a permission error. Ensure Insight has the correct permissions in this channel as listed on the project Git page. https://github.com/Nathan-LS/Insight#permissions"
+                        await message.channel.send("{}\n{}".format(message.author.mention, msg))
+                    except:
+                        pass
                 await asyncio.sleep(30)
             except discord.NotFound:
                 await asyncio.sleep(60)
