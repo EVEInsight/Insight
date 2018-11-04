@@ -6,11 +6,13 @@ from requests.auth import HTTPBasicAuth
 import json
 import sys
 import InsightExc
+import InsightLogger
 
 
 class EVEsso(object):
     def __init__(self, service_module):
         assert isinstance(service_module, service.service_module)
+        self.logger = InsightLogger.InsightLogger.get_logger('SSO', 'SSO.log')
         self.service = service_module
         self.__client_id = None
         self.__client_secret = None
@@ -72,13 +74,19 @@ class EVEsso(object):
                                      timeout=60)
             if response.status_code == 200:
                 token_row.token = response.json().get("access_token")
+                self.logger.info('Response 200 on token ID: {} when getting token.'.format(token_row.token_id))
             elif response.status_code == 400:
                 db.delete(token_row)
+                self.logger.warning('Response 400 on token ID: {} when getting token. Headers: {} Body: {}'.
+                                    format(token_row.token_id, response.headers, response.json()))
             else:
                 token_row.token = None
+                self.logger.warning('Response {} on token ID: {} when getting token. Headers: {} Body: {}'.
+                                    format(response.status_code, token_row.token_id, response.headers, response.json()))
         except Exception as ex:
             token_row.token = None
             print(ex)
+            self.logger.exception(ex)
 
     def delete_token(self, row):
         assert isinstance(row, tb_tokens)

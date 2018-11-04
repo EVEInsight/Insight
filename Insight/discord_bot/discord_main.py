@@ -9,11 +9,13 @@ import InsightExc
 import traceback
 from .UnboundUtilityCommands import UnboundUtilityCommands
 import asyncio
+import InsightLogger
 
 
 class Discord_Insight_Client(discord.Client):
     def __init__(self, service_module):
         super().__init__(fetch_offline_members=True, heartbeat_timeout=20)
+        self.logger = InsightLogger.InsightLogger.get_logger('Insight.main', 'Insight_main.log', console_print=True)
         self.service: service_module = service_module
         self.channel_manager: service.Channel_manager = self.service.channel_manager
         self.channel_manager.set_client(self)
@@ -109,7 +111,7 @@ class Discord_Insight_Client(discord.Client):
             return asyncio.Lock()
 
     async def on_guild_join(self, guild: discord.Guild):
-        print('Joined server ({}) with {} members.'.format(guild.name, guild.member_count))
+        self.logger.info('Joined server ({}) with {} members.'.format(guild.name, guild.member_count))
         channel: discord.TextChannel = guild.system_channel
         if channel is not None:
             permissions: discord.Permissions = channel.permissions_for(channel.guild.me)
@@ -133,7 +135,7 @@ class Discord_Insight_Client(discord.Client):
                 return
 
     async def on_guild_remove(self, guild: discord.Guild):
-        print('Removed from server ({}) with {} members.'.format(guild.name, guild.member_count))
+        self.logger.info('Removed from server ({}) with {} members.'.format(guild.name, guild.member_count))
 
     async def on_message(self, message):
         await self.wait_until_ready()

@@ -7,6 +7,7 @@ import swagger_client
 import InsightExc
 from sqlalchemy_utils import EncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
+import InsightLogger
 
 
 def get_key():
@@ -146,6 +147,7 @@ class Tokens(dec_Base.Base, sso_base):
         helper(tb_contacts_pilots)
 
     def write_changes(self, api_call, etag, etag_function, enum_owner, service_module):
+        lg = InsightLogger.InsightLogger.get_logger('Tokens', 'Tokens.log')
         try:
             contacts = self.get_results(api_call, etag, etag_function)
             self.__remove(enum_owner, service_module)
@@ -164,6 +166,7 @@ class Tokens(dec_Base.Base, sso_base):
                 pass
             self.last_updated = datetime.datetime.utcnow()
             self.last_modified = datetime.datetime.utcnow()
+            lg.info('{} contact update ok for token ID: {}'.format(enum_owner.value, self.token_id))
         except ApiException as ex:
             if ex.status == 304:  # nochanges
                 self.last_updated = datetime.datetime.utcnow()
@@ -176,9 +179,12 @@ class Tokens(dec_Base.Base, sso_base):
                     self.alliance_id = None
                 self.__remove(enum_owner, service_module)
             else:
-                print("Error code {} on token ID: {} when updating contacts.".format(str(ex.status),str(self.token_id)))
+                print("Error code {} on token ID: {} when updating contacts.".format(str(ex.status), str(self.token_id)))
+            lg.warning('Error: {} when updating token ID: {}. Headers: {} Body: {}'.
+                       format(ex.status, self.token_id, ex.headers, ex.body))
         except Exception as ex:
             print("Error: '{}' on token ID: {} when updating contacts.".format(str(ex), str(self.token_id)))
+            lg.exception(ex)
 
     def update_contacts(self, service_):
         if self.token is not None:

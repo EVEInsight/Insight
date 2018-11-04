@@ -1,9 +1,11 @@
 import re
 import traceback
+import InsightLogger
 
 
 class InsightAdmins(object):
     def __init__(self):
+        self.logger = InsightLogger.InsightLogger.get_logger('AdminModule', 'AdminModule.log')
         self.__admins = set()
         self.__file_name = "InsightAdmins.txt"
         self.__read_admins()
@@ -40,7 +42,12 @@ class InsightAdmins(object):
 
     def is_admin(self, other_id):
         try:
-            return int(other_id) in self.__admins
+            is_admin = int(other_id) in self.__admins
+            if is_admin:
+                self.logger.info("User '{}' is an admin.".format(other_id))
+            else:
+                self.logger.warning("User '{}' attempted to access an admin command and was denied.".format(other_id))
+            return is_admin
         except Exception as ex:
             print("InsightAdmins error: {}".format(ex))
             traceback.print_exc()
