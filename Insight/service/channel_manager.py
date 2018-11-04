@@ -140,6 +140,8 @@ class Channel_manager(object):
                     feed = await self.__get_channel_feed(channel_object)
                     retry_count = 0
                     return feed
+                except InsightExc.DiscordError.FeedConvertReload:
+                    pass
                 except Exception as ex:
                     print('An error occurred when loading a channel feed: {}'.format(ex))
                     traceback.print_exc()

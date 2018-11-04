@@ -53,3 +53,8 @@ class LackInsightAdmin(InsightException):
               "located next to your 'config.ini' file. You may execute this command after editing the file " \
               "and restarting Insight.".format(str(user_id))
         super().__init__(msg)
+
+
+class FeedConvertReload(InsightException):
+    def __init__(self):
+        super().__init__('Feed reload after conversion.')

@@ -27,7 +27,7 @@ class RareShips(capRadar):
                   " now enjoy the following features: \n\n Customizable base systems\n\n Additional optional " \
                   "tracking types/groups\n\n Mention modes"
             self.discord_client.loop.create_task(self.channel_discord_object.send(content=msg))
-            raise InsightExc.DiscordError.InsightException("AT radar to capital radar conversion non-exception.")
+            raise InsightExc.DiscordError.FeedConvertReload
         except Exception as ex:
             print(ex)
             raise ex
