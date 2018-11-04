@@ -58,3 +58,8 @@ class LackInsightAdmin(InsightException):
 class FeedConvertReload(InsightException):
     def __init__(self):
         super().__init__('Feed reload after conversion.')
+
+
+class EmbedOptionsError(InsightException):
+    def __init__(self):
+        super().__init__('Embed options error')

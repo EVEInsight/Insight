@@ -91,41 +91,45 @@ class mapper_index(object):
             raise AssertionError
 
     def get_embed(self):
-        embed = discord.Embed()
-        embed.title = ""
-        embed.color = discord.Color(659493)
-        embed.timestamp = datetime.datetime.utcnow()
-        embed.set_author(name=self.name())
-        embed.set_footer(text='Timeout: {}s'.format(self.__timeout_seconds))
-        embed.description = self.__header_text
-        for index, h in enumerate(self.e_header_container):
-            try:
-                results = self.e_body_container[index]
-            except IndexError:
-                break
-            results.reverse()
-            options_str = ""
-            total_len = 0
-            pg_count = 0
-            while len(results) != 0:
-                if pg_count >= 20:
-                    raise InsightExc.User.TooManyOptions
-                add_str = "{}\n\n".format(str(results.pop()))
-                if total_len + len(add_str) > 950:
+        try:
+            embed = discord.Embed()
+            embed.title = ""
+            embed.color = discord.Color(659493)
+            embed.timestamp = datetime.datetime.utcnow()
+            embed.set_author(name=self.name())
+            embed.set_footer(text='Timeout: {}s'.format(self.__timeout_seconds))
+            embed.description = self.__header_text
+            for index, h in enumerate(self.e_header_container):
+                try:
+                    results = self.e_body_container[index]
+                except IndexError:
+                    break
+                results.reverse()
+                options_str = ""
+                total_len = 0
+                pg_count = 0
+                while len(results) != 0:
+                    if pg_count >= 20:
+                        raise InsightExc.User.TooManyOptions
+                    add_str = "{}\n\n".format(str(results.pop()))
+                    if total_len + len(add_str) > 950:
+                        options_str = '```{}```'.format(options_str) if options_str else '```empty```'
+                        t_h = '{}'.format(h) if pg_count == 0 else '{} - continued ({})'.format(h, pg_count)
+                        embed.add_field(name=t_h, value=options_str, inline=False)
+                        options_str = ""
+                        pg_count += 1
+                        total_len = 0
+                    options_str += add_str
+                    total_len += len(add_str)
+                if options_str:
                     options_str = '```{}```'.format(options_str) if options_str else '```empty```'
                     t_h = '{}'.format(h) if pg_count == 0 else '{} - continued ({})'.format(h, pg_count)
                     embed.add_field(name=t_h, value=options_str, inline=False)
-                    options_str = ""
-                    pg_count += 1
-                    total_len = 0
-                options_str += add_str
-                total_len += len(add_str)
-            if options_str:
-                options_str = '```{}```'.format(options_str) if options_str else '```empty```'
-                t_h = '{}'.format(h) if pg_count == 0 else '{} - continued ({})'.format(h, pg_count)
-                embed.add_field(name=t_h, value=options_str, inline=False)
-        embed.add_field(name='Info', value=self.__footer_text)
-        return embed
+            embed.add_field(name='Info', value=self.__footer_text)
+            return embed
+        except Exception as ex:
+            print(ex)
+            raise InsightExc.DiscordError.EmbedOptionsError
 
     def __str__(self):
         __str_item = self.__mention + "\n" + self.__header_text + "\n\n"
@@ -179,7 +183,10 @@ class mapper_index(object):
             if isinstance(self.message.channel, discord.TextChannel):
                 p: discord.Permissions = self.message.channel.permissions_for(self.message.channel.guild.me)
                 if p.embed_links:
-                    await self.message.channel.send(embed=self.get_embed())
+                    try:
+                        await self.message.channel.send(embed=self.get_embed())
+                    except InsightExc.DiscordError.EmbedOptionsError:
+                        await self.message.channel.send(str(self))
                 else:
                     await self.message.channel.send(str(self))
             else:
