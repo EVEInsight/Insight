@@ -89,12 +89,12 @@ class sqlUpdater(object):
 
     def sqlV_2_2_0(self):
         """v2.2.0"""
-        yield "alter table discord_channels add mention VARCHAR(9) DEFAULT 'noMention' not null;"
-        yield 'alter table discord_channels add mention_every FLOAT DEFAULT 15.0 not null;'
+        yield "alter table discord_channels add mention VARCHAR(9) NOT NULL DEFAULT 'noMention' constraint mention_method check (mention IN ('noMention', 'here', 'everyone'));"
+        yield 'alter table discord_channels add mention_every FLOAT NOT NULL DEFAULT 15.0;'
 
     def sqlV_2_3_0(self):
         """v2.3.0"""
-        yield "alter table discord_channels add modification_lock BOOLEAN DEFAULT 0 not null;"
+        yield "alter table discord_channels add modification_lock BOOLEAN NOT NULL DEFAULT 0 check (modification_lock IN (0, 1));"
 
     def sqlV_2_4_0(self):
         """v2.4.0"""
