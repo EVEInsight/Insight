@@ -18,8 +18,8 @@ class ChannelLoaderError(InsightException):
 
 class LockTimeout(InsightException):
     def __init__(self):
-        msg = "Another user is currently running a command in this feed. Try running this command once the current " \
-              "active task is complete."
+        msg = "Another user is currently running a command in this feed or the feed is currently busy. " \
+              "Try running this command once the current active task is complete."
         super().__init__(msg)
 
 
