@@ -211,7 +211,7 @@ class zk(object):
                     await asyncio.sleep(25)
 
     async def coroutine_process_json(self, zk_thread_pool: ThreadPoolExecutor):
-        lg = InsightLogger.InsightLogger.get_logger('ZK.json', 'ZK.log', console_print=True, child=True)
+        lg = InsightLogger.InsightLogger.get_logger('ZK.json', 'ZK.log', child=True)
         msg = 'Started zk data processing coroutine.'
         print(msg)
         lg.info(msg)
@@ -228,7 +228,7 @@ class zk(object):
                 print(ex)
 
     async def coroutine_filters(self, zk_thread_pool: ThreadPoolExecutor):
-        lg = InsightLogger.InsightLogger.get_logger('ZK.filters', 'ZK.log', console_print=True, child=True)
+        lg = InsightLogger.InsightLogger.get_logger('ZK.filters', 'ZK.log', child=True)
         msg = "Started zk filter coroutine."
         print(msg)
         lg.info(msg)

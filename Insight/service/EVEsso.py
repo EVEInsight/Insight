@@ -70,15 +70,25 @@ class EVEsso(object):
         headers = {"Content-Type": "application/json", **self.service.get_headers(lib_requests=True)}
         payload = {"grant_type": "refresh_token", "refresh_token": token_row.refresh_token}
         try:
+            if token_row.error_count >= 4:
+                db.delete(token_row)
+                self.logger.info('Token {} has been deleted after {} errors.'.format(token_row.token_id, token_row.error_count))
+                return
             response = requests.post(url=self._token_url, auth=auth_header, data=json.dumps(payload), headers=headers,
                                      timeout=60)
             if response.status_code == 200:
                 token_row.token = response.json().get("access_token")
+                token_row.error_count = 0
                 self.logger.info('Response 200 on token ID: {} when getting token.'.format(token_row.token_id))
-            elif response.status_code == 400:
-                db.delete(token_row)
-                self.logger.warning('Response 400 on token ID: {} when getting token. Headers: {} Body: {}'.
+            elif response.status_code == 420:
+                self.logger.warning('Response 420 on token ID: {} when getting token. Headers: {} Body: {}'.
                                     format(token_row.token_id, response.headers, response.json()))
+                token_row.token = None
+            elif 400 <= response.status_code < 500:
+                self.logger.warning('Response {} on token ID: {} when getting token. Headers: {} Body: {}'.
+                                    format(response.status_code, token_row.token_id, response.headers, response.json()))
+                token_row.token = None
+                token_row.error_count += 1
             else:
                 token_row.token = None
                 self.logger.warning('Response {} on token ID: {} when getting token. Headers: {} Body: {}'.
