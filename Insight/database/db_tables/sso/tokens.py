@@ -148,7 +148,7 @@ class Tokens(dec_Base.Base, sso_base):
         helper(tb_contacts_pilots)
 
     def write_changes(self, api_call, etag, etag_function, enum_owner, service_module):
-        lg = InsightLogger.InsightLogger.get_logger('Tokens', 'Tokens.log')
+        lg = InsightLogger.InsightLogger.get_logger('Tokens.{}'.format(self.token_id), 'Tokens.log', child=True)
         try:
             contacts = self.get_results(api_call, etag, etag_function)
             self.__remove(enum_owner, service_module)
@@ -167,10 +167,11 @@ class Tokens(dec_Base.Base, sso_base):
                 pass
             self.last_updated = datetime.datetime.utcnow()
             self.last_modified = datetime.datetime.utcnow()
-            lg.info('{} contact update ok for token ID: {}'.format(enum_owner.value, self.token_id))
+            lg.info('{} contact update ok.'.format(enum_owner.value))
         except ApiException as ex:
             if ex.status == 304:  # nochanges
                 self.last_updated = datetime.datetime.utcnow()
+                lg.info('{} contact update ok. No changes.'.format(enum_owner.value))
             elif ex.status == 403:  # changed alliance/corp
                 if enum_owner == contact_owner.pilot:
                     self.character_id = None
@@ -178,11 +179,13 @@ class Tokens(dec_Base.Base, sso_base):
                     self.corporation_id = None
                 if enum_owner == contact_owner.alliance:
                     self.alliance_id = None
+                lg.info('Removing contact type: {}'.format(enum_owner.value))
                 self.__remove(enum_owner, service_module)
             else:
                 print("Error code {} on token ID: {} when updating contacts.".format(str(ex.status), str(self.token_id)))
-            lg.warning('Error: {} when updating token ID: {}. Headers: {} Body: {}'.
-                       format(ex.status, self.token_id, ex.headers, ex.body))
+            if ex.status != 304:
+                lg.warning('{} updating error: {} Headers: {} Body: {}'.
+                           format(enum_owner.value, ex.status, ex.headers, ex.body))
         except Exception as ex:
             print("Error: '{}' on token ID: {} when updating contacts.".format(str(ex), str(self.token_id)))
             lg.exception(ex)
@@ -242,6 +245,8 @@ class Tokens(dec_Base.Base, sso_base):
 
     @classmethod
     def mass_sync_all(cls, service_module):
+        lg = InsightLogger.InsightLogger.get_logger('Tokens', 'Tokens.log')
+        st = InsightLogger.InsightLogger.time_start()
         db: Session = service_module.get_session()
         try:
             ids = [id.discord_user for id in db.query(cls.discord_user).distinct()]
@@ -252,6 +257,7 @@ class Tokens(dec_Base.Base, sso_base):
             print(ex)
         finally:
             db.close()
+            InsightLogger.InsightLogger.time_log(lg, st, 'Update all tokens in the database.', warn_higher=60000)
 
     @classmethod
     def delete_noTracking(cls, service_module):
