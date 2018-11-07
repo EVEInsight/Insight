@@ -190,6 +190,10 @@ class discord_feed_service(object):
         """!quit - Close and shut down the Insight application service."""
         await self.discord_client.unbound_commands.command_quit(message_object)
 
+    async def command_admin(self, message_object):
+        """!admin - Access the Insight admin console to execute administrator functionality."""
+        await self.discord_client.unbound_commands.command_admin(message_object)
+
     def add_km(self,km):
         if self.cached_feed_table.feed_running:
             assert isinstance(km,dbRow.tb_kills)

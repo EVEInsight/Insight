@@ -176,6 +176,8 @@ class Discord_Insight_Client(discord.Client):
                     await feed.proxy_lock(feed.command_unlock(message), message.author, 1, ignore_channel_setting=True)
                 elif await self.commandLookup.quit(message):
                     await feed.proxy_lock(feed.command_quit(message), message.author, 2, ignore_channel_setting=True)
+                elif await self.commandLookup.admin(message):
+                    await feed.proxy_lock(feed.command_admin(message), message.author, 2, ignore_channel_setting=True)
                 elif await self.commandLookup.eightball(message):
                     await feed.proxy_lock(feed.command_8ball(message), message.author, 0)
                 elif await self.commandLookup.dscan(message):

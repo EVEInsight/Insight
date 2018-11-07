@@ -12,6 +12,9 @@ class UnboundCommandBase(object):
         self.unbound: UnboundUtilityCommands = unbound_service
         self.client = self.unbound.client
 
+    def command_description(self):
+        return "Not implemented."
+
     def get_embed(self, message_text: str)->discord.Embed:
         e = discord.Embed()
         e.color = discord.Color(659493)

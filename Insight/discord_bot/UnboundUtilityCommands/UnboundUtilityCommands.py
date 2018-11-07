@@ -1,4 +1,4 @@
-from . import Dscan, EightBall, Quit
+from . import Dscan, EightBall, Quit, Admin
 import discord
 import discord_bot
 
@@ -10,6 +10,7 @@ class UnboundUtilityCommands(object):
         self.dscan = Dscan.Dscan(self)
         self.eightBall = EightBall.EightBall(self)
         self.quit = Quit.Quit(self)
+        self.admin = Admin.Admin(self)
 
     def strip_command(self, message_object: discord.Message):
         try:
@@ -25,3 +26,6 @@ class UnboundUtilityCommands(object):
 
     async def command_quit(self, message_object: discord.Message):
         await self.quit.run_command(message_object, self.strip_command(message_object))
+
+    async def command_admin(self, message_object: discord.Message):
+        await self.admin.run_command(message_object, self.strip_command(message_object))
