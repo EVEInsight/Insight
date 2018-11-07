@@ -8,6 +8,7 @@ import InsightExc
 from sqlalchemy_utils import EncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 import InsightLogger
+import json
 
 
 def get_key():
@@ -173,14 +174,26 @@ class Tokens(dec_Base.Base, sso_base):
                 self.last_updated = datetime.datetime.utcnow()
                 lg.info('{} contact update ok. No changes.'.format(enum_owner.value))
             elif ex.status == 403:  # changed alliance/corp
-                if enum_owner == contact_owner.pilot:
+                er_resp = ""
+                try:
+                    error_body = json.loads(ex.body)
+                    er_resp = str(error_body.get('error'))
+                except json.JSONDecodeError as ex_403:
+                    lg.exception(ex_403)
+                except Exception as ex_403:
+                    lg.exception(ex_403)
+                if enum_owner == contact_owner.pilot and er_resp == "Character ID mismatch between request path and auth token":
                     self.character_id = None
-                if enum_owner == contact_owner.corp:
+                    self.__remove(enum_owner, service_module)
+                    lg.info('Removing contact type: {}'.format(enum_owner.value))
+                if enum_owner == contact_owner.corp and er_resp == "Character is not in the corporation":
                     self.corporation_id = None
-                if enum_owner == contact_owner.alliance:
+                    self.__remove(enum_owner, service_module)
+                    lg.info('Removing contact type: {}'.format(enum_owner.value))
+                if enum_owner == contact_owner.alliance and er_resp == "Character is not in the alliance":
                     self.alliance_id = None
-                lg.info('Removing contact type: {}'.format(enum_owner.value))
-                self.__remove(enum_owner, service_module)
+                    self.__remove(enum_owner, service_module)
+                    lg.info('Removing contact type: {}'.format(enum_owner.value))
             else:
                 print("Error code {} on token ID: {} when updating contacts.".format(str(ex.status), str(self.token_id)))
             if ex.status != 304:
