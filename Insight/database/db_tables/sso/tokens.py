@@ -178,8 +178,6 @@ class Tokens(dec_Base.Base, sso_base):
                 try:
                     error_body = json.loads(ex.body)
                     er_resp = str(error_body.get('error'))
-                except json.JSONDecodeError as ex_403:
-                    lg.exception(ex_403)
                 except Exception as ex_403:
                     lg.exception(ex_403)
                 if enum_owner == contact_owner.pilot and er_resp == "Character ID mismatch between request path and auth token":
@@ -195,7 +193,7 @@ class Tokens(dec_Base.Base, sso_base):
                     self.__remove(enum_owner, service_module)
                     lg.info('Removing contact type: {}'.format(enum_owner.value))
             else:
-                print("Error code {} on token ID: {} when updating contacts.".format(str(ex.status), str(self.token_id)))
+                pass
             if ex.status != 304:
                 lg.warning('{} updating error: {} Headers: {} Body: {}'.
                            format(enum_owner.value, ex.status, ex.headers, ex.body))
