@@ -2,6 +2,7 @@ from .base_objects import *
 from . import characters,corporations,alliances,types,systems
 import requests
 import traceback
+import InsightLogger
 
 
 class name_resolve(name_only):
@@ -31,6 +32,8 @@ class name_resolve(name_only):
             id_keys = list(missing_object_dict.keys())
             id_keys = list(set(id_keys) - set(error_ids))
             for id_list in cls.split_lists(id_keys, cls.missing_id_chunk_size()):
+                lg = InsightLogger.InsightLogger.get_logger('ZK.names', 'ZK.log', child=True)
+                lg.info('Processing name chunk of size {} from {} total missing names.'.format(len(id_list), len(id_keys)))
                 try:
                     response = requests.post(url=cls.post_url(), headers=service_module.get_headers(lib_requests=True),
                                              json=id_list, timeout=3)
@@ -40,10 +43,14 @@ class name_resolve(name_only):
                             if selected_item is not None:
                                 selected_item.set_name(search_result.get('name'))
                     else:
+                        lg.warning('Response {} Headers: {} Body: {} IDs: {}'.
+                                    format(response.status_code, response.headers, response.json(), str(id_list)))
                         ids_404.extend(id_list)
                 except requests.exceptions.Timeout:
+                    lg.info('Timeout.')
                     ids_404.extend(id_list)
                 except Exception as ex:
+                    lg.exception(ex)
                     print('Error: {} when resolving char names.'.format(ex))
                     ids_404.extend(id_list)
             db.commit()

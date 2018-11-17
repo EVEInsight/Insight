@@ -18,7 +18,7 @@ import InsightLogger
 class zk(object):
     def __init__(self, service_module):
         assert isinstance(service_module,service.ServiceModule)
-        self.logger = InsightLogger.InsightLogger.get_logger('ZK', 'ZK.log', console_print=True)
+        self.logger = InsightLogger.InsightLogger.get_logger('ZK', 'ZK.log')
         self.service = service_module
         identifier = str(self.generate_identifier())
         self.zk_stream_url = str("https://redisq.zkillboard.com/listen.php?queueID={}".format(identifier))
@@ -223,7 +223,7 @@ class zk(object):
                 km = await loop.run_in_executor(zk_thread_pool, partial(self.__make_km, json_data))
                 if km is not None:
                     await self.__km_postProcess.async_q.put(km)
-                    InsightLogger.InsightLogger.time_log(lg, st, 'JSON parse km_id: {}'.format(km.kill_id), 2500)
+                    InsightLogger.InsightLogger.time_log(lg, st, 'JSON parse km_id: {}'.format(km.kill_id), 3500)
             except Exception as ex:
                 print(ex)
 
