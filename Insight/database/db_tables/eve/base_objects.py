@@ -194,6 +194,9 @@ class name_only(table_row):
     def get_name(self):
         raise NotImplementedError
 
+    def reset_name(self):
+        self.set_name(None)
+
     @hybrid_property
     def need_name(self):
         raise NotImplementedError

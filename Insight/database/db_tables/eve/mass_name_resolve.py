@@ -11,15 +11,25 @@ class name_resolve(name_only):
         return "https://esi.evetech.net/latest/universe/names/?datasource=tranquility"
 
     @classmethod
-    def __get_objects_with_missing_names(cls,service_module):
+    def __get_objects_with_missing_names(cls, service_module):
         __missing_objects = []
         __missing_objects += characters.Characters.missing_name_objects(service_module)
         __missing_objects += corporations.Corporations.missing_name_objects(service_module)
         __missing_objects += alliances.Alliances.missing_name_objects(service_module)
         __missing_objects += types.Types.missing_name_objects(service_module)
-        __missing_objects += characters.Characters.missing_name_objects(service_module)
         __missing_objects += systems.Systems.missing_name_objects(service_module)
         return __missing_objects
+
+    @classmethod
+    def missing_count(cls, service_module)->int:
+        db = service_module.get_session()
+        try:
+            return len(cls.__get_objects_with_missing_names(service_module))
+        except Exception as ex:
+            print(ex)
+            return -1
+        finally:
+            db.close()
 
     @classmethod
     def api_mass_name_resolve(cls, service_module, error_ids=[]):

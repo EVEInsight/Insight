@@ -1,4 +1,4 @@
-from . import Dscan, EightBall, Quit, Admin
+from . import Dscan, EightBall, Quit, Admin, AdminResetNames
 import discord
 import discord_bot
 
@@ -7,10 +7,13 @@ class UnboundUtilityCommands(object):
     def __init__(self, insight_client):
         assert isinstance(insight_client, discord_bot.Discord_Insight_Client)
         self.client: discord_bot.Discord_Insight_Client = insight_client
+        self.threadpool_unbound = self.client.threadpool_unbound
         self.dscan = Dscan.Dscan(self)
         self.eightBall = EightBall.EightBall(self)
         self.quit = Quit.Quit(self)
         self.admin = Admin.Admin(self)
+        self.admin_resetnames = AdminResetNames.AdminResetNames(self)
+
 
     def strip_command(self, message_object: discord.Message):
         try:

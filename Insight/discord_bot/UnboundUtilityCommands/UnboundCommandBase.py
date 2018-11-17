@@ -11,6 +11,7 @@ class UnboundCommandBase(object):
     def __init__(self, unbound_service):
         self.unbound: UnboundUtilityCommands = unbound_service
         self.client = self.unbound.client
+        self.service = self.client.service
 
     def command_description(self):
         return "Not implemented."
@@ -43,7 +44,7 @@ class UnboundCommandBase(object):
         else:  # private convo so no need to check for permissions. Bot can embed
             return True
 
-    async def run_command(self, d_message: discord.Message, m_text:str):
+    async def run_command(self, d_message: discord.Message, m_text: str = ""):
         try:
             if self.can_embed(d_message):
                 await d_message.channel.send(content='{}\n'.format(d_message.author.mention), embed=self.get_embed(m_text))
