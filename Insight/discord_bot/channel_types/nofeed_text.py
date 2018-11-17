@@ -129,7 +129,8 @@ class discord_text_nofeed_exist(discord_feed_service):
                     "Created a new feed! You can manage feed configuration and access additional settings with the "
                     "'!settings' command.")
                 await __tmp_feed_object.command_start(message_object)
-                print('New {} in {}'.format(str(__tmp_feed_object), __tmp_feed_object.str_channel_server()))
+                lg = InsightLogger.InsightLogger.get_logger('Insight.main', 'Insight_main.log')
+                lg.info('New {} in {}'.format(str(__tmp_feed_object), __tmp_feed_object.str_channel_server()))
             except Exception as ex:
                 await service_module.channel_manager.delete_feed(__tmp_feed_object.channel_id)
                 try:

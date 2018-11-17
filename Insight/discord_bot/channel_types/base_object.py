@@ -289,7 +289,7 @@ class discord_feed_service(object):
         """Temp pause an error feed instead of removing it completely. Resume again in 45 minutes."""
         try:
             if self.cached_feed_table.feed_running:
-                remaining = 90
+                remaining = 120
                 self.cached_feed_table.feed_running = False
                 while remaining > 0 and not self.cached_feed_table.feed_running:
                     remaining -= 1
@@ -305,7 +305,8 @@ class discord_feed_service(object):
                 __row = db.query(dbRow.tb_channels).filter(dbRow.tb_channels.channel_id == self.channel_id).one()
                 db.delete(__row)
                 db.commit()
-                print('Deleted {} in {}'.format(str(self), self.str_channel_server()))
+                lg = InsightLogger.InsightLogger.get_logger('Insight.main', 'Insight_main.log')
+                lg.info('Deleted {} in {}'.format(str(self), self.str_channel_server()))
                 return True
             except Exception as ex:
                 print(ex)

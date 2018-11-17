@@ -268,7 +268,8 @@ class Tokens(dec_Base.Base, sso_base):
             print(ex)
         finally:
             db.close()
-            InsightLogger.InsightLogger.time_log(lg, st, 'Update all tokens in the database.', warn_higher=60000)
+            InsightLogger.InsightLogger.time_log(lg, st, 'Update all tokens in the database.', warn_higher=1200,
+                                                 seconds=True)
 
     @classmethod
     def delete_noTracking(cls, service_module):

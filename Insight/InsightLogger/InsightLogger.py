@@ -3,6 +3,7 @@ import os
 import datetime
 import time
 import sys
+from logging.handlers import TimedRotatingFileHandler
 
 
 class LoggerStartTime(object):
@@ -12,22 +13,24 @@ class LoggerStartTime(object):
     def ms_passed(self)->int:
         return int((datetime.datetime.utcnow() - self.start).total_seconds() * 1000)
 
+    def seconds_passed(self)->int:
+        return int((datetime.datetime.utcnow() - self.start).total_seconds())
+
 
 class InsightLogger(object):
     @classmethod
     def path(cls, file_name):
-        tm = datetime.datetime.utcnow()
-        tm_s = tm.strftime('%m_%d_%Y-')
-        pt_name = 'logs/{}'.format(file_name.split('.', 1)[0])
+        fname = file_name.split('.', 1)[0]
+        pt_name = 'logs/{}'.format(fname)
         os.makedirs(pt_name, exist_ok=True)
-        return os.path.join(pt_name, str(tm_s+file_name))
+        return os.path.join(pt_name, fname)
 
     @classmethod
     def get_logger(cls, name, file_name, level=logging.INFO, console_print=False, console_level=logging.WARNING, child=False)->logging.Logger:
         logger = logging.getLogger(name)
         if len(logger.handlers) == 0 and not child:
             logger.setLevel(level)
-            f_fmt = logging.Formatter('%(asctime)s %(threadName)23s:%(name)-23s %(levelname)-8s - %(message)s')
+            f_fmt = logging.Formatter('%(asctime)s %(threadName)23s:%(name)-40s %(levelname)-8s - %(message)s')
             f_fmt.converter = time.gmtime
             if console_print:
                 if console_level >= logging.WARNING:
@@ -40,17 +43,22 @@ class InsightLogger(object):
                     sh_console.setFormatter(fmt)
                 sh_console.setLevel(console_level)
                 logger.addHandler(sh_console)
-            fh = logging.FileHandler(cls.path(file_name))
+            fh = TimedRotatingFileHandler(cls.path(file_name), when='midnight', interval=1, backupCount=30, delay=True,
+                                          utc=True)
             fh.setFormatter(f_fmt)
             fh.setLevel(level)
             logger.addHandler(fh)
         return logger
 
     @classmethod
-    def time_log(cls, logger_object: logging.Logger, start_time: LoggerStartTime, msg: str, warn_higher: int = 5000):
-        ms_passed = start_time.ms_passed()
-        log_m = "Time: {:>4}ms - {}".format(ms_passed, msg)
-        if ms_passed >= warn_higher:
+    def time_log(cls, logger_object: logging.Logger, start_time: LoggerStartTime, msg: str, warn_higher: int = 5000, seconds=False):
+        if seconds:
+            passed_time = start_time.seconds_passed()
+            log_m = "Time: {:>4}s - {}".format(passed_time, msg)
+        else:
+            passed_time = start_time.ms_passed()
+            log_m = "Time: {:>4}ms - {}".format(passed_time, msg)
+        if passed_time >= warn_higher:
             logger_object.warning(log_m)
         else:
             logger_object.info(log_m)

@@ -8,6 +8,7 @@ import json
 import aiohttp
 import traceback
 import time
+import InsightLogger
 
 
 class background_tasks(object):
@@ -23,12 +24,15 @@ class background_tasks(object):
         self.task_discordbots_api = self.client.loop.create_task(self.discordbots_api())
 
     async def __helper_update_contacts_channels(self):
+        lg = InsightLogger.InsightLogger.get_logger('Tokens', 'Tokens.log')
+        st = InsightLogger.InsightLogger.time_start()
         async for channel in self.client.channel_manager.get_all_channels():
             try:
                 await channel.background_contact_sync(message=None, suppress=self.suppress_notify)
             except Exception as ex:
                 print(ex)
         self.suppress_notify = False
+        InsightLogger.InsightLogger.time_log(lg, st, "Update/reload channels", seconds=True)
 
     async def sync_contacts(self):
         while True:
@@ -37,9 +41,12 @@ class background_tasks(object):
                 next_run = next_run if next_run >= 3600 else 7200
                 await asyncio.sleep(next_run)
             try:
+                lg = InsightLogger.InsightLogger.get_logger('Tokens', 'Tokens.log')
+                st = InsightLogger.InsightLogger.time_start()
                 await self.client.loop.run_in_executor(None, partial(tb_tokens.mass_sync_all, self.client.service))
                 await self.client.loop.run_in_executor(None, partial(tb_tokens.delete_noTracking, self.client.service))
                 await self.__helper_update_contacts_channels()
+                InsightLogger.InsightLogger.time_log(lg, st, "Total sync contacts task.", seconds=True)
             except Exception as ex:
                 print(ex)
             if not self.client.service.cli_args.defer_tasks:  # run startup
