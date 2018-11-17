@@ -14,11 +14,12 @@ import logging
 
 
 class Discord_Insight_Client(discord.Client):
-    def __init__(self, service_module):
+    def __init__(self, service_module, multiproc_dict):
         super().__init__(fetch_offline_members=True, heartbeat_timeout=20)
         self.logger = InsightLogger.InsightLogger.get_logger('Insight.main', 'Insight_main.log', console_print=True,
                                                              console_level=logging.INFO)
         self.service: service_module = service_module
+        self.__multiproc_dict: dict = multiproc_dict
         self.channel_manager: service.Channel_manager = self.service.channel_manager
         self.channel_manager.set_client(self)
         self.commandLookup = DiscordCommands()
@@ -89,6 +90,10 @@ class Discord_Insight_Client(discord.Client):
         except Exception as ex:
             print(ex)
         await self.logout()
+
+    async def reboot_self(self):
+        self.__multiproc_dict['flag_reboot'] = True
+        await self.shutdown_self()
 
     async def get_semaphore(self, channel_object) ->asyncio.Semaphore:
         try:
@@ -220,9 +225,9 @@ class Discord_Insight_Client(discord.Client):
                 await asyncio.sleep(20)
 
     @staticmethod
-    def start_bot(service_module):
+    def start_bot(service_module, multiproc_dict):
         if service_module.config_file["discord"]["token"]:
-            client = Discord_Insight_Client(service_module)
+            client = Discord_Insight_Client(service_module, multiproc_dict)
             try:
                 client.run(service_module.config_file["discord"]["token"])
                 client.cleanup_close()

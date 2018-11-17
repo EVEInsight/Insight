@@ -22,6 +22,7 @@ added_hiddenimports.extend(collect_submodules('SQLAlchemy-Utils'))
 added_hiddenimports.extend(collect_submodules('cryptography'))
 added_hiddenimports.extend(collect_submodules('networkx'))
 added_hiddenimports.extend(collect_submodules('aiohttp'))
+added_hiddenimports.extend(collect_submodules('multiprocessing'))
 
 a = Analysis(['../Insight/__main__.py'],
              pathex=['./Insight'],

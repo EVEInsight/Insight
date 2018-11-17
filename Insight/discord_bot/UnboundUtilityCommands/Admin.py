@@ -10,10 +10,12 @@ class Admin(UnboundCommandBase):
         async with self.cLock:
             options = dOpt.mapper_index_withAdditional(self.client, d_message)
             options.set_main_header("Select an Insight administrator function to execute.")
-            options.add_option(dOpt.option_calls_coroutine(self.unbound.quit.command_description(), "",
-                                                           self.unbound.quit.run_command(d_message)))
             options.add_option(dOpt.option_calls_coroutine(self.unbound.admin_resetnames.command_description(), "",
                                                            self.unbound.admin_resetnames.run_command(d_message)))
             options.add_option(dOpt.option_calls_coroutine(self.unbound.admin_backup.command_description(), "",
                                                            self.unbound.admin_backup.run_command(d_message)))
+            options.add_option(dOpt.option_calls_coroutine(self.unbound.quit.command_description(), "",
+                                                           self.unbound.quit.run_command(d_message)))
+            options.add_option(dOpt.option_calls_coroutine(self.unbound.admin_reboot.command_description(), "",
+                                                           self.unbound.admin_reboot.run_command(d_message)))
             await options()
