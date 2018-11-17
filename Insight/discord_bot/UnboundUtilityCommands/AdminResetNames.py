@@ -15,20 +15,6 @@ class AdminResetNames(UnboundCommandBase):
     def command_description(self):
         return "Reset names - Clear and reload all character, corporation, alliance, and type names in the database."
 
-    async def set_status(self, message_str: str):
-        try:
-            game_act = discord.Activity(name=message_str, type=discord.ActivityType.watching)
-            await self.client.change_presence(activity=game_act, status=discord.Status.dnd)
-        except Exception as ex:
-            print(ex)
-
-    async def send_status_message(self, d_message: discord.Message, message_str: str):
-        try:
-            print(message_str)
-            await d_message.channel.send('{}\n{}'.format(d_message.author.mention, message_str))
-        except Exception as ex:
-            print(ex)
-
     def __reset_all_names(self)->int:
         reset_count = 0
         db: Session = self.service.get_session()
@@ -53,12 +39,12 @@ class AdminResetNames(UnboundCommandBase):
                                     " names that have been renamed by GMs. Note: Downloading names could take a few"
                                     " minutes and Insight could become unresponsive during the update.")
             options.add_option(dOpt.option_returns_object("Reset and redownload all names.", return_object=0))
-            options.add_option(dOpt.option_returns_object("Download missing names only", return_object=1))
+            options.add_option(dOpt.option_returns_object("Download missing names only.", return_object=1))
             resp = await options()
             async with InsightUtilities.ThreadPoolPause(self.client.threadpool_insight, timeout=15):
                 async with InsightUtilities.ThreadPoolPause(self.client.threadpool_zk, timeout=15):
                     if resp == 0:
-                        smsg = "Resetting database names... Insight database interactions are temporarily unavailable."
+                        smsg = "Resetting database names... Insight is temporarily unavailable"
                         self.client.loop.create_task(self.set_status(smsg))
                         reset_count = await self.client.loop.run_in_executor(self.tp, self.__reset_all_names)
                         msg = "{:,} total names were reset.".format(reset_count)

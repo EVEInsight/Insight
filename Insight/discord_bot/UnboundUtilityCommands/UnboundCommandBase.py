@@ -16,6 +16,20 @@ class UnboundCommandBase(object):
     def command_description(self):
         return "Not implemented."
 
+    async def set_status(self, message_str: str):
+        try:
+            game_act = discord.Activity(name=message_str, type=discord.ActivityType.watching)
+            await self.client.change_presence(activity=game_act, status=discord.Status.dnd)
+        except Exception as ex:
+            print(ex)
+
+    async def send_status_message(self, d_message: discord.Message, message_str: str):
+        try:
+            print(message_str)
+            await d_message.channel.send('{}\n{}'.format(d_message.author.mention, message_str))
+        except Exception as ex:
+            print(ex)
+
     def get_embed(self, message_text: str)->discord.Embed:
         e = discord.Embed()
         e.color = discord.Color(659493)

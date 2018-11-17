@@ -14,4 +14,6 @@ class Admin(UnboundCommandBase):
                                                            self.unbound.quit.run_command(d_message)))
             options.add_option(dOpt.option_calls_coroutine(self.unbound.admin_resetnames.command_description(), "",
                                                            self.unbound.admin_resetnames.run_command(d_message)))
+            options.add_option(dOpt.option_calls_coroutine(self.unbound.admin_backup.command_description(), "",
+                                                           self.unbound.admin_backup.run_command(d_message)))
             await options()
