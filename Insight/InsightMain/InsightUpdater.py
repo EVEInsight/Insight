@@ -16,9 +16,10 @@ class InsightUpdater(object):
                 if h == nh:
                     multiproc_dict['notify_msg'] = 'There are no new updates to apply.'
                 else:
-                    multiproc_dict['notify_msg'] = 'Insight has been updated from:\n{} - {}\n' \
-                                                        'to\n{} - {}'.format(h.committed_datetime, h.hexsha,
-                                                                             nh.committed_datetime, nh.hexsha)
+                    multiproc_dict['notify_msg'] = 'Insight has been updated from:\n{} - {}\n{}\n' \
+                                                        'to\n\n{} - {}\n{}\n'.format(h.committed_datetime, h.hexsha,
+                                                                                 h.message, nh.committed_datetime,
+                                                                                 nh.hexsha, nh.message)
             else:
                 multiproc_dict['notify_msg'] = 'Invalid repo. Found repo but it is not an Insight repo.'
         except InvalidGitRepositoryError:
