@@ -160,7 +160,7 @@ class mapper_index(object):
             assert self.isInt(response)
             assert int(response) >= 0 and int(response) < self.__current_option_index()
         except AssertionError:
-            raise InsightExc.User.InvalidIndex("You must enter a number between 0 and {}, but you inputted '{}'."
+            raise InsightExc.User.InvalidIndex("You must enter a number between 0 and {}, but you entered '{}'."
                                                "".format(str(self.__current_option_index() - 1), str(response)))
 
     async def add_additional(self):
@@ -242,7 +242,7 @@ class mapper_return_noOptions_requiresInt(mapper_return_noOptions):
     async def check_response(self,response):
         if not self.isInt(response):
             raise InsightExc.User.NotInteger(
-                ("You entered an invalid number. You must enter an integer, but you inputted"
+                ("You entered an invalid number. You must enter an integer, but you entered"
                                               " '{}' which is not an integer.".format(str(response))))
 
     async def response_action(self, response):
@@ -269,7 +269,7 @@ class mapper_return_noOptions_requiresFloat(mapper_return_noOptions):
 
     async def check_response(self,response):
         if not self.isFloat(response):
-            raise InsightExc.User.NotFloat("You entered an invalid number. You must enter a float, but you inputted"
+            raise InsightExc.User.NotFloat("You entered an invalid number. You must enter a float, but you entered"
                                            " '{}' which is not a float.".format(str(response)))
 
     async def response_action(self, response):
