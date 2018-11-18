@@ -1,4 +1,4 @@
-from . import Dscan, EightBall, Quit, Admin, AdminResetNames, Backup, Reboot
+from . import Dscan, EightBall, Quit, Admin, AdminResetNames, Backup, Reboot, Update
 import discord
 import discord_bot
 
@@ -15,6 +15,7 @@ class UnboundUtilityCommands(object):
         self.admin_resetnames = AdminResetNames.AdminResetNames(self)
         self.admin_backup = Backup.Backup(self)
         self.admin_reboot = Reboot.Reboot(self)
+        self.admin_update = Update.Update(self)
 
     def strip_command(self, message_object: discord.Message):
         try:

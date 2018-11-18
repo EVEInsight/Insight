@@ -17,4 +17,4 @@ class Reboot(UnboundCommandBase):
                                     "message in Discord which you can safely ignore.")
             resp = await options()
             if resp:
-                await self.client.reboot_self()
+                await self.client.reboot_self(d_message.author)

@@ -55,7 +55,7 @@ class AdminResetNames(UnboundCommandBase):
                     self.client.loop.create_task(self.send_status_message(d_message, msg))
             if missing_count > 0:
                 msg = "A total of {:,} names are still missing from that database. To run another API pull, run the " \
-                      "'!admin' command -> Reset names -> Download missing names only."
+                      "'!admin' command -> Reset names -> Download missing names only.".format(missing_count)
             else:
                 msg = "Successfully updated all missing names."
             self.client.loop.create_task(self.send_status_message(d_message, msg))

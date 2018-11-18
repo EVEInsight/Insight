@@ -53,6 +53,7 @@ class Discord_Insight_Client(discord.Client):
             await self.change_presence(activity=game_act, status=discord.Status.dnd)
         except Exception as ex:
             print(ex)
+        self.loop.create_task(self.send_multiproc_status())
         await self.service.zk_obj.make_queues()
         self.loop.create_task(self.service.zk_obj.pull_kms_ws())
         await self.channel_manager.load_channels()
@@ -71,6 +72,20 @@ class Discord_Insight_Client(discord.Client):
         print(motd)
         if self.service.motd:
             await self.loop.run_in_executor(None, partial(self.channel_manager.post_message, motd))
+
+    async def send_multiproc_status(self):
+        notify_user = self.__multiproc_dict.get('notify_userid')
+        msg = "Insight admin notification:\n\n{}".format(str(self.__multiproc_dict.get('notify_msg')))
+        if isinstance(notify_user, int) and self.__multiproc_dict.get('notify_msg') is not None:
+            await self.wait_until_ready()
+            d_user: discord.User = self.get_user(notify_user)
+            if d_user is not None:
+                try:
+                    await d_user.send(msg)
+                except Exception as ex:
+                    print(ex)
+        self.__multiproc_dict['notify_userid'] = None
+        self.__multiproc_dict['notify_msg'] = None
 
     def cleanup_close(self):
         print('Closing event loop...')
@@ -91,9 +106,14 @@ class Discord_Insight_Client(discord.Client):
             print(ex)
         await self.logout()
 
-    async def reboot_self(self):
+    async def reboot_self(self, d_author: discord.User):
         self.__multiproc_dict['flag_reboot'] = True
+        self.__multiproc_dict['notify_userid'] = d_author.id
         await self.shutdown_self()
+
+    async def update_self(self, d_author: discord.User):
+        self.__multiproc_dict['flag_update'] = True
+        await self.reboot_self(d_author)
 
     async def get_semaphore(self, channel_object) ->asyncio.Semaphore:
         try:
