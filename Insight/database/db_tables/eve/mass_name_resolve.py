@@ -61,6 +61,7 @@ class name_resolve(name_only):
                     ids_404.extend(id_list)
                 except Exception as ex:
                     lg.exception(ex)
+                    lg.info('Error IDs: {}'.format(str(id_list)))
                     print('Error: {} when resolving char names.'.format(ex))
                     ids_404.extend(id_list)
             db.commit()
