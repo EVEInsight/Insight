@@ -1,13 +1,75 @@
 # v1.3.0
+v1.3.0 is the latest update to Insight which includes numerous backend improvements for further application stability. 
 ## New features
-* Preconfigured
-    * Big Kills feed
-        * Added a new feed that displays all kills valued more than a customized minimum value.
+* Added a "Big Kills" feed that displays all mails valued greater than a customized minimum ISK value.
+* WebSocket streaming via the ```-ws``` flag as an optional method to obtain mails.
+* Framework for multiple utility type commands which will expanded upon in later updates.
+* Mention modes for all feed types with customizable time limits.
+* The ```!lock``` command which prevents feeds from being modified from unauthorized Discord users lacking channel permissions. [(#13)](https://github.com/Nathan-LS/Insight/issues/13)
+* Option panes now use Discord rich embeds offering better experience and support for option text exceeding the 2000 character limit.
+* The ```!8ball``` utility command.
+* Insight can now be cleanly shut down via CTRL-C or a Discord command.
+* The ```!admin``` command interface which allows Insight administrators to access the following functionality:
+    * Shutdown or reboot the Insight application
+    * Name resetting to clear and repopulate all cached names in the database. Characters, corporations, etc.
+    * Database and log backup into zip archives.
+    * Update patching (for Git installations running on the Python interpreter) and automatic reboot/reload.
+* Multiple minor adjustments to visuals and text refactoring.
+* Welcome message when Insight joins a new server. Insight now offers a helpful greeting to the public channel of new servers with basic command usage.
+* New scripts for easier setup and installation on Linux systems.
+* Numerous improvements to core stability.
+
+## Changes
+* The AT ship radar feed type has been removed. The functionality of this feed has been merged with the full Capital Radar feed service offering extended functionality. (base systems, timeouts, etc.) Existing AT feeds are automatically converted when Insight starts.
+* The "currently watching" status message has been changed to include the current number of feeds.
+* Insight now sends more detailed header information to zK and ESI. Including the Git URL and optional 'from' email.
+* Mails less than a minute ago will output the time in seconds.
+* Contact syncing now runs every 3 hours.
+
+## Fixes
+* SSO tokens randomly raising 4xx errors are not immediately dropped. ESI would sometimes raise error 400 on a valid token when the service was experiencing issues and then return 200 later. Insight now has an error counter and drops tokens after a consecutive number of error 400s.
+* Some tokens would have a specific type (alliance, corp, pilot) dropped on error 403. Error 403 signals the token owner leaving the alliance or corp, no longer having access. Error 403 was raised in rare instances of service outages. Further inspection of the error message ensures these random drops do not occur.
+* A race condition was fixed which allowed users to create 2 feeds in one channel with the last feed overwriting the first. 
+* Insight now attempts to resend mail messages if it fails due to error 5xx or socket error.
+* Fixed an issue affecting RedisQ polling and VMware based hosts.
+
 ## Technical
-* RouteMapper
-    * Increased speed and memory optimization improvements.
-* Add index on attacker KM id foreign key to speed up SQLAlchemy object refreshing.
-    
+**Logging**
+* Added the overdue logging module with extensive logging for error detection and timing delays.
+* Logging now uses TimedRotatingFileHandler for saving logs into daily files.
+
+**RouteMapper**
+* Increased speed and memory optimization improvements. 
+
+**Database**
+* Database update versions are now independent of application version. This allows multiple new patches to the database per single application update. 
+* Template/preconfigured feeds use SQLAlchemy ```add``` instead of```merge``` on feed initialization to improve speed.
+* Add more indexes for faster object loading and searching.
+* Add ```mention``` and ```mention_every``` columns to the ```discord_channels``` table to support mention modes for every channel.
+* Add ```modification_lock``` bool to ```discord_channels``` table for locking channels.
+* Add ```error_count``` to tokens.
+* The database service connection is properly closed when Insight is shutting down.
+
+**Startup/shutdown**
+* Insight uses multiple threads on startup to load all channel feeds, offering a limited time improvement. MySQL support when? :)
+* New multiprocessing parent/child model for Insight startup. Insight utilizes two processes to handle reboot and update functionality. This model uses the Python multiprocessing library so it is supported by both Windows and Linux. 
+    * Parent: The parent process checks set flags on child termination to either terminate itself or create a new child process running Insight. (reboot functionality) This process also handles updating Insight Git if requested on child termination and then rebooting (forking).
+    * Child: The actual Insight service which creates the asyncio event loop and runs the bot.
+
+**Core**
+* More async locking. Multiple commands cannot be in progress in a single feed. 
+* Command flooding. Add delay on responding to feeds that raise too many errors or run too many commands in a minute interval.
+* Permanent threads with infinite loops have been replaced by coroutines. These coroutines submit work to thread pools as needed. Example: RedisQ polling, raw json -> DB insertion, and KM filter passing have all been redesigned to run as coroutines.
+* Add WebSocket support for ZK.
+* RedisQ polling and discordbots threading requests have been replaced with aiohttp coroutines.
+* Thread pools are properly closed before Insight shutdown.
+* Updated packages in requirements.txt.
+* Increased timeout on RedisQ error 429s to 5 minutes. Don't run more than Insight copy per IP address.
+
+**Misc**
+* Add ThreadPoolPause context manager utility to block threads while backups or other administrative functions occur.
+* Added numerous internal exceptions to support new functionality.
+
 # v1.2.0
 ## New features
 * Entity feed
@@ -40,6 +102,7 @@
     * The route caching module increases the memory footprint of Insight by 500MB when all systems are loaded. Ensure your machine is capable of handling this additional requirement.
 * Updated requirements.txt
 * Extensive changes to visual embed variables and function calls for easier code navigation.
+
 # v1.1.0
 ## New features
 * Settings
