@@ -1,3 +1,7 @@
+# v1.3.1
+## Fixes
+* Fixed an issue when running Insight on computers without Git. Attempting to run Insight on a computer without Git would result in an application crash. The Insight updater now attempts to import the GitPython library within the update function and catches the error in the event of no valid Git executable.
+
 # v1.3.0
 v1.3.0 is the latest update to Insight which includes numerous backend improvements for further application stability. 
 ## New features
