@@ -3,7 +3,7 @@ from . import regions,systems
 from .sde_importer import *
 
 
-class Constellations(dec_Base.Base,individual_api_pulling,index_api_updating,sde_impoter):
+class Constellations(dec_Base.Base, name_only, individual_api_pulling, index_api_updating, sde_impoter):
     __tablename__ = 'constellations'
 
     constellation_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
@@ -34,6 +34,16 @@ class Constellations(dec_Base.Base,individual_api_pulling,index_api_updating,sde
 
     def get_id(self):
         return self.constellation_id
+
+    def set_name(self, api_name):
+        self.name = api_name
+
+    def get_name(self):
+        return self.name
+
+    @hybrid_property
+    def need_name(self):
+        return self.name == None
 
     def __str__(self):
         try:

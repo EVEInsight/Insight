@@ -1,6 +1,7 @@
 from .UnboundCommandBase import *
 from sqlalchemy.orm import Session
-from database.db_tables import tb_characters, tb_corporations, tb_alliances, tb_types, tb_systems, name_resolver
+from database.db_tables import tb_characters, tb_corporations, tb_alliances, tb_types, \
+    tb_systems, tb_constellations, tb_regions, name_resolver
 import InsightExc
 import InsightUtilities
 from functools import partial
@@ -13,13 +14,14 @@ class AdminResetNames(UnboundCommandBase):
         self.tp = self.unbound.threadpool_unbound
 
     def command_description(self):
-        return "Reset names - Clear and reload all character, corporation, alliance, and type names in the database."
+        return "Reset names - Clear and reload all character, corporation, alliance, type, system, constellation, " \
+               "and region names in the database."
 
     def __reset_all_names(self)->int:
         reset_count = 0
         db: Session = self.service.get_session()
         try:
-            for tabl in [tb_characters, tb_corporations, tb_alliances, tb_types, tb_systems]:
+            for tabl in [tb_characters, tb_corporations, tb_alliances, tb_types, tb_systems, tb_constellations, tb_regions]:
                 for row in db.query(tabl).all():
                     row.reset_name()
                     reset_count += 1

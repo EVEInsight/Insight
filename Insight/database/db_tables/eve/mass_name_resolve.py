@@ -1,5 +1,5 @@
 from .base_objects import *
-from . import characters,corporations,alliances,types,systems
+from . import characters, corporations, alliances, types, systems, constellations, regions
 import requests
 import traceback
 import InsightLogger
@@ -18,6 +18,8 @@ class name_resolve(name_only):
         __missing_objects += alliances.Alliances.missing_name_objects(service_module)
         __missing_objects += types.Types.missing_name_objects(service_module)
         __missing_objects += systems.Systems.missing_name_objects(service_module)
+        __missing_objects += constellations.Constellations.missing_name_objects(service_module)
+        __missing_objects += regions.Regions.missing_name_objects(service_module)
         return __missing_objects
 
     @classmethod
@@ -58,7 +60,7 @@ class name_resolve(name_only):
                             selected_item = missing_object_dict.get(search_result.get('id'))
                             if selected_item is not None:
                                 selected_item.set_name(search_result.get('name'))
-                        if commit_pending_buffer >= 30000:
+                        if commit_pending_buffer >= 25000:
                             db.commit()
                             commit_pending_buffer = 0
                     else:

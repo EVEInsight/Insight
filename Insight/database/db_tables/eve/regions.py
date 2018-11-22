@@ -4,7 +4,7 @@ from .sde_importer import *
 from sqlalchemy import case
 
 
-class Regions(dec_Base.Base,individual_api_pulling,index_api_updating,sde_impoter):
+class Regions(dec_Base.Base, name_only, individual_api_pulling, index_api_updating, sde_impoter):
     __tablename__ = 'regions'
 
     region_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
@@ -29,6 +29,16 @@ class Regions(dec_Base.Base,individual_api_pulling,index_api_updating,sde_impote
 
     def get_id(self):
         return self.region_id
+
+    def set_name(self, api_name):
+        self.name = api_name
+
+    def get_name(self):
+        return self.name
+
+    @hybrid_property
+    def need_name(self):
+        return self.name == None
 
     def __str__(self):
         return "{}".format(str(self.name))

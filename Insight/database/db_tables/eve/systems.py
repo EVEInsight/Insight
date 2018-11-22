@@ -4,7 +4,7 @@ from .sde_importer import *
 import math
 
 
-class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating,sde_impoter):
+class Systems(dec_Base.Base, name_only, individual_api_pulling, index_api_updating, sde_impoter):
     __tablename__ = 'systems'
 
     system_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
@@ -37,6 +37,9 @@ class Systems(dec_Base.Base,name_only,individual_api_pulling,index_api_updating,
 
     def set_name(self, api_name):
         self.name = api_name
+
+    def get_name(self):
+        return self.name
 
     def __str__(self):
         try:
