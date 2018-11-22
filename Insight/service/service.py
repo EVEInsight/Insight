@@ -22,9 +22,11 @@ __passkey = None
 
 
 class service_module(object):
-    def __init__(self):
-        self.config_file = configparser.ConfigParser()
+    def __init__(self, multiproc_dict):
+        self.__multiproc_dict:dict = multiproc_dict
         self.cli_args = self.__read_cli_args()
+        self.set_crash_recovery(self.cli_args.crash_recovery, None)
+        self.config_file = configparser.ConfigParser()
         self.config_file.read(self.read_config_file(self.cli_args.config))
         self.__header_dict = {}
         self.welcome()
@@ -39,6 +41,7 @@ class service_module(object):
         self.zk_obj = zk.zk(self)
         self.__admin_module = InsightAdmins.InsightAdmins()
         self.motd = self.__read_motd()
+        self.set_crash_recovery(self.cli_args.crash_recovery, self.__admin_module.get_default_admin())  # set id
 
     def __read_cli_args(self):
         parser = argparse.ArgumentParser()
@@ -65,6 +68,8 @@ class service_module(object):
                             help="Specifies the name of the SDE database file relative to main.py. Download and extract the "
                                  "sqlite-latest.sqlite file from https://www.fuzzwork.co.uk/dump/",
                             type=str, default="sqlite-latest.sqlite")
+        parser.add_argument("--crash_recovery", "-cr", action="store_true",
+                            help="Automatically reboot Insight in the event of an application crash.", default=False)
         return parser.parse_args()
 
     def get_headers(self, lib_requests=False) ->dict:
@@ -181,6 +186,13 @@ class service_module(object):
     def shutdown(self):
         print('Attempting to shut down the database...')
         self.__db_manager.shutdown()
+
+    def set_crash_recovery(self, mode_flag: bool, notify_user_id):
+        if mode_flag is True and self.__multiproc_dict.get('crash_recovery') is not True:
+            print('Insight crash recovery has been enabled. Insight will attempt to reboot up to 2 times in the '
+                  'span of 30 minutes in the event of a crash.')
+        self.__multiproc_dict['crash_recovery'] = mode_flag
+        self.__multiproc_dict['notify_userid'] = notify_user_id
 
     @classmethod
     def get_version(cls):

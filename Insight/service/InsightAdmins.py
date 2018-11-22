@@ -7,6 +7,7 @@ class InsightAdmins(object):
     def __init__(self):
         self.logger = InsightLogger.InsightLogger.get_logger('AdminModule', 'AdminModule.log')
         self.__admins = set()
+        self.top_admin = None
         self.__file_name = "InsightAdmins.txt"
         self.__read_admins()
         self.print_admins()
@@ -19,6 +20,8 @@ class InsightAdmins(object):
                 for i in text.split():
                     try:
                         self.__admins.add(int(i))
+                        if self.top_admin is None:
+                            self.top_admin = int(i)
                     except ValueError:
                         print("'{}' - is not a valid Discord user id in the '{}' file.".format(i, self.__file_name))
         except FileNotFoundError:
@@ -52,5 +55,8 @@ class InsightAdmins(object):
             print("InsightAdmins error: {}".format(ex))
             traceback.print_exc()
             return False
+
+    def get_default_admin(self):
+        return self.top_admin
 
 
