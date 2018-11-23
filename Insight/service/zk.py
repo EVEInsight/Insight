@@ -17,7 +17,7 @@ import InsightLogger
 
 class zk(object):
     def __init__(self, service_module):
-        assert isinstance(service_module,service.ServiceModule)
+        assert isinstance(service_module, service.ServiceModule)
         self.logger = InsightLogger.InsightLogger.get_logger('ZK', 'ZK.log')
         self.service = service_module
         identifier = str(self.generate_identifier())
@@ -136,8 +136,11 @@ class zk(object):
 
     async def pull_kms_redisq(self):
         """pulls kms using redisq"""
+        lg = InsightLogger.InsightLogger.get_logger('ZK.redisq', 'ZK.log', child=True)
         async with aiohttp.ClientSession(headers=self.service.get_headers()) as client:
-            print("Started zk stream (RedisQ/polling) coroutine.")
+            msg = "Started zk stream (RedisQ/polling) coroutine."
+            print(msg)
+            lg.info(msg)
             next_delay = datetime.datetime.utcnow()
             while self.run:
                 try:
@@ -153,20 +156,22 @@ class zk(object):
                         elif resp.status == 429:  # error limited
                             print("{} {}".format(str(datetime.datetime.utcnow()),
                                                  "zKill error limited. Are you using more than 1 bot with the same zk queue identifier? Delete your 'zk_identifier.txt' file."))
-                            await asyncio.sleep(300)
-                        elif 400 <= resp.status < 500:  # calm down zKill is probably overloaded
-                            print("{} - RedisQ zk error code: {}".format(str(datetime.datetime.utcnow()), resp.status))
-                            await asyncio.sleep(90)
-                        elif 500 <= resp.status < 600:
-                            print("{} - RedisQ zk error code: {}".format(str(datetime.datetime.utcnow()), resp.status))
-                            await asyncio.sleep(60)
+                            await asyncio.sleep(900)
                         else:
+                            headers = resp.headers
+                            body = await resp.text()
                             print("{} - RedisQ zk error code: {}".format(str(datetime.datetime.utcnow()), resp.status))
-                            await asyncio.sleep(60)
+                            lg.warning('Error: {} Headers: {} Body: {}'.format(resp.status, str(headers), str(body)))
+                            if 400 <= resp.status < 500:
+                                await asyncio.sleep(300)
+                            else:
+                                await asyncio.sleep(120)
                 except asyncio.TimeoutError:
                     await asyncio.sleep(15)
+                    lg.info('Timeout.')
                 except Exception as ex:
                     print('ZK RedisQ(polling) error: {}'.format(ex))
+                    lg.exception(ex)
                     await asyncio.sleep(30)
                 await asyncio.sleep(.1)
 
