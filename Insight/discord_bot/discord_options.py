@@ -128,7 +128,8 @@ class mapper_index(object):
             embed.add_field(name='Info', value=self.__footer_text)
             return embed
         except Exception as ex:
-            print(ex)
+            if not isinstance(ex, InsightExc.InsightException):
+                print(ex)
             raise InsightExc.DiscordError.EmbedOptionsError
 
     def __str__(self):
