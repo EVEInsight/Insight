@@ -34,8 +34,9 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         __options.set_main_header("Select the mention mode for this channel. On detected {} activity the bot "
                                   "can optionally mention @ here or @ everyone.\n\n"
                                   "Mention limit: 1 @ here or @ everyone per 15 minutes regardless of tracked "
-                                  "group. If the limit is exceeded, the killmail will be posted without mentions.".format(
-            group_type))
+                                  "group. If the limit is exceeded, the killmail will be posted without mentions. "
+                                  "The delay between mentions can be modified after feed creation via the '!settings'"
+                                  " command.".format(group_type))
         __options.add_option(discord_options.option_returns_object("No mention", return_object=enum_mention.noMention))
         __options.add_option(discord_options.option_returns_object("@ here", return_object=enum_mention.here))
         __options.add_option(discord_options.option_returns_object("@ everyone", return_object=enum_mention.everyone))

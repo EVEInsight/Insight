@@ -116,7 +116,7 @@ token = YourDiscordAppTokenGoesHere
 ```
 
 #### EVE Developer
-Insight requires an EVE Application to access user contacts for use in cap radar feeds. Navigate to [Create New App](https://developers.eveonline.com/applications/create).
+Insight requires an EVE Application to access user contacts for use in radar and proximity feeds. Navigate to [Create New App](https://developers.eveonline.com/applications/create).
 
 Provide a name and description for your app and select **Authentication & API Access** for **Connection Type**
 

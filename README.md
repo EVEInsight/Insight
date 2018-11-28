@@ -25,7 +25,7 @@ If you have questions, suggestions, or bug reports feel free to drop by the [pro
 - [Permissions](#permissions)
 - [Getting started](#getting-started)
   * [Entity Feed](#entity-feed)
-  * [Capital Radar Feed](#capital-radar-feed)
+  * [Radar Feed](#radar-feed)
 - [Branch overview](#branch-overview)
 - [Installation](#installation)
 - [FAQ](#frequently-asked-questions)
@@ -36,7 +36,7 @@ If you have questions, suggestions, or bug reports feel free to drop by the [pro
 
 # Feature Overview
 * Entity feeds ideal for personal, corporate, or alliance killboard streaming.
-* Capital radar feeds ideal for tracking hostile incursions into friendly space, hunting expensive targets within jump range, or detecting capital escalations in real time.
+* Radar feeds ideal for tracking hostile incursions into friendly space, hunting expensive targets within jump range, or detecting capital escalations in real time.
 * Proximity watches ideal for finding potential fleets to fight, tracking hostile fleet movement within your region, or alerting you of nearby hostiles within a few jumps of your base systems.
 * Preconfigured feeds offering custom spins such as: Alliance Tournament system feed, npc officer hunter, AT ship radar, and more!
 * Rich embeds to present mails with color indicating sidebars, hyperlinks, and images.
@@ -86,7 +86,7 @@ In intended feed channels the bot requires the following permissions:
 | Read Messages | Allows the bot to read command events.|
 | Send Messages | Allows the bot to communicate and display prompts to users running commands.|
 | Embed Links   | Allows the bot to post Discord rich embed content containing images (ship renders, player portraits, corp/alliance logos) and hyperlinks (zKillboard and Dotlan).
-| Mention Everyone | Allows the bot to optionally mention @here or @everyone for capital radar alerts.
+| Mention Everyone | Allows the bot to optionally mention @here or @everyone for optional alerts.
 
 # Getting started
 ## Entity Feed
@@ -103,12 +103,12 @@ entity you wish to track.
 a tracked entity participates in PvP. You can now run the command ```!settings``` to add or remove entities
 in your feed. If you wish to remove the feed, run ```!remove```.
 
-## Capital Radar Feed
+## Radar Feed
 This quick start guide will help you set up a radar feed for tracking supercapital activity within 12 light-years of our base system, Jita.
 1. Begin by inviting Insight to your Discord server using one of the provided [links](#links).
 2. Ensure Insight has the correct [permissions](#permissions) in the intended feed channel.
 3. Run the command:
-``` !create``` and select 'Capital Radar'.
+``` !create``` and select 'Radar'.
 4. The bot will ask for the name of a base system. In our example case, enter ```Jita```.
 5. Next, we will be asked for the maximum light-year range from Jita we wish to track targets. Enter ```12```
 or whichever range you prefer.

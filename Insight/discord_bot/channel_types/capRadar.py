@@ -8,7 +8,7 @@ class capRadar(noCH.discord_text_nofeed_exist):
         self.sync_settings = Linked_Options.opt_sync(self)
 
     def __str__(self):
-        return "Capital Radar Feed"
+        return "Radar Feed"
 
     def load_table(self):
         super(capRadar, self).load_table()
@@ -23,7 +23,7 @@ class capRadar(noCH.discord_text_nofeed_exist):
 
     @classmethod
     async def create_new(cls,message_object:discord.Message, service_module, discord_client):
-        """Capital Radar - Tracks hostile super, capital, blops, AT ship, or custom specified ship/npc activity within a set light-year proximity of base systems. Radar feeds are ideal for tracking hostile incursions into friendly space, hunting expensive targets within jump range, or detecting capital escalations."""
+        """Radar - Tracks hostile super, capital, blops, AT ship, or custom specified ship/npc activity within a set light-year proximity of base systems. Radar feeds are ideal for tracking hostile incursions into friendly space, hunting expensive targets within jump range, or detecting capital escalations."""
         await super(capRadar, cls).create_new(message_object,service_module,discord_client)
 
     async def command_sync(self, message_object):
