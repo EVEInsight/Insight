@@ -78,4 +78,3 @@ class InsightLogger(object):
         cls.get_logger('Insight.feed', 'Insight_feed.log')
         cls.get_logger('Tokens', 'Tokens.log')
         cls.get_logger('InsightUtilities', 'InsightUtilities.log', level=logging.DEBUG)
-

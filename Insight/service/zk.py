@@ -190,13 +190,16 @@ class zk(object):
 
     async def pull_kms_ws(self):
         if self.run_websocket:
-            print("Started zk stream (WebSocket) coroutine.")
+            lg = InsightLogger.InsightLogger.get_logger('ZK.ws', 'ZK.log', child=True)
+            lg_msg = "Started zk stream (WebSocket) coroutine."
+            lg.info(lg_msg)
+            print(lg_msg)
             async with aiohttp.ClientSession(headers=self.service.get_headers()) as client:
                 while self.run:
                     next_delay = datetime.datetime.utcnow()
                     try:
                         async with client.ws_connect('wss://zkillboard.com:2096', heartbeat=10) as ws:
-                            print('{} - ZK WebSocket connection established.'.format(str(datetime.datetime.utcnow())))
+                            lg.info('ZK WebSocket connection established.')
                             await ws.send_json(data={"action": "sub", "channel": "killstream"})
                             async for msg in ws:
                                 if msg.type == aiohttp.WSMsgType.TEXT:
@@ -206,14 +209,17 @@ class zk(object):
                                         self.add_delay(self.delay_next, next_delay)
                                         next_delay = datetime.datetime.utcnow()
                                     else:
-                                        print("ZK WebSocket package error.")
+                                        lg.warning("ZK WebSocket package error.")
                                 elif msg.type == aiohttp.WSMsgType.ERROR:
-                                    print("ZK WS error response.")
+                                    lg.warning("ZK WS error response.")
                                 else:
-                                    print("ZK WebSocket unknown response.")
+                                    lg.warning("ZK WebSocket unknown response.")
                     except Exception as ex:
-                        print('{} - ZK WebSocket error: {}'.format(str(datetime.datetime.utcnow()), ex))
-                    await asyncio.sleep(25)
+                        lg_msg = 'ZK WebSocket error: {}'.format(str(ex))
+                        print(lg_msg)
+                        lg.warning(lg_msg)
+                        lg.exception(ex)
+                    await asyncio.sleep(40)
 
     async def coroutine_process_json(self, zk_thread_pool: ThreadPoolExecutor):
         lg = InsightLogger.InsightLogger.get_logger('ZK.json', 'ZK.log', child=True)
