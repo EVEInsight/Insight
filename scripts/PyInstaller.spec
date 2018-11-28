@@ -57,7 +57,7 @@ import os
 os.mkdir('{}/EVE-Insight'.format(DISTPATH))
 shutil.copy('README.md','{}/EVE-Insight/README.md'.format(DISTPATH))
 shutil.copy('LICENSE.md','{}/EVE-Insight/LICENSE.md'.format(DISTPATH))
-shutil.copy('Insight/default-config.ini','{}/EVE-Insight/default-config.ini'.format(DISTPATH))
+shutil.copy('default-config.ini','{}/EVE-Insight/default-config.ini'.format(DISTPATH))
 shutil.copy('CCP.md','{}/EVE-Insight/CCP.md'.format(DISTPATH))
 shutil.copy('Installation.md','{}/EVE-Insight/Installation.md'.format(DISTPATH))
 shutil.copy('ChangeLog.md','{}/EVE-Insight/ChangeLog.md'.format(DISTPATH))

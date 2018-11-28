@@ -35,7 +35,7 @@ python3 setup.py install || error
 cd ..
 rm python-client -R
 pip3 install --upgrade -r requirements.txt
-cp -n Insight/default-config.ini config.ini
+cp -n default-config.ini config.ini
 if $sde_download; then
         wget -nc https://www.fuzzwork.co.uk/dump/sqlite-latest.sqlite.bz2.md5 || error
         wget -nc https://www.fuzzwork.co.uk/dump/sqlite-latest.sqlite.bz2 || error

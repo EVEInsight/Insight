@@ -109,7 +109,9 @@ class service_module(object):
             __passkey = tmpConfig['encryption']['secret_key']
             return fname
         except FileNotFoundError:
-            print("The config file '{0}' could not be found. Rename file 'default-config.ini' to '{0}'".format(fname))
+            print("The config file '{0}' could not be found. Rename file 'default-config.ini' to '{0}'. "
+                  "If you are using Insight with Docker make sure to check your volume directory, rename the "
+                  "'default-config.ini' to 'config.ini', and populate the configuration values.".format(fname))
             sys.exit(1)
 
     def __read_motd(self):
