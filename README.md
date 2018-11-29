@@ -129,8 +129,8 @@ to blacklist from appearing on the radar, accessible by the ```!sync``` command.
 |---|---|
 | master | Stable with latest features. The [public bot](#links) runs this branch. |
 | development | Latest unstable features. You can invite the [public experimental bot](https://discordapp.com/api/oauth2/authorize?client_id=477314845608378369&permissions=149504&scope=bot), but there are no guarantees of uptime or stability. |
-| dev | Depreciated branch. |
-| experimental | Depreciated branch. |
+| dev | Deprecated branch. |
+| experimental | Deprecated branch. |
 
 # Hosting Insight
 There are three ways to run and host Insight yourself if you do not wish to use the [public bot](#links).
