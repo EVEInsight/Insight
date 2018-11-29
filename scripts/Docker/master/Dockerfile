@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y \
  git \
  build-essential \
  && rm -rf /var/lib/apt/lists/*
-RUN git clone -b development --single-branch https://github.com/Nathan-LS/Insight.git
+RUN git clone -b master --single-branch https://github.com/Nathan-LS/Insight.git
 RUN pip3 install wheel
 RUN pip3 install setuptools
 WORKDIR /InsightDocker/python-client

@@ -11,8 +11,9 @@ This bot features an intuitive interface for creating, modifying, and managing i
 * **Insight** (with preconfigured role): [Insight Bot Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=463952393206497290&permissions=149504&scope=bot)
 * **Insight** (without preconfigured role): [Insight Bot Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=463952393206497290&permissions=0&scope=bot)
 
-Insight is available publicly hosted for invites directly to Discord servers. 
-[Binary releases](https://github.com/Nathan-LS/Insight/releases) or a [source installation guide](https://github.com/Nathan-LS/Insight/wiki/Source-Installation) are available if you wish to host Insight yourself.
+Insight is available publicly hosted for invites directly to Discord servers.
+ 
+See [hosting Insight](#hosting-insight) if you are interested in hosting your own copy of Insight.
 
 If you have questions, suggestions, or bug reports feel free to drop by the [project support server.](https://discord.gg/Np3FCUn)
 
@@ -27,7 +28,10 @@ If you have questions, suggestions, or bug reports feel free to drop by the [pro
   * [Entity Feed](#entity-feed)
   * [Radar Feed](#radar-feed)
 - [Branch overview](#branch-overview)
-- [Installation](#installation)
+- [Hosting Insight](#hosting-insight)
+  * [Docker](#hosting-insight)
+  * [Binaries](#hosting-insight)
+  * [Source](#hosting-insight)
 - [FAQ](#frequently-asked-questions)
 - [Credits](#credits)
 - [Licenses](#licenses)
@@ -123,16 +127,30 @@ to blacklist from appearing on the radar, accessible by the ```!sync``` command.
 # Branch overview
 | Branch | Purpose |
 |---|---|
-| main | Release branch. Releases are snapshots of merges into this branch. |
-| dev | Stable with latest features. The [public bot](#links) runs this branch. |
-| experimental | Latest unstable features. You can invite the [public experimental bot](https://discordapp.com/api/oauth2/authorize?client_id=477314845608378369&permissions=149504&scope=bot), but there are no guarantees of uptime or stability. |
+| master | Stable with latest features. The [public bot](#links) runs this branch. |
+| development | Latest unstable features. You can invite the [public experimental bot](https://discordapp.com/api/oauth2/authorize?client_id=477314845608378369&permissions=149504&scope=bot), but there are no guarantees of uptime or stability. |
+| dev | Depreciated branch. |
+| experimental | Depreciated branch. |
 
-# Installation
-Packaged binaries are available for Windows and Linux under [releases](https://github.com/Nathan-LS/Insight/releases). Binary releases are the simplest way 
-to host your own Insight copy. Follow the instructions in ```Installation.md```, edit ```default-config.ini``` and you are ready to go! There are no additional downloads or package management systems to deal with.
+# Hosting Insight
+There are three ways to run and host Insight yourself if you do not wish to use the [public bot](#links).
+#### [Docker](https://hub.docker.com/r/nathanls/insight/)
+Simple to install and update. Supported on any OS that can use Docker.
+1. Create and navigate to a directory where you wish to store Insight configuration, logs, and database.
+2. Pull and run: ```docker run -it --rm -v ${PWD}:/app nathanls/insight```
+3. If you receive errors about a missing config file rename the **default-config.ini** file to **config.ini** and populate your configuration values in accordance with the Installation.md file.
+4. Automatically keep the image up to date by checking for updates before starting: ```docker pull nathanls/insight && docker run -it --rm -v ${PWD}:/app nathanls/insight```
 
-If you wish to run the latest Insight branch from source you will need a Python 3 interpreter and 
-the packages in ```requirements.txt```. The [wiki](https://github.com/Nathan-LS/Insight/wiki/Source-Installation) contains a detailed guide for 
+See [Insight on Docker Hub](https://hub.docker.com/r/nathanls/insight/) and [Docker docs](https://docs.docker.com/) for more information about using Docker.
+
+#### [Binaries](https://github.com/Nathan-LS/Insight/releases)
+Packaged binaries are available for Windows and Linux under [releases](https://github.com/Nathan-LS/Insight/releases). Docker or Python are not required to be installed when running binary releases.
+
+Follow the instructions in ```Installation.md```, edit ```default-config.ini``` and you are ready to go! There are no additional downloads or package management systems to deal with.
+
+#### [Source](https://github.com/Nathan-LS/Insight/wiki/Source-Installation)
+Requires a Python 3.6 interpreter (<=3.5 and >=3.7 not supported) and Docker for building dependencies.
+The [wiki](https://github.com/Nathan-LS/Insight/wiki/Source-Installation) contains a detailed guide for 
 source installation using a Linux operating system.
 
 # Frequently asked questions
