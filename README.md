@@ -137,9 +137,13 @@ There are three ways to run and host Insight yourself if you do not wish to use 
 #### [Docker](https://hub.docker.com/r/nathanls/insight/)
 Simple to install and update. Supported on any OS that can use Docker.
 1. Create and navigate to a directory where you wish to store Insight configuration, logs, and database.
-2. Pull and run: ```docker run -it --rm -v ${PWD}:/app nathanls/insight```
-3. If you receive errors about a missing config file rename the **default-config.ini** file to **config.ini** and populate your configuration values in accordance with the Installation.md file.
-4. Automatically keep the image up to date by checking for updates before starting: ```docker pull nathanls/insight && docker run -it --rm -v ${PWD}:/app nathanls/insight```
+2. Pull and run the image. This command will pull the stable Docker Insight image and initialize the config files in your current directory.
+
+    ```docker run -it --rm -v ${PWD}:/app nathanls/insight --docker-init```
+3. Edit ```default-config.ini``` and populate your configuration values in accordance with the Installation.md file. Rename this file to ```config.ini```.
+4. Keep the image up to date by checking for updates and then starting Insight: 
+
+    ```docker pull nathanls/insight && docker run -it --rm -v ${PWD}:/app nathanls/insight```
 
 See [Insight on Docker Hub](https://hub.docker.com/r/nathanls/insight/) and [Docker docs](https://docs.docker.com/) for more information about using Docker.
 

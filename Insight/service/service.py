@@ -70,6 +70,8 @@ class service_module(object):
                             type=str, default="sqlite-latest.sqlite")
         parser.add_argument("--crash_recovery", "-cr", action="store_true",
                             help="Automatically reboot Insight in the event of an application crash.", default=False)
+        parser.add_argument("--docker-init", "-d", action="store_true",
+                            help="Initialize the Docker volume with the configuration and README files.", default=False)
         return parser.parse_args()
 
     def get_headers(self, lib_requests=False) ->dict:
