@@ -6,7 +6,7 @@ do
   cp /InsightDocker/Insight/default-config.ini /app
   cp /InsightDocker/Insight/README.md /app
   cp /InsightDocker/Insight/LICENSE.md /app
-  cp /InsightDocker/Insight/Installation.md /app
+  cp /InsightDocker/Insight/scripts/Docker/master/README.md /app/Installation.md
   cp /InsightDocker/Insight/ChangeLog.md /app
   cp /InsightDocker/Insight/CCP.md /app
   echo "Successfully initialized the Docker volume with config and README files. Please edit the 'default-config.ini' with your configuration details and then rename it to 'config.ini'."
