@@ -31,18 +31,14 @@ class Options_ProximityIntel(opt_capradar):
                         options.add_option(discord_options.option_returns_object(name=str(i), return_object=i))
 
             try:
-                header_make(db.query(tb_systems).filter(tb_systems.name.ilike("%{}%".format(search_str))).all(),
-                            "Systems")
-                header_make(db.query(tb_constellations).filter(tb_constellations.name.ilike("%{}%".format(search_str))).all(),
-                            "Constellations")
-                header_make(db.query(tb_regions).filter(tb_regions.name.ilike("%{}%".format(search_str))).all(),
-                            "Regions")
+                header_make(SearchHelper.search(db, tb_systems, tb_systems.name, search_str), "Systems")
+                header_make(SearchHelper.search(db, tb_constellations, tb_constellations.name, search_str), "Constellations")
+                header_make(SearchHelper.search(db, tb_regions, tb_regions.name, search_str), "Regions")
                 options.add_header_row("Additional Options")
                 options.add_option(discord_options.option_returns_object("Search again", return_object=None))
                 return options
             except Exception as ex:
-                print(ex)
-                raise InsightExc.Db.DatabaseError
+                raise ex
             finally:
                 db.close()
 

@@ -38,17 +38,16 @@ class Options_EnFeed(Base_Feed.base_activefeed):
                     for i in row_list:
                         __options.add_option(dOpt.option_returns_object(name=i.get_name(), return_object=i))
             try:
-                header_make(db.query(tb_alliances).filter(tb_alliances.alliance_name.ilike("%{}%".format(search_str))).all(),"Alliances")
-                header_make(db.query(tb_corporations).filter(tb_corporations.corporation_name.ilike("%{}%".format(search_str))).all(),"Corporations")
-                header_make(db.query(tb_characters).filter(tb_characters.character_name.ilike("%{}%".format(search_str))).all(),"Pilots")
+                header_make(SearchHelper.search(db, tb_alliances, tb_alliances.alliance_name, search_str), "Alliances")
+                header_make(SearchHelper.search(db, tb_corporations, tb_corporations.corporation_name, search_str), "Corporations")
+                header_make(SearchHelper.search(db, tb_characters, tb_characters.character_name, search_str),"Pilots")
                 __options.add_header_row("Additional Options")
                 __options.add_option(dOpt.option_returns_object("Search again", return_object=None))
+                return __options
             except Exception as ex:
-                print(ex)
-                db.rollback()
+                raise ex
             finally:
                 db.close()
-                return __options
 
         __search = dOpt.mapper_return_noOptions(self.cfeed.discord_client, message_object)
         __search.set_main_header("Enter the name of an entity you wish to track.\n\n"
@@ -57,6 +56,8 @@ class Options_EnFeed(Base_Feed.base_activefeed):
         __selected_option = None
         while __selected_option is None:
             __search_name = await __search()
+            if len(__search_name) <= 2:
+                raise InsightExc.userInput.ShortSearchCriteria(min_length=3)
             __func = partial(id_resolver.api_mass_id_resolve,self.cfeed.service,__search_name)
             await self.cfeed.discord_client.loop.run_in_executor(None, __func) #lookup name from eve api first and add to db
             __found_results = await self.cfeed.discord_client.loop.run_in_executor(None,partial(make_options,__search_name))

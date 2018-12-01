@@ -78,7 +78,9 @@ class mapper_index(object):
     def set_bit_length(self, bit_l: int):
         self.maxbitlength = bit_l
 
-    def add_option(self, mapper_option_obj:option_calls_coroutine):
+    def add_option(self, mapper_option_obj: option_calls_coroutine):
+        if self.__current_option_index() > 400:
+            raise InsightExc.userInput.TooManyOptions
         if isinstance(mapper_option_obj, option_calls_coroutine) or isinstance(mapper_option_obj,option_returns_object):
             mapper_option_obj.set_index(self.__current_option_index())
             self.__option_container.append(mapper_option_obj)

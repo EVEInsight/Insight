@@ -81,15 +81,14 @@ class Options_CapRadar(Base_Feed.base_activefeed):
                     for i in row_list:
                         __options.add_option(discord_options.option_returns_object(name=str(i), return_object=i))
             try:
-                header_make(db.query(tb_systems).filter(tb_systems.name.ilike("%{}%".format(search_str))).all(),"Systems")
+                header_make(SearchHelper.search(db, tb_systems, tb_systems.name, search_str), "Systems")
                 __options.add_header_row("Additional Options")
                 __options.add_option(discord_options.option_returns_object("Search again",return_object=None))
+                return __options
             except Exception as ex:
-                print(ex)
-                db.rollback()
+                raise ex
             finally:
                 db.close()
-                return __options
 
         __search = discord_options.mapper_return_noOptions(self.cfeed.discord_client, message_object)
         __search.set_main_header("Enter the name of a new base system.")
@@ -240,16 +239,15 @@ class Options_CapRadar(Base_Feed.base_activefeed):
                         res_name = "ID: {} Name: {}".format(str(i.get_id()), i.get_name())
                         results.add_option(discord_options.option_returns_object(name=res_name, return_object=i))
             try:
-                header_make(db.query(tb_types).filter((tb_types.type_name.ilike("%{}%".format(s_str))) | (
-                    tb_types.type_id.ilike("%{}%".format(s_str)))).all(), "Types")
-                header_make(db.query(tb_groups).filter((tb_groups.name.ilike("%{}%".format(s_str))) | (
-                    tb_groups.group_id.ilike("%{}%".format(s_str)))).all(), "Groups")
+                header_make(SearchHelper.search(db, tb_types, tb_types.type_name, s_str), "Types")
+                header_make(SearchHelper.search(db, tb_types, tb_types.type_id, s_str), "Types")
+                header_make(SearchHelper.search(db, tb_groups, tb_groups.name, s_str), "Groups")
+                header_make(SearchHelper.search(db, tb_groups, tb_groups.group_id, s_str), "Groups")
                 results.add_header_row("Additional Options")
                 results.add_option(discord_options.option_returns_object("Search again", return_object=None))
                 return results
             except Exception as ex:
-                print(ex)
-                raise InsightExc.Db.DatabaseError
+                raise ex
             finally:
                 db.close()
 

@@ -34,7 +34,7 @@ class InsightProgrammingError(InsightException):
 
 
 class TooManyOptions(InsightException):
-    def __init__(self, message="There are too many options to show! If you are searching, please refine your search. "
+    def __init__(self, message="There are too many options to show! If you are searching please refine your search. "
                                "Ensure Insight has the 'Embed Links' role in this channel as more options can be "
                                "displayed through Discord rich embeds."):
         super().__init__(message)
@@ -52,4 +52,11 @@ class NotFloat(InsightException):
 
 class CommandNotFound(InsightException):
     def __init__(self, message="Command not found."):
+        super().__init__(message)
+
+
+class ShortSearchCriteria(InsightException):
+    def __init__(self, min_length=2, message=""):
+        if not message:
+            message = "The minimum search length is {} characters. Please refine your search.".format(min_length)
         super().__init__(message)

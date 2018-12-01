@@ -12,5 +12,6 @@ from .alliances import Alliances as tb_alliances
 from .kills import Kills as tb_kills
 from .mass_name_resolve import name_resolve as name_resolver
 from .mass_id_resolve import id_resolve as id_resolver
+from .SearchHelper import SearchHelper
 from .locations import Locations as tb_locations
 from .stargates import Stargates as tb_stargates
