@@ -173,6 +173,8 @@ class Discord_Insight_Client(discord.Client):
         if not await self.commandLookup.is_command(message):
             return
         sem = await self.get_semaphore(message.channel)
+        lg = InsightLogger.InsightLogger.get_logger('Insight.command.{}.{}'.format(str(type(message.channel)).replace(' ', ''),
+                                                                           message.channel.id), 'Insight_command.log', child=True)
         async with sem:
             try:
                 feed = await self.channel_manager.get_channel_feed(message.channel)
@@ -213,12 +215,14 @@ class Discord_Insight_Client(discord.Client):
                     await self.commandLookup.notfound(message)
                 await asyncio.sleep(3)
             except InsightExc.InsightException as ex:
+                lg.exception(ex)
                 try:
                     await message.channel.send("{}\n{}".format(message.author.mention, str(ex)))
                 except:
                     pass
-                await asyncio.sleep(20)
-            except discord.Forbidden:
+                await asyncio.sleep(30)
+            except discord.Forbidden as ex:
+                lg.exception(ex)
                 if isinstance(message.channel, discord.TextChannel) and \
                         message.channel.permissions_for(message.channel.guild.me).send_messages:
                     try:
@@ -227,7 +231,8 @@ class Discord_Insight_Client(discord.Client):
                     except:
                         pass
                 await asyncio.sleep(30)
-            except discord.NotFound:
+            except discord.NotFound as ex:
+                lg.exception(ex)
                 await asyncio.sleep(60)
             except asyncio.CancelledError:
                 try:
@@ -236,7 +241,7 @@ class Discord_Insight_Client(discord.Client):
                 except:
                     pass
             except Exception as ex:
-                traceback.print_exc()
+                lg.exception(ex)
                 try:
                     await message.channel.send(
                         "{}\nUncaught exception: '{}'.".format(message.author.mention, str(ex.__class__.__name__)))
