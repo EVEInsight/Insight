@@ -43,6 +43,7 @@ WORKDIR /InsightDocker/Insight
 RUN rm /InsightDocker/python-client -R
 RUN pip3 install --upgrade -r requirements.txt
 RUN cp /InsightDocker/Insight/scripts/Docker/DockerEntry.sh /InsightDocker
-RUN chmod +x /InsightDocker/DockerEntry.sh
+RUN cp /InsightDocker/Insight/scripts/Docker/DockerBinBuild.sh /InsightDocker
+RUN chmod +x /InsightDocker/DockerEntry.sh /InsightDocker/DockerBinBuild.sh
 WORKDIR /app
 ENTRYPOINT ["/InsightDocker/DockerEntry.sh", "python3", "/InsightDocker/Insight/Insight", "-sde", "/InsightDocker/sqlite-latest.sqlite"]

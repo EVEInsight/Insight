@@ -1,6 +1,7 @@
 # Supported tags and ```Dockerfile``` links
 * ```latest``` ([master/Dockerfile](https://github.com/Nathan-LS/Insight/blob/master/scripts/Docker/master/Dockerfile))
 * ```development``` ([development/Dockerfile](https://github.com/Nathan-LS/Insight/blob/master/scripts/Docker/development/Dockerfile))
+
 # Quick reference
 * **Where to get help:**
 
@@ -13,7 +14,7 @@
 Insight provides EVE Online killmail streaming for Discord. Insight can stream personal or corporate killboards, detect supercapitals with a proximity radar, and more!
 Killmails and intel are presented in Discord rich embeds containing relevant links and images to quickly identify important information.
 
-## Feature Overview
+# Feature Overview
 * Entity feeds ideal for personal, corporate, or alliance killboard streaming.
 * Radar feeds ideal for tracking hostile incursions into friendly space, hunting expensive targets within jump range, or detecting capital escalations in real time.
 * Proximity watches ideal for finding potential fleets to fight, tracking hostile fleet movement within your region, or alerting you of nearby hostiles within a few jumps of your base systems.
@@ -66,18 +67,18 @@ like this:
 5. Create your new CCP App and copy the **Client ID**, **Secret Key**, and **Callback URL** into the appropriate sections in your **config** file.
 6. Save your config file and rename it from ```default-config.ini``` to ```config.ini```.
 
-## Updating
+# Updating
 This Docker repository utilizes automated builds. The Docker images are automatically updated whenever there are new commits to the [Git repo](https://github.com/Nathan-LS/Insight). You can update your image locally by running:
 ```
 $ docker pull nathanls/insight
 ```
 There is no need to manually update the SDE or any files associated with the Insight build as the latest dependencies are all included within the image.
 
-## Inviting your bot
+# Inviting your bot
 1. Find your Discord application's id from [Discord Apps](https://discordapp.com/developers/applications/me).
 2. Edit this URL to include your app's client ID:
     ```
     https://discordapp.com/api/oauth2/authorize?client_id=YourClientIDHere&permissions=149504&scope=bot
     ```
-### or
+**or**
 1. A link is provided when Insight starts. Check the program console and copy down the **Invite Link**.

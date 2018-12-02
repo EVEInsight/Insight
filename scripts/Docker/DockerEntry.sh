@@ -12,6 +12,8 @@ do
   echo "Successfully initialized the Docker volume with config and README files. Please edit the 'default-config.ini' with your configuration details and then rename it to 'config.ini'."
   exit 0
  fi
+ if [ "$a" = "-b" ] || [ "$a" = "--build-binary" ]; then
+  exec /InsightDocker/DockerBinBuild.sh
+ fi
 done
-cp /InsightDocker/Insight/default-config.ini /app
 exec "$@"
