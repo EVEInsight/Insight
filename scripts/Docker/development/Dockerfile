@@ -23,7 +23,7 @@ RUN wget https://www.fuzzwork.co.uk/dump/sqlite-latest.sqlite.bz2.md5
 RUN md5sum -c sqlite-latest.sqlite.bz2.md5
 RUN bunzip2 sqlite-latest.sqlite.bz2
 
-FROM python:3.6-slim
+FROM python:3.6-slim-jessie
 LABEL maintainer="nathan@nathan-s.com"
 LABEL url="https://github.com/Nathan-LS/Insight"
 ARG branch=development

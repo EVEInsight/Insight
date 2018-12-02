@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-python3 install pyinstaller
+pip3 install pyinstaller
 cp /app/config.ini /InsightDocker/Insight
 cp /app/Database.db /InsightDocker/Insight
 mv /InsightDocker/sqlite-latest.sqlite /InsightDocker/Insight
 cd /InsightDocker/Insight
 pyinstaller scripts/PyInstaller.spec --clean
-cp /InsightDocker/Insight/dist /app
-cp /InsightDocker/Insight/distTest /app
+cp /InsightDocker/Insight/dist /app -R
+cp /InsightDocker/Insight/distTest /app -R
 cd /app
 rm /InsightDocker -R
 ldd --version
