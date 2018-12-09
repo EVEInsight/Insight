@@ -58,6 +58,7 @@ class background_tasks(object):
 
     async def bot_status(self):
         await self.client.wait_until_ready()
+        lg = InsightLogger.InsightLogger.get_logger('Insight.status', 'Insight_status.log')
         while True:
             try:
                 update = await self.client.loop.run_in_executor(None, self.client.service.update_available)
@@ -80,6 +81,7 @@ class background_tasks(object):
                                                                        str(stats_feeds[1]))
                 game_act = discord.Activity(name=status_str, type=discord.ActivityType.watching)
                 await self.client.change_presence(activity=game_act, status=d_status)
+                lg.info(status_str)
             except Exception as ex:
                 print(ex)
             next_run = 300 - (time.time() % 300)  # get time to next 5 minute interval

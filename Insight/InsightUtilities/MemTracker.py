@@ -10,8 +10,17 @@ class MemTracker(object):
     @classmethod
     def str_print_(cls, rows, limit=15, sort='size', order='descending'):
         """helper function to redirect output from pympler from stdout to string"""
-        str_output = ""
+        total_objects = 0
+        total_memory = 0
+        for r in rows:
+            total_objects += r[1]
+            total_memory += r[2]
+        str_output = "Total Objects: {:,} Total Mem: {:,.2f} MB\n".format(total_objects, total_memory / (1024 * 1024))
+        str_output += "Sorted by mem size\n"
         for line in summary.format_(rows, limit=limit, sort=sort, order=order):
+            str_output += line + '\n'
+        str_output += "Sorted by total amount\n"
+        for line in summary.format_(rows, limit=limit, sort='#', order=order):
             str_output += line + '\n'
         return str_output
 
