@@ -194,9 +194,16 @@ class discord_feed_service(object):
         """!admin - Access the Insight admin console to execute administrator functionality."""
         await self.discord_client.unbound_commands.command_admin(message_object)
 
-    def add_km(self,km):
+    def add_km(self, km):
+        if self.kmQueue.sync_q.qsize() >= 100:
+            self.logger.info('Emptying KM queue with a total of: {} elements.'.format(self.kmQueue.sync_q.qsize()))
+            while True:
+                try:
+                    self.kmQueue.sync_q.get_nowait()
+                except queue.Empty:
+                    break
         if self.cached_feed_table.feed_running:
-            assert isinstance(km,dbRow.tb_kills)
+            assert isinstance(km, dbRow.tb_kills)
             __visual = self.linked_visual(km)
             if __visual:
                 self.kmQueue.sync_q.put_nowait(__visual)
@@ -283,6 +290,7 @@ class discord_feed_service(object):
             except Exception as ex:
                 print('Error {} - when sending KM. Other'.format(ex))
                 self.logger.exception(ex)
+            __item = None  # remove reference
             await asyncio.sleep(.1)
 
     async def remove(self):
