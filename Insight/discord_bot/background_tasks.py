@@ -9,6 +9,7 @@ import aiohttp
 import traceback
 import time
 import InsightLogger
+import InsightUtilities
 
 
 class background_tasks(object):
@@ -22,6 +23,7 @@ class background_tasks(object):
         self.task_sync_contacts = self.client.loop.create_task(self.sync_contacts())
         self.task_bot_status = self.client.loop.create_task(self.bot_status())
         self.task_discordbots_api = self.client.loop.create_task(self.discordbots_api())
+        self.task_mem = self.client.loop.create_task(self.mem_profiler())
 
     async def __helper_update_contacts_channels(self):
         lg = InsightLogger.InsightLogger.get_logger('Tokens', 'Tokens.log')
@@ -108,6 +110,13 @@ class background_tasks(object):
                         print(ex)
                         traceback.print_exc()
                     await asyncio.sleep(900)
+
+    async def mem_profiler(self):
+        await self.client.wait_until_ready()
+        mem_tracker = InsightUtilities.MemTracker()
+        while True:
+            await self.client.loop.run_in_executor(None, mem_tracker.log_summary)
+            await asyncio.sleep(3600)
 
 
 import discord_bot
