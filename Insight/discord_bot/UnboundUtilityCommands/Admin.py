@@ -12,6 +12,8 @@ class Admin(UnboundCommandBase):
             options.set_main_header("Select an Insight administrator function to execute.")
             options.add_option(dOpt.option_calls_coroutine(self.unbound.admin_resetnames.command_description(), "",
                                                            self.unbound.admin_resetnames.run_command(d_message)))
+            options.add_option(dOpt.option_calls_coroutine(self.unbound.admin_mem.command_description(), "",
+                                                           self.unbound.admin_mem.run_command(d_message)))
             options.add_option(dOpt.option_calls_coroutine(self.unbound.admin_backup.command_description(), "",
                                                            self.unbound.admin_backup.run_command(d_message)))
             options.add_option(dOpt.option_calls_coroutine(self.unbound.quit.command_description(), "",
