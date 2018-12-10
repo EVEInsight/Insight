@@ -10,5 +10,6 @@ class MemoryDiagnostic(UnboundCommandBase):
     def command_description(self):
         return "Memory Diagnostic - Display the largest items in memory."
 
-    def get_text(self, message_text: str):
-        return MemTracker.summary()[:2000]
+    async def get_text(self, message_text: str):
+        result = await self.client.loop.run_in_executor(None, MemTracker.summary)
+        return result[:2000]

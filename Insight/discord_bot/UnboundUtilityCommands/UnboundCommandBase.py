@@ -30,16 +30,16 @@ class UnboundCommandBase(object):
         except Exception as ex:
             print(ex)
 
-    def get_embed(self, message_text: str)->discord.Embed:
+    async def get_embed(self, message_text: str)->discord.Embed:
         e = discord.Embed()
         e.color = discord.Color(659493)
         e.timestamp = datetime.datetime.utcnow()
         e.set_author(name=self.__class__.__name__)
         e.set_footer(text='Utility command')
-        e.description = self.get_text(message_text)
+        e.description = await self.get_text(message_text)
         return e
 
-    def get_text(self, message_text: str)->str:
+    async def get_text(self, message_text: str)->str:
         return "Not implemented."
 
     @classmethod
@@ -61,9 +61,9 @@ class UnboundCommandBase(object):
     async def run_command(self, d_message: discord.Message, m_text: str = ""):
         try:
             if self.can_embed(d_message):
-                await d_message.channel.send(content='{}\n'.format(d_message.author.mention), embed=self.get_embed(m_text))
+                await d_message.channel.send(content='{}\n'.format(d_message.author.mention), embed=await self.get_embed(m_text))
             elif self.can_text(d_message):
-                await d_message.channel.send(content='{}\n{}'.format(d_message.author.mention, self.get_text(m_text)))
+                await d_message.channel.send(content='{}\n{}'.format(d_message.author.mention, await self.get_text(m_text)))
             else:  # permissions error
                 pass
         except discord.HTTPException as ex:
