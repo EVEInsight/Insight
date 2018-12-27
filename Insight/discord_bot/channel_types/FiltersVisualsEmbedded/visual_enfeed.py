@@ -88,14 +88,17 @@ class visual_enfeed(base_visual):
 
     @classmethod
     def get_desc(cls):
-        return "Full - Detailed killmail overview, pilot and ship images, color sidebar, and zKillboard/Dotlan links. Size: Large"
+        return "Full (Legacy) - The original legacy appearance. Detailed killmail overview, pilot and ship images, " \
+               "color sidebar, and zKillboard/Dotlan links with large fields and images. Size: Large"
 
     @classmethod
     def appearance_options(cls):
-        yield cls
+        yield VisualEnfeedUtility
         yield VisualEnfeedCompact
         yield VisualEnfeedLinkOnly
+        yield cls
 
 
 from .VisualEnfeedCompact import VisualEnfeedCompact
 from .VisualEnfeedLinkOnly import VisualEnfeedLinkOnly
+from .VisualEnfeedUtility import VisualEnfeedUtility

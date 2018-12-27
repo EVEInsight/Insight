@@ -105,15 +105,15 @@ class visual_capradar(base_visual):
 
     @classmethod
     def appearance_options(cls):
-        yield cls
         yield VisualCapRadarUtility
         yield VisualCapRadarUtilityMinimal
         yield VisualCapRadarCompact
         yield VisualCapRadarLinkOnly
+        yield cls
 
     @classmethod
     def get_desc(cls):
-        return "Full - Detailed count breakdown of tracked ship types, highest valued attacker details, " \
+        return "Full (Legacy) - Detailed count breakdown of tracked ship types, highest valued attacker details, " \
                "system/location details, and generated Dotlan routes from base system. Size: Large"
 
 
