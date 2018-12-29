@@ -2,7 +2,7 @@ import discord
 from concurrent.futures import ThreadPoolExecutor
 import service
 from .background_tasks import background_tasks
-from .DiscordCommands import DiscordCommands
+import InsightUtilities
 import sys
 from functools import partial
 import InsightExc
@@ -22,7 +22,7 @@ class Discord_Insight_Client(discord.Client):
         self.__multiproc_dict: dict = multiproc_dict
         self.channel_manager: service.Channel_manager = self.service.channel_manager
         self.channel_manager.set_client(self)
-        self.commandLookup = DiscordCommands()
+        self.commandLookup = InsightUtilities.InsightCommands()
         self.background_tasks = background_tasks(self)
         self.threadpool_insight = ThreadPoolExecutor(max_workers=5)
         self.threadpool_zk = ThreadPoolExecutor(max_workers=2)
@@ -31,7 +31,7 @@ class Discord_Insight_Client(discord.Client):
         self.loop.set_default_executor(self.threadpool_insight)
         self.loop.create_task(self.setup_tasks())
         self.__id_semaphores = {}
-        self.__id_create_locks = {}
+        self.__id_channel_locks = {}
 
     async def on_ready(self):
         print('-------------------')
@@ -48,6 +48,7 @@ class Discord_Insight_Client(discord.Client):
 
     async def setup_tasks(self):
         await self.wait_until_ready()
+        self.commandLookup.set_bot_mention_prefix(self.user.mention)
         try:
             game_act = discord.Activity(name="Starting...", type=discord.ActivityType.watching)
             await self.change_presence(activity=game_act, status=discord.Status.dnd)
@@ -127,13 +128,13 @@ class Discord_Insight_Client(discord.Client):
             print('Error when getting semaphore: {}'.format(ex))
             return asyncio.Semaphore(value=3)
 
-    async def get_create_lock(self, channel_object) ->asyncio.Lock:
+    async def get_channel_lock(self, channel_object) ->asyncio.Lock:
         try:
             assert channel_object.id is not None
-            cLock = self.__id_create_locks.get(channel_object.id)
+            cLock = self.__id_channel_locks.get(channel_object.id)
             if not isinstance(cLock, asyncio.Lock):
                 cLock = asyncio.Lock()
-                self.__id_create_locks[channel_object.id] = cLock
+                self.__id_channel_locks[channel_object.id] = cLock
             return cLock
         except Exception as ex:
             print('Error when getting create lock: {}'.format(ex))
@@ -170,49 +171,32 @@ class Discord_Insight_Client(discord.Client):
         await self.wait_until_ready()
         if message.author.id == self.user.id or message.author.bot:
             return
-        if not await self.commandLookup.is_command(message):
+        if not self.commandLookup.is_command(['!', '?'], message.content):
             return
         sem = await self.get_semaphore(message.channel)
         lg = InsightLogger.InsightLogger.get_logger('Insight.command.{}.{}'.format(str(type(message.channel)).replace(' ', ''),
                                                                            message.channel.id), 'Insight_command.log', child=True)
         async with sem:
             try:
-                feed = await self.channel_manager.get_channel_feed(message.channel)
-                if await self.commandLookup.create(message):
-                    loc = await self.get_create_lock(message.channel)
-                    async with loc:
-                        feed = await self.channel_manager.get_channel_feed(message.channel)
-                        await feed.proxy_lock(feed.command_create(message), message.author, 1)
-                elif await self.commandLookup.settings(message):
-                    await feed.proxy_lock(feed.command_settings(message), message.author, 1)
-                elif await self.commandLookup.start(message):
-                    await feed.proxy_lock(feed.command_start(message), message.author, 1)
-                elif await self.commandLookup.stop(message):
-                    await feed.proxy_lock(feed.command_stop(message), message.author, 1)
-                elif await self.commandLookup.sync(message):
-                    await feed.proxy_lock(feed.command_sync(message), message.author, 1)
-                elif await self.commandLookup.remove(message):
-                    await feed.proxy_lock(feed.command_remove(message), message.author, 1)
-                elif await self.commandLookup.help(message):
-                    await feed.proxy_lock(feed.command_help(message), message.author, 0)
-                elif await self.commandLookup.about(message):
-                    await feed.proxy_lock(feed.command_about(message), message.author, 0)
-                elif await self.commandLookup.status(message):
-                    await feed.proxy_lock(feed.command_status(message), message.author, 1)
-                elif await self.commandLookup.lock(message):
-                    await feed.proxy_lock(feed.command_lock(message), message.author, 1, ignore_channel_setting=True)
-                elif await self.commandLookup.unlock(message):
-                    await feed.proxy_lock(feed.command_unlock(message), message.author, 1, ignore_channel_setting=True)
-                elif await self.commandLookup.quit(message):
-                    await feed.proxy_lock(feed.command_quit(message), message.author, 2, ignore_channel_setting=True)
-                elif await self.commandLookup.admin(message):
-                    await feed.proxy_lock(feed.command_admin(message), message.author, 2, ignore_channel_setting=True)
-                elif await self.commandLookup.eightball(message):
-                    await feed.proxy_lock(feed.command_8ball(message), message.author, 0)
-                elif await self.commandLookup.dscan(message):
-                    await feed.proxy_lock(feed.command_dscan(message), message.author, 0)
-                else:
-                    await self.commandLookup.notfound(message)
+                loc = await self.get_channel_lock(message.channel)
+                async with loc:
+                    feed = await self.channel_manager.get_channel_feed(message.channel)
+                    await self.commandLookup.parse_and_run(message.channel.id, ['!', '?'], message.content,
+                                                           create=feed.proxy_lock(feed.command_create(message), message.author, 1),
+                                                           settings=feed.proxy_lock(feed.command_settings(message), message.author, 1),
+                                                           start=feed.proxy_lock(feed.command_start(message), message.author, 1),
+                                                           stop=feed.proxy_lock(feed.command_stop(message), message.author, 1),
+                                                           sync=feed.proxy_lock(feed.command_sync(message), message.author, 1),
+                                                           remove=feed.proxy_lock(feed.command_remove(message), message.author, 1),
+                                                           help=feed.proxy_lock(feed.command_help(message), message.author, 0),
+                                                           about=feed.proxy_lock(feed.command_about(message), message.author, 0),
+                                                           status=feed.proxy_lock(feed.command_status(message), message.author, 1),
+                                                           lock=feed.proxy_lock(feed.command_lock(message), message.author, 1, ignore_channel_setting=True),
+                                                           unlock=feed.proxy_lock(feed.command_unlock(message), message.author, 1, ignore_channel_setting=True),
+                                                           quit=feed.proxy_lock(feed.command_quit(message), message.author, 2, ignore_channel_setting=True),
+                                                           admin=feed.proxy_lock(feed.command_admin(message), message.author, 2, ignore_channel_setting=True),
+                                                           eightball=feed.proxy_lock(feed.command_8ball(message), message.author, 0),
+                                                           dscan=feed.proxy_lock(feed.command_dscan(message), message.author, 0))
                 await asyncio.sleep(3)
             except InsightExc.InsightException as ex:
                 lg.exception(ex)
