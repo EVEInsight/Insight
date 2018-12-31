@@ -6,8 +6,7 @@ import datetime
 
 
 class InsightCommands(metaclass=InsightSingleton):
-    def __init__(self, prefix_self: str = None):
-        self.prefix_self = prefix_self
+    def __init__(self):
         self.commands = {
             'about':    ['about', 'info'],
             'help':     ['help', 'commands'],
@@ -31,9 +30,6 @@ class InsightCommands(metaclass=InsightSingleton):
     def __similar(self, message_txt):
         return difflib.get_close_matches(message_txt.lower(), self.all_commands)
 
-    def set_bot_mention_prefix(self, prefix: str):
-        self.prefix_self = prefix
-
     async def parse_and_run(self, channel_id: int, prefixes: list, message_txt: str, **kwargs):
         if not self.is_command(prefixes, message_txt):
             return
@@ -50,14 +46,9 @@ class InsightCommands(metaclass=InsightSingleton):
             self.raise_notfound(channel_id, prefixes, message_txt)
 
     def is_command(self, prefixes: list, message_txt: str)->bool:
-        if self.prefix_self is not None and message_txt.startswith(self.prefix_self):
-            return True
-        else:
-            return any(message_txt.startswith(i.lower()) for i in prefixes)
+        return any(message_txt.startswith(i.lower()) for i in prefixes)
 
     def strip_prefix(self, prefixes: list, message_txt: str)->str:
-        if self.prefix_self is not None:
-            prefixes.append(self.prefix_self)
         for p in prefixes:
             if message_txt.startswith(p):
                 new_str = message_txt.replace(p, "", 1)
@@ -78,7 +69,7 @@ class InsightCommands(metaclass=InsightSingleton):
 
     def raise_notfound(self, channel_id: int, prefixes: list, message_txt: str):
         if self.can_raise_notfound(channel_id):
-            prefix_s = str(self.prefix_self + " ") if len(prefixes) == 0 else min(prefixes, key=len)
+            prefix_s = "" if len(prefixes) == 0 else min(prefixes, key=len)
             similar_commands = self.__similar(message_txt)
             resp_text = "The command: '{}' was not found.\n\n".format(message_txt)
             if len(similar_commands) == 0:

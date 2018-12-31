@@ -22,6 +22,7 @@ class Discord_Insight_Client(discord.Client):
         self.__multiproc_dict: dict = multiproc_dict
         self.channel_manager: service.Channel_manager = self.service.channel_manager
         self.channel_manager.set_client(self)
+        self.serverManager = service.ServerManager(self.service, self)
         self.commandLookup = InsightUtilities.InsightCommands()
         self.background_tasks = background_tasks(self)
         self.threadpool_insight = ThreadPoolExecutor(max_workers=5)
@@ -48,12 +49,12 @@ class Discord_Insight_Client(discord.Client):
 
     async def setup_tasks(self):
         await self.wait_until_ready()
-        self.commandLookup.set_bot_mention_prefix(self.user.mention)
         try:
             game_act = discord.Activity(name="Starting...", type=discord.ActivityType.watching)
             await self.change_presence(activity=game_act, status=discord.Status.dnd)
         except Exception as ex:
             print(ex)
+        await self.serverManager.loader()
         self.loop.create_task(self.send_multiproc_status())
         await self.service.zk_obj.make_queues()
         self.loop.create_task(self.service.zk_obj.pull_kms_ws())
@@ -171,7 +172,7 @@ class Discord_Insight_Client(discord.Client):
         await self.wait_until_ready()
         if message.author.id == self.user.id or message.author.bot:
             return
-        if not self.commandLookup.is_command(['!', '?'], message.content):
+        if not self.commandLookup.is_command(await self.serverManager.get_server_prefixes(message.channel), message.content):
             return
         sem = await self.get_semaphore(message.channel)
         lg = InsightLogger.InsightLogger.get_logger('Insight.command.{}.{}'.format(str(type(message.channel)).replace(' ', ''),
@@ -181,7 +182,7 @@ class Discord_Insight_Client(discord.Client):
                 loc = await self.get_channel_lock(message.channel)
                 async with loc:
                     feed = await self.channel_manager.get_channel_feed(message.channel)
-                    await self.commandLookup.parse_and_run(message.channel.id, ['!', '?'], message.content,
+                    await self.commandLookup.parse_and_run(message.channel.id, await self.serverManager.get_server_prefixes(message.channel), message.content,
                                                            create=feed.proxy_lock(feed.command_create(message), message.author, 1),
                                                            settings=feed.proxy_lock(feed.command_settings(message), message.author, 1),
                                                            start=feed.proxy_lock(feed.command_start(message), message.author, 1),
