@@ -74,8 +74,7 @@ class VisualProximityWatch(base_visual):
         self.embed.set_footer(text=footer_str)
 
     def run_filter(self):
-        tdiff = datetime.datetime.utcnow() - datetime.timedelta(minutes=self.feed_options.max_km_age)
-        if tdiff >= self.km.killmail_time:
+        if (datetime.datetime.utcnow() - self.max_delta()) >= self.km.killmail_time:
             return False
         list_sys_reg = self.filters.object_filter_systems + self.filters.object_filter_constellations + self.filters.object_filter_regions
         self.base_sysConstReg = self.km.filter_system_gates(self.filters.object_filter_systems, self.in_system_nonly, self.feed.service)
@@ -104,6 +103,9 @@ class VisualProximityWatch(base_visual):
         else:
             self.color = discord.Color(4128800)
         super().set_frame_color()
+
+    def max_delta(self):
+        return datetime.timedelta(minutes=self.feed_options.max_km_age)
 
     @classmethod
     def feed_specific_row_type(cls):

@@ -126,6 +126,9 @@ class base_visual(object):
         raise NotImplementedError
         #return tb_enfeed  <example
 
+    def max_delta(self)->datetime.timedelta:
+        return datetime.timedelta(days=7)
+
     @classmethod
     def get_appearance_class(cls, c_id):
         try:

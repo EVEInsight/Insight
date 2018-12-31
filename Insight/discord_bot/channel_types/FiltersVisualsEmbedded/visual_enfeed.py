@@ -52,9 +52,7 @@ class visual_enfeed(base_visual):
         pass
 
     def run_filter(self):
-        tdiff = datetime.datetime.utcnow() - datetime.timedelta(
-            hours=3)  # hardcoded entity feed limits to prevent posting month old KMs
-        if tdiff >= self.km.killmail_time:
+        if (datetime.datetime.utcnow() - self.max_delta()) >= self.km.killmail_time:
             return False
         if self.feed_options.minValue > self.km.totalValue:
             return False
@@ -81,6 +79,9 @@ class visual_enfeed(base_visual):
             else:
                 return False
         return False
+
+    def max_delta(self):
+        return datetime.timedelta(days=1)
 
     @classmethod
     def feed_specific_row_type(cls):

@@ -82,8 +82,7 @@ class visual_capradar(base_visual):
         return return_str
 
     def run_filter(self):
-        tdiff = datetime.datetime.utcnow() - datetime.timedelta(minutes=self.feed_options.max_km_age)
-        if tdiff >= self.km.killmail_time:
+        if (datetime.datetime.utcnow() - self.max_delta()) >= self.km.killmail_time:
             return False
         self.baseSystem = self.km.filter_system_ly(self.filters.object_filter_systems, self.in_system_ly)
         if self.baseSystem is None:
@@ -98,6 +97,9 @@ class visual_capradar(base_visual):
         if len(self.tracked_hostiles) == 0:
             return False
         return True
+
+    def max_delta(self):
+        return datetime.timedelta(minutes=self.feed_options.max_km_age)
 
     @classmethod
     def feed_specific_row_type(cls):
