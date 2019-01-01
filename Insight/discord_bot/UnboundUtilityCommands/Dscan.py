@@ -6,7 +6,7 @@ class Dscan(UnboundCommandBase):
         super().__init__(unbound_service)
         self.resp = "The Dscan service is currently in development!"
 
-    async def get_text(self, message_text: str)->str:
+    async def get_text(self, d_message: discord.Message, message_text: str, **kwargs)->str:
         return self.resp
 
 

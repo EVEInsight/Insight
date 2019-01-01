@@ -1,4 +1,4 @@
-from . import Dscan, EightBall, Quit, Admin, AdminResetNames, Backup, Reboot, Update, MemoryDiagnostic
+from . import Dscan, EightBall, Quit, Admin, AdminResetNames, Backup, Reboot, Update, MemoryDiagnostic, Prefix
 import discord
 import discord_bot
 
@@ -7,9 +7,12 @@ class UnboundUtilityCommands(object):
     def __init__(self, insight_client):
         assert isinstance(insight_client, discord_bot.Discord_Insight_Client)
         self.client: discord_bot.Discord_Insight_Client = insight_client
+        self.serverManager = self.client.serverManager
+        self.commandParser = self.client.commandLookup
         self.threadpool_unbound = self.client.threadpool_unbound
         self.dscan = Dscan.Dscan(self)
         self.eightBall = EightBall.EightBall(self)
+        self.prefix = Prefix.Prefix(self)
         self.quit = Quit.Quit(self)
         self.admin = Admin.Admin(self)
         self.admin_resetnames = AdminResetNames.AdminResetNames(self)
@@ -18,20 +21,21 @@ class UnboundUtilityCommands(object):
         self.admin_update = Update.Update(self)
         self.admin_mem = MemoryDiagnostic.MemoryDiagnostic(self)
 
-    def strip_command(self, message_object: discord.Message):
-        try:
-            return message_object.content.split(' ', 1)[1]
-        except IndexError:
-            return ''
+    async def strip_command(self, message_object: discord.Message):
+        prefixes = await self.serverManager.get_server_prefixes(message_object.channel)
+        return self.commandParser.strip_non_command(prefixes, message_object.content)
 
     async def command_dscan(self, message_object: discord.Message):
-        await self.dscan.run_command(message_object, self.strip_command(message_object))
+        await self.dscan.run_command(message_object, await self.strip_command(message_object))
 
     async def command_8ball(self, message_object: discord.Message):
-        await self.eightBall.run_command(message_object, self.strip_command(message_object))
+        await self.eightBall.run_command(message_object, await self.strip_command(message_object))
 
     async def command_quit(self, message_object: discord.Message):
-        await self.quit.run_command(message_object, self.strip_command(message_object))
+        await self.quit.run_command(message_object, await self.strip_command(message_object))
 
     async def command_admin(self, message_object: discord.Message):
-        await self.admin.run_command(message_object, self.strip_command(message_object))
+        await self.admin.run_command(message_object, await self.strip_command(message_object))
+
+    async def command_prefix(self, message_object: discord.Message):
+        await self.prefix.run_command(message_object, await self.strip_command(message_object))

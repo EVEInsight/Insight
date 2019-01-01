@@ -29,7 +29,7 @@ class EightBall(UnboundCommandBase):
             traceback.print_exc()
             yield from responses
 
-    async def get_text(self, message_text: str)->str:
+    async def get_text(self, d_message: discord.Message, message_text: str, **kwargs)->str:
         return str(random.choice(self.responses))
 
 

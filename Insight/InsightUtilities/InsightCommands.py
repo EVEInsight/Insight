@@ -22,7 +22,8 @@ class InsightCommands(metaclass=InsightSingleton):
             'lock':     ['lock'],
             'unlock':   ['unlock'],
             'quit':     ['quit'],
-            'admin':    ['admin']
+            'admin':    ['admin'],
+            'prefix':   ['prefix']
         }
         self.all_commands = [c for i in self.commands.values() for c in i]
         self.notfound_timers = {}
@@ -54,6 +55,14 @@ class InsightCommands(metaclass=InsightSingleton):
                 new_str = message_txt.replace(p, "", 1)
                 return new_str.strip()
         return message_txt
+
+    def strip_non_command(self, prefixes, message_txt: str)->str:
+        no_prefix = self.strip_prefix(prefixes, message_txt)
+        for c in self.all_commands:
+            if no_prefix.startswith(c):
+                new_str = no_prefix.replace(c, "", 1)
+                return new_str.strip()
+        return no_prefix
 
     def can_raise_notfound(self, channel_id: int)->bool:
         next_raise = self.notfound_timers.get(channel_id)
