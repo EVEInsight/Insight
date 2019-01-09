@@ -9,6 +9,7 @@ import queue
 import sys
 import traceback
 import InsightExc
+import InsightUtilities
 
 
 class Channel_manager(object):
@@ -16,8 +17,8 @@ class Channel_manager(object):
         self.service = service_module
         self.__channel_feed_container = {}
         self.__dm_container = {}
-        self.__discord_client:discord_bot.Discord_Insight_Client = None
-        self.__id_locks = {}
+        self.__discord_client: discord_bot.Discord_Insight_Client = None
+        self.id_locks = InsightUtilities.AsyncLockManager()
         self.__delay_post = queue.Queue()
 
     async def add_delay(self, other_time):
@@ -129,11 +130,7 @@ class Channel_manager(object):
 
     async def get_channel_feed(self, channel_object: discord.TextChannel):
         assert channel_object.id is not None
-        cLock = self.__id_locks.get(channel_object.id)
-        if not isinstance(cLock, asyncio.Lock):
-            cLock = asyncio.Lock()
-            self.__id_locks[channel_object.id] = cLock
-        async with cLock:  # race condition to prevent double loading of channels if timed correctly
+        async with (await self.id_locks.get_object(channel_object.id)):  # race condition to prevent double loading of channels if timed correctly
             retry_count = 4
             while retry_count > 0:
                 try:

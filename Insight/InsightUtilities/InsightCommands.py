@@ -68,12 +68,12 @@ class InsightCommands(metaclass=InsightSingleton):
         next_raise = self.notfound_timers.get(channel_id)
         if isinstance(next_raise, datetime.datetime):
             if datetime.datetime.utcnow() >= next_raise:
-                self.notfound_timers[channel_id] = datetime.datetime.utcnow() + datetime.timedelta(hours=6)
+                self.notfound_timers[channel_id] = datetime.datetime.utcnow() + datetime.timedelta(hours=12)
                 return True
             else:
                 return False
         else:
-            self.notfound_timers[channel_id] = datetime.datetime.utcnow() + datetime.timedelta(hours=6)
+            self.notfound_timers[channel_id] = datetime.datetime.utcnow() + datetime.timedelta(hours=12)
             return True
 
     def raise_notfound(self, channel_id: int, prefixes: list, message_txt: str):

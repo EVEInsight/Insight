@@ -6,7 +6,6 @@ import InsightUtilities
 import sys
 from functools import partial
 import InsightExc
-import traceback
 from .UnboundUtilityCommands import UnboundUtilityCommands
 import asyncio
 import InsightLogger
@@ -31,8 +30,8 @@ class Discord_Insight_Client(discord.Client):
         self.unbound_commands = UnboundUtilityCommands(self)
         self.loop.set_default_executor(self.threadpool_insight)
         self.loop.create_task(self.setup_tasks())
-        self.__id_semaphores = {}
-        self.__id_channel_locks = {}
+        self.channelLocks = InsightUtilities.AsyncLockManager(self.loop)
+        self.channelSemaphores = InsightUtilities.AsyncSemaphoreManager(self.loop)
 
     async def on_ready(self):
         print('-------------------')
@@ -117,30 +116,6 @@ class Discord_Insight_Client(discord.Client):
         self.__multiproc_dict['flag_update'] = True
         await self.reboot_self(d_author)
 
-    async def get_semaphore(self, channel_object) ->asyncio.Semaphore:
-        try:
-            assert channel_object.id is not None
-            cSem = self.__id_semaphores.get(channel_object.id)
-            if not isinstance(cSem, asyncio.Semaphore):
-                cSem = asyncio.Semaphore(value=3)
-                self.__id_semaphores[channel_object.id] = cSem
-            return cSem
-        except Exception as ex:
-            print('Error when getting semaphore: {}'.format(ex))
-            return asyncio.Semaphore(value=3)
-
-    async def get_channel_lock(self, channel_object) ->asyncio.Lock:
-        try:
-            assert channel_object.id is not None
-            cLock = self.__id_channel_locks.get(channel_object.id)
-            if not isinstance(cLock, asyncio.Lock):
-                cLock = asyncio.Lock()
-                self.__id_channel_locks[channel_object.id] = cLock
-            return cLock
-        except Exception as ex:
-            print('Error when getting create lock: {}'.format(ex))
-            return asyncio.Lock()
-
     async def on_guild_join(self, guild: discord.Guild):
         self.logger.info('Joined server ({}) with {} members.'.format(guild.name, guild.member_count))
         channel: discord.TextChannel = guild.system_channel
@@ -174,13 +149,11 @@ class Discord_Insight_Client(discord.Client):
             return
         if not self.commandLookup.is_command(await self.serverManager.get_server_prefixes(message.channel), message.content):
             return
-        sem = await self.get_semaphore(message.channel)
         lg = InsightLogger.InsightLogger.get_logger('Insight.command.{}.{}'.format(str(type(message.channel)).replace(' ', ''),
                                                                            message.channel.id), 'Insight_command.log', child=True)
-        async with sem:
+        async with (await self.channelSemaphores.get_object(message.channel.id, 3)):
             try:
-                loc = await self.get_channel_lock(message.channel)
-                async with loc:
+                async with (await self.channelLocks.get_object(message.channel.id)):
                     feed = await self.channel_manager.get_channel_feed(message.channel)
                     await self.commandLookup.parse_and_run(message.channel.id, await self.serverManager.get_server_prefixes(message.channel), message.content,
                                                            create=feed.proxy_lock(feed.command_create(message), message.author, 1),
