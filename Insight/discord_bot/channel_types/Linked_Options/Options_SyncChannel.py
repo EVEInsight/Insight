@@ -11,7 +11,7 @@ class Options_Sync(options_base.Options_Base):
     def __init__(self, insight_channel):
         assert isinstance(insight_channel, capRadar.capRadar)
         super().__init__(insight_channel)
-        self.previous_sync_print = ""
+        self.previous_sync_count = -1
 
     def yield_options(self):
         yield (self.InsightOption_addToken, False)
@@ -76,24 +76,24 @@ class Options_Sync(options_base.Options_Base):
 
         def sync_contacts(check_modify=False):
             db: Session = self.cfeed.service.get_session()
-            return_str = ""
+            previousTokenCount = self.previous_sync_count
             try:
-                __row = db.query(tb_channels).filter(tb_channels.channel_id == self.cfeed.channel_id).one()
-                __row.sync_api_contacts(self.cfeed.service)
+                channel_tokens = db.query(tb_channels).filter(tb_channels.channel_id == self.cfeed.channel_id).one()
+                channel_tokens.sync_api_contacts(self.cfeed.service)
                 db.commit()
-                return_str = __row.str_tokens()
+                previousTokenCount = len(channel_tokens.object_tokens)
                 if check_modify:
-                    if return_str == self.previous_sync_print:
+                    if previousTokenCount == self.previous_sync_count:
                         return None
                 if suppress_notify:
                     return None
-                return return_str
+                return channel_tokens.str_tokens()
             except Exception as ex:
                 print(ex)
                 raise InsightExc.Db.DatabaseError
             finally:
                 db.close()
-                self.previous_sync_print = return_str
+                self.previous_sync_count = previousTokenCount
 
         if message_object is not None:
             await self.cfeed.channel_discord_object.send("Syncing ally contact blacklist now")
