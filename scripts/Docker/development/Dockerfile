@@ -3,7 +3,7 @@ FROM swaggerapi/swagger-codegen-cli:latest as SwaggerBuilder
 FROM openjdk:12-jdk-alpine as SwaggerRunner
 COPY --from=SwaggerBuilder /opt/swagger-codegen-cli/swagger-codegen-cli.jar ./swagger-codegen-cli.jar
 RUN java -jar ./swagger-codegen-cli.jar generate \
- -i "https://esi.tech.ccp.is/_latest/swagger.json" \
+ -i "https://esi.evetech.net/_latest/swagger.json" \
  -l python \
  -o /python-client
 
