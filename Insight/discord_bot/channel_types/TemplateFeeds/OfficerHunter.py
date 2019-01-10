@@ -12,6 +12,8 @@ class OfficerHunter(capRadar):
         self.general_table().reset_filters(self.channel_id, self.service)
         db: Session = self.service.get_session()
         try:
+            row = db.query(self.linked_table()).filter(self.linked_table().channel_id == self.channel_id).one()
+            row.template_id = 0
             systemR = dbRow.tb_Filter_systems(30000142, self.channel_id, load_fk=False)
             systemR.max = 50000
             db.add(systemR)
@@ -22,6 +24,13 @@ class OfficerHunter(capRadar):
             db.add(dbRow.tb_Filter_groups(574, self.channel_id, load_fk=False))  # serpentis
             db.add(dbRow.tb_Filter_groups(1174, self.channel_id, load_fk=False))  # drones
             db.commit()
+            msg = "This officer hunter feed has been converted to a full radar service as the officer hunter " \
+                  "functionality has been merged into the main feed service. You now enjoy the previous officer " \
+                  "hunter features along with the following new features:\n\nCustomizable base systems\n\nAdditional" \
+                  " optional tracking types/groups.\n\nTo create a new officer hunter feed in the future, create a " \
+                  "new blank Radar feed and enable NPC Officer tracking via the '!settings' command."
+            self.discord_client.loop.create_task(self.channel_discord_object.send(content=msg))
+            raise InsightExc.DiscordError.FeedConvertReload
         except Exception as ex:
             print(ex)
             raise ex
@@ -58,3 +67,7 @@ class OfficerHunter(capRadar):
     @classmethod
     def is_preconfigured(cls):
         return True
+
+    @classmethod
+    def feed_category(cls):
+        return 0

@@ -15,6 +15,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         self.capital_ids = [547, 485, 1538, 883]
         self.blops_ids = [898]
         self.at_ids = list(self.at_ship_ids())
+        self.officer_ids = list(self.npc_officer_ids())
 
     def yield_options(self):
         yield (self.InsightOptionRequired_add, True)
@@ -23,6 +24,7 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         yield (self.InsightOptionRequired_capitals, True)
         yield (self.InsightOptionRequired_blops, True)
         yield (self.InsightOptionRequired_atships, True)
+        yield (self.InsightOptionRequired_npc_officers, False)
         yield (self.InsightOptionRequired_maxage, True)
         yield (self.InsightOption_addcustom, False)
         yield (self.InsightOption_removecustom, False)
@@ -200,6 +202,22 @@ class Options_CapRadar(Base_Feed.base_activefeed):
                                                                                type_mode=True))
         await self.reload(message_object)
 
+    async def InsightOptionRequired_npc_officers(self,message_object:discord.Message):
+        """NPC Officer Tracking - Enable or disable tracking of NPC officer targets within range of base systems. Formerly the Officer Hunter preconfigured feed service."""
+        options = discord_options.mapper_return_yes_no(self.cfeed.discord_client, message_object)
+        options.set_main_header("Track NPC Officer activity in this channel? (Officer Hunter)")
+        track_group_TF = await options()
+        if track_group_TF:
+            mention_method = self.mention_options(message_object, "NPC Officer ships")
+            mention_enum = await mention_method()
+            await self.cfeed.discord_client.loop.run_in_executor(None, partial(self.modify_groups, self.officer_ids,
+                                                                               mention_enum, type_mode=False))
+        else:
+            await self.cfeed.discord_client.loop.run_in_executor(None, partial(self.modify_groups, self.officer_ids,
+                                                                               enum_mention.noMention, remove=True,
+                                                                               type_mode=False))
+        await self.reload(message_object)
+
     async def InsightOptionRequired_maxage(self,message_object:discord.Message):
         """Set maximum killmail age - Set the maximum delay for killmails. Fetched mails occurring more than the set minutes ago will be ignored."""
         def change_limit(new_limit):
@@ -343,6 +361,14 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         yield 45531  # Victor
         yield 48636  # Hydra
         yield 48635  # Tiamat
+
+    def npc_officer_ids(self):
+        yield 553  # angels
+        yield 559  # br
+        yield 564  # guristas
+        yield 569  # sansha
+        yield 574  # serpentis
+        yield 1174  # drones
 
 
 from .. import capRadar
