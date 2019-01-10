@@ -123,7 +123,8 @@ class Discord_Insight_Client(discord.Client):
             permissions: discord.Permissions = channel.permissions_for(channel.guild.me)
             message = "Hi!\n\nI am an EVE Online killmail streaming bot offering various feed types and " \
                       "utilities. Run the **!create** command in a Discord channel to quickly begin setting up a feed." \
-                      " Run the **!help** command to see all of my available commands. You can read more about my " \
+                      " Run the **!help** command to see all of my available commands. Use the '!prefix' " \
+                      "command to configure server-wide command prefixes. You can read more about my " \
                       "functionality and follow development on [GitHub](https://github.com/Nathan-LS/Insight).\n\n" \
                       "Thank you for choosing Insight!"
             if permissions.embed_links and permissions.send_messages:

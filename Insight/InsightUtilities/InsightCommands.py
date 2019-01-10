@@ -87,7 +87,9 @@ class InsightCommands(metaclass=InsightSingleton):
                 resp_text += "Did you mean?\n\n"
                 for c in similar_commands:
                     resp_text += "'{}{}'\n".format(prefix_s, c)
-            resp_text += "\nRun the '{}help' command to see a list of available commands.".format(prefix_s)
+            resp_text += "\nRun the '{0}help' command to see a list of available commands. You can manage Insight " \
+                         "prefixes by running: '{0}prefix' to avoid command collisions with other Discord bots." \
+                         "".format(prefix_s)
             if len(resp_text) >= 750:
                 raise InsightExc.userInput.CommandNotFound
             else:
