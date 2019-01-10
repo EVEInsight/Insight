@@ -1,4 +1,5 @@
-from . import Dscan, EightBall, Quit, Admin, AdminResetNames, Backup, Reboot, Update, MemoryDiagnostic, Prefix
+from . import Dscan, EightBall, Quit, Admin, AdminResetNames, Backup, Reboot, Update, MemoryDiagnostic, Prefix, About, \
+    Help
 import discord
 import discord_bot
 
@@ -13,6 +14,8 @@ class UnboundUtilityCommands(object):
         self.dscan = Dscan.Dscan(self)
         self.eightBall = EightBall.EightBall(self)
         self.prefix = Prefix.Prefix(self)
+        self.about = About.About(self)
+        self.help = Help.Help(self)
         self.quit = Quit.Quit(self)
         self.admin = Admin.Admin(self)
         self.admin_resetnames = AdminResetNames.AdminResetNames(self)
@@ -39,3 +42,9 @@ class UnboundUtilityCommands(object):
 
     async def command_prefix(self, message_object: discord.Message):
         await self.prefix.run_command(message_object, await self.strip_command(message_object))
+
+    async def command_about(self, message_object: discord.Message):
+        await self.about.run_command(message_object, await self.strip_command(message_object))
+
+    async def command_help(self, message_object: discord.Message):
+        await self.help.run_command(message_object, await self.strip_command(message_object))

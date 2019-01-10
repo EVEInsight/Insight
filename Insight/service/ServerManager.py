@@ -20,11 +20,15 @@ class ServerManager(object):
         else:
             self.guild_prefixes[discord_guild.id] = None
 
+    async def get_min_prefix(self, discord_channel: discord.TextChannel)->str:
+        pref = await self.get_server_prefixes(discord_channel)
+        return "" if len(pref) == 0 else min(pref, key=len)
+
     async def get_server_prefixes(self, discord_channel: discord.TextChannel)->list:
         if not isinstance(discord_channel, discord.TextChannel):
             items = self.default_prefixes
             if self.prefix_self is not None:
-                items.append(self.prefix_self)
+                return items + [self.prefix_self]
             return items
         else:
             guild: discord.Guild = discord_channel.guild

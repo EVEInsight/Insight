@@ -33,12 +33,17 @@ class Discord_Insight_Client(discord.Client):
         self.channelLocks = InsightUtilities.AsyncLockManager(self.loop)
         self.channelSemaphores = InsightUtilities.AsyncSemaphoreManager(self.loop)
 
+    def get_invite_url(self):
+        try:
+            return 'https://discordapp.com/api/oauth2/authorize?client_id={}&permissions=149504&scope=bot' \
+                   ''.format(self.user.id)
+        except:
+            return ""
+
     async def on_ready(self):
         print('-------------------')
         print('Logged in as: {}'.format(str(self.user.name)))
-        invite_url = 'https://discordapp.com/api/oauth2/authorize?client_id={}&permissions=149504&scope=bot'.format(
-            self.user.id)
-        print('Invite Link: {}'.format(invite_url))
+        print('Invite Link: {}'.format(self.get_invite_url()))
         print('This bot is a member of {} servers.'.format(str(len(self.guilds))))
         print('Loaded Discord cache with: {} servers, {} channels, {} users.'.format(len(self.guilds),
                                                                         len(list(self.get_all_channels())),
