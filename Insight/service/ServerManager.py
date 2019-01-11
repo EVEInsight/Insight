@@ -3,12 +3,14 @@ from database.db_tables import tb_servers, tb_server_prefixes
 from sqlalchemy.orm import Session
 from functools import partial
 import InsightLogger
+import asyncio
 
 
 class ServerManager(object):
     def __init__(self, service_module, discord_client):
         self.service = service_module
         self.client: discord.Client = discord_client
+        self.lock = asyncio.Lock(loop=self.client.loop)
         self.default_prefixes = ['?', '!']
         self.prefix_self = None
         self.guild_prefixes = {}
@@ -24,24 +26,28 @@ class ServerManager(object):
         pref = await self.get_server_prefixes(discord_channel)
         return "" if len(pref) == 0 else min(pref, key=len)
 
+    def get_append_self_prefix(self, prefix_list: list):
+        if self.prefix_self is not None:
+            return [self.prefix_self] + prefix_list
+        else:
+            return prefix_list
+
     async def get_server_prefixes(self, discord_channel: discord.TextChannel)->list:
-        if not isinstance(discord_channel, discord.TextChannel):
-            items = self.default_prefixes
-            if self.prefix_self is not None:
-                return items + [self.prefix_self]
-            return items
-        else:
-            guild: discord.Guild = discord_channel.guild
-            items = self.guild_prefixes.get(guild.id)
-        if isinstance(items, list):
-            return items
-        else:
-            items = await self.client.loop.run_in_executor(None, partial(self.get_prefixes_from_db, guild))
-            if self.prefix_self is not None:
-                items.append(self.prefix_self)
-            self.guild_prefixes[guild.id] = items
-            self.lg.info("Loaded prefixes from DB for server ID: {}".format(guild.id))
-            return items
+        async with self.lock:
+            if not isinstance(discord_channel, discord.TextChannel):
+                return self.get_append_self_prefix(self.default_prefixes)
+            else:
+                guild: discord.Guild = discord_channel.guild
+                items = self.guild_prefixes.get(guild.id)
+            if isinstance(items, list):
+                return items
+            else:
+                pulled_items = await self.client.loop.run_in_executor(None, partial(self.get_prefixes_from_db, guild))
+                items = self.get_append_self_prefix(pulled_items)
+                items.sort(key=len, reverse=True)
+                self.guild_prefixes[guild.id] = items
+                self.lg.info("Loaded prefixes from DB for server ID: {}".format(guild.id))
+                return items
 
     def get_prefixes_from_db(self, guild_obj: discord.Guild)->list:
         db: Session = self.service.get_session()
