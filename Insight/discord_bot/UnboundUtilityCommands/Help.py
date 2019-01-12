@@ -25,7 +25,7 @@ class Help(UnboundCommandBase):
             "**{p}8ball** - Shake the 8ball.",
             "**{p}help** - Display command information and prefixes.",
             "**{p}lock** - Lock a feed service from being modified by users without certain Discord channel roles.",
-            "**{p}prefix** - Manage server-wise command prefixes for this bot.",
+            "**{p}prefix** - Manage server-wide command prefixes for this bot.",
             "**{p}quit** - Close and shut down the Insight application service.",
             "**{p}remove** - Delete the currently configured feed service in this channel.",
             "**{p}settings** - Modify feed settings and behavior. Alias: **{p}config**",

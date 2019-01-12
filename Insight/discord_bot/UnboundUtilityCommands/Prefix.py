@@ -20,6 +20,11 @@ class Prefix(UnboundCommandBase):
         return msg
 
     async def option_add(self, d_message: discord.Message):
+        max_pref = 5
+        if len(await self.serverManager.get_server_prefixes(d_message.channel)) > max_pref:
+            raise InsightExc.userInput.InsightException("There are too many prefixes configured for this server. "
+                                                        "You are only allowed a maximum of {} custom prefixes. Please "
+                                                        "remove unneeded prefixes before adding more.".format(max_pref))
         options = dOpt.mapper_return_noOptions(self.client, d_message)
         max_prefix_len = 20
         options.set_main_header("Enter a new command prefix to add for this Discord server. A new prefix is a short "
@@ -30,7 +35,7 @@ class Prefix(UnboundCommandBase):
         new_prefix = await options()
         if len(new_prefix) > max_prefix_len:
             return
-        await self.client.loop.run_in_executor(None, partial(self.serverManager.add_prefix, new_prefix, d_message.channel.guild))
+        await self.serverManager.add_prefix(new_prefix, d_message.channel.guild)
         await self.option_view(d_message)
 
     async def option_remove(self, d_message: discord.Message):
@@ -40,7 +45,7 @@ class Prefix(UnboundCommandBase):
             if p != self.client.user.mention:
                 options.add_option(dOpt.option_returns_object(str(p), "", p))
         remove_prefix: str = await options()
-        await self.client.loop.run_in_executor(None, partial(self.serverManager.remove_prefix, remove_prefix, d_message.channel.guild))
+        await self.serverManager.remove_prefix(remove_prefix, d_message.channel.guild)
         await self.option_view(d_message)
 
     async def option_view(self, d_message: discord.Message):

@@ -27,6 +27,7 @@ class InsightCommands(metaclass=InsightSingleton):
         }
         self.all_commands = [c for i in self.commands.values() for c in i]
         self.notfound_timers = {}
+        self.lock = asyncio.Lock(loop=asyncio.get_event_loop())
 
     def __similar(self, message_txt):
         return difflib.get_close_matches(message_txt.lower(), self.all_commands)
@@ -44,7 +45,7 @@ class InsightCommands(metaclass=InsightSingleton):
                         return
                     else:
                         raise InsightExc.Internal.InsightException("Could not call coroutine. Keyword argument missing.")
-            self.raise_notfound(channel_id, prefixes, message_txt)
+            await self.raise_notfound(channel_id, prefixes, message_txt)
 
     def is_command(self, prefixes: list, message_txt: str)->bool:
         return any(message_txt.startswith(i.lower()) for i in prefixes)
@@ -64,20 +65,21 @@ class InsightCommands(metaclass=InsightSingleton):
                 return new_str.strip()
         return no_prefix
 
-    def can_raise_notfound(self, channel_id: int)->bool:
-        next_raise = self.notfound_timers.get(channel_id)
-        if isinstance(next_raise, datetime.datetime):
-            if datetime.datetime.utcnow() >= next_raise:
+    async def can_raise_notfound(self, channel_id: int)->bool:
+        async with self.lock:
+            next_raise = self.notfound_timers.get(channel_id)
+            if isinstance(next_raise, datetime.datetime):
+                if datetime.datetime.utcnow() >= next_raise:
+                    self.notfound_timers[channel_id] = datetime.datetime.utcnow() + datetime.timedelta(hours=12)
+                    return True
+                else:
+                    return False
+            else:
                 self.notfound_timers[channel_id] = datetime.datetime.utcnow() + datetime.timedelta(hours=12)
                 return True
-            else:
-                return False
-        else:
-            self.notfound_timers[channel_id] = datetime.datetime.utcnow() + datetime.timedelta(hours=12)
-            return True
 
-    def raise_notfound(self, channel_id: int, prefixes: list, message_txt: str):
-        if self.can_raise_notfound(channel_id):
+    async def raise_notfound(self, channel_id: int, prefixes: list, message_txt: str):
+        if await self.can_raise_notfound(channel_id):
             prefix_s = "" if len(prefixes) == 0 else min(prefixes, key=len)
             similar_commands = self.__similar(message_txt)
             resp_text = "The command: '{}' was not found.\n\n".format(message_txt)

@@ -16,17 +16,18 @@ class ServerManager(object):
         self.guild_prefixes = {}
         self.lg = InsightLogger.InsightLogger.get_logger('Insight.command', 'Insight_command.log')
 
-    def invalidate_prefixes(self, discord_guild: discord.Guild):
-        if not isinstance(discord_guild, discord.Guild):
-            return
-        else:
-            self.guild_prefixes[discord_guild.id] = None
+    async def _invalidate_prefixes(self, discord_guild: discord.Guild):
+        async with self.lock:
+            if not isinstance(discord_guild, discord.Guild):
+                return
+            else:
+                self.guild_prefixes[discord_guild.id] = None
 
     async def get_min_prefix(self, discord_channel: discord.TextChannel)->str:
         pref = await self.get_server_prefixes(discord_channel)
         return "" if len(pref) == 0 else min(pref, key=len)
 
-    def get_append_self_prefix(self, prefix_list: list):
+    def _get_append_self_prefix(self, prefix_list: list):
         if self.prefix_self is not None:
             return [self.prefix_self] + prefix_list
         else:
@@ -35,21 +36,21 @@ class ServerManager(object):
     async def get_server_prefixes(self, discord_channel: discord.TextChannel)->list:
         async with self.lock:
             if not isinstance(discord_channel, discord.TextChannel):
-                return self.get_append_self_prefix(self.default_prefixes)
+                return self._get_append_self_prefix(self.default_prefixes)
             else:
                 guild: discord.Guild = discord_channel.guild
                 items = self.guild_prefixes.get(guild.id)
             if isinstance(items, list):
                 return items
             else:
-                pulled_items = await self.client.loop.run_in_executor(None, partial(self.get_prefixes_from_db, guild))
-                items = self.get_append_self_prefix(pulled_items)
+                pulled_items = await self.client.loop.run_in_executor(None, partial(self._get_prefixes_from_db, guild))
+                items = self._get_append_self_prefix(pulled_items)
                 items.sort(key=len, reverse=True)
                 self.guild_prefixes[guild.id] = items
                 self.lg.info("Loaded prefixes from DB for server ID: {}".format(guild.id))
                 return items
 
-    def get_prefixes_from_db(self, guild_obj: discord.Guild)->list:
+    def _get_prefixes_from_db(self, guild_obj: discord.Guild)->list:
         db: Session = self.service.get_session()
         try:
             row: tb_servers = db.query(tb_servers).filter(tb_servers.server_id == guild_obj.id).one_or_none()
@@ -72,26 +73,32 @@ class ServerManager(object):
         finally:
             db.close()
 
-    def add_prefix(self, prefix: str, guild_obj: discord.Guild):
+    async def add_prefix(self, prefix: str, guild_obj: discord.Guild):
+        await self.client.loop.run_in_executor(None, partial(self._add_prefix, prefix, guild_obj))
+        await self._invalidate_prefixes(guild_obj)
+
+    async def remove_prefix(self, prefix: str, guild_obj: discord.Guild):
+        await self.client.loop.run_in_executor(None, partial(self._remove_prefix, prefix, guild_obj))
+        await self._invalidate_prefixes(guild_obj)
+
+    def _add_prefix(self, prefix: str, guild_obj: discord.Guild):
         db: Session = self.service.get_session()
         try:
             db.merge(tb_server_prefixes(guild_obj.id, prefix))
             db.commit()
-            self.invalidate_prefixes(guild_obj)
         except Exception as ex:
             self.lg.exception(ex)
             raise ex
         finally:
             db.close()
 
-    def remove_prefix(self, prefix: str, guild_obj: discord.Guild):
+    def _remove_prefix(self, prefix: str, guild_obj: discord.Guild):
         db: Session = self.service.get_session()
         try:
             row = db.query(tb_server_prefixes).filter(tb_server_prefixes.server_id==guild_obj.id, tb_server_prefixes.prefix==prefix).one_or_none()
             if row is not None:
                 db.delete(row)
             db.commit()
-            self.invalidate_prefixes(guild_obj)
         except Exception as ex:
             self.lg.exception(ex)
             raise ex
