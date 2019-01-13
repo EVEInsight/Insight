@@ -207,7 +207,7 @@ Insight keeps track of delays for service reliability. See the [wiki article](ht
 
 **How do I host Insight myself?**
 
-Insight runs on Windows, Linux, or Mac. See the [hosting insight](#hosting-insight) section.
+Insight runs on Windows, Linux, or Mac. See the [hosting Insight](#hosting-insight) section.
 
 
 **Why do I have to paste my callback url when using the !sync command?**

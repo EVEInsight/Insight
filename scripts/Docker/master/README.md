@@ -52,6 +52,8 @@ services:
     restart: always
     volumes:
       - ./:/app
+    stdin_open: true
+    tty: true
 ```
 
 # Configuring Insight
