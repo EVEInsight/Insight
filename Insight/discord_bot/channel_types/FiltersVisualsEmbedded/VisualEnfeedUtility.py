@@ -54,4 +54,4 @@ class VisualEnfeedUtility(visual_enfeed):
 
     @classmethod
     def get_desc(cls):
-        return "Utility - Basic killmail information with victim, final blow, and detail fields. Size: Medium"
+        return "Utility - Fields: victim, final blow, and details(system, celestial, involved count). Size: Large"

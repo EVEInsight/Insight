@@ -21,4 +21,4 @@ class VisualEnfeedLinkOnly(visual_enfeed):
 
     @classmethod
     def get_desc(cls):
-        return "Link-only - A direct killmail link with no rich embed content. Size: Smallest"
+        return "Link-only - A direct killmail text link with no rich embed content. Size: Smallest"

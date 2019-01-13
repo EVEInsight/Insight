@@ -57,5 +57,5 @@ class VisualCapRadarUtility(visual_capradar):
 
     @classmethod
     def get_desc(cls):
-        return "Utility - Detailed tracked ship/affiliation count breakdown, victim, highest valued attacker," \
-               " system/location details, and generated Dotlan routes from base system. Size: Medium"
+        return "Utility - Fields: Attacking ship overview, affiliation overview, victim, highest valued attacker, " \
+               "details(system, celestial, time), and Dotlan routes. Size: Large"

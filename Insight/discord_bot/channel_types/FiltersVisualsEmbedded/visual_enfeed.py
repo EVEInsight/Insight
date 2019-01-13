@@ -89,13 +89,14 @@ class visual_enfeed(base_visual):
 
     @classmethod
     def get_desc(cls):
-        return "Full (Legacy) - The original legacy appearance. Detailed killmail overview, pilot and ship images, " \
-               "color sidebar, and zKillboard/Dotlan links with large fields and images. Size: Large"
+        return "Full (Legacy) - The first/original Insight appearance (not recommended for new feeds or mobile). " \
+               "Detailed killmail overview, pilot and ship images, color sidebar, and zKillboard/Dotlan links with " \
+               "large fields and images. Size: Very large"
 
     @classmethod
     def appearance_options(cls):
-        yield VisualEnfeedUtility
         yield VisualEnfeedCompact
+        yield VisualEnfeedUtility
         yield VisualEnfeedLinkOnly
         yield cls
 

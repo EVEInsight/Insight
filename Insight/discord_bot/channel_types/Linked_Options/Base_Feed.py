@@ -57,7 +57,7 @@ class base_activefeed(options_base.Options_Base):
         _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
         _options.set_main_header("Select a rich embed appearance. Appearances allow you to select a template for "
                                  "killmail presentation and differ in verbosity, size, and the amount of information "
-                                 "provided. See https://github.com/Nathan-LS/Insight/wiki/Rich-Embed-Appearance for "
+                                 "provided. See [Insight wiki](https://github.com/Nathan-LS/Insight/wiki/Rich-Embed-Appearance) for "
                                  "sample previews of each appearance. Note: appearances can be changed after feed "
                                  "creation by running the '!settings' command.")
         for ap in self.cfeed.linked_visual_base().appearance_options():

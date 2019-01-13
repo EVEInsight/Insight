@@ -113,16 +113,16 @@ class VisualProximityWatch(base_visual):
 
     @classmethod
     def appearance_options(cls):
-        yield cls
         yield VisualProximityWatchMinimal
+        yield cls
         yield VisualProximityWatchCompact
         yield VisualProximityWatchEFCompact
         yield VisualProximityWatchLinkOnly
 
     @classmethod
     def get_desc(cls):
-        return "Utility - Detailed ship/affiliation count breakdown, victim, highest valued attacker," \
-               " and system/location details. Size: Medium"
+        return "Utility - Fields: Attacking ship overview, affiliation overview, victim, highest valued attacker, " \
+               "details(system, celestial, time), and Dotlan routes. Size: Large"
 
 
 from .VisualProximityWatchCompact import VisualProximityWatchCompact
