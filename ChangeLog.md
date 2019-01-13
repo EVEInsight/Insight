@@ -1,3 +1,26 @@
+# v1.4.0
+## New features
+* Server-wide command prefix modification support. Users can now add and remove Insight prefixes via the **!prefix** command.
+* Docker support. Insight is available to run as a Docker container with all dependencies packaged.
+* Various new appearance options.
+## Changes
+* All references to the capital radar feed have renamed to radar feed as this feed tracks more than just capital ships.
+* Crash recovery support in the parent Insight parent process which can be enabled via the ```-cr``` CLI arg.
+* The default configuration file has been moved to the project root directory for consistency.
+* Git repo branch restructure. See README.MD file.
+* Redesigned command parser to support custom prefixes.
+* Increased the maximum time delta for some feed types. Supers, freighters, etc feeds are now set to 7 days instead of 3 hours. Frequent outages in ESI resulted in some mails being loaded past the 3 hour mark and thus would not be sent to feeds.
+* Radar and proximity feeds will now only print the synced token notification when the underlying count of tokens changes. Previously, any modification(contact added or removed for example) of the token would trigger a notification message.
+* Redesigned the **!about** command to display libraries used, special thanks, and links (bot invite, support Discord, Chnagelog).
+* Redesigned the **!help** command to display configured prefixes and commands with the shortest length command prefix.
+* Merged the NPC Officer Hunter preconfigured feed type with the radar service. The NPC Officer Hunter is now accessible by a switch in a radar feed via **!settings**. Existing feeds are automatically converted to the radar service.
+## Fixes
+* Fixed an issue where the Admin reset name functions would consume a large amount of memory.
+* Fixed a potential memory leak when searching for entities or systems. Also added a minimum search criteria character count.
+* Fixed a potential memory issue where SQLAlchemy mail objects were held longer than expected.
+## Technical
+* Added the lock and semaphore pool managing utility classes.
+* Added a memory diagnostic logger that will log memory and reference count changes over time.
 # v1.3.1
 ## Fixes
 * Fixed an issue when running Insight on computers without Git. Attempting to run Insight on a computer without Git would result in an application crash. The Insight updater now attempts to import the GitPython library within the update function and catches the error in the event of no valid Git executable.
