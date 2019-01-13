@@ -4,7 +4,7 @@
 * Docker support. Insight is available to run as a Docker container with all dependencies packaged.
 * Various new appearance options.
 ## Changes
-* All references to the capital radar feed have renamed to radar feed as this feed tracks more than just capital ships.
+* All references to the capital radar feed have been renamed to radar feed as this feed tracks more than just capital ships.
 * Crash recovery support in the parent Insight parent process which can be enabled via the ```-cr``` CLI arg.
 * The default configuration file has been moved to the project root directory for consistency.
 * Git repo branch restructure. See README.MD file.

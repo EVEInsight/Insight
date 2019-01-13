@@ -1,4 +1,4 @@
-# Insight v1.3.1
+# Insight v1.4.0
 Insight provides EVE Online killmail streaming for Discord. Insight can stream personal or corporate killboards, detect supercapitals with a proximity radar, and more!
 Killmails and intel are presented in Discord rich embeds containing relevant links and images to quickly identify important information.
 
@@ -64,19 +64,26 @@ If you have questions, suggestions, or bug reports feel free to drop by the [pro
 # Commands
 When in doubt, run ```!help```. The ```!help``` command guides you to every possible command, feature, and modifiable option.
 
-Commands can be prefixed with either ```!``` or ```?```.
+Commands can be prefixed with either ```!```, ```?```, or ```@Insight``` by default. You can add or remove server-wide command prefixes via the ```!prefix``` command.
 
 | Command | Description |
 |---|---|
-| !about | Display Insight credits and version information. |
-| !create | Begin setting up a new feed service in this channel. |
-| !help | Displays information about available commands. |
+| !about | Display Insight credits, version information, and bot invite links. |
+| !admin | Access the Insight admin console to execute administrator functionality. |
+| !create | Begin setting up a new feed service in this channel. Alias: **!new** |
+| !dscan | Coming soon! |
+| !8ball | Shake the 8ball. |
+| !help | Display command information and prefixes. |
+| !lock | Lock a feed service from being modified by users without certain Discord channel roles. |
+| !prefix | Manage server-wide command prefixes for this bot. |
+| !quit | Close and shut down the Insight application service. |
 | !remove | Delete the currently configured feed service in this channel. |
-| !settings | Modify feed settings and behavior. |
+| !settings | Modify feed settings and behavior. Alias: **!config** |
 | !start | Start/resume a channel feed from being paused. |
 | !status | Display information about the currently running feed. |
 | !stop | Pause a channel feed. |
-| !sync | Manage EVE contact tokens for this channel. |
+| !sync | Manage contact EVE tokens for a radar or proximity watch feed. Contact token syncing allows you to ignore allies in tracked ships from appearing as potential targets. |
+| !unlock | Unlock a feed service to allow any Discord channel user to modify feed configuration. |
 
 More detailed command information is available in the [commands wiki.](https://github.com/Nathan-LS/Insight/wiki/Commands)
 
@@ -135,6 +142,7 @@ to blacklist from appearing on the radar, accessible by the ```!sync``` command.
 # Hosting Insight
 There are three ways to run and host Insight yourself if you do not wish to use the [public bot](#links).
 #### [Docker](https://hub.docker.com/r/nathanls/insight/)
+The recommended and easiest method to host Insight. Images are automatically built on new commits.
 1. Create and navigate to a directory where you wish to store Insight configuration, logs, and database.
 2. Pull and run the image. This command will pull the stable Docker Insight image and initialize the config files in your current directory.
     ```
@@ -148,7 +156,7 @@ There are three ways to run and host Insight yourself if you do not wish to use 
 See [Insight on Docker Hub](https://hub.docker.com/r/nathanls/insight/) and [Docker docs](https://docs.docker.com/) for more information about using Docker.
 
 #### [Binaries](https://github.com/Nathan-LS/Insight/releases)
-Packaged binaries are available for Windows and Linux under [releases](https://github.com/Nathan-LS/Insight/releases). Docker or Python are not required to be installed when running binary releases.
+Packaged binaries are available for Windows and Linux under [releases](https://github.com/Nathan-LS/Insight/releases). Executables are built with PyInstaller using the installer script in ```/scripts/PyInstaller.spec```. New binaries are built for stable point releases. Docker or Python are not required to be installed when running binary releases.
 
 Follow the instructions in ```Installation.md```, edit ```default-config.ini``` and you are ready to go! There are no additional downloads or package management systems to deal with.
 
@@ -160,7 +168,7 @@ source installation using a Linux operating system.
 # Frequently asked questions
 **How do I invite Insight to my Discord server?**
 
-You can invite Insight to any server where you have the **Manage Server** role. Follow the [link](#links), select the server, and Insight will be invited.
+You can invite Insight to any server where you have the **Manage Server** role. Follow the [link](#links), select the server, and Insight will be invited. If you are hosting Insight yourself, the invite link will be printed in the program console on program startup. 
 
 **What Discord permissions does Insight require?**
 
@@ -199,8 +207,7 @@ Insight keeps track of delays for service reliability. See the [wiki article](ht
 
 **How do I host Insight myself?**
 
-Download the latest [release](https://github.com/Nathan-LS/Insight/releases) archive for either Linux or Windows, unzip the file, and follow the instructions in ```Installation.md```. 
-There is also a [source installation guide](https://github.com/Nathan-LS/Insight/wiki/Source-Installation) for running Insight on the Python interpreter with any operating system (including Mac).
+Insight runs on Windows, Linux, or Mac. See the [hosting insight](#hosting-insight) section.
 
 
 **Why do I have to paste my callback url when using the !sync command?**

@@ -34,13 +34,25 @@ This Docker image uses volumes to persist the Database.db and config file. See [
 1. Create and navigate to a directory where you wish to store Insight configuration, logs, and database.
 2. Pull and run the image. This command will pull the stable Docker Insight image and initialize the config files in your current directory.
     ```
-    $ docker run --name insight-container-name -it --rm -v ${PWD}:/app nathanls/insight --docker-init
+    docker run --name insight -it --rm -v ${PWD}:/app nathanls/insight --docker-init
     ```
 3. Edit ```default-config.ini``` and populate your configuration values in accordance with the [Configuring Insight](#configuring-insight) section. Rename this file to ```config.ini```.
 4. Keep the image up to date by checking for updates and then starting Insight: 
     ```
-    $ docker pull nathanls/insight && docker run --name insight-container-name -it --rm -v ${PWD}:/app nathanls/insight
+    docker pull nathanls/insight && docker run --name insight -it --rm -v ${PWD}:/app nathanls/insight
     ```
+
+# via ```docker stack deploy``` or ```docker-compose```
+Example ```stack.yml``` for ```insight```:
+```text
+version: '3.1'
+services:
+  insight:
+    image: nathanls/insight
+    restart: always
+    volumes:
+      - ./:/app
+```
 
 # Configuring Insight
 1. Find and open the 'default-config.ini' file with a text editor.
@@ -70,7 +82,7 @@ like this:
 # Updating
 This Docker repository utilizes automated builds. The Docker images are automatically updated whenever there are new commits to the [Git repo](https://github.com/Nathan-LS/Insight). You can update your image locally by running:
 ```
-$ docker pull nathanls/insight
+docker pull nathanls/insight
 ```
 There is no need to manually update the SDE or any files associated with the Insight build as the latest dependencies are all included within the image.
 
@@ -81,4 +93,4 @@ There is no need to manually update the SDE or any files associated with the Ins
     https://discordapp.com/api/oauth2/authorize?client_id=YourClientIDHere&permissions=149504&scope=bot
     ```
 **or**
-1. A link is provided when Insight starts. Check the program console and copy down the **Invite Link**.
+* A link is provided when Insight starts. Check the program console and copy down the **Invite Link**.
