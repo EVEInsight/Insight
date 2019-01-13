@@ -80,7 +80,10 @@ class Base_Str_ATKv(object):
     def str_ship_image(self, resolution=512):
         try:
             if self.object_ship.object_group.object_category.category_id == 11 or resolution <= 64:
-                return "https://image.eveonline.com/Type/{}_64.png".format(str(self.ship_type_id))
+                if resolution == 32 or resolution == 64:
+                    return "https://image.eveonline.com/Type/{}_{}.png".format(str(self.ship_type_id), str(resolution))
+                else:
+                    return "https://image.eveonline.com/Type/{}_64.png".format(str(self.ship_type_id))
             return "https://image.eveonline.com/Render/{}_{}.png".format(str(self.ship_type_id), str(resolution))
         except:
             return ""

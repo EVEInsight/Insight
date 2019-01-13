@@ -96,6 +96,8 @@ class visual_enfeed(base_visual):
     @classmethod
     def appearance_options(cls):
         yield VisualEnfeedCompact
+        yield VisualEnfeedCompact2
+        yield VisualEnfeedCompact3
         yield VisualEnfeedUtility
         yield VisualEnfeedLinkOnly
         yield cls
@@ -104,3 +106,5 @@ class visual_enfeed(base_visual):
 from .VisualEnfeedCompact import VisualEnfeedCompact
 from .VisualEnfeedLinkOnly import VisualEnfeedLinkOnly
 from .VisualEnfeedUtility import VisualEnfeedUtility
+from .VisualEnfeedCompact2 import VisualEnfeedCompact2
+from .VisualEnfeedCompact3 import VisualEnfeedCompact3
