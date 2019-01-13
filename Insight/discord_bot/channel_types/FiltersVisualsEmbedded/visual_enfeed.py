@@ -98,6 +98,7 @@ class visual_enfeed(base_visual):
         yield VisualEnfeedCompact
         yield VisualEnfeedCompact2
         yield VisualEnfeedCompact3
+        yield VisualEnfeedAbbreviated
         yield VisualEnfeedUtility
         yield VisualEnfeedLinkOnly
         yield cls
@@ -108,3 +109,4 @@ from .VisualEnfeedLinkOnly import VisualEnfeedLinkOnly
 from .VisualEnfeedUtility import VisualEnfeedUtility
 from .VisualEnfeedCompact2 import VisualEnfeedCompact2
 from .VisualEnfeedCompact3 import VisualEnfeedCompact3
+from .VisualEnfeedAbbreviated import VisualEnfeedAbbreviated

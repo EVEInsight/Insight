@@ -110,6 +110,7 @@ class visual_capradar(base_visual):
         yield VisualCapRadarUtilityMinimal
         yield VisualCapRadarUtility
         yield VisualCapRadarCompact
+        yield VisualCapRadarAbbreviated
         yield VisualCapRadarLinkOnly
         yield cls
 
@@ -124,3 +125,4 @@ from .VisualCapRadarCompact import VisualCapRadarCompact
 from .VisualCapRadarLinkOnly import VisualCapRadarLinkOnly
 from .VisualCapRadarUtility import VisualCapRadarUtility
 from .VisualCapRadarUtilityMinimal import VisualCapRadarUtilityMinimal
+from .VisualCapRadarAbbreviated import VisualCapRadarAbbreviated

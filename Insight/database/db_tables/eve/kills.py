@@ -225,6 +225,15 @@ class Kills(dec_Base.Base, table_row):
         except:
             return datetime.datetime.utcnow()
 
+    def str_eve_time(self, include_date=False):
+        try:
+            if include_date:
+                return self.killmail_time.strftime("%d.%m.%Y %H:%M")
+            else:
+                return self.killmail_time.strftime("%H:%M")
+        except:
+            return ""
+
     def str_zk_link(self):
         try:
             return "https://zkillboard.com/kill/{}/".format(str(self.kill_id))

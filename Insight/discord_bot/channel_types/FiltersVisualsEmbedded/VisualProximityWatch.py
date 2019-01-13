@@ -117,6 +117,7 @@ class VisualProximityWatch(base_visual):
         yield cls
         yield VisualProximityWatchCompact
         yield VisualProximityWatchEFCompact
+        yield VisualProximityWatchAbbreviated
         yield VisualProximityWatchLinkOnly
 
     @classmethod
@@ -129,3 +130,4 @@ from .VisualProximityWatchCompact import VisualProximityWatchCompact
 from .VisualProximityWatchEFCompact import VisualProximityWatchEFCompact
 from .VisualProximityWatchLinkOnly import VisualProximityWatchLinkOnly
 from .VisualProximityWatchMinimal import VisualProximityWatchMinimal
+from .VisualProximityWatchAbbreviated import VisualProximityWatchAbbreviated
