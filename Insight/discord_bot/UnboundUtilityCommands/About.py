@@ -12,8 +12,8 @@ class About(UnboundCommandBase):
         s += "**Links:**\n"
         for l in [
             "[Insight on GitHub](https://github.com/Nathan-LS/Insight)",
-            "[Insight on Docker Hub](https://cloud.docker.com/repository/docker/nathanls/insight)",
-            "[View changelog](https://github.com/Nathan-LS/Insight/blob/master/ChangeLog.md)",
+            "[Insight on Docker Hub](https://hub.docker.com/r/nathanls/insight/)",
+            "[View ChangeLog](https://github.com/Nathan-LS/Insight/blob/master/ChangeLog.md)",
             "[Invite me to your Discord server]({invite_url})",
             "[Join Insight support Discord for additional help](https://discord.gg/Np3FCUn)"
         ]:

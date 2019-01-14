@@ -1,0 +1,14 @@
+language: python
+services:
+  - docker
+python:
+  - "3.6"
+  - "3.6-dev"
+before_install:
+  - docker run --rm -v ${PWD}:/local swaggerapi/swagger-codegen-cli:latest generate -i "https://esi.tech.ccp.is/_latest/swagger.json" -l python -o /local/python-client
+  - cd python-client
+  - python3 setup.py install
+install:
+  - pip install -r requirements.txt
+script:
+  - pytest
