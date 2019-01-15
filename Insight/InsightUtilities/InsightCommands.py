@@ -59,6 +59,8 @@ class InsightCommands(metaclass=InsightSingleton):
 
     def strip_non_command(self, prefixes, message_txt: str)->str:
         no_prefix = self.strip_prefix(prefixes, message_txt)
+        if no_prefix == message_txt:  # not a command and has no prefix parsed out
+            return message_txt
         for c in self.all_commands:
             if no_prefix.startswith(c):
                 new_str = no_prefix.replace(c, "", 1)

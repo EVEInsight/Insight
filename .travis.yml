@@ -7,7 +7,10 @@ python:
 before_install:
   - docker run --rm -v ${PWD}:/local swaggerapi/swagger-codegen-cli:latest generate -i "https://esi.evetech.net/_latest/swagger.json" -l python -o /local/swagger-python-client
   - sudo chown -R $USER swagger-python-client
-  - python3 swagger-python-client/setup.py install
+  - cd swagger-python-client
+  - python3 setup.py install
+  - cd ..
+  - rm swagger-python-client -R
 install:
   - pip install -r requirements.txt
 script:

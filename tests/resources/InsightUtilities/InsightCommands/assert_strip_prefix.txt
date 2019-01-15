@@ -1,0 +1,23 @@
+about
+insight
+word
+f
+1
+2
+3
+4
+5
+6
+command
+@command
+command
+!command
+!!command
+?command
+about
+!help
+help
+another test command
+another test command
+More words and commands
+!More words and commands

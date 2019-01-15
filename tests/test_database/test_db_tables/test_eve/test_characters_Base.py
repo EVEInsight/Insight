@@ -1,24 +1,15 @@
-from unittest import TestCase
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
-from service.service import service_module
-from database.db_tables import Base
+from tests.abstract import DatabaseTesting
 from database.db_tables.eve import tb_characters
 from swagger_client import UniverseApi
 
 
-class TestCharacters(TestCase):
+class TestCharactersBase(DatabaseTesting.DatabaseTesting):
     def setUp(self):
-        self.engine = create_engine('sqlite:///:memory:')
-        self.db = Session(self.engine)
-        Base.Base.metadata.create_all(self.engine)
+        super().setUp()
         self.db.add(tb_characters(1326083433))
         self.db.add(tb_characters(1363013499))
         self.db.commit()
-
-    def tearDown(self):
-        Base.Base.metadata.drop_all(self.engine)
 
     def helper_get_id(self, char_id: int)->tb_characters:
         return self.db.query(tb_characters).filter(tb_characters.character_id == char_id).one()
