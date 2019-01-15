@@ -11,6 +11,9 @@ class ServiceModule(service_module):
     def get_session(self):
         return self.session
 
+    def close_session(self):
+        self.session.close()
+
     def get_headers(self, lib_requests=False) ->dict:
         tmp_dict = {}
         tmp_dict['Maintainer'] = 'nathan@nathan-s.com (https://github.com/Nathan-LS/Insight)'

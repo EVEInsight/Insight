@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-from tests.mocks import ServiceModule
+from tests.mocks import ServiceModule, DiscordInsightClient
 from database.db_tables import Base
 from tests.abstract import InsightTestBase
 
@@ -13,6 +13,7 @@ class DatabaseTesting(InsightTestBase.InsightTestBase):
         self.db = Session(self.engine)
         Base.Base.metadata.create_all(self.engine)
         self.service = ServiceModule.ServiceModule(self.db)
+        self.client = DiscordInsightClient.DiscordInsightClient()
 
     def tearDown(self):
         Base.Base.metadata.drop_all(self.engine)

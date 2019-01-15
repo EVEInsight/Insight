@@ -20,7 +20,10 @@ class id_resolve(name_only):
                     __row.set_name(i.name)
                     db.merge(__row)
         try:
-            resp = cls.get_response(cls.get_api(cls.get_configuration()),names=[str(search_str)])
+            if isinstance(search_str, list):
+                resp = cls.get_response(cls.get_api(cls.get_configuration()), names=search_str)
+            else:
+                resp = cls.get_response(cls.get_api(cls.get_configuration()), names=[str(search_str)])
             try:
                 make_rows(resp.alliances,tb_alliances)
                 make_rows(resp.corporations,tb_corporations)
