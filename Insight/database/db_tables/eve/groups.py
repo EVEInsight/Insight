@@ -19,14 +19,14 @@ class Groups(dec_Base.Base,individual_api_pulling,index_api_updating,sde_impoter
 
     def __init__(self, eve_id: int):
         self.group_id = eve_id
-        self.__types = None
+        self._types = None
 
     def load_fk_objects(self):
         if self.category_id:
             self.object_category = categories.Categories(self.category_id)
-        if self.__types:
+        if self._types:
             self.object_types = []
-            for object_id in self.__types:
+            for object_id in self._types:
                 self.object_types.append(types.Types(object_id))
 
     def get_id(self):
@@ -46,7 +46,7 @@ class Groups(dec_Base.Base,individual_api_pulling,index_api_updating,sde_impoter
         self.name = response.get("name")
         self.category_id = response.get("category_id")
         self.published = response.get("published")
-        self.__types = response.get("types")
+        self._types = response.get("types")
 
     @classmethod
     def primary_key_row(cls):

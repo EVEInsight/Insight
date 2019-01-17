@@ -22,7 +22,7 @@ class CharactersTestNameOnly(DatabaseTesting.DatabaseTesting):
     def test_set_name(self):
         for r in self.db.query(tb_characters).all():
             self.assertEqual(r.character_name, None)
-            r.set_name(self.random_string(240, True))
+            r.set_name(self.random_string(1, 240, True))
             self.assertNotEqual(r.character_name, None)
         self.db.commit()
         self.db.close()
@@ -36,7 +36,7 @@ class CharactersTestNameOnly(DatabaseTesting.DatabaseTesting):
 
     def test_reset_name(self):
         for r in self.db.query(tb_characters).all():
-            r.character_name = self.random_string(240, True)
+            r.character_name = self.random_string(1, 240, True)
             self.assertNotEqual(r.character_name, None)
             r.reset_name()
             self.assertEqual(r.character_name, None)

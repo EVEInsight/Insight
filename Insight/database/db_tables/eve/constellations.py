@@ -22,14 +22,14 @@ class Constellations(dec_Base.Base, name_only, individual_api_pulling, index_api
 
     def __init__(self, eve_id: int):
         self.constellation_id = eve_id
-        self.__systems = None
+        self._systems = None
 
     def load_fk_objects(self):
         if self.region_id:
             self.object_region = regions.Regions(self.region_id)
-        if self.__systems:
+        if self._systems:
             self.object_systems = []
-            for system_id in self.__systems:
+            for system_id in self._systems:
                 self.object_systems.append(systems.Systems(system_id))
 
     def get_id(self):
@@ -64,7 +64,7 @@ class Constellations(dec_Base.Base, name_only, individual_api_pulling, index_api
         self.pos_x = response.get("position").get("x")
         self.pos_y = response.get("position").get("y")
         self.pos_z = response.get("position").get("z")
-        self.__systems = response.get("systems")
+        self._systems = response.get("systems")
 
     @classmethod
     def primary_key_row(cls):

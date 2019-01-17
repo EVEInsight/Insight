@@ -26,9 +26,9 @@ class InsightTestBase(TestCase):
             yield (i, lines_assert[counter])
             counter += 1
 
-    def random_string(self, max_length=5, random_length=False):
+    def random_string(self, min_length=1, max_length=5, random_length=False):
         if random_length:
-            len = random.randint(0, max_length)
+            len = random.randint(min_length, max_length)
         else:
             len = max_length
         return ''.join(random.choice(string.ascii_letters + string.digits) for c in range(len))

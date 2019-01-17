@@ -53,7 +53,7 @@ class index_api_updating(table_row):
     @classmethod
     def api_import_all_ids(cls, service_module):
         try:
-            __id_list = cls.__index_get_response(cls.__index_get_api(cls.get_configuration()))
+            __id_list = cls._index_get_response(cls._index_get_api(cls.get_configuration()))
             print("Found {} of object {} in API indexes.".format(str(len(__id_list)),cls.__name__))
             db: Session = service_module.get_session()
             for object_id in list(set(__id_list)-set([i[0] for i in db.query(cls.primary_key_row()).all()])):
@@ -75,11 +75,11 @@ class index_api_updating(table_row):
         #return api.get_universe_groups_with_http_info(**kwargs)
 
     @classmethod
-    def __index_get_api(cls, configuration):
+    def _index_get_api(cls, configuration):
         return swagger_client.UniverseApi(swagger_client.ApiClient(configuration))
 
     @classmethod
-    def __index_get_response(cls, api):
+    def _index_get_response(cls, api):
         r = cls.index_swagger_api_call(api, datasource='tranquility')
         number_pages = r[2].get("X-Pages")
         if number_pages is None:

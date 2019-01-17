@@ -17,12 +17,12 @@ class Categories(dec_Base.Base,individual_api_pulling,index_api_updating,sde_imp
 
     def __init__(self, eve_id: int):
         self.category_id = eve_id
-        self.__groups = None
+        self._groups = None
 
     def load_fk_objects(self):
-        if self.__groups:
+        if self._groups:
             self.object_groups = []
-            for object_id in self.__groups:
+            for object_id in self._groups:
                 self.object_groups.append(groups.Groups(object_id))
 
     def get_id(self):
@@ -38,7 +38,7 @@ class Categories(dec_Base.Base,individual_api_pulling,index_api_updating,sde_imp
     def process_body(self,response):
         self.name = response.get("name")
         self.published = response.get("published")
-        self.__groups = response.get("groups")
+        self._groups = response.get("groups")
 
     @classmethod
     def primary_key_row(cls):

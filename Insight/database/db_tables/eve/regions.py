@@ -19,12 +19,12 @@ class Regions(dec_Base.Base, name_only, individual_api_pulling, index_api_updati
 
     def __init__(self, eve_id: int):
         self.region_id = eve_id
-        self.__constellations = None
+        self._constellations = None
 
     def load_fk_objects(self):
-        if self.__constellations:
+        if self._constellations:
             self.object_constellations = []
-            for id in self.__constellations:
+            for id in self._constellations:
                 self.object_constellations.append(constellations.Constellations(id))
 
     def get_id(self):
@@ -53,7 +53,7 @@ class Regions(dec_Base.Base, name_only, individual_api_pulling, index_api_updati
     def process_body(self,response):
         self.name = response.get("name")
         self.description = response.get("description")
-        self.__constellations= response.get("constellations")
+        self._constellations= response.get("constellations")
 
     @classmethod
     def primary_key_row(cls):

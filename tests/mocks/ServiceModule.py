@@ -1,4 +1,5 @@
 from service.service import service_module
+from sqlalchemy.orm import Session, scoped_session
 import platform
 import requests
 import aiohttp
@@ -9,10 +10,16 @@ class ServiceModule(service_module):
         self.session = db_session
 
     def get_session(self):
-        return self.session
+        if isinstance(self.session, scoped_session):
+            return self.session()
+        else:
+            return self.session
 
     def close_session(self):
-        self.session.close()
+        if isinstance(self.session, scoped_session):
+            self.session.remove()
+        else:
+            self.session.close()
 
     def get_headers(self, lib_requests=False) ->dict:
         tmp_dict = {}
