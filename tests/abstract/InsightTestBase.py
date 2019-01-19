@@ -3,6 +3,7 @@ import os
 from tests.resources import ResourceRoot
 import random
 import string
+import json
 
 
 class InsightTestBase(TestCase):
@@ -12,6 +13,10 @@ class InsightTestBase(TestCase):
     def get_file_lines(self, filename):
         with open(os.path.join(self.resources, filename)) as f:
             return f.read().splitlines()
+
+    def file_json(self, filename):
+        with open(os.path.join(self.resources, filename)) as f:
+            return json.load(f)
 
     def set_resource_path(self, *args):
         self.resources = os.path.join(self.resources if self.resources is not None else

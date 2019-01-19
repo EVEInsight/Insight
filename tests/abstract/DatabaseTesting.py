@@ -11,7 +11,7 @@ class DatabaseTesting(InsightTestBase.InsightTestBase):
         super().setUp()
         self.set_resource_path('database')
         self.engine = create_engine('sqlite:///:memory:', connect_args={'check_same_thread': False}, poolclass=StaticPool)
-        self.scoped_session = sessionmaker(bind=self.engine)
+        self.scoped_session = scoped_session(sessionmaker(bind=self.engine))
         self.db = Session(self.engine)
         Base.Base.metadata.create_all(self.engine)
         self.service = ServiceModule.ServiceModule(self.db)

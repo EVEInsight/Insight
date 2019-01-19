@@ -3,15 +3,19 @@ from sqlalchemy.orm import Session, scoped_session
 import platform
 import requests
 import aiohttp
+from tests.mocks import ChannelManager
 
 
 class ServiceModule(service_module):
     def __init__(self, db_session):
         self.session = db_session
+        self.cli_args = self._read_cli_args()
+        self.channel_manager = ChannelManager.ChannelManager(self)
 
     def get_session(self):
         if isinstance(self.session, scoped_session):
-            return self.session()
+            ses= self.session()
+            return ses
         else:
             return self.session
 

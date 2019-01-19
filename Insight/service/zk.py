@@ -25,8 +25,8 @@ class zk(object):
         self.run = True
         self.error_ids = []
         self.error_ids_last_reset = datetime.datetime.utcnow()
-        self.__km_preProcess: janus.Queue = None  # raw json, before insertion to database
-        self.__km_postProcess: janus.Queue = None  # fully finished sqlalchemy objects with names resolved
+        self._km_preProcess: janus.Queue = None  # raw json, before insertion to database
+        self._km_postProcess: janus.Queue = None  # fully finished sqlalchemy objects with names resolved
         self.delay_km = queue.Queue()  # delay from occurrence to load
         self.delay_process = queue.Queue()  # process/name resolve delay
         self.delay_next = queue.Queue()  # delay between zk requests
@@ -84,7 +84,7 @@ class zk(object):
                 f.write(random_s)
                 return random_s
 
-    def __make_km(self, km_json):
+    def _make_km(self, km_json):
         """returns the cached km object if it does not exist, returns none if error or already exists"""
         result = None
         pull_start_time = datetime.datetime.utcnow()
@@ -125,7 +125,7 @@ class zk(object):
                 for km in results:
                     if self.service.cli_args.force_ctime:
                         km.killmail_time = datetime.datetime.utcnow()
-                    self.__km_postProcess.sync_q.put_nowait(km)
+                    self._km_postProcess.sync_q.put_nowait(km)
             except Exception as ex:
                 print(ex)
             finally:
@@ -149,7 +149,7 @@ class zk(object):
                             data = await resp.json()
                             package = data.get('package')
                             if package is not None:
-                                await self.__km_preProcess.async_q.put(package)
+                                await self._km_preProcess.async_q.put(package)
                             if not self.run_websocket:
                                 self.add_delay(self.delay_next, next_delay)
                                 next_delay = datetime.datetime.utcnow()
@@ -205,7 +205,7 @@ class zk(object):
                                 if msg.type == aiohttp.WSMsgType.TEXT:
                                     package = self.ws_extract(msg.json())
                                     if package:
-                                        await self.__km_preProcess.async_q.put(package)
+                                        await self._km_preProcess.async_q.put(package)
                                         self.add_delay(self.delay_next, next_delay)
                                         next_delay = datetime.datetime.utcnow()
                                     else:
@@ -229,11 +229,11 @@ class zk(object):
         loop = asyncio.get_event_loop()
         while True:
             try:
-                json_data = await self.__km_preProcess.async_q.get()
+                json_data = await self._km_preProcess.async_q.get()
                 st = InsightLogger.InsightLogger.time_start()
-                km = await loop.run_in_executor(zk_thread_pool, partial(self.__make_km, json_data))
+                km = await loop.run_in_executor(zk_thread_pool, partial(self._make_km, json_data))
                 if km is not None:
-                    await self.__km_postProcess.async_q.put(km)
+                    await self._km_postProcess.async_q.put(km)
                     InsightLogger.InsightLogger.time_log(lg, st, 'JSON parse km_id: {}'.format(km.kill_id), 3500)
             except Exception as ex:
                 print(ex)
@@ -246,7 +246,7 @@ class zk(object):
         loop = asyncio.get_event_loop()
         while True:
             try:
-                km = await self.__km_postProcess.async_q.get()
+                km = await self._km_postProcess.async_q.get()
                 st = InsightLogger.InsightLogger.time_start()
                 await loop.run_in_executor(zk_thread_pool, partial(self.service.channel_manager.send_km, km))
                 InsightLogger.InsightLogger.time_log(lg, st, 'Filer pass km_id: {}'.format(km.kill_id), 2500)
@@ -254,5 +254,5 @@ class zk(object):
                 print(ex)
 
     async def make_queues(self):
-        self.__km_preProcess = janus.Queue()
-        self.__km_postProcess = janus.Queue()
+        self._km_preProcess = janus.Queue()
+        self._km_postProcess = janus.Queue()

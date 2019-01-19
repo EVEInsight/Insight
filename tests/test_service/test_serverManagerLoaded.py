@@ -35,8 +35,8 @@ class TestServerManagerLoaded(AsyncTesting.AsyncTesting, DatabaseTesting.Databas
             self.client.add_channel(i)
 
     def tearDown(self):
-        AsyncTesting.AsyncTesting.setUp(self)
-        DatabaseTesting.DatabaseTesting.setUp(self)
+        AsyncTesting.AsyncTesting.tearDown(self)
+        DatabaseTesting.DatabaseTesting.tearDown(self)
 
     def test__invalidate_prefixes(self):
         for g in self.guilds:

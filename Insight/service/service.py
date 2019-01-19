@@ -24,7 +24,7 @@ __passkey = None
 class service_module(object):
     def __init__(self, multiproc_dict):
         self.__multiproc_dict:dict = multiproc_dict
-        self.cli_args = self.__read_cli_args()
+        self.cli_args = self._read_cli_args()
         self.set_crash_recovery(self.cli_args.crash_recovery, None)
         self.config_file = configparser.ConfigParser()
         self.config_file.read(self.read_config_file(self.cli_args.config))
@@ -43,7 +43,7 @@ class service_module(object):
         self.motd = self.__read_motd()
         self.set_crash_recovery(self.cli_args.crash_recovery, self.__admin_module.get_default_admin())  # set id
 
-    def __read_cli_args(self):
+    def _read_cli_args(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("--config", "-c",
                             help="Specifies a config file other than the default 'config.ini' to run the program with",
