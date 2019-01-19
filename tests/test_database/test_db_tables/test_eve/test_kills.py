@@ -382,3 +382,10 @@ class TestKills(DatabaseTesting.DatabaseTesting):
     @unittest.SkipTest
     def test_str_overview(self):  # todo
         self.fail()
+
+    def test_to_dict(self):
+        d = self.km.to_jsonDictionary()
+        self.tearDown()
+        DatabaseTesting.DatabaseTesting.setUp(self)
+        new = tb_kills.make_row(d.get("package"), self.service)
+        self.assertEqual(d, new.to_jsonDictionary())

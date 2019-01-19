@@ -70,5 +70,21 @@ class Victims(dec_Base.Base, table_row, Base_Str_ATKv):
                 return False
         return False
 
+    def to_jsonDictionary(self)->dict:
+        return {
+            "alliance_id": self.alliance_id,
+            "character_id": self.character_id,
+            "corporation_id": self.corporation_id,
+            "damage_taken": self.damage_taken,
+            "items": [],
+            "position": {
+                "x": self.pos_x,
+                "y": self.pos_y,
+                "z": self.pos_z
+            },
+            "ship_type_id": self.ship_type_id
+        }
+
+
 from ..filters import *
 from ..eve import *

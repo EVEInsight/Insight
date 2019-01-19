@@ -108,6 +108,18 @@ class Attackers(dec_Base.Base, Base_Str_ATKv):
             print(ex)
             return False
 
+    def to_jsonDictionary(self)->dict:
+        return {
+            "character_id": self.character_id,
+            "corporation_id": self.corporation_id,
+            "damage_done": self.damage_done,
+            "faction_id": None,
+            "final_blow": self.final_blow,
+            "security_status": self.security_status,
+            "ship_type_id": self.ship_type_id,
+            "weapon_type_id": self.weapon_type_id
+        }
+
 
 from ..filters import *
 from ..eve import *

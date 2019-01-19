@@ -21,5 +21,7 @@ class Admin(UnboundCommandBase):
             options.add_option(dOpt.option_calls_coroutine(self.unbound.admin_reboot.command_description(), "",
                                                            self.unbound.admin_reboot.run_command(d_message)))
             options.add_option(dOpt.option_calls_coroutine(self.unbound.admin_update.command_description(), "",
-                                                           self.unbound.admin_update.run_command(d_message)))
+                                                           self.unbound.admin_update.run_command(d_message))),
+            options.add_option(dOpt.option_calls_coroutine(self.unbound.admin_mail_export.command_description(), "",
+                                                           self.unbound.admin_mail_export.run_command(d_message)))
             await options()

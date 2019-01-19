@@ -359,3 +359,25 @@ class Kills(dec_Base.Base, table_row):
                 display_str = "--Other" if not is_blue else "--Allies/blues"
                 return_str += "{0:<{len}} {1}\n".format(display_str, str(overflow), len=max_len+1)
         return return_str
+
+    def to_jsonDictionary(self)->dict:
+        kID = {"killID": self.kill_id}
+        km = {"killmail":{
+            "attackers": [a.to_jsonDictionary() for a in self.object_attackers],
+            "killmail_id": self.kill_id,
+            "killmail_time": str(self.killmail_time),
+            "solar_system_id": self.solar_system_id,
+            "victim": self.object_victim.to_jsonDictionary()
+        }}
+        zkb = {"zkb": {
+            "locationID": self.locationID,
+            "hash": self.hash,
+            "fittedValue": self.fittedValue,
+            "totalValue": self.totalValue,
+            "points": self.points,
+            "npc": self.npc,
+            "solo": self.solo,
+            "awox": self.awox,
+            "href": self.href
+        }}
+        return {"package": {**kID, **km, **zkb}}
