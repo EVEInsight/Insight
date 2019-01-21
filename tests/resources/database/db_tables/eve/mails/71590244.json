@@ -1,0 +1,69 @@
+{
+    "package": {
+        "killID": 71590244,
+        "killmail": {
+            "attackers": [
+                {
+                    "alliance_id": null,
+                    "character_id": null,
+                    "corporation_id": 1000274,
+                    "damage_done": 9977.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 0.0,
+                    "ship_type_id": 47960,
+                    "weapon_type_id": null
+                },
+                {
+                    "alliance_id": null,
+                    "character_id": 3019609,
+                    "corporation_id": 1000274,
+                    "damage_done": 7939.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 0.0,
+                    "ship_type_id": 47955,
+                    "weapon_type_id": 34580
+                },
+                {
+                    "alliance_id": null,
+                    "character_id": 3019610,
+                    "corporation_id": 1000274,
+                    "damage_done": 4804.0,
+                    "faction_id": null,
+                    "final_blow": true,
+                    "security_status": 0.0,
+                    "ship_type_id": 47960,
+                    "weapon_type_id": 47446
+                }
+            ],
+            "killmail_id": 71590244,
+            "killmail_time": "2018-08-01 06:20:11",
+            "solar_system_id": 32000105,
+            "victim": {
+                "alliance_id": 99006112,
+                "character_id": 93874219,
+                "corporation_id": 98224068,
+                "damage_taken": 22720.0,
+                "items": [],
+                "position": {
+                    "x": -14959474103787.0,
+                    "y": -14959788692507.0,
+                    "z": -14959788678737.0
+                },
+                "ship_type_id": 12005
+            }
+        },
+        "zkb": {
+            "locationID": 0,
+            "hash": "a202c378903281b1723c2026a54defd744c4e20a",
+            "fittedValue": 448744921.98,
+            "totalValue": 1421324821.48,
+            "points": 1.0,
+            "npc": true,
+            "solo": false,
+            "awox": false,
+            "href": "https://esi.evetech.net/v1/killmails/71590244/a202c378903281b1723c2026a54defd744c4e20a/"
+        }
+    }
+}

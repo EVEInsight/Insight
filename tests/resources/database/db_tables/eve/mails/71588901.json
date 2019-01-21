@@ -1,0 +1,58 @@
+{
+    "package": {
+        "killID": 71588901,
+        "killmail": {
+            "attackers": [
+                {
+                    "alliance_id": 1354830081,
+                    "character_id": 1348134779,
+                    "corporation_id": 98011082,
+                    "damage_done": 9111.0,
+                    "faction_id": null,
+                    "final_blow": true,
+                    "security_status": -1.9,
+                    "ship_type_id": 12023,
+                    "weapon_type_id": 2185
+                },
+                {
+                    "alliance_id": 1354830081,
+                    "character_id": 766620623,
+                    "corporation_id": 98011082,
+                    "damage_done": 6347.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 5.0,
+                    "ship_type_id": 29990,
+                    "weapon_type_id": 27419
+                }
+            ],
+            "killmail_id": 71588901,
+            "killmail_time": "2018-08-01 03:34:56",
+            "solar_system_id": 30004708,
+            "victim": {
+                "alliance_id": 99005157,
+                "character_id": 941222173,
+                "corporation_id": 1025146968,
+                "damage_taken": 15458.0,
+                "items": [],
+                "position": {
+                    "x": -1162846483543.5,
+                    "y": -811858199721.47,
+                    "z": 1850259816314.6
+                },
+                "ship_type_id": 626
+            }
+        },
+        "zkb": {
+            "locationID": 50013771,
+            "hash": "36b84936b9b3079722f6e5231e2dca012f2cef0a",
+            "fittedValue": 16658640.59,
+            "totalValue": 33781342.38,
+            "points": 18.0,
+            "npc": false,
+            "solo": false,
+            "awox": false,
+            "href": "https://esi.evetech.net/v1/killmails/71588901/36b84936b9b3079722f6e5231e2dca012f2cef0a/"
+        }
+    }
+}

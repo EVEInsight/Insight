@@ -1,0 +1,47 @@
+{
+    "package": {
+        "killID": 71594838,
+        "killmail": {
+            "attackers": [
+                {
+                    "alliance_id": null,
+                    "character_id": null,
+                    "corporation_id": null,
+                    "damage_done": 0.0,
+                    "faction_id": null,
+                    "final_blow": true,
+                    "security_status": 0.0,
+                    "ship_type_id": null,
+                    "weapon_type_id": null
+                }
+            ],
+            "killmail_id": 71594838,
+            "killmail_time": "2018-08-01 15:01:01",
+            "solar_system_id": 30004211,
+            "victim": {
+                "alliance_id": 99008223,
+                "character_id": 95553561,
+                "corporation_id": 98378478,
+                "damage_taken": 9404.0,
+                "items": [],
+                "position": {
+                    "x": 108956236732.31,
+                    "y": 108507982310.75,
+                    "z": 177603819956.44
+                },
+                "ship_type_id": 41030
+            }
+        },
+        "zkb": {
+            "locationID": 40266884,
+            "hash": "4b1d91a6347d3df2c30dfbcc5a343eacaaccd216",
+            "fittedValue": 961675308.38,
+            "totalValue": 961675308.38,
+            "points": 1.0,
+            "npc": true,
+            "solo": false,
+            "awox": false,
+            "href": "https://esi.evetech.net/v1/killmails/71594838/4b1d91a6347d3df2c30dfbcc5a343eacaaccd216/"
+        }
+    }
+}

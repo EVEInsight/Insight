@@ -190,6 +190,9 @@ class Kills(dec_Base.Base, table_row):
                     __return_item = victim
         return __return_item
 
+    def is_npc(self)->bool:
+        return self.npc
+
     def get_final_blow(self):
         for i in self.object_attackers:
             if i.final_blow == True:

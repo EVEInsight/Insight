@@ -25,7 +25,7 @@ class MailExport(UnboundCommandBase):
                     row = tb_kills.get_row({"killID": km_id}, self.service)
                     if isinstance(row, tb_kills):
                         with open(os.path.join("mails", "{}.json".format(km_id)), 'w+') as f:
-                            json.dump(row.to_jsonDictionary(), f)
+                            json.dump(row.to_jsonDictionary(), indent=4, fp=f)
                         ok_ids.append(i)
                         continue
                     error_input.append(i)

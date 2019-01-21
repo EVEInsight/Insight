@@ -1,0 +1,58 @@
+{
+    "package": {
+        "killID": 71289959,
+        "killmail": {
+            "attackers": [
+                {
+                    "alliance_id": 99007379,
+                    "character_id": 1115159745,
+                    "corporation_id": 1108799297,
+                    "damage_done": 2856.0,
+                    "faction_id": null,
+                    "final_blow": true,
+                    "security_status": 5.0,
+                    "ship_type_id": 23913,
+                    "weapon_type_id": 40556
+                },
+                {
+                    "alliance_id": 1727758877,
+                    "character_id": 90457318,
+                    "corporation_id": 1282059165,
+                    "damage_done": 26.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 0.1,
+                    "ship_type_id": 11993,
+                    "weapon_type_id": 27441
+                }
+            ],
+            "killmail_id": 71289959,
+            "killmail_time": "2018-07-16 19:32:05",
+            "solar_system_id": 30002586,
+            "victim": {
+                "alliance_id": 498125261,
+                "character_id": 2113705838,
+                "corporation_id": 98486683,
+                "damage_taken": 2882.0,
+                "items": [],
+                "position": {
+                    "x": -882082338884.1,
+                    "y": 57619916405.537,
+                    "z": -111185380119.58
+                },
+                "ship_type_id": 2161
+            }
+        },
+        "zkb": {
+            "locationID": 50005882,
+            "hash": "9eb676c8ce2832c8f943919efa6080d44e720a50",
+            "fittedValue": 18346723.63,
+            "totalValue": 19388794.43,
+            "points": 4.0,
+            "npc": false,
+            "solo": false,
+            "awox": false,
+            "href": "https://esi.evetech.net/v1/killmails/71289959/9eb676c8ce2832c8f943919efa6080d44e720a50/"
+        }
+    }
+}

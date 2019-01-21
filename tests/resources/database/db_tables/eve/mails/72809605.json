@@ -1,0 +1,69 @@
+{
+    "package": {
+        "killID": 72809605,
+        "killmail": {
+            "attackers": [
+                {
+                    "alliance_id": 99002938,
+                    "character_id": 1513318925,
+                    "corporation_id": 98019139,
+                    "damage_done": 241.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 5.0,
+                    "ship_type_id": 23913,
+                    "weapon_type_id": 40559
+                },
+                {
+                    "alliance_id": 99002938,
+                    "character_id": 154083867,
+                    "corporation_id": 612633154,
+                    "damage_done": 220.0,
+                    "faction_id": null,
+                    "final_blow": true,
+                    "security_status": 5.0,
+                    "ship_type_id": 24483,
+                    "weapon_type_id": 23057
+                },
+                {
+                    "alliance_id": 99008244,
+                    "character_id": 490329316,
+                    "corporation_id": 1431056470,
+                    "damage_done": 0.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 3.4,
+                    "ship_type_id": 22456,
+                    "weapon_type_id": 22778
+                }
+            ],
+            "killmail_id": 72809605,
+            "killmail_time": "2018-10-08 02:28:28",
+            "solar_system_id": 30002943,
+            "victim": {
+                "alliance_id": 99008244,
+                "character_id": 2113791869,
+                "corporation_id": 1431056470,
+                "damage_taken": 461.0,
+                "items": [],
+                "position": {
+                    "x": -53418355928.107,
+                    "y": -9134407494.0099,
+                    "z": 323085927203.81
+                },
+                "ship_type_id": 670
+            }
+        },
+        "zkb": {
+            "locationID": 40186873,
+            "hash": "99ae3b406ef599b7e1d43a8fb6ab4819d2473146",
+            "fittedValue": 10000.0,
+            "totalValue": 10000.0,
+            "points": 1.0,
+            "npc": false,
+            "solo": false,
+            "awox": false,
+            "href": null
+        }
+    }
+}

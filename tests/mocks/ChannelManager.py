@@ -1,5 +1,6 @@
 from service.channel_manager import Channel_manager
 from database.db_tables.eve import tb_kills
+from tests.mocks import DiscordInsightClient
 
 
 class ChannelManager(Channel_manager):
@@ -8,6 +9,9 @@ class ChannelManager(Channel_manager):
         self.client = None
         self.mock_mails_sent = []
         self.mock_messages_sent = []
+
+    def get_discord_client(self):
+        return DiscordInsightClient.DiscordInsightClient()
 
     def sy_get_all_channels(self):  # mock replacement
         yield 1

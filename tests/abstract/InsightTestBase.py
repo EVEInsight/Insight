@@ -8,15 +8,22 @@ import json
 
 class InsightTestBase(TestCase):
     def setUp(self):
+        self.resources = None
         self.resources = ResourceRoot.ResourceRoot.get_path()
 
-    def get_file_lines(self, filename):
-        with open(os.path.join(self.resources, filename)) as f:
+    def get_file_lines_from_abs(self, abs_path, filename):
+        with open(os.path.join(abs_path, filename)) as f:
             return f.read().splitlines()
+
+    def get_file_lines(self, filename):
+        return self.get_file_lines_from_abs(self.resources, filename)
 
     def file_json(self, filename):
         with open(os.path.join(self.resources, filename)) as f:
             return json.load(f)
+
+    def get_resource_path(self, *args, path=None):
+        return os.path.join(path if path is not None else ResourceRoot.ResourceRoot.get_path(), *args)
 
     def set_resource_path(self, *args):
         self.resources = os.path.join(self.resources if self.resources is not None else

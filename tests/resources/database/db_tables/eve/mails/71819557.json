@@ -1,0 +1,58 @@
+{
+    "package": {
+        "killID": 71819557,
+        "killmail": {
+            "attackers": [
+                {
+                    "alliance_id": null,
+                    "character_id": null,
+                    "corporation_id": 1000133,
+                    "damage_done": 26186.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 0.0,
+                    "ship_type_id": 43643,
+                    "weapon_type_id": null
+                },
+                {
+                    "alliance_id": null,
+                    "character_id": null,
+                    "corporation_id": 1000162,
+                    "damage_done": 98.0,
+                    "faction_id": null,
+                    "final_blow": true,
+                    "security_status": 0.0,
+                    "ship_type_id": 23407,
+                    "weapon_type_id": null
+                }
+            ],
+            "killmail_id": 71819557,
+            "killmail_time": "2018-08-12 09:03:05",
+            "solar_system_id": 30001168,
+            "victim": {
+                "alliance_id": 99006069,
+                "character_id": 813670016,
+                "corporation_id": 98434316,
+                "damage_taken": 26284.0,
+                "items": [],
+                "position": {
+                    "x": 325658842281.22,
+                    "y": -36475815137.292,
+                    "z": -269611696066.18
+                },
+                "ship_type_id": 44996
+            }
+        },
+        "zkb": {
+            "locationID": 40074193,
+            "hash": "54879b20fe9b03959a41f9eaa28f274d47583cf5",
+            "fittedValue": 6017253933.78,
+            "totalValue": 6686469176.3,
+            "points": 1.0,
+            "npc": true,
+            "solo": false,
+            "awox": false,
+            "href": "https://esi.evetech.net/v1/killmails/71819557/54879b20fe9b03959a41f9eaa28f274d47583cf5/"
+        }
+    }
+}

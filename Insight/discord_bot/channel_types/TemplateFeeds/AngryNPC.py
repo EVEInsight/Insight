@@ -14,11 +14,6 @@ class AngryNPC(enFeed):
         try:
             row = db.query(self.linked_table()).filter(self.linked_table().channel_id == self.channel_id).one()
             row.show_mode = dbRow.enum_kmType.show_both
-            db.add(dbRow.tb_Filter_categories(6, self.channel_id, load_fk=False))  # ships
-            db.add(dbRow.tb_Filter_categories(87, self.channel_id, load_fk=False))  # fighters
-            db.add(dbRow.tb_Filter_categories(23, self.channel_id, load_fk=False))  # pos
-            db.add(dbRow.tb_Filter_categories(66, self.channel_id, load_fk=False))  # citadel items
-            db.add(dbRow.tb_Filter_groups(1657, self.channel_id, load_fk=False))  # citadel
             db.commit()
         except Exception as ex:
             print(ex)
@@ -42,18 +37,12 @@ class AngryNPC(enFeed):
 
     def make_derived_visual(self, visual_class):
         class VisualSoloNPC(visual_class):
-            def internal_list_options(self):
-                super(visual_enfeed, self).internal_list_options()
-                self.in_attackers_ships_category = internal_options.use_blacklist.value
-
             def run_filter(self):
                 if (datetime.datetime.utcnow() - self.max_delta()) >= self.km.killmail_time:
                     return False
                 if self.feed_options.minValue > self.km.totalValue:
                     return False
-                filter_crit = self.filters.object_filter_categories + self.filters.object_filter_groups
-                tracked_ships = self.km.filter_attackers(self.km.object_attackers, filter_crit, self.in_attackers_ships_category)
-                if len(tracked_ships) != len(self.km.object_attackers):
+                if not self.km.is_npc():
                     return False
                 self.set_kill()
                 return True

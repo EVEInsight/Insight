@@ -1,0 +1,58 @@
+{
+    "package": {
+        "killID": 71586686,
+        "killmail": {
+            "attackers": [
+                {
+                    "alliance_id": 99003581,
+                    "character_id": 2114313191,
+                    "corporation_id": 98537981,
+                    "damage_done": 459.0,
+                    "faction_id": null,
+                    "final_blow": true,
+                    "security_status": 0.9,
+                    "ship_type_id": 33468,
+                    "weapon_type_id": 31872
+                },
+                {
+                    "alliance_id": 99003214,
+                    "character_id": 93425447,
+                    "corporation_id": 98169165,
+                    "damage_done": 0.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 1.4,
+                    "ship_type_id": 22460,
+                    "weapon_type_id": 22778
+                }
+            ],
+            "killmail_id": 71586686,
+            "killmail_time": "2018-08-01 00:04:37",
+            "solar_system_id": 30001162,
+            "victim": {
+                "alliance_id": 99003214,
+                "character_id": 2112097179,
+                "corporation_id": 98169165,
+                "damage_taken": 459.0,
+                "items": [],
+                "position": {
+                    "x": 1109722403467.3,
+                    "y": -59812085469.625,
+                    "z": -926979180258.14
+                },
+                "ship_type_id": 670
+            }
+        },
+        "zkb": {
+            "locationID": 40073974,
+            "hash": "c519c72afe28e4ea9bcd9545bb42bdd711dad2f9",
+            "fittedValue": 10000.0,
+            "totalValue": 10000.0,
+            "points": 1.0,
+            "npc": false,
+            "solo": false,
+            "awox": false,
+            "href": "https://esi.evetech.net/v1/killmails/71586686/c519c72afe28e4ea9bcd9545bb42bdd711dad2f9/"
+        }
+    }
+}

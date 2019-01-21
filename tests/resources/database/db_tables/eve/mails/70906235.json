@@ -1,0 +1,135 @@
+{
+    "package": {
+        "killID": 70906235,
+        "killmail": {
+            "attackers": [
+                {
+                    "alliance_id": 498125261,
+                    "character_id": 418435434,
+                    "corporation_id": 98480565,
+                    "damage_done": 9735.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 5.0,
+                    "ship_type_id": 29988,
+                    "weapon_type_id": 29988
+                },
+                {
+                    "alliance_id": 498125261,
+                    "character_id": 96377383,
+                    "corporation_id": 1018389948,
+                    "damage_done": 3151.0,
+                    "faction_id": null,
+                    "final_blow": true,
+                    "security_status": 5.0,
+                    "ship_type_id": 24702,
+                    "weapon_type_id": 2969
+                },
+                {
+                    "alliance_id": 498125261,
+                    "character_id": 1897005265,
+                    "corporation_id": 803493697,
+                    "damage_done": 2746.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 5.0,
+                    "ship_type_id": 17843,
+                    "weapon_type_id": 2446
+                },
+                {
+                    "alliance_id": 498125261,
+                    "character_id": 92368875,
+                    "corporation_id": 1018389948,
+                    "damage_done": 886.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 4.9,
+                    "ship_type_id": 11196,
+                    "weapon_type_id": 11196
+                },
+                {
+                    "alliance_id": 498125261,
+                    "character_id": 2113434559,
+                    "corporation_id": 98362674,
+                    "damage_done": 646.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 3.8,
+                    "ship_type_id": 22464,
+                    "weapon_type_id": 27361
+                },
+                {
+                    "alliance_id": 498125261,
+                    "character_id": 91221051,
+                    "corporation_id": 98210135,
+                    "damage_done": 0.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": -1.3,
+                    "ship_type_id": 12013,
+                    "weapon_type_id": 37612
+                },
+                {
+                    "alliance_id": 498125261,
+                    "character_id": 2057517860,
+                    "corporation_id": 803493697,
+                    "damage_done": 0.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 4.8,
+                    "ship_type_id": 22456,
+                    "weapon_type_id": 5443
+                },
+                {
+                    "alliance_id": 498125261,
+                    "character_id": 91676409,
+                    "corporation_id": 98210135,
+                    "damage_done": 0.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 4.9,
+                    "ship_type_id": 22444,
+                    "weapon_type_id": 2913
+                },
+                {
+                    "alliance_id": 498125261,
+                    "character_id": 842526259,
+                    "corporation_id": 803493697,
+                    "damage_done": 0.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 5.0,
+                    "ship_type_id": 3756,
+                    "weapon_type_id": 1877
+                }
+            ],
+            "killmail_id": 70906235,
+            "killmail_time": "2018-06-26 14:49:02",
+            "solar_system_id": 30003125,
+            "victim": {
+                "alliance_id": 1354830081,
+                "character_id": 2112441190,
+                "corporation_id": 98529628,
+                "damage_taken": 17164.0,
+                "items": [],
+                "position": {
+                    "x": -3351601709416.1,
+                    "y": 2053624730705.4,
+                    "z": -1656134222860.9
+                },
+                "ship_type_id": 17634
+            }
+        },
+        "zkb": {
+            "locationID": 50009087,
+            "hash": "6240f3d6af20c3a257df7f5e9c2dc0a54893a7d0",
+            "fittedValue": 85006135.25,
+            "totalValue": 116572115.51,
+            "points": 1.0,
+            "npc": false,
+            "solo": false,
+            "awox": false,
+            "href": "https://esi.evetech.net/v1/killmails/70906235/6240f3d6af20c3a257df7f5e9c2dc0a54893a7d0/"
+        }
+    }
+}

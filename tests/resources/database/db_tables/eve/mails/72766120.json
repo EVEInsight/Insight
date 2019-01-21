@@ -1,0 +1,113 @@
+{
+    "package": {
+        "killID": 72766120,
+        "killmail": {
+            "attackers": [
+                {
+                    "alliance_id": 99003581,
+                    "character_id": 1309245129,
+                    "corporation_id": 98020182,
+                    "damage_done": 852.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": -0.9,
+                    "ship_type_id": 17703,
+                    "weapon_type_id": 3244
+                },
+                {
+                    "alliance_id": 99003581,
+                    "character_id": 2113316712,
+                    "corporation_id": 98456980,
+                    "damage_done": 804.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 4.7,
+                    "ship_type_id": 621,
+                    "weapon_type_id": 8007
+                },
+                {
+                    "alliance_id": 99003581,
+                    "character_id": 2112558966,
+                    "corporation_id": 98557321,
+                    "damage_done": 633.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 3.6,
+                    "ship_type_id": 16242,
+                    "weapon_type_id": 16242
+                },
+                {
+                    "alliance_id": 99003581,
+                    "character_id": 2114008085,
+                    "corporation_id": 98538918,
+                    "damage_done": 367.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 0.1,
+                    "ship_type_id": 16242,
+                    "weapon_type_id": 16242
+                },
+                {
+                    "alliance_id": 99003581,
+                    "character_id": 1756880362,
+                    "corporation_id": 98555959,
+                    "damage_done": 215.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 5.0,
+                    "ship_type_id": 16242,
+                    "weapon_type_id": 16242
+                },
+                {
+                    "alliance_id": 99003581,
+                    "character_id": 93259022,
+                    "corporation_id": 98473651,
+                    "damage_done": 163.0,
+                    "faction_id": null,
+                    "final_blow": false,
+                    "security_status": 5.0,
+                    "ship_type_id": 16242,
+                    "weapon_type_id": 16242
+                },
+                {
+                    "alliance_id": 99003581,
+                    "character_id": 2113144878,
+                    "corporation_id": 98185110,
+                    "damage_done": 44.0,
+                    "faction_id": null,
+                    "final_blow": true,
+                    "security_status": 4.9,
+                    "ship_type_id": 16238,
+                    "weapon_type_id": 7293
+                }
+            ],
+            "killmail_id": 72766120,
+            "killmail_time": "2018-10-06 02:56:25",
+            "solar_system_id": 30000481,
+            "victim": {
+                "alliance_id": 498125261,
+                "character_id": 96532097,
+                "corporation_id": 98480565,
+                "damage_taken": 3078.0,
+                "items": [],
+                "position": {
+                    "x": -411717425504.92,
+                    "y": 78431947137.686,
+                    "z": -26010609657.005
+                },
+                "ship_type_id": 11393
+            }
+        },
+        "zkb": {
+            "locationID": 50003837,
+            "hash": "18c09fcce2ec8cc5a7862131cdcd97bec1dcd956",
+            "fittedValue": 43851263.65,
+            "totalValue": 73341906.54,
+            "points": 1.0,
+            "npc": false,
+            "solo": false,
+            "awox": false,
+            "href": null
+        }
+    }
+}

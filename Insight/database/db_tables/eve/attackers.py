@@ -110,6 +110,7 @@ class Attackers(dec_Base.Base, Base_Str_ATKv):
 
     def to_jsonDictionary(self)->dict:
         return {
+            "alliance_id": self.alliance_id,
             "character_id": self.character_id,
             "corporation_id": self.corporation_id,
             "damage_done": self.damage_done,
