@@ -1,3 +1,5 @@
+group: travis_latest
+dist: xenial
 language: python
 services:
   - docker
@@ -12,5 +14,8 @@ install:
   - cd ..
   - rm swagger-python-client -R
   - pip install -r requirements.txt
+  - pip install codecov pytest-cov
 script:
-  - pytest
+  - pytest --cov=./
+after_success:
+  - codecov

@@ -4,12 +4,14 @@ from tests.resources import ResourceRoot
 import random
 import string
 import json
+import sys
 
 
 class InsightTestBase(TestCase):
     def setUp(self):
         self.resources = None
         self.resources = ResourceRoot.ResourceRoot.get_path()
+        sys.argv = [sys.argv[0]]
 
     def get_file_lines_from_abs(self, abs_path, filename):
         with open(os.path.join(abs_path, filename)) as f:

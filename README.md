@@ -3,6 +3,7 @@
 [![](https://img.shields.io/docker/pulls/nathanls/insight.svg)](https://hub.docker.com/r/nathanls/insight) 
 [![](https://img.shields.io/travis/Nathan-LS/Insight/master.svg?label=master)](https://travis-ci.org/Nathan-LS/Insight) 
 [![](https://img.shields.io/travis/Nathan-LS/Insight/development.svg?label=development)](https://travis-ci.org/Nathan-LS/Insight) 
+[![codecov](https://codecov.io/gh/Nathan-LS/Insight/branch/development/graph/badge.svg)](https://codecov.io/gh/Nathan-LS/Insight)
 [![](https://img.shields.io/github/license/Nathan-LS/Insight.svg)](https://github.com/Nathan-LS/Insight/blob/master/LICENSE.md)
 [![](https://img.shields.io/discord/379777846144532480.svg)](https://discord.gg/Np3FCUn)
 
