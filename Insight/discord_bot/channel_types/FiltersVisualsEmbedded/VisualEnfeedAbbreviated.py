@@ -21,4 +21,5 @@ class VisualEnfeedAbbreviated(visual_enfeed):
 
     @classmethod
     def get_desc(cls):
-        return "Abbreviated - null. Size: Small"  # todo
+        return "Abbreviated - Minimal verbosity with victim/attacker names & affiliation. " \
+               "Includes KM, affiliation, & Dotlan map links. Size: Small"

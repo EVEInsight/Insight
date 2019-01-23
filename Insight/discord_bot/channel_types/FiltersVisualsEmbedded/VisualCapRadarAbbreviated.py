@@ -31,4 +31,5 @@ class VisualCapRadarAbbreviated(visual_capradar):
 
     @classmethod
     def get_desc(cls):
-        return "Abbreviated - null Size: Small"  # todo
+        return "Abbreviated - Minimal verbosity with attacker name, ship, & affiliation. Includes KM, affiliation, " \
+               "location, & Dotlan super route links. Size: Small"

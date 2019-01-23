@@ -31,4 +31,5 @@ class VisualProximityWatchAbbreviated(VisualProximityWatch):
 
     @classmethod
     def get_desc(cls):
-        return "Abbreviated - null Size: Small"  # todo
+        return "Abbreviated - Minimal verbosity with attacker name, ship, & affiliation. Includes KM, affiliation, " \
+               "location, & Dotlan map links. Size: Small"
