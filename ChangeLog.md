@@ -2,7 +2,7 @@
 ## New features
 * Server-wide command prefix modification support. Users can now add and remove Insight prefixes via the **!prefix** command.
 * Docker support. Insight is available to run as a Docker container with all dependencies packaged.
-* Various new appearance options.
+* Various new appearance options. Variations of the compact appearance for entity feeds and the new abbreviated appearance for all feed types.
 ## Changes
 * All references to the capital radar feed have been renamed to radar feed as this feed tracks more than just capital ships.
 * Crash recovery support in the parent Insight parent process which can be enabled via the ```-cr``` CLI arg.
