@@ -13,6 +13,7 @@ class InsightTestBase(TestCase):
         self.resources = ResourceRoot.ResourceRoot.get_path()
         sys.argv = [sys.argv[0]]
 
+    @classmethod
     def get_file_lines_from_abs(self, abs_path, filename):
         with open(os.path.join(abs_path, filename)) as f:
             return f.read().splitlines()
@@ -20,11 +21,16 @@ class InsightTestBase(TestCase):
     def get_file_lines(self, filename):
         return self.get_file_lines_from_abs(self.resources, filename)
 
-    def file_json(self, filename):
-        with open(os.path.join(self.resources, filename)) as f:
+    @classmethod
+    def file_json_from_abs(cls, abs_path, filename):
+        with open(os.path.join(abs_path, filename)) as f:
             return json.load(f)
 
-    def get_resource_path(self, *args, path=None):
+    def file_json(self, filename):
+        return self.file_json_from_abs(self.resources, filename)
+
+    @classmethod
+    def get_resource_path(cls, *args, path=None):
         return os.path.join(path if path is not None else ResourceRoot.ResourceRoot.get_path(), *args)
 
     def set_resource_path(self, *args):

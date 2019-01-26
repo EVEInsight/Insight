@@ -4,6 +4,7 @@ import platform
 import requests
 import aiohttp
 from tests.mocks import ChannelManager
+import os
 
 
 class ServiceModule(service_module):
@@ -31,3 +32,11 @@ class ServiceModule(service_module):
         web_lib = 'requests/{}'.format(requests.__version__) if lib_requests else 'aiohttp/{}'.format(aiohttp.__version__)
         tmp_dict['User-Agent'] = 'Insight Test Suite/{} ({}; {}) Python/{}'.format(str(self.get_version()), platform.platform(aliased=True, terse=True), web_lib, platform.python_version())
         return tmp_dict
+
+    @property
+    def config_file(self):
+        return {"ccp_developer":
+                {"client_id": os.environ.get("sso_client_id"),
+                 "secret_key": os.environ.get("sso_secret_key"),
+                 "callback_url": os.environ.get("sso_callback_url")}
+                }

@@ -10,23 +10,28 @@ class TestUniversalSupersFilter1(AbstractFilterTesting.AbstractFilterTesting):
     def download_systems(self):
         return True
 
-    def populate_group_ids(self):
+    @classmethod
+    def populate_group_ids(cls):
         yield from [30, 659]
 
-    def assert_file_path(self):
+    @classmethod
+    def assert_file_path(cls):
         return "UniversalSupers"
 
-    def filter_pass_assert_file(self):
+    @classmethod
+    def filter_pass_assert_file(cls):
         yield "1_pass.txt"
 
-    def filter_fail_assert_file(self):
+    @classmethod
+    def filter_fail_assert_file(cls):
         yield "1_fail.txt"
 
-    def filter_systems_ids(self):
+    @classmethod
+    def filter_systems_ids(cls):
         yield 30000142
 
-    @property
-    def InsightChannelType(self):
+    @classmethod
+    def InsightChannelType(cls):
         return UniverseSupers
 
     def mock_modify_before_view(self, filter_object: visual_capradar):

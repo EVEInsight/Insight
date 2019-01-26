@@ -6,18 +6,22 @@ class TestCapLossesFilter1(AbstractFilterTesting.AbstractFilterTesting):
     def need_api_download(self):
         return True
 
-    def populate_group_ids(self):
+    @classmethod
+    def populate_group_ids(cls):
         yield from [30, 659, 547, 485, 1538, 902, 883]
 
-    def assert_file_path(self):
+    @classmethod
+    def assert_file_path(cls):
         return "CapLosses"
 
-    def filter_pass_assert_file(self):
+    @classmethod
+    def filter_pass_assert_file(cls):
         yield "1_pass.txt"
 
-    def filter_fail_assert_file(self):
+    @classmethod
+    def filter_fail_assert_file(cls):
         yield "1_fail.txt"
 
-    @property
-    def InsightChannelType(self):
+    @classmethod
+    def InsightChannelType(cls):
         return CapitalLosses

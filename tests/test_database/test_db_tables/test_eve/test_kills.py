@@ -3,11 +3,13 @@ from database.db_tables import tb_kills, tb_attackers, tb_victims, tb_systems, t
 from database.db_tables.filters import tb_Filter_characters, tb_Filter_corporations, tb_Filter_alliances, tb_Filter_types, tb_Filter_groups, tb_Filter_systems, tb_Filter_constellations, tb_Filter_regions
 import datetime
 import unittest
+from tests.mocks import ServiceModule
 
 
 class TestKills(DatabaseTesting.DatabaseTesting):
     def setUp(self):
         super().setUp()
+        self.service = ServiceModule.ServiceModule(self.db)
         self.set_resource_path('db_tables', 'eve', 'mails')
         self.data = self.file_json("74647898.json")
         tb_kills.make_row(self.data.get("package"), self.service)

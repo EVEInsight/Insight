@@ -36,6 +36,7 @@ class service_module(object):
         self.__sc_session: scoped_session = self.__db_manager.get_scoped_session()
         self.static_data_import = static_data.static_data_import(self,self.__import_everything_flag)
         self.routes = RouteMapper.RouteMapper(self)
+        self.routes.setup_load()
         self.sso = EVEsso.EVEsso(self)
         self.channel_manager = cm.Channel_manager(self)
         self.zk_obj = zk.zk(self)

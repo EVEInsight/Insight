@@ -14,27 +14,27 @@ class EVEsso(object):
         assert isinstance(service_module, service.service_module)
         self.logger = InsightLogger.InsightLogger.get_logger('SSO', 'SSO.log')
         self.service = service_module
-        self.__client_id = None
-        self.__client_secret = None
-        self.__callback = ""
+        self._client_id = None
+        self._client_secret = None
+        self._callback = ""
         self._token_url = "https://login.eveonline.com/oauth/token"
         self._verify_url = "https://login.eveonline.com/oauth/verify"
         self._revoke_url = "https://login.eveonline.com/oauth/revoke"
         self._login_url = ""
-        self.__get_config()
+        self._get_config()
 
-    def __get_config(self):
+    def _get_config(self):
         """gets the configuration from the config file, exits if invalid or no keys"""
-        self.__client_id = self.service.config_file["ccp_developer"]["client_id"]
-        self.__client_secret = self.service.config_file["ccp_developer"]["secret_key"]
-        self.__callback = self.service.config_file["ccp_developer"]["callback_url"]
-        if not self.__client_id or not self.__client_secret or not self.__callback:
+        self._client_id = self.service.config_file["ccp_developer"]["client_id"]
+        self._client_secret = self.service.config_file["ccp_developer"]["secret_key"]
+        self._callback = self.service.config_file["ccp_developer"]["callback_url"]
+        if not self._client_id or not self._client_secret or not self._callback:
             print("You are missing a CCP developer application key and secret. Please set these in the config file.")
             sys.exit(1)
         self._login_url = "https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri={cb}&client_id={cid}&scope={scopes}".format(
-            cb=self.__callback, cid=self.__client_id, scopes=self.__get_scopes())
+            cb=self._callback, cid=self._client_id, scopes=self._get_scopes())
 
-    def __get_scopes(self):
+    def _get_scopes(self):
         _scopes = quote(
             "esi-characters.read_contacts.v1 esi-corporations.read_contacts.v1 esi-alliances.read_contacts.v1")
         return str(_scopes)
@@ -43,7 +43,7 @@ class EVEsso(object):
         return self._login_url
 
     def get_callback_example(self):
-        return "{}{}".format(self.__callback, "?code=ExampleCallbackAuthCode")
+        return "{}{}".format(self._callback, "?code=ExampleCallbackAuthCode")
 
     def clean_auth_code(self, auth_str):
         parsed_str = urlparse.urlparse(auth_str)
@@ -51,7 +51,7 @@ class EVEsso(object):
         return code[0]
 
     def get_token_from_auth(self, auth_code):
-        auth_header = (HTTPBasicAuth(self.__client_id, self.__client_secret))
+        auth_header = (HTTPBasicAuth(self._client_id, self._client_secret))
         headers = {"Content-Type": "application/json", **self.service.get_headers(lib_requests=True)}
         payload = {"grant_type": "authorization_code", "code": auth_code}
         response = requests.post(url=self._token_url, auth=auth_header, data=json.dumps(payload), headers=headers,
@@ -66,7 +66,7 @@ class EVEsso(object):
         assert isinstance(token_row, tb_tokens)
         db: Session = self.service.get_session()
         auth_header = (
-            HTTPBasicAuth(self.__client_id, self.__client_secret))
+            HTTPBasicAuth(self._client_id, self._client_secret))
         headers = {"Content-Type": "application/json", **self.service.get_headers(lib_requests=True)}
         payload = {"grant_type": "refresh_token", "refresh_token": token_row.refresh_token}
         try:
@@ -112,7 +112,7 @@ class EVEsso(object):
             db.close()
             try:
                 auth_header = (
-                    HTTPBasicAuth(self.__client_id, self.__client_secret))
+                    HTTPBasicAuth(self._client_id, self._client_secret))
                 headers = {"Content-Type": "application/json", **self.service.get_headers(lib_requests=True)}
                 payload = {"token_type_hint": "refresh_token", "token": ref_token}
                 response = requests.post(url=self._revoke_url, auth=auth_header, data=json.dumps(payload),

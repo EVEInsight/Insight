@@ -20,8 +20,7 @@ class zk(object):
         assert isinstance(service_module, service.ServiceModule)
         self.logger = InsightLogger.InsightLogger.get_logger('ZK', 'ZK.log')
         self.service = service_module
-        identifier = str(self.generate_identifier())
-        self.zk_stream_url = str("https://redisq.zkillboard.com/listen.php?queueID={}".format(identifier))
+        self.zk_stream_url = self.generate_redisq_url()
         self.run = True
         self.error_ids = []
         self.error_ids_last_reset = datetime.datetime.utcnow()
@@ -84,6 +83,18 @@ class zk(object):
                 f.write(random_s)
                 return random_s
 
+    def generate_redisq_url(self, no_identifier=False):
+        if no_identifier:
+            return "https://redisq.zkillboard.com/listen.php"
+        else:
+            return "https://redisq.zkillboard.com/listen.php?queueID={}".format(self.generate_identifier())
+
+    def url_stream(self):
+        return self.zk_stream_url
+
+    def url_websocket(self):
+        return "wss://zkillboard.com:2096"
+
     def _make_km(self, km_json):
         """returns the cached km object if it does not exist, returns none if error or already exists"""
         result = None
@@ -144,7 +155,7 @@ class zk(object):
             next_delay = datetime.datetime.utcnow()
             while self.run:
                 try:
-                    async with client.get(url=self.zk_stream_url, timeout=45) as resp:
+                    async with client.get(url=self.url_stream(), timeout=45) as resp:
                         if resp.status == 200:
                             data = await resp.json()
                             package = data.get('package')
@@ -198,7 +209,7 @@ class zk(object):
                 while self.run:
                     next_delay = datetime.datetime.utcnow()
                     try:
-                        async with client.ws_connect('wss://zkillboard.com:2096', heartbeat=10) as ws:
+                        async with client.ws_connect(self.url_websocket(), heartbeat=10) as ws:
                             lg.info('ZK WebSocket connection established.')
                             await ws.send_json(data={"action": "sub", "channel": "killstream"})
                             async for msg in ws:

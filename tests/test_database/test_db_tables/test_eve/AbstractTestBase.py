@@ -1,5 +1,5 @@
 from tests.abstract import DatabaseTesting
-
+from tests.mocks import ServiceModule
 
 class AbstractTestBase(DatabaseTesting.DatabaseTesting):
     @property
@@ -29,6 +29,7 @@ class AbstractTestBase(DatabaseTesting.DatabaseTesting):
 
     def setUp(self):
         super().setUp()
+        self.service = ServiceModule.ServiceModule(self.db)
         self.db.add(self.helper_row(self.helper_assert_id))
         self.db.commit()
 

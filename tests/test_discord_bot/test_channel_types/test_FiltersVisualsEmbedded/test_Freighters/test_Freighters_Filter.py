@@ -9,18 +9,22 @@ class TestFreightersFilter1(AbstractFilterTesting.AbstractFilterTesting):
     def download_systems(self):
         return True
 
-    def populate_group_ids(self):
+    @classmethod
+    def populate_group_ids(cls):
         yield from [513, 902]
 
-    def assert_file_path(self):
+    @classmethod
+    def assert_file_path(cls):
         return "Freighters"
 
-    def filter_pass_assert_file(self):
+    @classmethod
+    def filter_pass_assert_file(cls):
         yield "1_pass.txt"
 
-    def filter_fail_assert_file(self):
+    @classmethod
+    def filter_fail_assert_file(cls):
         yield "1_fail.txt"
 
-    @property
-    def InsightChannelType(self):
+    @classmethod
+    def InsightChannelType(cls):
         return Freighters
