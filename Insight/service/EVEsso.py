@@ -22,6 +22,21 @@ class EVEsso(object):
         self._revoke_url = "https://login.eveonline.com/oauth/revoke"
         self._login_url = ""
         self._get_config()
+        if self.service.cli_args.auth:
+            self._console_auth_mode()
+
+    def _console_auth_mode(self):
+        print("==================Insight auth code converter mode==================")
+        print("Using SSO config parameters from file: {}".format(self.service.cli_args.config))
+        print("Client ID: ****{}".format(self._client_id[-4:]))
+        print("Client Secret: ****{}".format(self._client_secret[-4:]))
+        print("Navigate to this URL:\n\n{}\n\nSign in, and paste the callback URL into this console prompt:"
+              "".format(self.get_sso_login()))
+        with open(0) as i:
+            sys.stdin = i
+            auth_input = input().strip()
+        print("\nRefresh token: {}".format(self.get_token_from_auth(self.clean_auth_code(auth_input)).get("refresh_token")))
+        sys.exit(0)
 
     def _get_config(self):
         """gets the configuration from the config file, exits if invalid or no keys"""

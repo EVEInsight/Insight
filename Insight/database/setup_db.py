@@ -2,6 +2,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker,Session
 from sqlalchemy import create_engine
 import database.db_tables as DB
 import sys
+from InsightUtilities import ColumnEncryption
 
 
 class setup_database(object):
@@ -48,7 +49,7 @@ class setup_database(object):
                 tb_contacts_pilots.__table__.drop(self.engine)
                 tb_discord_tokens.__table__.drop(self.engine)
                 tb_tokens.__table__.drop(self.engine)
-                self.service.read_config_file(self.service.cli_args.config, newkey=True)
+                ColumnEncryption().reset_key()
                 print("Issue resolved. You must restart Insight.")
                 sys.exit(0)
             elif resp.startswith('n'):

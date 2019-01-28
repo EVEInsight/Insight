@@ -6,9 +6,8 @@ from . import EVEsso
 from . import RouteMapper
 from . import InsightAdmins
 import database
-import argparse
 import configparser
-import sys
+import InsightUtilities
 import discord
 from distutils.version import LooseVersion
 import requests
@@ -18,16 +17,14 @@ import platform
 import traceback
 import sys
 
-__passkey = None
-
 
 class service_module(object):
     def __init__(self, multiproc_dict):
-        self.__multiproc_dict:dict = multiproc_dict
-        self.cli_args = self._read_cli_args()
+        self.__multiproc_dict: dict = multiproc_dict
+        self.cli_args = InsightUtilities.InsightArgumentParser.get_cli_args()
         self.set_crash_recovery(self.cli_args.crash_recovery, None)
         self.config_file = configparser.ConfigParser()
-        self.config_file.read(self.read_config_file(self.cli_args.config))
+        self.config_file.read(self.cli_args.config)
         self.__header_dict = {}
         self.welcome()
         self.__import_everything_flag = False
@@ -43,39 +40,6 @@ class service_module(object):
         self.__admin_module = InsightAdmins.InsightAdmins()
         self.motd = self.__read_motd()
         self.set_crash_recovery(self.cli_args.crash_recovery, self.__admin_module.get_default_admin())  # set id
-
-    def _read_cli_args(self):
-        parser = argparse.ArgumentParser()
-        parser.add_argument("--config", "-c",
-                            help="Specifies a config file other than the default 'config.ini' to run the program with",
-                            default="config.ini")
-        parser.add_argument("--debug_km","-km",
-                            help="Start the application in debug mode to send kms starting at and above this id through all channel feeds.",
-                            type=int)
-        parser.add_argument("--force_ctime","-fc",
-                            action="store_true",
-                            help="If --debug_km is set, this flag will push kms to feeds with their time occurrence set to now.",
-                            default=False)
-        parser.add_argument("--debug_limit","-limit",
-                            help="Sets the total limit of debug kms to push through feeds before exiting the program. Default is unlimited.",
-                            type=int)
-        parser.add_argument("--skip_api_import", "-noapi", action="store_true",
-                            help="Skip startup API static data import check.", default=False)
-        parser.add_argument("--websocket", "-ws", action="store_true",
-                            help="Enable the experimental secondary ZK websocket connection.", default=False)
-        parser.add_argument("--defer_tasks", "-defer", action="store_true",
-                            help="Defers slow tasks to run later instead of at startup.", default=False)
-        parser.add_argument("--sde_db","-sde",
-                            help="Specifies the name of the SDE database file relative to main.py. Download and extract the "
-                                 "sqlite-latest.sqlite file from https://www.fuzzwork.co.uk/dump/",
-                            type=str, default="sqlite-latest.sqlite")
-        parser.add_argument("--crash_recovery", "-cr", action="store_true",
-                            help="Automatically reboot Insight in the event of an application crash.", default=False)
-        parser.add_argument("--build-binary", "-b", action="store_true",
-                            help="Utilize the Docker image to build a binary package of Insight.", default=False)
-        parser.add_argument("--docker-init", "-d", action="store_true",
-                            help="Initialize the Docker volume with the configuration and README files.", default=False)
-        return parser.parse_args()
 
     def get_headers(self, lib_requests=False) ->dict:
         key = 'requests' if lib_requests else 'aiohttp'
@@ -97,27 +61,6 @@ class service_module(object):
                 traceback.print_exc()
                 sys.exit(1)
         return self.__header_dict[key]
-
-    @classmethod
-    def read_config_file(cls, fname, newkey=False):
-        try:
-            with open(fname, 'r'):
-                pass
-            tmpConfig = configparser.ConfigParser()
-            tmpConfig.read(fname)
-            if not tmpConfig['encryption']['secret_key'] or newkey:
-                print("Generating a new encryption secret key in config file.")
-                tmpConfig['encryption']['secret_key'] = cls.generate_secret()
-                with open(fname, 'w') as cf:
-                    tmpConfig.write(cf)
-            global __passkey
-            __passkey = tmpConfig['encryption']['secret_key']
-            return fname
-        except FileNotFoundError:
-            print("The config file '{0}' could not be found. Rename file 'default-config.ini' to '{0}'. "
-                  "If you are using Insight with Docker make sure to check your volume directory, rename the "
-                  "'default-config.ini' to 'config.ini', and populate the configuration values.".format(fname))
-            sys.exit(1)
 
     def __read_motd(self):
         filename = 'motd.txt'
@@ -210,12 +153,3 @@ class service_module(object):
     def get_db_version(cls):
         version_str = 'v2.4.0'
         return LooseVersion(version_str)
-
-    @staticmethod
-    def get_key():
-        global __passkey
-        return __passkey
-
-    @staticmethod
-    def generate_secret():
-        return str(secrets.token_urlsafe(64))

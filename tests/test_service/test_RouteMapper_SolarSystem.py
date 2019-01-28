@@ -32,7 +32,7 @@ class TestRouteMapperSolarSystem(DatabaseTesting.DatabaseTesting):
         self.assertTrue(self.s1.has_gate_distances())
 
     def test_get_distance(self):
-        self.assertEquals(1, self.s1.get_gate_distance(self.s2))
+        self.assertEquals(1, self.s1.get_distance(self.s2))
         self.assertEquals(1, self.s1._access_counter)
 
     def test_get_gate_distance(self):

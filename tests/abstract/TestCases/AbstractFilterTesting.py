@@ -5,7 +5,7 @@ from database.db_tables.filters import tb_Filter_characters, tb_Filter_corporati
 from tests.mocks.libDiscord.TextChannel import TextChannel
 from tests.mocks.ServiceModule import ServiceModule
 import datetime
-from  sqlalchemy.sql.expression import func
+from sqlalchemy.sql.expression import func
 
 
 class AbstractFilterTesting(DatabaseTesting.DatabaseTesting, AsyncTesting.AsyncTesting):
@@ -163,6 +163,8 @@ class AbstractFilterTesting(DatabaseTesting.DatabaseTesting, AsyncTesting.AsyncT
                     VisualFilter = self.setup_visual(km)
                     self.mock_modify_before_filter(VisualFilter)
                     self.assertFalse(VisualFilter.run_filter())
+            else:
+                pass
 
     def test_generate_view(self):
         for km in self.db.query(tb_kills).order_by(func.random()).limit(25).all():
