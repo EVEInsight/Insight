@@ -5,6 +5,10 @@ from discord_bot.channel_types.TemplateFeeds.AngryNPC import AngryNPC
 class TestAngryNpcsFilter1(AbstractFilterTesting.AbstractFilterTesting):
     """no minimum value set"""
     @classmethod
+    def import_item_db(cls):
+        return True
+
+    @classmethod
     def assert_file_path(cls):
         return "AngryNpcs"
 

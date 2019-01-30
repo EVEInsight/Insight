@@ -11,10 +11,15 @@ from sqlalchemy.sql.expression import func
 class AbstractFilterTesting(DatabaseTesting.DatabaseTesting, AsyncTesting.AsyncTesting):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         path_mails = cls.get_resource_path("database", "db_tables", "eve", "mails")
         cls.assert_files = cls.get_resource_path("DiscordBot", "ChannelTypes", "FiltersVisualsEmbedded",
                                                    cls.assert_file_path())
         cls.engine = cls.get_engine()
+        if cls.import_item_db():
+            cls.import_type_group_category(cls.engine)
+        if cls.import_map_db():
+            cls.import_system_constellation_region(cls.engine)
         cls.scoped_session = cls.get_scoped_session(cls.engine)
         cls.db = cls.get_session(cls.engine)
         cls.service = ServiceModule(cls.scoped_session)
@@ -30,10 +35,6 @@ class AbstractFilterTesting(DatabaseTesting.DatabaseTesting, AsyncTesting.AsyncT
             cls.db.merge(tb_Filter_alliances(filter_id, 1, True))
         for filter_id in cls.filter_systems_ids():
             cls.db.merge(tb_Filter_systems(filter_id, 1, True))
-        for group_id in cls.populate_group_ids():
-            cls.db.merge(tb_groups(group_id))
-        for cat_id in cls.populate_category_ids():
-            cls.db.merge(tb_categories(cat_id))
         cls.db.commit()
         cls.db.close()
 
@@ -51,23 +52,16 @@ class AbstractFilterTesting(DatabaseTesting.DatabaseTesting, AsyncTesting.AsyncT
     def tearDown(self):
         AsyncTesting.AsyncTesting.tearDown(self)
 
-    def helper_download_data(self):
-        tb_groups.api_mass_data_resolve(self.service)
-        tb_categories.api_mass_data_resolve(self.service)
-        if self.download_systems():
-            tb_systems.api_mass_data_resolve(self.service)
-        tb_constellations.api_mass_data_resolve(self.service)
-        tb_regions.api_mass_data_resolve(self.service)
-        self.loop.run_until_complete(self.InsightChannel.async_load_table())
-
     def get_channel_object(self):
         self.InsightChannel = self.InsightChannelType()(self.channel, self.service)
         return self.InsightChannel
 
-    def need_api_download(self):
+    @classmethod
+    def import_item_db(cls):
         return False
 
-    def download_systems(self):
+    @classmethod
+    def import_map_db(cls):
         return False
 
     @classmethod
@@ -81,16 +75,6 @@ class AbstractFilterTesting(DatabaseTesting.DatabaseTesting, AsyncTesting.AsyncT
         row: tb_enfeed = t(1)
         row.template_id = cls.InsightChannelType().get_template_id()
         return row
-
-    @classmethod
-    def populate_group_ids(cls):
-        return
-        yield
-
-    @classmethod
-    def populate_category_ids(cls):
-        return
-        yield
 
     @classmethod
     def filter_character_ids(cls):
@@ -147,9 +131,6 @@ class AbstractFilterTesting(DatabaseTesting.DatabaseTesting, AsyncTesting.AsyncT
                       self.InsightChannel.cached_feed_specific, self.InsightChannel)
 
     def test_run_filter(self):
-        if self.need_api_download():
-            self.helper_download_data()
-            self.get_channel_object()
         pass_ids = set(self.filter_pass_ids())
         fail_ids = set(self.filter_fail_ids())
         for km in self.db.query(tb_kills).all():

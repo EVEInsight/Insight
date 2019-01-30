@@ -3,12 +3,9 @@ from discord_bot.channel_types.TemplateFeeds.CapitalLosses import CapitalLosses
 
 
 class TestCapLossesFilter1(AbstractFilterTesting.AbstractFilterTesting):
-    def need_api_download(self):
-        return True
-
     @classmethod
-    def populate_group_ids(cls):
-        yield from [30, 659, 547, 485, 1538, 902, 883]
+    def import_item_db(cls):
+        return True
 
     @classmethod
     def assert_file_path(cls):

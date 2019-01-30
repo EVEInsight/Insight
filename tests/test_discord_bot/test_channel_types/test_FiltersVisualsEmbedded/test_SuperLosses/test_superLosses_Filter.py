@@ -3,12 +3,9 @@ from discord_bot.channel_types.TemplateFeeds.SuperLosses import SuperLosses
 
 
 class TestSuperLossesFilter1(AbstractFilterTesting.AbstractFilterTesting):
-    def need_api_download(self):
-        return True
-
     @classmethod
-    def populate_group_ids(cls):
-        yield from [30, 659]
+    def import_item_db(cls):
+        return True
 
     @classmethod
     def assert_file_path(cls):

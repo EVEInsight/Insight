@@ -4,11 +4,12 @@ from discord_bot.channel_types.TemplateFeeds.AbyssalLosses import AbyssalLosses
 
 class TestAbyssalFilter1(AbstractFilterTesting.AbstractFilterTesting):
     """without min value set"""
-    def need_api_download(self):
+    @classmethod
+    def import_item_db(cls):
         return True
 
     @classmethod
-    def download_systems(cls):
+    def import_map_db(cls):
         return True
 
     @classmethod

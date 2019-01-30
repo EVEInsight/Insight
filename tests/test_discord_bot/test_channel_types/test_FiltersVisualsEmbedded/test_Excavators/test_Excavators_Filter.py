@@ -3,12 +3,9 @@ from discord_bot.channel_types.TemplateFeeds.ExcavatorLosses import ExcavatorLos
 
 
 class TestFreightersFilter1(AbstractFilterTesting.AbstractFilterTesting):
-    def need_api_download(self):
-        return True
-
     @classmethod
-    def populate_group_ids(cls):
-        yield from [101]
+    def import_item_db(cls):
+        return True
 
     @classmethod
     def assert_file_path(cls):

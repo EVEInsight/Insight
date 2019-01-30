@@ -4,15 +4,13 @@ from discord_bot.channel_types.FiltersVisualsEmbedded.visual_capradar import vis
 
 
 class TestUniversalSupersFilter1(AbstractFilterTesting.AbstractFilterTesting):
-    def need_api_download(self):
-        return True
-
-    def download_systems(self):
+    @classmethod
+    def import_item_db(cls):
         return True
 
     @classmethod
-    def populate_group_ids(cls):
-        yield from [30, 659]
+    def import_map_db(cls):
+        return True
 
     @classmethod
     def assert_file_path(cls):

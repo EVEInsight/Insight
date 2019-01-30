@@ -65,3 +65,14 @@ class DatabaseTesting(InsightTestBase.InsightTestBase):
     def import_stargates(cls, engine):
         cls._sql_import("stargates.sql", engine)
 
+    @classmethod
+    def import_type_group_category(cls, engine):
+        cls._sql_import("categories.sql", engine)
+        cls._sql_import("groups.sql", engine)
+        cls._sql_import("types.sql", engine)
+
+    @classmethod
+    def import_system_constellation_region(cls, engine):
+        cls._sql_import("regions.sql", engine)
+        cls._sql_import("constellations.sql", engine)
+        cls._sql_import("systems.sql", engine)

@@ -3,7 +3,8 @@ from discord_bot.channel_types.TemplateFeeds.BigKills import BigKills
 
 
 class TestBigKillsFilter1(AbstractFilterTesting.AbstractFilterTesting):
-    def need_api_download(self):
+    @classmethod
+    def import_item_db(cls):
         return True
 
     @classmethod

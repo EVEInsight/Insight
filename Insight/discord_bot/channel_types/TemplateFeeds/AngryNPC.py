@@ -44,6 +44,8 @@ class AngryNPC(enFeed):
                     return False
                 if not self.km.is_npc():
                     return False
+                if self.km.get_alive_nonnpc_count(self.km.object_attackers) > 0:
+                    return False
                 self.set_kill()
                 return True
 
