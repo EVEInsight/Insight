@@ -8,11 +8,8 @@ from database.db_tables.sso import tb_tokens
 class TestTokensColEncrypt(DatabaseTesting.DatabaseTesting):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         ColumnEncryption()._set_random_key()
-
-    @classmethod
-    def tearDownClass(cls):
-        InsightSingleton.clear_instance_references()
 
     def test_insert(self):
         self.db.add(tb_tokens(1, "token123"))

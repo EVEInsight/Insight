@@ -43,12 +43,12 @@ class mapper_index(object):
         assert isinstance(message_object,discord.Message)
         assert isinstance(discord_client_object,discord_main.Discord_Insight_Client)
         self.message = message_object
-        self.__option_container = []
-        self.__printout_format = []
-        self.__mention = "{}".format(self.message.author.mention)
-        self.__header_text = ""
-        self.__footer_text = "Select an option by entering its number:"
-        self.__timeout_seconds = int(timeout_seconds)
+        self._option_container = []
+        self._printout_format = []
+        self._mention = "{}".format(self.message.author.mention)
+        self._header_text = ""
+        self._footer_text = "Select an option by entering its number:"
+        self._timeout_seconds = int(timeout_seconds)
         self.discord_client = discord_client_object
         self.e_header_container = ['Options']
         self.e_body_container = []
@@ -56,35 +56,35 @@ class mapper_index(object):
         self.maxbitlength = 16
 
     def set_main_header(self,main_header_txt:str):
-        self.__header_text = main_header_txt
+        self._header_text = main_header_txt
 
     def set_footer_text(self,main_footer_text:str):
-        self.__footer_text = main_footer_text
+        self._footer_text = main_footer_text
 
     def add_blank_line(self):
-        self.__printout_format.append("")
+        self._printout_format.append("")
 
     def add_header_row(self, header_txt):
-        self.__printout_format.append("\n-----{}-----".format(str(header_txt)))
+        self._printout_format.append("\n-----{}-----".format(str(header_txt)))
         if self.header_index == 0 and len(self.e_body_container) == 0:
             self.e_header_container = [str(header_txt)]
         else:
             self.e_header_container.append(str(header_txt))
             self.header_index += 1
 
-    def __current_option_index(self)->int:
-        return int(len(self.__option_container))
+    def _current_option_index(self)->int:
+        return int(len(self._option_container))
 
     def set_bit_length(self, bit_l: int):
         self.maxbitlength = bit_l
 
     def add_option(self, mapper_option_obj: option_calls_coroutine):
-        if self.__current_option_index() > 400:
+        if self._current_option_index() > 400:
             raise InsightExc.userInput.TooManyOptions
         if isinstance(mapper_option_obj, option_calls_coroutine) or isinstance(mapper_option_obj,option_returns_object):
-            mapper_option_obj.set_index(self.__current_option_index())
-            self.__option_container.append(mapper_option_obj)
-            self.__printout_format.append("{}".format(str(mapper_option_obj)))
+            mapper_option_obj.set_index(self._current_option_index())
+            self._option_container.append(mapper_option_obj)
+            self._printout_format.append("{}".format(str(mapper_option_obj)))
             try:
                 self.e_body_container[self.header_index].append(str(mapper_option_obj))
             except IndexError:
@@ -99,8 +99,8 @@ class mapper_index(object):
             embed.color = discord.Color(659493)
             embed.timestamp = datetime.datetime.utcnow()
             embed.set_author(name=self.name())
-            embed.set_footer(text='Timeout: {}s'.format(self.__timeout_seconds))
-            embed.description = self.__header_text
+            embed.set_footer(text='Timeout: {}s'.format(self._timeout_seconds))
+            embed.description = self._header_text
             for index, h in enumerate(self.e_header_container):
                 try:
                     results = self.e_body_container[index]
@@ -127,7 +127,7 @@ class mapper_index(object):
                     options_str = '```{}```'.format(options_str) if options_str else '```empty```'
                     t_h = '{}'.format(h) if pg_count == 0 else '{} - continued ({})'.format(h, pg_count)
                     embed.add_field(name=t_h, value=options_str, inline=False)
-            embed.add_field(name='Info', value=self.__footer_text)
+            embed.add_field(name='Info', value=self._footer_text)
             return embed
         except Exception as ex:
             if not isinstance(ex, InsightExc.InsightException):
@@ -135,17 +135,17 @@ class mapper_index(object):
             raise InsightExc.DiscordError.EmbedOptionsError
 
     def __str__(self):
-        __str_item = self.__mention + "\n" + self.__header_text + "\n\n"
-        for i in self.__printout_format:
+        __str_item = self._mention + "\n" + self._header_text + "\n\n"
+        for i in self._printout_format:
             __str_item += (str(i) + "\n\n")
-        __str_item += "\n\n" + self.__footer_text
+        __str_item += "\n\n" + self._footer_text
         if len(__str_item) >= 1950:
             raise InsightExc.User.TooManyOptions
         return __str_item + "\n"
 
     async def check_conditions(self):
         try:
-            assert self.__current_option_index() > 0
+            assert self._current_option_index() > 0
         except AssertionError:
             raise InsightExc.User.InsightProgrammingError
 
@@ -161,16 +161,16 @@ class mapper_index(object):
     async def check_response(self,response):
         try:
             assert self.isInt(response)
-            assert int(response) >= 0 and int(response) < self.__current_option_index()
+            assert int(response) >= 0 and int(response) < self._current_option_index()
         except AssertionError:
             raise InsightExc.User.InvalidIndex("You must enter a number between 0 and {}, but you entered '{}'."
-                                               "".format(str(self.__current_option_index() - 1), str(response)))
+                                               "".format(str(self._current_option_index() - 1), str(response)))
 
     async def add_additional(self):
         pass
 
     def get_option(self,index:int)->option_calls_coroutine:
-        return self.__option_container[index]
+        return self._option_container[index]
 
     async def response_action(self, response):
         await self.check_response(response)
@@ -194,11 +194,11 @@ class mapper_index(object):
                     await self.message.channel.send(str(self))
             else:
                 await self.message.channel.send(embed=self.get_embed())
-            __response = await self.discord_client.wait_for('message', check=is_author, timeout=self.__timeout_seconds)
+            __response = await self.discord_client.wait_for('message', check=is_author, timeout=self._timeout_seconds)
             return await self.response_action(__response.content)
         except asyncio.TimeoutError:
             raise InsightExc.User.InputTimeout("Sorry, but you took too long to respond. You must respond within {} "
-                                               "seconds.".format(str(self.__timeout_seconds)))
+                                               "seconds.".format(str(self._timeout_seconds)))
         except discord.HTTPException as ex:
             if ex.code == 50035 and ex.status == 400:
                 raise InsightExc.User.TooManyOptions

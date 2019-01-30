@@ -113,14 +113,14 @@ class Options_EnFeed(Base_Feed.base_activefeed):
         __options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
         __options.set_main_header("Select the killmail viewing mode for this entity feed.")
         __options.add_option(dOpt.option_returns_object(
-            name="Show losses only - Only losses involving your tracked entities will be posted.",
-            return_object=enum_kmType.losses_only))
+            name="Show kills and losses - Both kills and losses involving tracked entities will be posted.",
+            return_object=enum_kmType.show_both))
         __options.add_option(dOpt.option_returns_object(
             name="Show kills only - Only kills where your tracked entities were attackers will be posted.",
             return_object=enum_kmType.kills_only))
         __options.add_option(dOpt.option_returns_object(
-            name="Show kills and losses - Both kills and losses involving tracked entities will be posted.",
-            return_object=enum_kmType.show_both))
+            name="Show losses only - Only losses involving your tracked entities will be posted.",
+            return_object=enum_kmType.losses_only))
         __selected_option = await __options()
         await self.cfeed.discord_client.loop.run_in_executor(None, partial(set_mode, __selected_option))
         await self.reload(message_object)

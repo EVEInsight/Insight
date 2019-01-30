@@ -18,8 +18,10 @@ class ServiceModule(service_module):
         if isinstance(self.session, scoped_session):
             ses = self.session()
             return ses
-        else:
+        elif isinstance(self.session, Session):
             return self.session
+        else:
+            raise NotImplementedError
 
     def close_session(self):
         if isinstance(self.session, scoped_session):

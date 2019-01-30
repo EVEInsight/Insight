@@ -5,9 +5,14 @@ import random
 import string
 import json
 import sys
+import InsightUtilities
 
 
 class InsightTestBase(TestCase):
+    @classmethod
+    def tearDownClass(cls):
+        InsightUtilities.InsightSingleton.clear_instance_references()
+
     def setUp(self):
         self.resources = None
         self.resources = ResourceRoot.ResourceRoot.get_path()

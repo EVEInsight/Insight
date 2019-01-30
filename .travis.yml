@@ -16,6 +16,6 @@ install:
   - pip install -r requirements.txt
   - pip install codecov pytest-cov
 script:
-  - pytest --cov=./
+  - pytest --cov=./ -W ignore::DeprecationWarning
 after_success:
   - codecov
