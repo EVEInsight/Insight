@@ -55,7 +55,7 @@ class DatabaseTesting(InsightTestBase.InsightTestBase):
     def _sql_import(cls, file, engine):
         with open(os.path.join(cls.sql_root, file), 'r') as f:
             for statement in f:
-                engine.execute(sqlalchemy.text(statement))
+                engine.execute(statement)
 
     @classmethod
     def import_systems(cls, engine):

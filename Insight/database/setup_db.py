@@ -40,9 +40,11 @@ class setup_database(object):
             print("The token table is corrupted. If you modified your database encryption secret key located in your "
                   "config file all existing tokens become invalid. Insight will not work until this issue is resolved. "
                   "You must either restore your previous encryption key or delete all existing tokens.")
-            resp = input(
-                "\n\nReset all tokens? Note: You will be unable to use Insight until this error goes away. "
-                "[Y/n]: ").lower()
+            with open(0) as i:
+                sys.stdin = i
+                resp = input(
+                    "\n\nReset all tokens? Note: You will be unable to use Insight until this error goes away. "
+                    "[Y/n]: ").lower()
             if resp.startswith('y'):
                 tb_contacts_alliances.__table__.drop(self.engine)
                 tb_contacts_corps.__table__.drop(self.engine)

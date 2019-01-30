@@ -4,6 +4,7 @@ from .BigKills import BigKills
 from .Freighters import Freighters
 from .ExcavatorLosses import ExcavatorLosses
 from .AbyssalLosses import AbyssalLosses
+from .AbyssalPvP import AbyssalPvP
 from .OfficerHunter import OfficerHunter
 from .UniverseSupers import UniverseSupers
 from .RareShips import RareShips
