@@ -33,6 +33,7 @@ COPY --from=SDE /sqlite-latest.sqlite ./sqlite-latest.sqlite
 RUN apt-get update && apt-get install -y \
  git \
  build-essential \
+ zip \
  && rm -rf /var/lib/apt/lists/*
 RUN git clone -b $branch --single-branch https://github.com/Nathan-LS/Insight.git
 RUN pip3 install wheel
@@ -40,7 +41,6 @@ RUN pip3 install setuptools
 WORKDIR /InsightDocker/python-client
 RUN python3 setup.py install
 WORKDIR /InsightDocker/Insight
-RUN rm /InsightDocker/python-client -R
 RUN pip3 install --upgrade -r requirements.txt
 RUN cp /InsightDocker/Insight/scripts/Docker/DockerEntry.sh /InsightDocker
 RUN cp /InsightDocker/Insight/scripts/Docker/DockerBinBuild.sh /InsightDocker

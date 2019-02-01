@@ -1,0 +1,31 @@
+version: '{branch}.{build}'
+pull_requests:
+  do_not_increment_build_number: true
+skip_tags: true
+max_jobs: 1
+image: Visual Studio 2017
+environment:
+  matrix:
+  - PYTHON: C:\Python36-x64
+install:
+- ps: >-
+    Invoke-WebRequest -OutFile swagger-client-python.zip https://github.com/Nathan-LS/Insight/releases/download/v1.3.1/swagger-client-python.zip
+
+    Expand-Archive swagger-client-python.zip -DestinationPath swagger-client-python
+
+    cd swagger-client-python
+
+    &$env:PYTHON\python -m pip install --upgrade pip
+
+    &$env:PYTHON\python setup.py install
+
+    cd ..
+
+    rm swagger-client-python -R
+
+    &$env:PYTHON\python -m pip install --upgrade -r requirements.txt
+
+    &$env:PYTHON\python -m pip install --upgrade pytest --no-warn-script-location
+build: off
+test_script:
+- cmd: '%PYTHON%\\python.exe -m pytest'

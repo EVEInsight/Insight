@@ -38,4 +38,7 @@ class InsightArgumentParser(object):
                             help="Boot Insight in SSO token authorization code converter mode. Given an authorization "
                                  "token, Insight will provide a raw refresh_token. Mainly used for unit testing.",
                             default=False)
+        parser.add_argument("--export-swagger-client", action="store_true",
+                            help="Export the built ESI swagger client library to a zip archive in the Docker volume.",
+                            default=False)
         return parser.parse_args()

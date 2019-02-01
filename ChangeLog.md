@@ -13,7 +13,7 @@
 * Redesigned command parser to support custom prefixes.
 * Increased the maximum time delta for some feed types. Supers, freighters, etc feeds are now set to 7 days instead of 3 hours. Frequent outages in ESI resulted in some mails being loaded past the 3 hour mark and thus would not be sent to feeds.
 * Radar and proximity feeds will now only print the synced token notification when the underlying count of tokens changes. Previously, any modification(contact added or removed for example) of the token would trigger a notification message.
-* Redesigned the **!about** command to display libraries used, special thanks, and links (bot invite, support Discord, Chnagelog).
+* Redesigned the **!about** command to display libraries used, special thanks, and links (bot invite, support Discord, Changelog).
 * Redesigned the **!help** command to display configured prefixes and commands with the shortest length command prefix.
 * Merged the NPC Officer Hunter preconfigured feed type with the radar service. The NPC Officer Hunter is now accessible by a switch in a radar feed via **!settings**. Existing feeds are automatically converted to the radar service.
 ## Fixes

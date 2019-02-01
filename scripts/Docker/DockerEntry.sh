@@ -15,5 +15,10 @@ do
  if [ "$a" = "-b" ] || [ "$a" = "--build-binary" ]; then
   exec /InsightDocker/DockerBinBuild.sh
  fi
+  if [ "$a" = "--export-swagger-client" ]; then
+  cd /InsightDocker/python-client
+  zip -r /app/swagger-client-python.zip .
+  exit 0
+ fi
 done
 exec "$@"
