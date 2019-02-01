@@ -53,26 +53,34 @@ class DatabaseTesting(InsightTestBase.InsightTestBase):
 
     @classmethod
     def _sql_import(cls, file, engine):
-        with open(os.path.join(cls.sql_root, file), 'r') as f:
+        with open(os.path.join(cls.sql_root, file), 'r', encoding='utf-8') as f:
             for statement in f:
                 engine.execute(statement)
 
     @classmethod
-    def import_systems(cls, engine):
-        cls._sql_import("systems.sql", engine)
+    def import_systems(cls, engine, full_data=False):
+        cls._sql_import("systems.sql" if not full_data else "systems_full.sql", engine)
 
     @classmethod
-    def import_stargates(cls, engine):
+    def import_stargates(cls, engine, full_data=False):
         cls._sql_import("stargates.sql", engine)
 
     @classmethod
-    def import_type_group_category(cls, engine):
-        cls._sql_import("categories.sql", engine)
-        cls._sql_import("groups.sql", engine)
-        cls._sql_import("types.sql", engine)
+    def import_types(cls, engine, full_data=False):
+        cls._sql_import("types.sql" if not full_data else "types_full.sql", engine)
 
     @classmethod
-    def import_system_constellation_region(cls, engine):
-        cls._sql_import("regions.sql", engine)
-        cls._sql_import("constellations.sql", engine)
-        cls._sql_import("systems.sql", engine)
+    def import_groups(cls, engine, full_data=False):
+        cls._sql_import("groups.sql" if not full_data else "groups_full.sql", engine)
+
+    @classmethod
+    def import_type_group_category(cls, engine, full_data=False):
+        cls._sql_import("categories.sql" if not full_data else "categories_full.sql", engine)
+        cls.import_groups(engine, full_data)
+        cls.import_types(engine, full_data)
+
+    @classmethod
+    def import_system_constellation_region(cls, engine, full_data=False):
+        cls._sql_import("regions.sql" if not full_data else "regions_full.sql", engine)
+        cls._sql_import("constellations.sql" if not full_data else "constellations_full.sql", engine)
+        cls.import_systems(engine, full_data)

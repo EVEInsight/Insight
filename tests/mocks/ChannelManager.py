@@ -6,7 +6,9 @@ from tests.mocks import DiscordInsightClient
 class ChannelManager(Channel_manager):
     def __init__(self, service):
         self.service = service
-        self.client = None
+        self._channel_feed_container = {}
+        self._dm_container = {}
+        self._discord_client = None
         self.mock_mails_sent = []
         self.mock_messages_sent = []
 
@@ -30,3 +32,8 @@ class ChannelManager(Channel_manager):
                 self.mock_mails_sent.append(km)  # mock send replacement feed.add_km(km)
             except Exception as ex:
                 print(ex)
+
+    async def add_feed_object(self,ch_feed_object):
+        self._channel_feed_container[ch_feed_object.channel_id] = ch_feed_object
+        # await self.refresh_post_all_tasks()
+        return ch_feed_object

@@ -1,40 +1,14 @@
-from tests.abstract.TestCases.AbstractBotReplyTesting import AbstractBotReplyTesting
 from discord_bot.channel_types.enFeed import enFeed
-from tests.mocks.libDiscord.TextChannel import TextChannel
-from database.db_tables.discord import tb_enfeed, tb_channels, enum_kmType
+from database.db_tables.discord import enum_kmType
 from database.db_tables.filters import tb_Filter_groups, tb_Filter_alliances, tb_Filter_corporations, tb_Filter_characters
-from discord_bot.channel_types.Linked_Options import opt_enfeed
-from tests.mocks.libDiscord.Message import Message
-from tests.mocks.libDiscord.User import User
 import InsightExc
-from database.db_tables.filters.base_filter import mention_method
+from tests.test_discord_bot.test_channel_types.test_Linked_Options import test_options_BaseFeed
 
 
-class TestOptions_EnFeed(AbstractBotReplyTesting):
-    def setUp(self):
-        super().setUp()
-        self.db.add(self.get_config_row().get_row(1, self.service))
-        self.db.commit()
-        text_channel = TextChannel(1, 1)
-        self.feed = self.feed_type()(text_channel, self.service)
-        self.options: opt_enfeed = self.feed.linked_options
-        self.message = Message(text_channel, User(1, "Tester"), "Initiation message.")
-
-    @classmethod
-    def get_config_row(cls):
-        return cls.feed_type().linked_table()
-
+class TestOptions_EnFeed(test_options_BaseFeed.TestOptions_BaseFeed):
     @classmethod
     def feed_type(cls):
         return enFeed
-
-    @property
-    def cached_row(self)->tb_channels:
-        return self.feed.cached_feed_table
-
-    @property
-    def cached_row_specific(self)->tb_enfeed:
-        return self.feed.cached_feed_specific
 
     def test_InsightOptionRequired_add(self):
         with self.subTest("Add tracking for NC"):
@@ -117,27 +91,7 @@ class TestOptions_EnFeed(AbstractBotReplyTesting):
             self.reply("-5b")
             self.helper_future_run_call(self.options.InsightOption_minValue(self.message))
             self.assertEqual(5e9, self.cached_row_specific.minValue)
-
-    def test_InsightOption_setMention(self):
-        with self.subTest("No mention"):
-            self.reply("0")
-            self.helper_future_run_call(self.options.InsightOption_setMention(self.message))
-            self.assertEqual(mention_method.noMention, self.cached_row.mention)
-        with self.subTest("Here"):
-            self.reply("1")
-            self.helper_future_run_call(self.options.InsightOption_setMention(self.message))
-            self.assertEqual(mention_method.here, self.cached_row.mention)
-        with self.subTest("Everyone"):
-            self.reply("2")
-            self.helper_future_run_call(self.options.InsightOption_setMention(self.message))
-            self.assertEqual(mention_method.everyone, self.cached_row.mention)
-
-    def test_InsightOption_setMentionEvery(self):
-        with self.subTest("5"):
-            self.reply("5")
-            self.helper_future_run_call(self.options.InsightOption_setMentionEvery(self.message))
-            self.assertEqual(5, self.cached_row.mention_every)
-        with self.subTest("10.2"):
-            self.reply("10.2")
-            self.helper_future_run_call(self.options.InsightOption_setMentionEvery(self.message))
-            self.assertEqual(10.2, self.cached_row.mention_every)
+        with self.subTest("Invalid input"):
+            with self.assertRaises(InsightExc.userInput.NotFloat):
+                self.reply("not a number")
+                self.helper_future_run_call(self.options.InsightOption_minValue(self.message))

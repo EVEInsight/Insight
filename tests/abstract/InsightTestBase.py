@@ -58,6 +58,9 @@ class InsightTestBase(TestCase):
             len = max_length
         return ''.join(random.choice(string.ascii_letters + string.digits) for c in range(len))
 
+    def random_int(self, min_number, max_number):
+        return random.randint(min_number, max_number)
+
     @classmethod
     def set_sys_args(cls, *args):
         sys.argv = [sys.argv[0]]

@@ -3,6 +3,8 @@
 * Server-wide command prefix modification support. Users can now add and remove Insight prefixes via the **!prefix** command.
 * Docker support. Insight is available to run as a Docker container with all dependencies packaged.
 * Various new appearance options. Variations of the compact appearance for entity feeds and the new abbreviated appearance for all feed types.
+* The new Angry NPCs feed type. This feed displays losses to solo npc ships.
+* The new Abyssal PvP feed type. This new feed displays PvP activity in Abyssal space.
 ## Changes
 * All references to the capital radar feed have been renamed to radar feed as this feed tracks more than just capital ships.
 * Crash recovery support in the parent Insight parent process which can be enabled via the ```-cr``` CLI arg.
@@ -21,6 +23,7 @@
 ## Technical
 * Added the lock and semaphore pool managing utility classes.
 * Added a memory diagnostic logger that will log memory and reference count changes over time.
+* Numerous test additions for further stability and easier debugging going forward.
 # v1.3.1
 ## Fixes
 * Fixed an issue when running Insight on computers without Git. Attempting to run Insight on a computer without Git would result in an application crash. The Insight updater now attempts to import the GitPython library within the update function and catches the error in the event of no valid Git executable.

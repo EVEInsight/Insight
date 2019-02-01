@@ -15,37 +15,37 @@ import InsightUtilities
 class Channel_manager(object):
     def __init__(self, service_module):
         self.service = service_module
-        self.__channel_feed_container = {}
-        self.__dm_container = {}
-        self.__discord_client: discord_bot.Discord_Insight_Client = None
+        self._channel_feed_container = {}
+        self._dm_container = {}
+        self._discord_client: discord_bot.Discord_Insight_Client = None
         self.id_locks = InsightUtilities.AsyncLockManager()
-        self.__delay_post = queue.Queue()
+        self._delay_post = queue.Queue()
 
     async def add_delay(self, other_time):
-        zk_module.add_delay(self.__delay_post, other_time)
+        zk_module.add_delay(self._delay_post, other_time)
 
     async def avg_delay(self):
-        result = await self.__discord_client.loop.run_in_executor(None,
-                                                                  partial(zk_module.avg_delay, self.__delay_post, True))
+        result = await self._discord_client.loop.run_in_executor(None,
+                                                                 partial(zk_module.avg_delay, self._delay_post, True))
         return result
 
     def feed_count(self):
-        return len(self.__channel_feed_container)
+        return len(self._channel_feed_container)
 
     def exists(self, feed_object):
         try:
             assert isinstance(feed_object, cType.insight_feed_service_base)
-            return self.__channel_feed_container.get(feed_object.channel_id) == feed_object
+            return self._channel_feed_container.get(feed_object.channel_id) == feed_object
         except Exception as ex:
             print(ex)
             return False
 
     def get_discord_client(self):
-        assert isinstance(self.__discord_client,discord_bot.Discord_Insight_Client)
-        return self.__discord_client
+        assert isinstance(self._discord_client, discord_bot.Discord_Insight_Client)
+        return self._discord_client
 
     def __get_active_channels(self):
-        __feeds = list(self.__channel_feed_container.values())
+        __feeds = list(self._channel_feed_container.values())
         random.shuffle(__feeds)
         return __feeds
 
@@ -68,14 +68,14 @@ class Channel_manager(object):
                 yield channel
 
     async def __get_text_channels(self):
-        for guild in self.__discord_client.guilds:
+        for guild in self._discord_client.guilds:
             for channel in guild.text_channels:
                 yield channel
 
     def set_client(self, client_object):
         try:
             assert isinstance(client_object,discord_bot.Discord_Insight_Client)
-            self.__discord_client = client_object
+            self._discord_client = client_object
         except AssertionError:
             sys.exit(1)
 
@@ -95,12 +95,12 @@ class Channel_manager(object):
         if load_message:
             print('Loading feed services... This could take some time depending on the number of feeds.')
         start = datetime.datetime.utcnow()
-        existing_ids = await self.__discord_client.loop.run_in_executor(None, get_ids)
+        existing_ids = await self._discord_client.loop.run_in_executor(None, get_ids)
         get_channel_tasks = []
         async for i in self.__get_text_channels():
             try:
                 if existing_ids is not None:
-                    if i.id in existing_ids and self.__channel_feed_container.get(i.id) is None:
+                    if i.id in existing_ids and self._channel_feed_container.get(i.id) is None:
                         get_channel_tasks.append(self.get_channel_feed(i))
                 else:
                     get_channel_tasks.append(self.get_channel_feed(i))
@@ -112,19 +112,19 @@ class Channel_manager(object):
                                                              (datetime.datetime.utcnow() - start).total_seconds()))
 
     async def add_feed_object(self,ch_feed_object):
-        self.__channel_feed_container[ch_feed_object.channel_id] = ch_feed_object
+        self._channel_feed_container[ch_feed_object.channel_id] = ch_feed_object
         await self.refresh_post_all_tasks()
         return ch_feed_object
 
     async def __add_channel(self,discord_channel_object,ch_feed_object_type):
-        return await self.add_feed_object(await ch_feed_object_type.load_new(discord_channel_object,self.service,self.__discord_client))
+        return await self.add_feed_object(await ch_feed_object_type.load_new(discord_channel_object, self.service, self._discord_client))
 
     async def __remove_container(self,ch_id_int):
-        return self.__channel_feed_container.pop(ch_id_int)
+        return self._channel_feed_container.pop(ch_id_int)
 
     async def __already_exists(self,ch_id):
         try:
-            return await self.__discord_client.loop.run_in_executor(None,partial(cType.insight_textChannel_NoFeed.get_existing_feed_type),ch_id,self.service)
+            return await self._discord_client.loop.run_in_executor(None, partial(cType.insight_textChannel_NoFeed.get_existing_feed_type), ch_id, self.service)
         except Exception as ex:
             print(ex)
 
@@ -149,7 +149,7 @@ class Channel_manager(object):
     async def __get_channel_feed(self,channel_object: discord.TextChannel):
         try:
             assert isinstance(channel_object,discord.TextChannel)
-            __feed_obj = self.__channel_feed_container.get(channel_object.id)
+            __feed_obj = self._channel_feed_container.get(channel_object.id)
             if __feed_obj is not None:
                 return __feed_obj
             else:
@@ -200,7 +200,7 @@ class Channel_manager(object):
             async for feed in self.get_all_channels():
                 try:
                     if feed.deque_done():
-                        feed.set_deque_task(self.__discord_client.loop.create_task(feed.post_all()))
+                        feed.set_deque_task(self._discord_client.loop.create_task(feed.post_all()))
                 except Exception as ex:
                     print(ex)
         except Exception as ex:
