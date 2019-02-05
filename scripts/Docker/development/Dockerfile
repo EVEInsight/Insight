@@ -38,7 +38,7 @@ RUN apt-get update && apt-get install -y \
 RUN git clone -b $branch --single-branch https://github.com/Nathan-LS/Insight.git
 RUN pip3 install wheel
 RUN pip3 install setuptools
-RUN cp /InsightDocker/python-client /InsightDocker/python-client-2
+RUN cp /InsightDocker/python-client /InsightDocker/python-client-2 -R
 WORKDIR /InsightDocker/python-client-2
 RUN python3 setup.py install
 WORKDIR /InsightDocker/Insight

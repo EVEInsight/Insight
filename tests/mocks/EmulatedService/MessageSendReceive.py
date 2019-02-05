@@ -1,6 +1,7 @@
 import InsightUtilities
 from tests.mocks.libDiscord import TextChannel, Message, User
 import janus
+import discord
 
 
 class MessageSendReceive(metaclass=InsightUtilities.InsightSingleton):
@@ -11,6 +12,8 @@ class MessageSendReceive(metaclass=InsightUtilities.InsightSingleton):
     def send_message(self, msg):
         if isinstance(msg, str):
             msg_object = Message.Message(TextChannel.TextChannel(1, 1), User.User(1), msg)
+        elif isinstance(msg, discord.Embed):
+            msg_object = Message.Message(TextChannel.TextChannel(1, 1), User.User(1), str(msg.description))
         else:
             raise NotImplementedError
         self.message_buffer.append(msg_object)

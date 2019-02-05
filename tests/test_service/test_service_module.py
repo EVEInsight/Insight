@@ -6,6 +6,7 @@ from distutils.version import LooseVersion
 
 class TestServiceModuleUpdatingOld(InsightTestBase):
     def setUp(self):
+        super().setUp()
         self.service = ServiceModule(None)
         self.service.get_version = MagicMock(return_value=LooseVersion("v0.1"))
 
@@ -15,6 +16,7 @@ class TestServiceModuleUpdatingOld(InsightTestBase):
 
 class TestServiceModuleUpdatingNew(InsightTestBase):
     def setUp(self):
+        super().setUp()
         self.service = ServiceModule(None)
         self.service.get_version = MagicMock(return_value=LooseVersion("v10"))
 
