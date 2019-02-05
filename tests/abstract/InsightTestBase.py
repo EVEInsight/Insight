@@ -6,6 +6,7 @@ import string
 import json
 import sys
 import InsightUtilities
+import shutil
 
 
 class InsightTestBase(TestCase):
@@ -65,3 +66,14 @@ class InsightTestBase(TestCase):
     def set_sys_args(cls, *args):
         sys.argv = [sys.argv[0]]
         sys.argv.extend(list(args))
+
+    def copy_file_into_cwid(self, path, file):
+        shutil.copy(os.path.join(path, file), os.getcwd())
+
+    def remove_file(self, f):
+        if os.path.exists(f):
+            os.remove(f)
+
+    def append_file(self, file_path, *args):
+        with open(file_path, 'a') as f:
+            f.writelines(args)

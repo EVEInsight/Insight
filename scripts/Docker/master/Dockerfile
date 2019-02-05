@@ -38,12 +38,14 @@ RUN apt-get update && apt-get install -y \
 RUN git clone -b $branch --single-branch https://github.com/Nathan-LS/Insight.git
 RUN pip3 install wheel
 RUN pip3 install setuptools
-WORKDIR /InsightDocker/python-client
+RUN cp /InsightDocker/python-client /InsightDocker/python-client-2
+WORKDIR /InsightDocker/python-client-2
 RUN python3 setup.py install
 WORKDIR /InsightDocker/Insight
 RUN pip3 install --upgrade -r requirements.txt
 RUN cp /InsightDocker/Insight/scripts/Docker/DockerEntry.sh /InsightDocker
 RUN cp /InsightDocker/Insight/scripts/Docker/DockerBinBuild.sh /InsightDocker
+RUN rm /InsightDocker/python-client-2 -R
 RUN chmod +x /InsightDocker/DockerEntry.sh /InsightDocker/DockerBinBuild.sh
 WORKDIR /app
 ENTRYPOINT ["/InsightDocker/DockerEntry.sh", "python3", "/InsightDocker/Insight/Insight", "-sde", "/InsightDocker/sqlite-latest.sqlite"]

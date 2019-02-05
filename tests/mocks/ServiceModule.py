@@ -6,6 +6,7 @@ import aiohttp
 from tests.mocks import ChannelManager
 import os
 import InsightUtilities
+import configparser
 
 
 class ServiceModule(service_module):
@@ -43,3 +44,11 @@ class ServiceModule(service_module):
                  "secret_key": os.environ.get("sso_secret_key"),
                  "callback_url": os.environ.get("sso_callback_url")}
                 }
+
+
+class ServiceModuleMock2(service_module):
+    def __init__(self):
+        self.cli_args = InsightUtilities.InsightArgumentParser.get_cli_args()
+        self._header_dict = {}
+        self.config_file = configparser.ConfigParser()
+        self.config_file.read(self.get_config_file(self.cli_args.config))

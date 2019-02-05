@@ -11,7 +11,6 @@ import InsightUtilities
 import discord
 from distutils.version import LooseVersion
 import requests
-import secrets
 import aiohttp
 import platform
 import traceback
@@ -20,30 +19,30 @@ import sys
 
 class service_module(object):
     def __init__(self, multiproc_dict):
-        self.__multiproc_dict: dict = multiproc_dict
+        self._multiproc_dict: dict = multiproc_dict
         self.cli_args = InsightUtilities.InsightArgumentParser.get_cli_args()
         self.set_crash_recovery(self.cli_args.crash_recovery, None)
         self.config_file = configparser.ConfigParser()
-        self.config_file.read(self.cli_args.config)
-        self.__header_dict = {}
+        self.config_file.read(self.get_config_file(self.cli_args.config))
+        self._header_dict = {}
         self.welcome()
-        self.__import_everything_flag = False
-        self.__import_check()
-        self.__db_manager = database.setup_database(self)
-        self.__sc_session: scoped_session = self.__db_manager.get_scoped_session()
-        self.static_data_import = static_data.static_data_import(self,self.__import_everything_flag)
+        self._import_everything_flag = False
+        self._import_check()
+        self._db_manager = database.setup_database(self)
+        self._sc_session: scoped_session = self._db_manager.get_scoped_session()
+        self.static_data_import = static_data.static_data_import(self, self._import_everything_flag)
         self.routes = RouteMapper.RouteMapper(self)
         self.routes.setup_load()
         self.sso = EVEsso.EVEsso(self)
         self.channel_manager = cm.Channel_manager(self)
         self.zk_obj = zk.zk(self)
-        self.__admin_module = InsightAdmins.InsightAdmins()
-        self.motd = self.__read_motd()
-        self.set_crash_recovery(self.cli_args.crash_recovery, self.__admin_module.get_default_admin())  # set id
+        self._admin_module = InsightAdmins.InsightAdmins()
+        self.motd = self._read_motd()
+        self.set_crash_recovery(self.cli_args.crash_recovery, self._admin_module.get_default_admin())  # set id
 
     def get_headers(self, lib_requests=False) ->dict:
         key = 'requests' if lib_requests else 'aiohttp'
-        if self.__header_dict.get(key) is None:
+        if self._header_dict.get(key) is None:
             try:
                 tmp_dict = {}
                 from_field = self.config_file.get('headers', 'from', fallback='')
@@ -55,14 +54,24 @@ class service_module(object):
                 tmp_dict['Maintainer'] = 'nathan@nathan-s.com (https://github.com/Nathan-LS/Insight)'
                 web_lib = 'requests/{}'.format(requests.__version__) if lib_requests else 'aiohttp/{}'.format(aiohttp.__version__)
                 tmp_dict['User-Agent'] = 'Insight/{} ({}; {}) Python/{}'.format(str(self.get_version()), platform.platform(aliased=True, terse=True), web_lib, platform.python_version())
-                self.__header_dict[key] = tmp_dict
+                self._header_dict[key] = tmp_dict
             except Exception as ex:
                 print('{} error when loading request headers.'.format(ex))
                 traceback.print_exc()
                 sys.exit(1)
-        return self.__header_dict[key]
+        return self._header_dict[key]
 
-    def __read_motd(self):
+    def get_config_file(self, file_path):
+        try:
+            with open(file_path, 'r'):
+                return file_path
+        except FileNotFoundError:
+            print("The config file '{0}' could not be found. Rename file 'default-config.ini' to '{0}'. "
+                  "If you are using Insight with Docker make sure to check your volume directory, rename the "
+                  "'default-config.ini' to 'config.ini', and populate the configuration values.".format(file_path))
+            sys.exit(1)
+
+    def _read_motd(self):
         filename = 'motd.txt'
         print('Edit the message of the day file "{}" to send a message to all '
               'feeds on Insight startup. Edit the file to be blank to prevent Insight from sending '
@@ -79,26 +88,26 @@ class service_module(object):
                 print('Creating empty motd file: "{}"'.format(filename))
                 return None
 
-    def __import_check(self):
+    def _import_check(self):
         try:
             with open(self.config_file['sqlite_database']['filename'],'r'):
                 if not self.cli_args.skip_api_import:
-                    self.__import_everything_flag = True
+                    self._import_everything_flag = True
         except FileNotFoundError:
             print("{} does not exist. Forcing first time static data import.".format(self.config_file['sqlite_database']['filename']))
-            self.__import_everything_flag = True
+            self._import_everything_flag = True
 
     def get_session(self)-> Session:
         """
 
         :rtype: Session
         """
-        session_object: Session = self.__sc_session()
+        session_object: Session = self._sc_session()
         assert isinstance(session_object,Session)
         return session_object
 
     def close_session(self):
-        self.__sc_session.remove()
+        self._sc_session.remove()
 
     def welcome(self):
         """Prints a welcome message with current version and displays alerts if new project updates are available."""
@@ -131,18 +140,18 @@ class service_module(object):
             return False
 
     def is_admin(self, user_id):
-        return self.__admin_module.is_admin(user_id)
+        return self._admin_module.is_admin(user_id)
 
     def shutdown(self):
         print('Attempting to shut down the database...')
-        self.__db_manager.shutdown()
+        self._db_manager.shutdown()
 
     def set_crash_recovery(self, mode_flag: bool, notify_user_id):
-        if mode_flag is True and self.__multiproc_dict.get('crash_recovery') is not True:
+        if mode_flag is True and self._multiproc_dict.get('crash_recovery') is not True:
             print('Insight crash recovery has been enabled. Insight will attempt to reboot up to 2 times in the '
                   'span of 30 minutes in the event of a crash.')
-        self.__multiproc_dict['crash_recovery'] = mode_flag
-        self.__multiproc_dict['notify_userid'] = notify_user_id
+        self._multiproc_dict['crash_recovery'] = mode_flag
+        self._multiproc_dict['notify_userid'] = notify_user_id
 
     @classmethod
     def get_version(cls):

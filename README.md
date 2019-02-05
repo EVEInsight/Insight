@@ -169,7 +169,7 @@ Packaged binaries are available for Windows and Linux under [releases](https://g
 Follow the instructions in ```Installation.md```, edit ```default-config.ini``` and you are ready to go! There are no additional downloads or package management systems to deal with.
 
 #### [Source](https://github.com/Nathan-LS/Insight/wiki/Source-Installation)
-Requires a Python 3.6 interpreter (<=3.5 and >=3.7 not supported) and Docker for building dependencies.
+Requires a Python 3.6 interpreter (<=3.5 and >=3.7 not supported).
 The [wiki](https://github.com/Nathan-LS/Insight/wiki/Source-Installation) contains a detailed guide for 
 source installation using a Linux operating system.
 
