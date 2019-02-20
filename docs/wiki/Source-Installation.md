@@ -1,5 +1,5 @@
 # Installation Options
-This installation guide covers installing Insight and the required packages from source. Binary versions of Insight are available under [releases](https://github.com/Nathan-LS/Insight/releases) for Windows and Linux which include all of the necessary packages and SDE database. Binary versions follow release tags from the main branch and allow you to skip this guide. If you are unfamiliar with installing packages and running applications on the Python Interpreter in Linux consider using the binary versions.
+This installation guide covers installing Insight and the required packages from source. Binary versions and a Docker image of Insight are available. See [hosting Insight](https://github.com/Nathan-LS/Insight#hosting-insight) for alternative methods of hosting Insight. Please consider using the Docker image of Insight if you are unfamiliar with installing packages or running applications on the Python Interpreter in Linux. Please be aware that running Insight from source specifically requires a Python 3.6 interpreter.
 
 # Table of Contents
 - [Installation Options](#installation-options)
@@ -17,21 +17,20 @@ This installation guide covers installing Insight and the required packages from
 - [Further Reading](#further-reading)
 
 # Requirements (running from source)
-* Python 3.5.3+ (prior versions of Python will not work)
+* Python 3.6 (Prior versions of Python will not work. Python 3.7+ is currently unsupported.)
 * Packages in requirements.txt
-* Docker
 * The latest [sqlite-latest.sqlite.bz2](https://www.fuzzwork.co.uk/dump/) from Fuzzwork
 * Git
 
 # Installation steps
-This guide will step you through setting up Insight with Ubuntu server. It is strongly recommended to use Linux over Windows as you will need Docker to make the Swagger Client library. You will be unable to run Docker with Windows 10 Home since Windows 10 Professional is required. 
+This guide will step you through setting up Insight on a Debian/Ubuntu operating system. 
 
-Note: A recent version of Ubuntu 18.04+ is recommended as Python 3.6 is included in the default repositories. You will need to build Python 3.5.3+ from source if your Linux distribution only includes an earlier version of python in the repositories.  
+Note: A recent version of Ubuntu 18.04+ is recommended as Python 3.6 is included in the default repositories. You will need to build Python 3.6 from source if your Linux distribution only includes an earlier version of python in the repositories. It is generally not recommended to mix multiple Python 3 versions on a system as things can break. 
 
 Let's start by making sure we have all of the required packages needed to run Insight:
 ```
 sudo apt-get update
-sudo apt-get install curl git python3 python3-pip python3-venv
+sudo apt-get install git python3 python3-dev python3-pip python3-venv wget unzip
 ```
 When you run the command 
 ```
@@ -39,12 +38,12 @@ python3 -V
 ```
 You should see:
 ```
-Python 3.6.5
+Python 3.6.x
 ```
-Note: Insight requires at least Python 3.5.3+. Earlier versions of Python will not work.
+Note: Insight requires Python 3.6 specifically. Earlier versions lack support for some of the asyncio features and syntax used in Insight. Python 3.7 causes issues with the third-party swagger-client which will eventually be replaced.
 
 ### Cloning the project and making your virtualenv
-Navigate to where you wish to keep the Insight project and make a new project directory. In this example, we will create a directory in the current user's home directory to store files.
+Navigate to where you wish to keep the Insight project and make a new project directory. In this example we will create a directory in the current user's home directory to store files.
 ```
 mkdir ~/InsightProjectFiles
 cd ~/InsightProjectFiles
@@ -53,7 +52,7 @@ Clone the project from Github:
 ```
 git clone https://github.com/Nathan-LS/Insight.git
 ```
-Let's create a python virtual environment in the Insight project directory and activate it. A virtual environment allows the user to install python packages to a virtual environment on a per-project basis without installing them to the global python environment. 
+Let's create a python virtual environment in the Insight project directory and activate it. A virtual environment allows the user to install python packages to a virtual environment on a per-project basis without installing them to the global Python environment. 
 ```
 cd Insight
 python3 -m venv venv
@@ -61,16 +60,14 @@ source venv/bin/activate
 ```
 
 ### Installing required packages
-We are now ready to start installing required packages to our activated virtual environment. First, we need to install the Swagger python-client using Docker. To install Docker Community Edition from Docker's official repos, visit [Docker Ubuntu Install Guide](https://docs.docker.com/install/linux/docker-ce/ubuntu/#set-up-the-repository) before proceeding.
+We are now ready to start installing required packages to our activated virtual environment. First, we need to install the Swagger python-client. This is an automatically generated library using the Swagger code generator for the EVE Online API. This library is now generated and provided under Insight releases. If you wish to generate the library yourself, see [CCP Codegen Blog](https://developers.eveonline.com/blog/article/swagger-codegen-update). The following steps assume you are downloading the swagger-client from Insight releases.
 
 
-Once docker is installed we are ready to begin making our swagger client. This command will download the Swagger Docker image and make a python client according to the latest CCP ESI release. Optionally, see [CCP Codegen Blog](https://developers.eveonline.com/blog/article/swagger-codegen-update) for more info.
-You may need to precede the command with ```sudo``` if you get permission errors.
-
+Download the latest swagger-client release. Replace the version number with the latest Insight release version.
 ```
-docker run --rm -v ${PWD}:/local swaggerapi/swagger-codegen-cli generate -i "https://esi.tech.ccp.is/_latest/swagger.json" -l python -o /local/python-client
-sudo chown -R $USER python-client
-cd python-client
+wget https://github.com/Nathan-LS/Insight/releases/download/v1.4.0/swagger-client-python.zip
+unzip swagger-client-python.zip -d swagger-client-python
+cd swagger-client-python
 ```
 
 Now we will install the python-client to the venv.
@@ -94,9 +91,9 @@ bunzip2 sqlite-latest.sqlite.bz2
 ### Configuration Steps
 We now need to create Discord and CCP Developer applications.
 
-Open the file **Insight/default-config.ini** in a text editor or run this command if using the command line interface:
+Open the file **default-config.ini** in a text editor or run this command if using the command line interface:
 ```
-nano Insight/default-config.ini
+nano default-config.ini
 ```
 
 #### Discord
@@ -116,7 +113,7 @@ token = YourDiscordAppTokenGoesHere
 ```
 
 #### EVE Developer
-Insight requires an EVE Application to access user contacts for use in radar and proximity feeds. Navigate to [Create New App](https://developers.eveonline.com/applications/create).
+Insight requires an EVE Application to access user contacts for use in cap radar feeds. Navigate to [Create New App](https://developers.eveonline.com/applications/create).
 
 Provide a name and description for your app and select **Authentication & API Access** for **Connection Type**
 
@@ -142,7 +139,7 @@ callback_url = ExampleCallbackURLGoesHere
 Save and rename your configuration file to **config.ini**, moving it to the current directory. If you are using nano and the CLI, use the following shortcuts: **'CRTL-X'**, **'Y'**, **'ENTER'** and run the command:
 
 ```
-mv Insight/default-config.ini config.ini
+mv default-config.ini config.ini
 ```
 
 

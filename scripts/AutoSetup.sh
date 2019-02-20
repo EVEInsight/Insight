@@ -27,7 +27,7 @@ source venv/bin/activate || error
 pip3 install --upgrade setuptools
 pip3 install --upgrade wheel
 echo 'Request sudo for running Docker command.'
-sudo docker run --rm -v ${PWD}:/local swaggerapi/swagger-codegen-cli generate -i "https://esi.tech.ccp.is/_latest/swagger.json" -l python -o /local/python-client || error
+sudo docker run --rm -v ${PWD}:/local swaggerapi/swagger-codegen-cli generate -i "https://esi.evetech.net/_latest/swagger.json" -l python -o /local/python-client || error
 echo 'Request sudo to chown generated client to current user.'
 sudo chown -R $USER:$USER python-client || error
 cd python-client || error
