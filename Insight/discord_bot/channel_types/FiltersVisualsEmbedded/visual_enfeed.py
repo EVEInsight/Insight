@@ -6,6 +6,7 @@ class visual_enfeed(base_visual):
     def __init__(self, km_row, discord_channel_object, overall_filters, feed_specific_row, feed_object):
         super().__init__(km_row, discord_channel_object, overall_filters, feed_specific_row, feed_object)
         self.is_kill = False
+        self.tracked_attackers = []
 
     def internal_list_options(self):
         super().internal_list_options()
@@ -74,7 +75,8 @@ class visual_enfeed(base_visual):
             self.set_kill()
             if self.feed_options.show_mode == enum_kmType.losses_only:
                 return False
-            if len(self.km.filter_attackers(self.km.object_attackers,filter_list=__list_aff,using_blacklist=self.in_attackers_affiliation)) > 0:
+            self.tracked_attackers = self.km.filter_attackers(self.km.object_attackers,filter_list=__list_aff,using_blacklist=self.in_attackers_affiliation)
+            if len(self.tracked_attackers) > 0:
                 return True
             else:
                 return False
@@ -98,6 +100,7 @@ class visual_enfeed(base_visual):
         yield VisualEnfeedCompact
         yield VisualEnfeedCompact2
         yield VisualEnfeedCompact3
+        yield VisualEnfeedCompactTracked
         yield VisualEnfeedAbbreviated
         yield VisualEnfeedUtility
         yield VisualEnfeedLinkOnly
@@ -110,3 +113,4 @@ from .VisualEnfeedUtility import VisualEnfeedUtility
 from .VisualEnfeedCompact2 import VisualEnfeedCompact2
 from .VisualEnfeedCompact3 import VisualEnfeedCompact3
 from .VisualEnfeedAbbreviated import VisualEnfeedAbbreviated
+from .VisualEnfeedEnfeedCompactTracked import VisualEnfeedCompactTracked

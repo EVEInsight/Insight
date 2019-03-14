@@ -273,8 +273,10 @@ class Kills(dec_Base.Base, table_row):
         except:
             return ""
 
-    def str_attacker_count(self):
-        count = len(self.object_attackers)
+    def str_attacker_count(self, attackerList : [] = None):
+        if attackerList is None:
+            attackerList = self.object_attackers
+        count = len(attackerList)
         if count == 1:
             return "solo"
         else:
