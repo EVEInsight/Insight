@@ -39,8 +39,8 @@ class background_tasks(object):
     async def sync_contacts(self):
         while True:
             if self.client.service.cli_args.defer_tasks:  # run later
-                next_run = 10800 - (time.time() % 10800)  # get time to next 3 hour interval
-                next_run = next_run if next_run >= 3600 else 7200
+                next_run = 21600 - (time.time() % 21600)  # get time to next 6 hour interval
+                next_run = next_run if next_run >= 7200 else 14400
                 await asyncio.sleep(next_run)
             try:
                 lg = InsightLogger.InsightLogger.get_logger('Tokens', 'Tokens.log')
@@ -52,8 +52,8 @@ class background_tasks(object):
             except Exception as ex:
                 print(ex)
             if not self.client.service.cli_args.defer_tasks:  # run startup
-                next_run = 10800 - (time.time() % 10800)  # get time to next 3 hour interval
-                next_run = next_run if next_run >= 3600 else 7200
+                next_run = 21600 - (time.time() % 21600)  # get time to next 6 hour interval
+                next_run = next_run if next_run >= 7200 else 14400
                 await asyncio.sleep(next_run)
 
     async def bot_status(self):
