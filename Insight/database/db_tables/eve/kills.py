@@ -200,6 +200,19 @@ class Kills(dec_Base.Base, table_row):
         print("Error finding final blow")
         return None
 
+    def get_top_damage(self, attacker_list: [] = None):
+        """Returns the highest damaging attacker of a given subset."""
+        topDamage: attackers.Attackers = None
+        if attacker_list is None:
+            attacker_list = self.object_attackers
+        for a in attacker_list:
+            if isinstance(topDamage, attackers.Attackers):
+                if topDamage.damage_done < a.damage_done:
+                    topDamage = a
+            else:
+                topDamage = a
+        return topDamage
+
     def get_victim(self):
         return self.object_victim
 

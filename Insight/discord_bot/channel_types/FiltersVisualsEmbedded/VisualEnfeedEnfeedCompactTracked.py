@@ -3,8 +3,8 @@ from .VisualEnfeedCompact import *
 
 class VisualEnfeedCompactTracked(VisualEnfeedCompact):
     def make_header(self):
-        if len(self.tracked_attackers) > 0:
-            a: tb_attackers = self.tracked_attackers[0]
+        if len(self.tracked_attackers) > 0 and self.is_kill:
+            a: tb_attackers = self.km.get_top_damage(self.tracked_attackers)
             trackCount = "({}/{})".format(len(self.tracked_attackers), self.km.str_total_involved())
             author_text = "Kill" if self.is_kill else "Loss"
             self.embed.set_author(name=author_text, url=self.km.str_zk_link(), icon_url=self.vi.str_highest_image(64))

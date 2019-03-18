@@ -391,3 +391,8 @@ class TestKills(DatabaseTesting.DatabaseTesting):
         DatabaseTesting.DatabaseTesting.setUp(self)
         new = tb_kills.make_row(d.get("package"), self.service)
         self.assertEqual(d, new.to_jsonDictionary())
+
+    def test_top_damage(self):
+        td: tb_attackers = self.km.get_top_damage()
+        self.assertEqual(2114664129, td.character_id)
+        self.assertEqual(2148, td.damage_done)
