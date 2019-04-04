@@ -29,6 +29,12 @@ class DatabaseTesting(InsightTestBase.InsightTestBase):
         self.scoped_session.remove()
         self.metadata_drop_all(self.engine)
 
+    def assert_contains(self, results, row_type, row_pk_id):
+        for r in results:
+            if isinstance(r, row_type) and r.get_id() == row_pk_id:
+                return
+        self.fail("Missing item with id: {} and type: {}".format(row_pk_id, str(row_type)))
+
     @classmethod
     def get_engine(cls):
         engine = create_engine('sqlite:///', connect_args={'check_same_thread': False}, poolclass=StaticPool)
@@ -75,7 +81,7 @@ class DatabaseTesting(InsightTestBase.InsightTestBase):
 
     @classmethod
     def import_type_group_category(cls, engine, full_data=False):
-        cls._sql_import("categories.sql" if not full_data else "categories_full.sql", engine)
+        cls._sql_import("categories.sql", engine)  # todo account for full eventually
         cls.import_groups(engine, full_data)
         cls.import_types(engine, full_data)
 

@@ -7,6 +7,7 @@ from sqlalchemy.orm import *
 from sqlalchemy import *
 from typing import List
 import InsightExc
+from discord_bot.OptionLogic.EntityOptions import *
 
 
 class Options_EnFeed(Base_Feed.base_activefeed):
@@ -21,6 +22,8 @@ class Options_EnFeed(Base_Feed.base_activefeed):
         yield (self.InsightOptionRequired_tracktype, True)
         yield (self.InsightOptionRequired_trackpods, True)
         yield (self.InsightOption_minValue, False)
+        yield (self.InsightOption_addShipBlackList, False)
+        yield (self.InsightOption_removeShipBlackList, False)
         yield from super().yield_options()
 
     async def InsightOptionRequired_add(self, message_object:discord.Message):
@@ -195,6 +198,14 @@ class Options_EnFeed(Base_Feed.base_activefeed):
         await self.cfeed.discord_client.loop.run_in_executor(None, partial(set_min_value, val))
         await self.reload(message_object)
         await message_object.channel.send("Minimum ISK value is now set at: {:,.2f} ISK.".format(val))
+
+    async def InsightOption_addShipBlackList(self, message_object: discord.Message):
+        """Add ship to blacklist - null"""
+        await AddShipOption(self.cfeed, message_object).run()
+
+    async def InsightOption_removeShipBlackList(self, message_object: discord.Message):
+        """Remove a  ship from blacklist - null"""
+        await RemoveShipOption(self.cfeed, message_object).run()
 
 
 from .. import enFeed

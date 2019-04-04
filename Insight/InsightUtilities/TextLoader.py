@@ -17,7 +17,7 @@ class TextLoader(metaclass=InsightSingleton):
             filePath = textPath.lower().replace('.txt', '').split('.')
             filePath[-1] += ".txt"
             with open(os.path.join(self._textpath, *filePath)) as f:
-                text = f.read()
+                return f.read()
         except FileNotFoundError:
             text = "The text path was not found: {}".format(textPath)
         except Exception as ex:

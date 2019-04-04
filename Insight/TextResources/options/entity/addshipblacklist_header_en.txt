@@ -1,0 +1,2 @@
+Add a ship or group to blacklist.
+Ex: Add pods to the blacklist.

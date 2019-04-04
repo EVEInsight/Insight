@@ -1,6 +1,6 @@
 from discord_bot.channel_types.enFeed import enFeed
 from database.db_tables.discord import enum_kmType
-from database.db_tables.filters import tb_Filter_groups, tb_Filter_alliances, tb_Filter_corporations, tb_Filter_characters
+from database.db_tables.filters import tb_Filter_groups, tb_Filter_alliances, tb_Filter_corporations, tb_Filter_characters, tb_Filter_types
 import InsightExc
 from tests.test_discord_bot.test_channel_types.test_Linked_Options import test_options_BaseFeed
 
@@ -95,3 +95,27 @@ class TestOptions_EnFeed(test_options_BaseFeed.TestOptions_BaseFeed):
             with self.assertRaises(InsightExc.userInput.NotFloat):
                 self.reply("not a number")
                 self.helper_future_run_call(self.options.InsightOption_minValue(self.message))
+
+    def test_InsightOption_addRemoveShipBlackList(self):
+        self.import_type_group_category(self.engine, full_data=True)  # temp before each. I am lazy and dont feel like making a new class right now
+        with self.subTest("Add Drake"):
+            self.reply("drake")
+            self.reply("0")
+            self.helper_future_run_call(self.options.InsightOption_addShipBlackList(self.message))
+            self.assertFilterContains(tb_Filter_types(24698, 1), self.cached_row.object_filter_types)
+        with self.subTest("Add rorq"):
+            self.reply("rorq")
+            self.reply("0")
+            self.helper_future_run_call(self.options.InsightOption_addShipBlackList(self.message))
+            self.assertFilterContains(tb_Filter_types(24698, 1), self.cached_row.object_filter_types)
+            self.assertFilterContains(tb_Filter_types(28352, 1), self.cached_row.object_filter_types)
+        with self.subTest("Remove Drake"):
+            self.reply("0")
+            self.helper_future_run_call(self.options.InsightOption_removeShipBlackList(self.message))  # remove drake
+            self.assertFilterContains(tb_Filter_types(28352, 1), self.cached_row.object_filter_types)  # still contain rorq
+            self.assertFilterNotContains(tb_Filter_types(24698, 1), self.cached_row.object_filter_types)  # no drake
+        with self.subTest("Remove Rorq"):
+            self.reply("0")
+            self.helper_future_run_call(self.options.InsightOption_removeShipBlackList(self.message))  # remove rorq
+            self.assertEqual(0, len(self.cached_row.object_filter_types))
+

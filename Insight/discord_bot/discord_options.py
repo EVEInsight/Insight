@@ -64,6 +64,12 @@ class mapper_index(object):
     def add_blank_line(self):
         self._printout_format.append("")
 
+    def add_unique_header_row(self, header_txt):
+        if header_txt in self.e_header_container:
+            return
+        else:
+            self.add_header_row(header_txt)
+
     def add_header_row(self, header_txt):
         self._printout_format.append("\n-----{}-----".format(str(header_txt)))
         if self.header_index == 0 and len(self.e_body_container) == 0:
