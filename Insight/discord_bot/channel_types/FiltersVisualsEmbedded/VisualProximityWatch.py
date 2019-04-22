@@ -105,7 +105,10 @@ class VisualProximityWatch(base_visual):
         super().set_frame_color()
 
     def max_delta(self):
-        return datetime.timedelta(minutes=self.feed_options.max_km_age)
+        if self.feed_options.max_km_age >= 10080:
+            return datetime.timedelta(minutes=10080)
+        else:
+            return datetime.timedelta(minutes=self.feed_options.max_km_age)
 
     @classmethod
     def feed_specific_row_type(cls):

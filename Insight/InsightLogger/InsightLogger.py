@@ -64,6 +64,11 @@ class InsightLogger(object):
             logger_object.info(log_m)
 
     @classmethod
+    def time_log_min(cls, logger_object: logging.Logger, start_time: LoggerStartTime, msg: str, min_ms: int = 5000):
+        if start_time.ms_passed() >= min_ms:
+            cls.time_log(logger_object, start_time, msg, min_ms, seconds=False)
+
+    @classmethod
     def time_start(cls)->LoggerStartTime:
         return LoggerStartTime()
 
@@ -76,6 +81,7 @@ class InsightLogger(object):
         cls.get_logger('sqlalchemy.pool', 'sqlalchemy_pool.log', level=logging.INFO)
         cls.get_logger('sqlalchemy.orm', 'sqlalchemy_orm.log', level=logging.WARNING)
         cls.get_logger('Insight.feed', 'Insight_feed.log')
+        cls.get_logger('Insight.filter', 'Insight_filter.log')
         cls.get_logger('Insight.command', 'Insight_command.log')
         cls.get_logger('Tokens', 'Tokens.log')
         cls.get_logger('InsightUtilities', 'InsightUtilities.log', level=logging.DEBUG)
