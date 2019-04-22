@@ -3,6 +3,7 @@ import datetime
 import traceback
 import InsightExc
 import asyncio
+import InsightLogger
 
 
 class internal_options(enum.Enum):
@@ -17,8 +18,10 @@ class base_visual(object):
         assert isinstance(overall_filters,tb_channels)
         assert isinstance(feed_specific_row,self.feed_specific_row_type())
         assert isinstance(feed_object, discord_bot.channel_types.insight_feed_service_base)
+        self.start_time = InsightLogger.InsightLogger.time_start()
         self.feed = feed_object
         self.km = km_row
+        self.logger = InsightLogger.InsightLogger.get_logger('Insight.filter.{}.km-{}'.format(self.feed.channel_id, self.km.kill_id), 'Insight_filter.log', child=True)
         self.channel = discord_channel_object
         self.filters = overall_filters
         self.feed_options = feed_specific_row
@@ -101,11 +104,13 @@ class base_visual(object):
     def __bool__(self):
         try:
             __resp = self.run_filter()
-            assert isinstance(__resp,bool)
+            assert isinstance(__resp, bool)
+            InsightLogger.InsightLogger.time_log_min(self.logger, self.start_time, "Filter", 1000)
             if __resp:
                 self.generate_view()
             return __resp
         except Exception as ex:
+            self.logger.exception(ex)
             print(ex)
             traceback.print_exc()
             return False
@@ -115,6 +120,7 @@ class base_visual(object):
             raise InsightExc.DiscordError.MessageMaxRetryExceed
         else:
             if self.send_attempt_count != 0:
+                self.logger.warning("Attempting to resend message after failure. Reattempt: {}".format(self.send_attempt_count))
                 await asyncio.sleep(10)
             self.send_attempt_count += 1
             if self.text_only:
