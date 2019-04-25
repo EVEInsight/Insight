@@ -21,7 +21,8 @@ class base_visual(object):
         self.start_time = InsightLogger.InsightLogger.time_start()
         self.feed = feed_object
         self.km = km_row
-        self.logger = InsightLogger.InsightLogger.get_logger('Insight.filter.{}.km-{}'.format(self.feed.channel_id, self.km.kill_id), 'Insight_filter.log', child=True)
+        self.km_id = self.km.kill_id
+        self.logger = feed_object.logger_filter
         self.channel = discord_channel_object
         self.filters = overall_filters
         self.feed_options = feed_specific_row
@@ -110,7 +111,7 @@ class base_visual(object):
                 self.generate_view()
             return __resp
         except Exception as ex:
-            self.logger.exception(ex)
+            self.logger.exception("km-{}".format(self.km_id))
             print(ex)
             traceback.print_exc()
             return False
