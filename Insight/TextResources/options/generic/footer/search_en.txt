@@ -1,0 +1,5 @@
+Enter a name or ID. Names are case insensitive.
+
+Note: partial names are accepted.
+
+Example: Entering "Drak" will yield all results starting with "Drak".

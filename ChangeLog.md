@@ -1,3 +1,12 @@
+# v1.5.0 (Development)
+## Planned features 
+* Dscan/local scan (Beta release)
+* EvE Appraisal support
+## New features 
+* The tracked appearance entity feed visual to display information about highest damage among the feed's tracked entities.
+## Code changes
+* Added the TextLoader utility to for easier organization of prompt texts with the ability to support localization.
+
 # v1.4.0
 ## New features
 * Server-wide command prefix modification support. Users can now add and remove Insight prefixes via the **!prefix** command.

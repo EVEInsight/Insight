@@ -11,7 +11,7 @@ from InsightUtilities import TextLoader
 
 
 class AbstractOption(object):
-    def __init__(self, cfeed, dMessage):
+    def __init__(self, cfeed, dMessage=None):
         self.cfeed: base_object.discord_feed_service = cfeed
         self.cID = self.cfeed.channel_id
         self.service = self.cfeed.service
@@ -26,6 +26,11 @@ class AbstractOption(object):
 
     def get_description(self) -> str:
         raise NotImplementedError
+
+    async def run_message(self, message_object: discord.Message):
+        """Option -> Replace this option text to be picked up by option loader wheel. New format."""
+        self.message = message_object
+        await self.run()
 
     async def run(self):
         await self._run_command()

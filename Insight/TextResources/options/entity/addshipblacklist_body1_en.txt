@@ -1,0 +1,4 @@
+Enter the name or ID of a ship/npc type/group to search for.
+By adding a ship or ship group to the blacklist you prevent kills from appearing in this feed of the specified blacklisted ships.
+
+Example: If you are using an entity feed to track an alliance that loses a ridiculous amount of Drakes and you don't want to see Drakes on the feed you would enter "Drake" in this prompt to blacklist it.

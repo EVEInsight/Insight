@@ -1,2 +1,4 @@
 from Insight.discord_bot.OptionLogic.EntityOptions.AddShipOption import AddShipOption
 from Insight.discord_bot.OptionLogic.EntityOptions.RemoveShipOption import RemoveShipOption
+from Insight.discord_bot.OptionLogic.EntityOptions.AddShipOptionWL import AddShipOptionWL
+from Insight.discord_bot.OptionLogic.EntityOptions.RemoveShipOptionWL import RemoveShipOptionWL

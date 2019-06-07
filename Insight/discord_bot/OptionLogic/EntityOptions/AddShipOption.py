@@ -4,16 +4,23 @@ from InsightUtilities import StaticUtil
 
 
 class AddShipOption(AbstractEntityOption):
+    """used by entity feeds to blacklist ships"""
     def get_description(self) -> str:
         return "It does something"  # todo implement
 
-    def text_location_addship_header(self) -> str:
-        return "Options.Entity.AddShipBlacklist_header"
+    def text_prompt1_body(self):
+        return "Options.Entity.AddShipBlacklist_body1"
+
+    def text_prompt1_footer(self):
+        return "Options.Generic.Footer.Search"
+
+    def text_prompt2_body(self):
+        return "Options.Entity.AddShipBlacklist_body2"
 
     def make_options(self, s_str):
         db: Session = self.cfeed.service.get_session()
         results = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, self.message)
-        results.set_main_header(TextLoader.text_sync(self.text_location_addship_header()))
+        results.set_main_header(TextLoader.text_sync(self.text_prompt2_body()))
         try:
             search_items = SearchHelper.search_type_group_is_ship(db, s_str)
             for r in StaticUtil.filter_type(search_items, tb_types):
@@ -36,8 +43,8 @@ class AddShipOption(AbstractEntityOption):
 
     async def _run_command(self):
         search = dOpt.mapper_return_noOptions(self.cfeed.discord_client, self.message)
-        search.set_main_header("Enter the name or ID of a ship/npc type/group to search for.")
-        search.set_footer_text("Enter a name or ID. Note: partial names are accepted: ")
+        search.set_main_header(TextLoader.text_sync(self.text_prompt1_body()))
+        search.set_footer_text(TextLoader.text_sync(self.text_prompt1_footer()))
         selected_row = None
         while selected_row is None:
             search_name = await search()

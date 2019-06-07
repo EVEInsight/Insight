@@ -3,6 +3,7 @@ import asyncio
 from functools import partial
 import threading
 import os
+import InsightLogger
 
 
 class TextLoader(metaclass=InsightSingleton):
@@ -11,6 +12,7 @@ class TextLoader(metaclass=InsightSingleton):
         self._textCache = {}
         self._lock = threading.Lock()
         self._textpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "TextResources")
+        self.logger = InsightLogger.InsightLogger.get_logger('InsightUtilities.TextLoader', 'InsightUtilities.log', child=True)
 
     def _load_text(self, textPath):
         try:
@@ -23,6 +25,7 @@ class TextLoader(metaclass=InsightSingleton):
         except Exception as ex:
             text = "Error when attempting to load text file: {} for {}".format(ex, textPath)
         print(text)
+        self.logger.error(text)
         return text
 
     def _get_text(self, resource: str, language: str):
@@ -33,7 +36,9 @@ class TextLoader(metaclass=InsightSingleton):
             if isinstance(text, str):
                 return text
             else:
+                self.logger.info("Required disk IO for '{}'".format(textPath))
                 text = self._load_text(textPath)
+                self.logger.info("Got '{}' for path: {}".format(text, textPath))
                 self._textCache[textPath] = text
                 return text
 

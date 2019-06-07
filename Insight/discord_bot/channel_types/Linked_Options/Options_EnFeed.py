@@ -204,7 +204,7 @@ class Options_EnFeed(Base_Feed.base_activefeed):
         await AddShipOption(self.cfeed, message_object).run()
 
     async def InsightOption_removeShipBlackList(self, message_object: discord.Message):
-        """Remove a  ship from blacklist - null"""
+        """Remove a ship from blacklist - null"""
         await RemoveShipOption(self.cfeed, message_object).run()
 
 

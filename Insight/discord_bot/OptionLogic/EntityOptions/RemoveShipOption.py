@@ -5,10 +5,13 @@ class RemoveShipOption(AbstractEntityOption):
     def get_description(self) -> str:
         return "It does something"  # todo implement
 
+    def text_remove_body1(self):
+        return "Options.Entity.RemoveShipBlacklist_body1"
+
     def make_options(self):
         db: Session = self.cfeed.service.get_session()
         remove = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, self.message)
-        remove.set_main_header("Select the item you wish to remove.")
+        remove.set_main_header(TextLoader.text_sync(self.text_remove_body1()))
         try:
             for i in self._get_row().object_filter_types:
                 remove.add_unique_header_row("Types")

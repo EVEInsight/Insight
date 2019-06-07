@@ -9,4 +9,5 @@ from .OfficerHunter import OfficerHunter
 from .UniverseSupers import UniverseSupers
 from .RareShips import RareShips
 from .AngryNPC import AngryNPC
+from .ShipLosses import ShipLosses
 # from .AllianceTournamentStream import AllianceTournamentStreamSystem # remove until next year

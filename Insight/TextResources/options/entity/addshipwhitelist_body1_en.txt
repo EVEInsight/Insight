@@ -1,0 +1,4 @@
+Enter the name or ID of a ship/npc type/group to search for.
+By adding a ship or ship group to the whitelist you filter to display only ship types destroyed that are in your whitelist.
+
+Example: Adding "Titans" to this whitelist will only show kills where ships belonging to the titan group are destroyed.
