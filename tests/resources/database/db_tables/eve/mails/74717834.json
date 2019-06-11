@@ -1,0 +1,47 @@
+{
+    "package": {
+        "killID": 74717834,
+        "killmail": {
+            "attackers": [
+                {
+                    "alliance_id": null,
+                    "character_id": null,
+                    "corporation_id": null,
+                    "damage_done": 172956.0,
+                    "faction_id": null,
+                    "final_blow": true,
+                    "security_status": 0.0,
+                    "ship_type_id": 23505,
+                    "weapon_type_id": null
+                }
+            ],
+            "killmail_id": 74717834,
+            "killmail_time": "2019-01-21 08:12:10",
+            "solar_system_id": 30001779,
+            "victim": {
+                "alliance_id": 99008259,
+                "character_id": 1039311228,
+                "corporation_id": 98439782,
+                "damage_taken": 172956.0,
+                "items": [],
+                "position": {
+                    "x": -23400270402.98,
+                    "y": -64640775867.357,
+                    "z": -180883281187.42
+                },
+                "ship_type_id": 17918
+            }
+        },
+        "zkb": {
+            "locationID": 40113831,
+            "hash": "dd541ce328f3ca502b74ec35bf3df35cd108b7ba",
+            "fittedValue": 621107536.61,
+            "totalValue": 1693635053.05,
+            "points": 1.0,
+            "npc": true,
+            "solo": false,
+            "awox": false,
+            "href": null
+        }
+    }
+}
