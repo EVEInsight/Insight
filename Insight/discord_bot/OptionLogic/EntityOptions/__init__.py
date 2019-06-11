@@ -2,3 +2,5 @@ from Insight.discord_bot.OptionLogic.EntityOptions.AddShipOption import AddShipO
 from Insight.discord_bot.OptionLogic.EntityOptions.RemoveShipOption import RemoveShipOption
 from Insight.discord_bot.OptionLogic.EntityOptions.AddShipOptionWL import AddShipOptionWL
 from Insight.discord_bot.OptionLogic.EntityOptions.RemoveShipOptionWL import RemoveShipOptionWL
+from Insight.discord_bot.OptionLogic.EntityOptions.MinValueOption import MinValueOption
+from Insight.discord_bot.OptionLogic.EntityOptions.MaxValueOption import MaxValueOption

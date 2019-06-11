@@ -1,0 +1,3 @@
+Enter a number.
+Entering '0' will disable the lower bound minimum value.
+Examples: 500m, 10 billion, 500,000, 0.

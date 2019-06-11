@@ -4,6 +4,7 @@ from ..enFeed import *
 class OptionsAbyssalLosses(Linked_Options.opt_enfeed):
     def yield_options(self):
         yield (self.InsightOption_minValue, False)
+        yield (self.InsightOption_maxValue, False)
         yield from super(Linked_Options.opt_enfeed, self).yield_options()
 
 

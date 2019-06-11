@@ -4,6 +4,7 @@ from ..enFeed import *
 class OptionsSoloNPC(Linked_Options.opt_enfeed):
     def yield_options(self):
         yield (self.InsightOption_minValue, True)
+        yield (self.InsightOption_maxValue, False)
         yield from super(Linked_Options.opt_enfeed, self).yield_options()
 
 

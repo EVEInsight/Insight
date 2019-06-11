@@ -22,6 +22,7 @@ class Options_EnFeed(Base_Feed.base_activefeed):
         yield (self.InsightOptionRequired_tracktype, True)
         yield (self.InsightOptionRequired_trackpods, True)
         yield (self.InsightOption_minValue, False)
+        yield (self.InsightOption_maxValue, False)
         yield (self.InsightOption_addShipBlackList, False)
         yield (self.InsightOption_removeShipBlackList, False)
         yield from super().yield_options()
@@ -157,47 +158,11 @@ class Options_EnFeed(Base_Feed.base_activefeed):
 
     async def InsightOption_minValue(self, message_object: discord.Message):
         """Set minimum ISK value - Set the minimum ISK value for killmails."""
+        await MinValueOption(self.cfeed, message_object).run()
 
-        def get_number(input_val: str):
-            try:
-                input_val = input_val.strip()
-                num = "".join([c for c in input_val if c.isdigit() or c == '.'])
-                n_modifier = "".join(a.casefold() for a in input_val if a.isalpha())
-                num = float(num)
-                if n_modifier.startswith('b'):
-                    num = num * 1e+9
-                elif n_modifier.startswith('m'):
-                    num = num * 1e+6
-                elif n_modifier.startswith('k'):
-                    num = num * 1e+3
-                else:
-                    pass
-                return num
-            except:
-                raise InsightExc.userInput.NotFloat
-
-        def set_min_value(isk_val):
-            db: Session = self.cfeed.service.get_session()
-            try:
-                row: tb_enfeed = db.query(tb_enfeed).filter(tb_enfeed.channel_id == self.cfeed.channel_id).one()
-                row.minValue = isk_val
-                db.merge(row)
-                db.commit()
-            except Exception as ex:
-                print(ex)
-                raise InsightExc.Db.DatabaseError
-            finally:
-                db.close()
-
-        options = dOpt.mapper_return_noOptions(self.cfeed.discord_client, message_object)
-        options.set_main_header("Set the minimum isk value for killmails. Mails below this value will not be posted. "
-                                "Enter '0' for no limit.")
-        options.set_footer_text("Enter a number. Examples: 500m, 10 billion, 500,000: ")
-        resp = await options()
-        val = get_number(resp)
-        await self.cfeed.discord_client.loop.run_in_executor(None, partial(set_min_value, val))
-        await self.reload(message_object)
-        await message_object.channel.send("Minimum ISK value is now set at: {:,.2f} ISK.".format(val))
+    async def InsightOption_maxValue(self, message_object: discord.Message):
+        """Set maximum ISK value - Set the maximum ISK value for killmails."""
+        await MaxValueOption(self.cfeed, message_object).run()
 
     async def InsightOption_addShipBlackList(self, message_object: discord.Message):
         """Add ship to blacklist - null"""

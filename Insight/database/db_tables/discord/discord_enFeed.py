@@ -15,6 +15,7 @@ class EnFeed(dec_Base.Base,discord_channel_base):
     template_id = Column(Integer, default=0, nullable=False)
     show_mode = Column(Enum(km_type_mode),default=km_type_mode.show_both,nullable=False)
     minValue = Column(Float, default=0.0, nullable=False)
+    maxValue = Column(Float, default=1e60, nullable=False)
     object_channel = relationship("Channels", uselist=False, back_populates="object_enFeed",lazy="joined")
 
     def __init__(self, channel_id):

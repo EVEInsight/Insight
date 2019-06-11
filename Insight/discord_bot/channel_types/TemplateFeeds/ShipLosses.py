@@ -7,6 +7,7 @@ class OptionsShipLosses(Linked_Options.opt_enfeed):
         yield (AddShipOptionWL(self.cfeed).run_message, True)
         yield (RemoveShipOptionWL(self.cfeed).run_message, False)
         yield (self.InsightOption_minValue, False)
+        yield (self.InsightOption_maxValue, False)
         yield from super(Linked_Options.opt_enfeed, self).yield_options()
 
 

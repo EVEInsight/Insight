@@ -95,6 +95,35 @@ class TestOptions_EnFeed(test_options_BaseFeed.TestOptions_BaseFeed):
             with self.assertRaises(InsightExc.userInput.NotFloat):
                 self.reply("not a number")
                 self.helper_future_run_call(self.options.InsightOption_minValue(self.message))
+        with self.subTest("0"):
+            self.reply("0")
+            self.helper_future_run_call(self.options.InsightOption_minValue(self.message))
+            self.assertEqual(0.0, self.cached_row_specific.minValue)
+
+    def test_InsightOption_maxValue(self):
+        with self.subTest("5b"):
+            self.reply("5b")
+            self.helper_future_run_call(self.options.InsightOption_maxValue(self.message))
+            self.assertEqual(5e9, self.cached_row_specific.maxValue)
+        with self.subTest("5m"):
+            self.reply("5m")
+            self.helper_future_run_call(self.options.InsightOption_maxValue(self.message))
+            self.assertEqual(5e6, self.cached_row_specific.maxValue)
+        with self.subTest("Invalid input"):
+            with self.assertRaises(InsightExc.userInput.NotFloat):
+                self.reply("not a number")
+                self.helper_future_run_call(self.options.InsightOption_maxValue(self.message))
+        with self.subTest("Less than floor"):
+            with self.assertRaises(InsightExc.InsightException):
+                self.reply("5b") # set high min value
+                self.helper_future_run_call(self.options.InsightOption_minValue(self.message))
+                self.assertEqual(5e9, self.cached_row_specific.minValue)
+                self.reply("5m")
+                self.helper_future_run_call(self.options.InsightOption_maxValue(self.message))
+        with self.subTest("0"):
+            self.reply("0")
+            self.helper_future_run_call(self.options.InsightOption_maxValue(self.message))
+            self.assertEqual(1e60, self.cached_row_specific.maxValue)
 
     def test_InsightOption_addRemoveShipBlackList(self):
         self.import_type_group_category(self.engine, full_data=True)  # temp before each. I am lazy and dont feel like making a new class right now

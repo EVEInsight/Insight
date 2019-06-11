@@ -1,0 +1,2 @@
+Set the maximum isk value for killmails. Mails above this value will not be posted.
+Enter '0' for no limit

@@ -57,6 +57,8 @@ class visual_enfeed(base_visual):
             return False
         if self.feed_options.minValue > self.km.totalValue:
             return False
+        if self.feed_options.maxValue < self.km.totalValue:
+            return False
         if not self.km.filter_loss(self.filters.object_filter_groups,
                                    self.in_victim_ship_group):  # if false/contained in cat blacklist ignore posting
             return False

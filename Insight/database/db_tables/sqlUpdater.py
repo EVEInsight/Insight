@@ -100,6 +100,10 @@ class sqlUpdater(object):
         """v2.4.0"""
         yield "ALTER TABLE tokens ADD error_count INTEGER DEFAULT 0 NOT NULL;"
 
+    def sqlV_2_5_0(self):
+        """v2.5.0"""
+        yield 'ALTER TABLE discord_enFeed ADD maxValue FLOAT DEFAULT 1e60 NOT NULL;'
+
     def update_all(self):
         """Updates tables, returning the latest successful updated version"""
         self.compatibility_check()
