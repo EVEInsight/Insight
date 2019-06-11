@@ -51,6 +51,10 @@ class TestIdResolve(DatabaseTesting.DatabaseTesting):
         self.helper_api_mass_id_resolve('lookup_names.txt', 'lookup_ids.txt', True)
 
     def test_api_mass_id_resolve_list(self):
+        """if an error occurs here, remove entries from:
+        tests/resources/database/db_tables/eve/mass_id_resolve/lookup_names_long.txt
+        tests/resources/database/db_tables/eve/mass_id_resolve/lookup_ids_long.txt
+        """
         lookup_names = [c.lower() for c in self.get_file_lines('lookup_names_long.txt')]
         id_resolver.api_mass_id_resolve(self.service, lookup_names)
         self.helper_api_mass_id_resolve('lookup_names_long.txt', 'lookup_ids_long.txt')
