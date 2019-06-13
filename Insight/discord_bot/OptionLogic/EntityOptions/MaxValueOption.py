@@ -1,4 +1,4 @@
-from Insight.discord_bot.OptionLogic.EntityOptions.MinValueOption import MinValueOption
+from discord_bot.OptionLogic.EntityOptions.MinValueOption import MinValueOption
 
 
 class MaxValueOption(MinValueOption):

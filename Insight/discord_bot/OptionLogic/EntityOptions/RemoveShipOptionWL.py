@@ -1,4 +1,4 @@
-from Insight.discord_bot.OptionLogic.EntityOptions.RemoveShipOption import RemoveShipOption
+from discord_bot.OptionLogic.EntityOptions.RemoveShipOption import RemoveShipOption
 
 
 class RemoveShipOptionWL(RemoveShipOption):
