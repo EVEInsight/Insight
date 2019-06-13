@@ -4,3 +4,4 @@ from discord_bot.OptionLogic.EntityOptions.AddShipOptionWL import AddShipOptionW
 from discord_bot.OptionLogic.EntityOptions.RemoveShipOptionWL import RemoveShipOptionWL
 from discord_bot.OptionLogic.EntityOptions.MinValueOption import MinValueOption
 from discord_bot.OptionLogic.EntityOptions.MaxValueOption import MaxValueOption
+from discord_bot.OptionLogic.EntityOptions.AddEntityOption import AddEntityOption

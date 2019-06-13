@@ -1,0 +1,7 @@
+Enter the name of an entity you wish to search for to add as a tracked entity for this channel.
+
+
+An entity is a pilot, corporation, alliance, or faction. Queries must be of at least three characters and can be case insensitive.
+Searching by corporation or alliance ticker is not supported at this time.
+
+You can select from the matched results or redo your search in the subsequent prompt.

@@ -29,46 +29,7 @@ class Options_EnFeed(Base_Feed.base_activefeed):
 
     async def InsightOptionRequired_add(self, message_object:discord.Message):
         """Add a new tracked entity  - Add an entity (pilot, corp, or alliance) to track involved PvP activity. You can add more than 1 entity to a channel."""
-
-        def make_options(search_str) -> dOpt.mapper_index:
-            __options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
-            __options.set_main_header(
-                "Select the entity you wish to add.\nNote: Additional entities can be added or removed after feed creation by running the ‘!settings’ command.")
-            db: Session = self.cfeed.service.get_session()
-
-            def header_make(row_list:List[tb_alliances],header_text):
-                if len(row_list) > 0:
-                    __options.add_header_row(header_text)
-                    for i in row_list:
-                        __options.add_option(dOpt.option_returns_object(name=i.get_name(), return_object=i))
-            try:
-                header_make(SearchHelper.search(db, tb_alliances, tb_alliances.alliance_name, search_str), "Alliances")
-                header_make(SearchHelper.search(db, tb_corporations, tb_corporations.corporation_name, search_str), "Corporations")
-                header_make(SearchHelper.search(db, tb_characters, tb_characters.character_name, search_str),"Pilots")
-                __options.add_header_row("Additional Options")
-                __options.add_option(dOpt.option_returns_object("Search again", return_object=None))
-                return __options
-            except Exception as ex:
-                raise ex
-            finally:
-                db.close()
-
-        __search = dOpt.mapper_return_noOptions(self.cfeed.discord_client, message_object)
-        __search.set_main_header("Enter the name of an entity you wish to track.\n\n"
-                                 "An entity is a pilot, corporation, or alliance.")
-        __search.set_footer_text("Enter a name. Note: partial names are accepted: ")
-        __selected_option = None
-        while __selected_option is None:
-            __search_name = await __search()
-            if len(__search_name) <= 2:
-                raise InsightExc.userInput.ShortSearchCriteria(min_length=3)
-            __func = partial(id_resolver.api_mass_id_resolve,self.cfeed.service,__search_name)
-            await self.cfeed.discord_client.loop.run_in_executor(None, __func) #lookup name from eve api first and add to db
-            __found_results = await self.cfeed.discord_client.loop.run_in_executor(None,partial(make_options,__search_name))
-            __selected_option = await __found_results()
-        function_call = partial(tb_channels.commit_list_entry,__selected_option,self.cfeed.channel_id,self.cfeed.service)
-        await self.cfeed.discord_client.loop.run_in_executor(None, function_call)
-        await self.reload(message_object)
+        await AddEntityOption(self.cfeed, message_object).run()
 
     async def InsightOption_remove(self,message_object:discord.Message):
         """Remove a tracked entity - Remove tracking of PvP activity for a previously added pilot, corp, or alliance."""

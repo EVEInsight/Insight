@@ -1,0 +1,2 @@
+Select a single entity you wish to add.
+Note: Additional entities can be added or removed after feed creation through the ‘!settings’ command.

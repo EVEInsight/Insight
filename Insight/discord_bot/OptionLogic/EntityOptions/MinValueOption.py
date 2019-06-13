@@ -46,8 +46,8 @@ class MinValueOption(AbstractEntityOption):
 
     async def _run_command(self):
         options = dOpt.mapper_return_noOptions(self.cfeed.discord_client, self.message)
-        options.set_main_header(TextLoader.text_sync(self.text_prompt_body()))
-        options.set_footer_text(TextLoader.text_sync(self.text_prompt_footer()))
+        options.set_main_header(await TextLoader.text_async(self.text_prompt_body()))
+        options.set_footer_text(await TextLoader.text_async(self.text_prompt_footer()))
         resp = await options()
         val = StaticUtil.str_to_isk(resp)
         if val <= 0:  # set to infinite bound

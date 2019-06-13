@@ -43,8 +43,8 @@ class AddShipOption(AbstractEntityOption):
 
     async def _run_command(self):
         search = dOpt.mapper_return_noOptions(self.cfeed.discord_client, self.message)
-        search.set_main_header(TextLoader.text_sync(self.text_prompt1_body()))
-        search.set_footer_text(TextLoader.text_sync(self.text_prompt1_footer()))
+        search.set_main_header(await TextLoader.text_async(self.text_prompt1_body()))
+        search.set_footer_text(await TextLoader.text_async(self.text_prompt1_footer()))
         selected_row = None
         while selected_row is None:
             search_name = await search()
