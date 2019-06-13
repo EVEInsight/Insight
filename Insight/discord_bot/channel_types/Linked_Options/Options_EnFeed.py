@@ -33,32 +33,7 @@ class Options_EnFeed(Base_Feed.base_activefeed):
 
     async def InsightOption_remove(self,message_object:discord.Message):
         """Remove a tracked entity - Remove tracking of PvP activity for a previously added pilot, corp, or alliance."""
-        def get_options():
-            db: Session = self.cfeed.service.get_session()
-            _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
-            _options.set_main_header("Remove an entity from being tracked in this feed:")
-            try:
-                for pilot in db.query(tb_Filter_characters).filter(
-                        tb_Filter_characters.channel_id == self.cfeed.channel_id).all():
-                    _options.add_option(
-                        dOpt.option_returns_object(name=pilot.object_item.get_name(), return_object=pilot))
-                for corp in db.query(tb_Filter_corporations).filter(
-                        tb_Filter_corporations.channel_id == self.cfeed.channel_id).all():
-                    _options.add_option(
-                        dOpt.option_returns_object(name=corp.object_item.get_name(), return_object=corp))
-                for ali in db.query(tb_Filter_alliances).filter(
-                        tb_Filter_alliances.channel_id == self.cfeed.channel_id).all():
-                    _options.add_option(dOpt.option_returns_object(name=ali.object_item.get_name(), return_object=ali))
-            except Exception as ex:
-                print(ex)
-            finally:
-                db.close()
-                return _options
-
-        _options = await self.cfeed.discord_client.loop.run_in_executor(None, get_options)
-        _row = await _options()
-        await self.delete_row(_row)
-        await self.reload(message_object)
+        await RemoveEntityOption(self.cfeed, message_object).run()
 
     async def InsightOptionRequired_tracktype(self, message_object:discord.Message):
         """Show losses/kills  - Set the feed to one of three modes: show losses only, show kills only, or show both kills and losses."""

@@ -1,0 +1,3 @@
+These are the currently configured tracked entities for this feed.
+
+You may remove an entity from this feed by entering the corresponding entity index number.
