@@ -35,6 +35,9 @@ class ShipLosses(enFeed):
             def set_frame_color(self):
                 self.embed.color = discord.Color(2640791)
 
+            def max_delta(self):
+                return datetime.timedelta(days=7)
+
         return VisualShipLosses
 
     @classmethod

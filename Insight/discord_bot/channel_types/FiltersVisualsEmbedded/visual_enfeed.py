@@ -59,8 +59,8 @@ class visual_enfeed(base_visual):
             return False
         if self.feed_options.maxValue < self.km.totalValue:
             return False
-        if not self.km.filter_loss(self.filters.object_filter_groups,
-                                   self.in_victim_ship_group):  # if false/contained in cat blacklist ignore posting
+        list_type_group = self.filters.object_filter_types + self.filters.object_filter_groups
+        if not self.km.filter_loss(list_type_group, self.in_victim_ship_group):  # if false/contained in cat blacklist ignore posting
             return False
         __list_systems = self.filters.object_filter_systems + self.filters.object_filter_regions
         match_syst = self.km.filter_system(__list_systems, self.in_system_nonly)

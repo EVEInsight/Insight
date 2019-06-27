@@ -30,6 +30,7 @@ class TestBigKillsFilter1(AbstractFilterTesting.AbstractFilterTesting):
     def InsightChannelType(cls):
         return BigKills
 
+
 class TestBigKillsFilter2(TestBigKillsFilter1):
     """for testing new max value option. Filter between 1.5B and 3B"""
     @classmethod

@@ -1,7 +1,7 @@
 from tests.abstract import DatabaseTesting, AsyncTesting
 from database.db_tables import tb_kills, tb_groups, tb_constellations, tb_categories, tb_systems, tb_regions
 from database.db_tables.discord import tb_channels, tb_enfeed
-from database.db_tables.filters import tb_Filter_characters, tb_Filter_corporations, tb_Filter_alliances, tb_Filter_systems
+from database.db_tables.filters import tb_Filter_characters, tb_Filter_corporations, tb_Filter_alliances, tb_Filter_systems, tb_Filter_groups, tb_Filter_types
 from tests.mocks.libDiscord.TextChannel import TextChannel
 from tests.mocks.ServiceModule import ServiceModule
 import datetime
@@ -35,6 +35,10 @@ class AbstractFilterTesting(DatabaseTesting.DatabaseTesting, AsyncTesting.AsyncT
             cls.db.merge(tb_Filter_alliances(filter_id, 1, True))
         for filter_id in cls.filter_systems_ids():
             cls.db.merge(tb_Filter_systems(filter_id, 1, True))
+        for filter_id in cls.filter_group_ids():
+            cls.db.merge(tb_Filter_groups(filter_id, 1, True))
+        for filter_id in cls.filter_type_ids():
+            cls.db.merge(tb_Filter_types(filter_id, 1, True))
         cls.db.commit()
         cls.db.close()
 
@@ -93,6 +97,16 @@ class AbstractFilterTesting(DatabaseTesting.DatabaseTesting, AsyncTesting.AsyncT
 
     @classmethod
     def filter_systems_ids(cls):
+        return
+        yield
+
+    @classmethod
+    def filter_group_ids(cls):
+        return
+        yield
+
+    @classmethod
+    def filter_type_ids(cls):
         return
         yield
 
