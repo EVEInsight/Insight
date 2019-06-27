@@ -1,0 +1,1 @@
+Select the killmail viewing mode for this entity feed.

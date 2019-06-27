@@ -6,3 +6,5 @@ from discord_bot.OptionLogic.EntityOptions.MinValueOption import MinValueOption
 from discord_bot.OptionLogic.EntityOptions.MaxValueOption import MaxValueOption
 from discord_bot.OptionLogic.EntityOptions.AddEntityOption import AddEntityOption
 from discord_bot.OptionLogic.EntityOptions.RemoveEntityOption import RemoveEntityOption
+from discord_bot.OptionLogic.EntityOptions.SetTrackTypeOption import SetTrackTypOption
+from discord_bot.OptionLogic.EntityOptions.SetTrackPodsOption import SetTrackPodsOption

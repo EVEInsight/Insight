@@ -1,0 +1,1 @@
+Show kills only - Only kills where your tracked entities were attackers will be posted.

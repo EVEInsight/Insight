@@ -1,0 +1,1 @@
+Show kills and losses - Both kills and losses involving tracked entities will be posted.

@@ -1,0 +1,1 @@
+Show losses only - Only losses involving your tracked entities will be posted.
