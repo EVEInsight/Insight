@@ -15,6 +15,7 @@ import aiohttp
 import platform
 import traceback
 import sys
+from InsightSubsystems.TheWatcher import TheWatcher
 
 
 class service_module(object):
@@ -35,6 +36,7 @@ class service_module(object):
         self.routes.setup_load()
         self.sso = EVEsso.EVEsso(self)
         self.channel_manager = cm.Channel_manager(self)
+        self.the_watcher = TheWatcher.TheWatcher(self)
         self.zk_obj = zk.zk(self)
         self._admin_module = InsightAdmins.InsightAdmins()
         self.motd = self._read_motd()

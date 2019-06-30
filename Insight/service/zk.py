@@ -13,6 +13,7 @@ import janus
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
 import InsightLogger
+from InsightSubsystems.TheWatcher import TheWatcher
 
 
 class zk(object):
@@ -30,6 +31,7 @@ class zk(object):
         self.delay_process = queue.Queue()  # process/name resolve delay
         self.delay_next = queue.Queue()  # delay between zk requests
         self.run_websocket = self.service.cli_args.websocket
+        self.watcher = TheWatcher.TheWatcher.get_instantiated()
 
     @staticmethod
     def add_delay(q, other_time, minutes=False):
@@ -260,6 +262,7 @@ class zk(object):
                 km = await self._km_postProcess.async_q.get()
                 st = InsightLogger.InsightLogger.time_start()
                 await loop.run_in_executor(zk_thread_pool, partial(self.service.channel_manager.send_km, km))
+                await self.watcher.submit_km_noblock(km)
                 InsightLogger.InsightLogger.time_log(lg, st, 'Filer pass km_id: {}'.format(km.kill_id), 2500)
             except Exception as ex:
                 print(ex)
