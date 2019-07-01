@@ -39,13 +39,16 @@ class TestOptions_EnFeed(test_options_BaseFeed.TestOptions_BaseFeed):
         self.helper_future_run_call(self.options.reload(None))
         with self.subTest("Remove NC. tracking"):
             self.reply("2")
+            self.reply("0")
             self.helper_future_run_call(self.options.InsightOption_remove(self.message))
             self.assertFilterNotContains(tb_Filter_alliances(1727758877, 1), self.cached_row.object_filter_alliances)
         with self.subTest("Remove UDIE tracking"):
             self.reply("1")
+            self.reply("0")
             self.helper_future_run_call(self.options.InsightOption_remove(self.message))
             self.assertFilterNotContains(tb_Filter_corporations(761955047, 1), self.cached_row.object_filter_alliances)
         with self.subTest("Remove Natuli tracking"):
+            self.reply("0")
             self.reply("0")
             self.helper_future_run_call(self.options.InsightOption_remove(self.message))
             self.assertFilterNotContains(tb_Filter_characters(1326083433, 1), self.cached_row.object_filter_alliances)

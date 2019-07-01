@@ -17,6 +17,7 @@ class setup_database(object):
         self._dbSession = sessionmaker(bind=self.engine)
         self.sc_session = scoped_session(self._dbSession)
         self.verify_tokens()
+        DB.tb_meta.set_default_values(self.sc_session())
 
     def initial_load(self):
         engine = create_engine('sqlite:///{}'.format(self.service.config_file['sqlite_database']['filename']),
