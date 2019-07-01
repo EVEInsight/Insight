@@ -21,7 +21,6 @@ class TheWatcher(metaclass=InsightSingleton):
         self.logger = InsightLogger.InsightLogger.get_logger("Watcher.main", "Watcher_main.log", console_print=True)
         InsightLogger.InsightLogger.get_logger("Watcher.systems", "Watcher_systems.log")
         InsightLogger.InsightLogger.get_logger("Watcher.pilots", "Watcher_pilots.log")
-        self.loop.create_task(self.coroutine_deqeue())
 
     async def submit_km_noblock(self, km):
         self.loop.create_task(self.kmQueue.put(km))
@@ -29,10 +28,17 @@ class TheWatcher(metaclass=InsightSingleton):
     async def submit_km(self, km):
         await self.kmQueue.put(km)
 
+    async def start_coroutines(self):
+        self.loop.create_task(self.coroutine_dequeue())
+        self.loop.create_task(self.coroutine_enqueue())
+
     async def load_historical_data(self):
         self.logger.info("Started historical data load.")
 
-    async def coroutine_deqeue(self):
+    async def coroutine_enqueue(self):
+        self.logger.info('The Watcher (pilot ship and system tracker) enqueue coroutine started.')
+
+    async def coroutine_dequeue(self):
         self.logger.info('The Watcher (pilot ship and system tracker) dequeue coroutine started.')
         #loop.create_task(self.load_all_kms())
         while True:

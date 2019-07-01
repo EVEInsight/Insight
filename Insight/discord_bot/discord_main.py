@@ -33,7 +33,7 @@ class Discord_Insight_Client(discord.Client):
         self.loop.create_task(self.setup_tasks())
         self.channelLocks = InsightUtilities.AsyncLockManager(self.loop)
         self.channelSemaphores = InsightUtilities.AsyncSemaphoreManager(self.loop)
-        self.the_watcher = TheWatcher.TheWatcher.get_instantiated()
+        self.the_watcher: TheWatcher.TheWatcher = TheWatcher.TheWatcher.get_instantiated()
 
     def get_invite_url(self):
         try:
@@ -73,7 +73,7 @@ class Discord_Insight_Client(discord.Client):
         self.loop.create_task(self.service.zk_obj.coroutine_process_json(self.threadpool_zk))
         self.loop.create_task(self.channel_manager.auto_refresh())
         self.loop.create_task(self.channel_manager.auto_channel_refresh())
-        self.loop.create_task(self.the_watcher.load_historical_data())
+        await self.the_watcher.start_coroutines()
 
     async def post_motd(self):
         div = '================================='
