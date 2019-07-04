@@ -41,4 +41,7 @@ class InsightArgumentParser(object):
         parser.add_argument("--export-swagger-client", action="store_true",
                             help="Export the built ESI swagger client library to a zip archive in the Docker volume.",
                             default=False)
+        parser.add_argument("--tests", "-t", action="store_true",
+                            help="Run unit tests inside the Docker container.",
+                            default=False)
         return parser.parse_args()

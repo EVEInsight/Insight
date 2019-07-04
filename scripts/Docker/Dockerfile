@@ -26,7 +26,7 @@ RUN bunzip2 sqlite-latest.sqlite.bz2
 FROM python:3.6-slim-stretch
 LABEL maintainer="nathan@nathan-s.com"
 LABEL url="https://github.com/Nathan-LS/Insight"
-ARG branch=development
+ARG INSIGHT_BRANCH=master
 WORKDIR /InsightDocker
 COPY --from=SwaggerRunner /python-client ./python-client
 COPY --from=SDE /sqlite-latest.sqlite ./sqlite-latest.sqlite
@@ -35,17 +35,15 @@ RUN apt-get update && apt-get install -y \
  build-essential \
  zip \
  && rm -rf /var/lib/apt/lists/*
-RUN git clone -b $branch --single-branch https://github.com/Nathan-LS/Insight.git
-RUN pip3 install wheel
-RUN pip3 install setuptools
+RUN git clone -b $INSIGHT_BRANCH --single-branch https://github.com/Nathan-LS/Insight.git
+RUN pip3 install wheel setuptools
 RUN cp /InsightDocker/python-client /InsightDocker/python-client-2 -R
 WORKDIR /InsightDocker/python-client-2
 RUN python3 setup.py install
 WORKDIR /InsightDocker/Insight
 RUN pip3 install --upgrade -r requirements.txt
-RUN cp /InsightDocker/Insight/scripts/Docker/DockerEntry.sh /InsightDocker
-RUN cp /InsightDocker/Insight/scripts/Docker/DockerBinBuild.sh /InsightDocker
+RUN find /InsightDocker/Insight/scripts/Docker/ -maxdepth 1 -name "*.sh" -type f -exec cp {} /InsightDocker/ \;
 RUN rm /InsightDocker/python-client-2 -R
-RUN chmod +x /InsightDocker/DockerEntry.sh /InsightDocker/DockerBinBuild.sh
+RUN find /InsightDocker/ -maxdepth 1 -name "*.sh" -type f -exec chmod +x {} +
 WORKDIR /app
 ENTRYPOINT ["/InsightDocker/DockerEntry.sh", "python3", "/InsightDocker/Insight/Insight", "-sde", "/InsightDocker/sqlite-latest.sqlite"]
