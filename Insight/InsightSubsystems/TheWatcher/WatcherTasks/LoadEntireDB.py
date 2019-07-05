@@ -25,7 +25,7 @@ class LoadEntireDB(WatcherTask.WatcherTask):
             db.close()
             return rows
 
-    def load_all_kms(self):
+    def _run_task(self):
         self.logger.info("Starting KM enqueue chunk gatherer.")
         g_st = InsightLogger.InsightLogger.time_start()
         index_max_id = 9e9

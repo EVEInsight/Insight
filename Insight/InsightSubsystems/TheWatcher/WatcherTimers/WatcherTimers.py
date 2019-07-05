@@ -29,7 +29,7 @@ class WatcherTimers(object):
         await self.watcher.reset_all()
         self.logger.info("Cleared all current data.")
         task = LoadEntireDB.LoadEntireDB(self.watcher)
-        await self.watcher.executor(task.load_all_kms)
+        await task.run_task()
 
     async def timer_load_all(self):
         """this task will load all mails from the database"""
