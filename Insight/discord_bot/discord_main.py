@@ -73,7 +73,7 @@ class Discord_Insight_Client(discord.Client):
         self.loop.create_task(self.service.zk_obj.coroutine_process_json(self.threadpool_zk))
         self.loop.create_task(self.channel_manager.auto_refresh())
         self.loop.create_task(self.channel_manager.auto_channel_refresh())
-        await self.the_watcher.start_coroutines()
+        self.loop.create_task(self.the_watcher.run_setup_tasks())
 
     async def post_motd(self):
         div = '================================='

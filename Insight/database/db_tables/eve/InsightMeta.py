@@ -58,3 +58,8 @@ class InsightMeta(dec_Base.Base):
             print(ex)
         finally:
             db.close()
+
+    @classmethod
+    def get_last_full_pull(cls, service_module) -> datetime.datetime:
+        return dateTimeParser(cls.get_value("the_watcher_last_full_pull", service_module))
+
