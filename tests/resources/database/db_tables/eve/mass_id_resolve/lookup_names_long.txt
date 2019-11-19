@@ -203,8 +203,6 @@ WILD BOARS
 TIME CRIT
 Addicted.
 Armed Trade Syndicate
-Nobilium Collective
-Semper Fidelia Ut STAIN
 Ushra'Khan
 Shoot First.
 Aporkalypse Now
@@ -233,7 +231,6 @@ inPanic
 Nibiru Gaming Ltd.
 Spatial Instability
 WiNGSPAN Delivery Network
-Kakistocracy Mercenary Alliance
 WINMATAR.
 SYNDICATED
 Hassle
@@ -241,7 +238,6 @@ LEGIO ASTARTES ARCANUM
 Black Lanterns
 GF Company
 New Signature
-THE BROTHER OF HULU
 Gentlemen's Agreement
 Local Is Primary
 Here Be Dragons
@@ -256,15 +252,12 @@ Destiny's Call
 What Could Possibly Go Wr0ng
 DevilBear
 Random Violence.
-KnockOut.
 Brotherhood Of Silent Space
-The Felines of the Egg of the Lisa
 Against ALL Authorities
 Praetoria Imperialis Excubitoris
 Bear In Mind.
 The Tuskers Co.
 Apocalypse Now.
-Fallen Vanguard
 STARCHASER Alliance
 Cursed Intentions Alliance
 Taylor Swift Empire
