@@ -1,15 +1,7 @@
 stages:
-  - build
   - test
-build_env:
-  stage: build
-  image: docker:latest
-  script:
-    - cp requirements.txt scripts/Docker/environment/
-    - cd scripts/Docker/environment/
-    - docker build . -t insight_env:$CI_COMMIT_REF_NAME
 test_insight:
   stage: test
   image: docker:latest
   script:
-    - docker run --rm -v ${PWD}:/app/Insight insight_env:$CI_COMMIT_REF_NAME pytest --cov=./
+    - docker run --rm -v ${PWD}:/InsightDocker/Insight nathanls/insight:$CI_COMMIT_REF_NAME --test
