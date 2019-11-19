@@ -12,4 +12,4 @@ test_insight:
   stage: test
   image: docker:latest
   script:
-    - docker run --rm -v ${PWD}:/app insight_env:$CI_COMMIT_REF_NAME python3 pytest --cov=./
+    - docker run --rm -v ${PWD}:/app/Insight insight_env:$CI_COMMIT_REF_NAME pytest --cov=./
