@@ -27,17 +27,24 @@ FROM python:3.6-slim-stretch
 LABEL maintainer="nathan@nathan-s.com"
 LABEL url="https://github.com/Nathan-LS/Insight"
 ARG INSIGHT_BRANCH=master
-WORKDIR /InsightDocker
-COPY --from=SwaggerRunner /python-client ./python-client
-COPY --from=SDE /sqlite-latest.sqlite ./sqlite-latest.sqlite
+ARG INSIGHT_REPO=https://github.com/Nathan-LS/Insight.git
 RUN apt-get update && apt-get install -y \
  git \
  build-essential \
  zip \
  && rm -rf /var/lib/apt/lists/*
-RUN git clone -b $INSIGHT_BRANCH --single-branch https://github.com/Nathan-LS/Insight.git
-RUN pip3 install wheel setuptools
+
+RUN mkdir /InsightDocker /app /home/insight
+RUN addgroup -gid 1007 insight
+RUN useradd --system --shell /bin/bash --home /app -u 1006 -g insight insight
+RUN chown insight:insight /InsightDocker /app /home/insight
+USER insight
+WORKDIR /InsightDocker
+COPY --from=SwaggerRunner /python-client ./python-client
+COPY --from=SDE /sqlite-latest.sqlite ./sqlite-latest.sqlite
+RUN git clone -b $INSIGHT_BRANCH --single-branch $INSIGHT_REPO
 RUN cp /InsightDocker/python-client /InsightDocker/python-client-2 -R
+USER root
 WORKDIR /InsightDocker/python-client-2
 RUN python3 setup.py install
 WORKDIR /InsightDocker/Insight

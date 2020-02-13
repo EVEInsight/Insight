@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 # This file should only be ran inside the Insight Docker container. This script copies the config file into the volume at run time and starts the bot with any param$
+chown -R insight:insight /app
+cd /app
+INSIGHT_START_CMD="$@"
 for a in "$@"
 do
  if [ "$a" = "-d" ] || [ "$a" = "--docker-init" ]; then
@@ -13,10 +16,10 @@ do
   exit 0
  fi
  if [ "$a" = "-b" ] || [ "$a" = "--build-binary" ]; then
-  exec /InsightDocker/DockerBinBuild.sh
+  runuser -l insight -c "/InsightDocker/DockerBinBuild.sh"
  fi
  if [ "$a" = "-t" ] || [ "$a" = "--tests" ]; then
-  exec /InsightDocker/DockerTests.sh
+  runuser -l insight -c "/InsightDocker/DockerTests.sh"
  fi
   if [ "$a" = "--export-swagger-client" ]; then
   cd /InsightDocker/python-client
@@ -24,4 +27,4 @@ do
   exit 0
  fi
 done
-exec "$@"
+runuser -l insight -c "$INSIGHT_START_CMD"

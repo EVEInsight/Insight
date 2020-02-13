@@ -1,7 +1,14 @@
 stages:
-  - test
-test_insight:
-  stage: test
+  - build
+  - deploy
+insight_build:
+  stage: build
   image: docker:latest
   script:
-    - docker run --rm -v ${PWD}:/InsightDocker/Insight nathanls/insight:$CI_COMMIT_REF_NAME --test
+    - cd scripts/Docker
+    - docker build --build-arg INSIGHT_BRANCH=$CI_COMMIT_REF_NAME --build-arg INSIGHT_REPO=$INSIGHT_REPO -t "$IMAGE_URL:$CI_COMMIT_REF_NAME" .
+insight_deploy:
+  stage: deploy
+  script:
+    - echo "$REGISTRY_PASSWORD" | docker login --username "$REGISTRY_USERNAME" --password-stdin "$REGISTRY_DOMAIN"
+    - docker push "$IMAGE_URL:$CI_COMMIT_REF_NAME"
