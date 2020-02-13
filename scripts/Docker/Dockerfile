@@ -51,6 +51,9 @@ WORKDIR /InsightDocker/Insight
 RUN pip3 install --upgrade -r requirements.txt
 RUN find /InsightDocker/Insight/scripts/Docker/ -maxdepth 1 -name "*.sh" -type f -exec cp {} /InsightDocker/ \;
 RUN rm /InsightDocker/python-client-2 -R
-RUN find /InsightDocker/ -maxdepth 1 -name "*.sh" -type f -exec chmod +x {} \;
+RUN find /InsightDocker/ -maxdepth 1 -name "*.sh" -type f -exec chmod 500 {} \;
+RUN find /InsightDocker/ -maxdepth 1 -name "*.sh" -type f -exec chown insight:insight {} \;
+RUN chown insight:insight python-client sqlite-latest.sqlite -R
+RUN chmod 600 sqlite-latest.sqlite
 WORKDIR /app
 ENTRYPOINT ["/InsightDocker/DockerEntry.sh", "python3", "/InsightDocker/Insight/Insight", "-sde", "/InsightDocker/sqlite-latest.sqlite"]
