@@ -53,7 +53,7 @@ RUN find /InsightDocker/Insight/scripts/Docker/ -maxdepth 1 -name "*.sh" -type f
 RUN rm /InsightDocker/python-client-2 -R
 RUN find /InsightDocker/ -maxdepth 1 -name "*.sh" -type f -exec chmod 500 {} \;
 RUN find /InsightDocker/ -maxdepth 1 -name "*.sh" -type f -exec chown insight:insight {} \;
-RUN chown insight:insight python-client sqlite-latest.sqlite -R
-RUN chmod 600 sqlite-latest.sqlite
+RUN chown insight:insight /InsightDocker/python-client /InsightDocker/sqlite-latest.sqlite -R
+RUN chmod 600 /InsightDocker/sqlite-latest.sqlite
 WORKDIR /app
 ENTRYPOINT ["/InsightDocker/DockerEntry.sh", "python3", "/InsightDocker/Insight/Insight", "-sde", "/InsightDocker/sqlite-latest.sqlite"]
