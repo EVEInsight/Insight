@@ -94,7 +94,7 @@ Commands can be prefixed with either ```!```, ```?```, or ```@Insight``` by defa
 | !sync | Manage contact EVE tokens for a radar or proximity watch feed. Contact token syncing allows you to ignore allies in tracked ships from appearing as potential targets. |
 | !unlock | Unlock a feed service to allow any Discord channel user to modify feed configuration. |
 
-More detailed command information is available in the [commands wiki.](https://github.com/Nathan-LS/Insight/wiki/Commands)
+More detailed command information is available in the [commands wiki.](https://wiki.eveinsight.net/user/commands)
 
 # Permissions
 The preconfigured role invite [link](#links) creates a server role with necessary permissions already assigned. Using the invite [link](#links) without preconfigured roles requires manual permission configuration.
@@ -169,9 +169,9 @@ Packaged binaries are available for Windows and Linux under [releases](https://g
 
 Follow the instructions in ```Installation.md```, edit ```default-config.ini``` and you are ready to go! There are no additional downloads or package management systems to deal with.
 
-#### [Source](https://github.com/Nathan-LS/Insight/wiki/Source-Installation)
+#### [Source](https://wiki.eveinsight.net/install/source)
 Requires a Python 3.6 interpreter (<=3.5 and >=3.7 not supported).
-The [wiki](https://github.com/Nathan-LS/Insight/wiki/Source-Installation) contains a detailed guide for 
+The [wiki](https://wiki.eveinsight.net/install/source) contains a detailed guide for 
 source installation using a Linux operating system.
 
 # Frequently asked questions
@@ -211,7 +211,7 @@ Direct message the bot with the ```!sync``` command and select an option. You ca
 
 **What do all the stats mean on the bot's watching message?**
 
-Insight keeps track of delays for service reliability. See the [wiki article](https://github.com/Nathan-LS/Insight/wiki/Color-codes-and-bot-status) for a detailed description.
+Insight keeps track of delays for service reliability. See the [wiki article](https://wiki.eveinsight.net/botcolorcodes) for a detailed description.
 
 
 **How do I host Insight myself?**

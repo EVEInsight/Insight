@@ -47,7 +47,7 @@ class Help(UnboundCommandBase):
 
     def generate_links(self):
         return "For more detailed command, feed type, or configuration information check out the project " \
-             "[wiki](https://github.com/Nathan-LS/Insight/wiki).\nAdditional live support is available via the " \
+             "[wiki](https://wiki.eveinsight.net).\nAdditional live support is available via the " \
              "[Insight support Discord server](https://discord.gg/Np3FCUn).\n"
 
     async def get_prefix_str(self, d_message:discord.Message):

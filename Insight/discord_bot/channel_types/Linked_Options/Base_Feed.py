@@ -26,6 +26,9 @@ class base_activefeed(options_base.Options_Base):
         yield (self.InsightOption_lockfeed, False)
         yield (self.InsightOption_unlockfeed, False)
 
+    def appearance_url(self) -> str:
+        return "https://wiki.eveinsight.net/appearances"
+
     async def InsightOption_remove_opt(self,message_object:discord.Message):
         """Delete Feed - Removes and deletes the currently active feed in this channel."""
         await self.cfeed.command_remove(message_object)
@@ -57,9 +60,9 @@ class base_activefeed(options_base.Options_Base):
         _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)
         _options.set_main_header("Select a rich embed appearance. Appearances allow you to select a template for "
                                  "killmail presentation and differ in verbosity, size, and the amount of information "
-                                 "provided. See [Insight wiki](https://github.com/Nathan-LS/Insight/wiki/Rich-Embed-Appearance) for "
+                                 "provided. See [Insight wiki]({}) for "
                                  "sample previews of each appearance. Note: appearances can be changed after feed "
-                                 "creation by running the '!settings' command.")
+                                 "creation by running the '!settings' command.".format(self.appearance_url()))
         for ap in self.cfeed.linked_visual_base().appearance_options():
             _options.add_option(dOpt.option_returns_object(name=ap.get_desc(), return_object=ap.appearance_id()))
         a_id = await _options()

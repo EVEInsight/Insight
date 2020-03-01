@@ -22,7 +22,7 @@ When in doubt, the only command you need to remember is ```!help```. The ```!hel
 
 # Commands
 ## !create
-Prompts the user to select a feed type for creation in the channel. For a detailed description of feed types, see [feed service types](https://github.com/Nathan-LS/Insight/wiki/Feed-Services). This command may only be used in server text channels and is unsupported in direct messages and channels that already have a feed. Use the command ```!remove``` to replace a feed service with another.
+Prompts the user to select a feed type for creation in the channel. For a detailed description of feed types, see [feed service types](https://wiki.eveinsight.net/feeds). This command may only be used in server text channels and is unsupported in direct messages and channels that already have a feed. Use the command ```!remove``` to replace a feed service with another.
 
 ## !help
 Display all available commands for the channel or direct message. If a command is not listed here, then it is unsupported by the channel. Certain commands are only supported in specific feed types or empty channels(channels without a feed). When it doubt, run ```!help```.

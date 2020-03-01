@@ -71,7 +71,7 @@ Available after creation using the ```!settings``` command. Some of these option
 * Remove a base system
      * Insight will prompt the user to remove a base system from the feed.
 * Manage feed sync settings
-     * Same as ```!sync``` command. This selection brings up options for syncing EVE contacts to the feed ignore blacklist. See [command !sync documentation for more information.](https://github.com/Nathan-LS/Insight/wiki/Commands#sync)
+     * Same as ```!sync``` command. This selection brings up options for syncing EVE contacts to the feed ignore blacklist. See [command !sync documentation for more information.](https://wiki.eveinsight.net/user/commands#sync)
 
 ### How radar filtering works
 1. Insight receives a mail and determines the number of minutes ago it occurred. Ignore if delay exceeds the radar set max age.

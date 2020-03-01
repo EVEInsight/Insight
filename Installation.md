@@ -1,6 +1,6 @@
 # Insight v1.4.0 Installation Guide
 This guide is for users who downloaded an Insight binary package from [releases.](https://github.com/Nathan-LS/Insight/releases)
-If you are running Insight from source, see [source installation guide.](https://github.com/Nathan-LS/Insight/wiki/Source-Installation)
+If you are running Insight from source, see [source installation guide.](https://wiki.eveinsight.net/install/source)
 ## Binary Executable Requirements
 
 ### Windows
@@ -13,7 +13,7 @@ If you are running Insight from source, see [source installation guide.](https:/
     * The Linux binary is built using Debian 8 so just about anything besides older versions of CentOS should work.
 ### Mac
 * Binary not supported
-    * Must build from [source](https://github.com/Nathan-LS/Insight/wiki/Installation)
+    * Must build from [source](https://wiki.eveinsight.net/install/source)
 
 ## Installing
 1. Extract the latest Insight [release](https://github.com/Nathan-LS/Insight/releases) archive.

@@ -337,7 +337,7 @@ class discord_feed_service(object):
 
     @classmethod
     def str_more_help(cls):
-        return "Run the command '!help' to see a list of available commands or visit:\n\nhttps://github.com/Nathan-LS/Insight/wiki"
+        return "Run the command '!help' to see a list of available commands or visit:\n\nhttps://wiki.eveinsight.net"
 
     def __str__(self):
         return "Base Insight Object"

@@ -31,6 +31,9 @@ class Options_CapRadar(Base_Feed.base_activefeed):
         yield (self.InsightOption_sync, False)
         yield from super().yield_options()
 
+    def appearance_url(self) -> str:
+        return "https://wiki.eveinsight.net/appearances/radar"
+
     def mention_options(self,message_object,group_type):
         __options = discord_options.mapper_index(self.cfeed.discord_client, message_object)
         __options.set_main_header("Select the mention mode for this channel. On detected {} activity the bot "
