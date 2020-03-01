@@ -4,6 +4,8 @@ import traceback
 import InsightExc
 import asyncio
 import InsightLogger
+from InsightUtilities import DiscordPermissionCheck
+import janus
 
 
 class internal_options(enum.Enum):
@@ -117,17 +119,40 @@ class base_visual(object):
             return False
 
     async def __call__(self, *args, **kwargs):
-        if self.send_attempt_count >= 3:
+        if self.send_attempt_count >= 5:
             raise InsightExc.DiscordError.MessageMaxRetryExceed
         else:
-            if self.send_attempt_count != 0:
-                self.logger.warning("Attempting to resend message after failure. Reattempt: {}".format(self.send_attempt_count))
-                await asyncio.sleep(10)
             self.send_attempt_count += 1
             if self.text_only:
-                await self.channel.send(content=self.message_txt)
+                if DiscordPermissionCheck.can_text(self.channel):
+                    await self.channel.send(content=self.message_txt)
+                else:
+                    raise InsightExc.DiscordError.DiscordPermissions
             else:
-                await self.channel.send(content=self.message_txt, embed=self.embed)
+                if DiscordPermissionCheck.can_embed(self.channel):
+                    await self.channel.send(content=self.message_txt, embed=self.embed)
+                else:
+                    raise InsightExc.DiscordError.DiscordPermissions
+
+    async def queue_task(self, discord_queue: janus.Queue):
+        if self.send_attempt_count == 1:
+            await asyncio.sleep(60)
+        elif self.send_attempt_count == 2:
+            await asyncio.sleep(600)
+        elif self.send_attempt_count == 3:
+            await asyncio.sleep(3600)
+        elif self.send_attempt_count == 4:
+            await asyncio.sleep(86400)
+        else:
+            await asyncio.sleep(1)
+        await discord_queue.async_q.put(self)
+
+    async def requeue(self, discord_queue):
+        self.feed.discord_client.loop.create_task(self.queue_task(discord_queue))
+
+    def debug_info(self):
+        return "KM ID: {} Feed: {} Appearance: {} TextChannel: {}".format(self.km_id, type(self.feed), type(self),
+                                                                          self.channel.id)
 
     def feed_specific_row_type(cls):
         raise NotImplementedError

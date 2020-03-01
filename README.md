@@ -6,6 +6,7 @@
 [![codecov](https://codecov.io/gh/Nathan-LS/Insight/branch/development/graph/badge.svg)](https://codecov.io/gh/Nathan-LS/Insight)
 [![](https://img.shields.io/github/license/Nathan-LS/Insight.svg)](https://github.com/Nathan-LS/Insight/blob/master/LICENSE.md)
 [![](https://img.shields.io/discord/379777846144532480.svg)](https://discord.gg/Np3FCUn)
+[![](https://img.shields.io/badge/-Wiki-blueviolet)](https://wiki.eveinsight.net)
 
 Insight provides EVE Online killmail streaming for Discord. Insight can stream personal or corporate killboards, detect supercapitals with a proximity radar, and more!
 Killmails and intel are presented in Discord rich embeds containing relevant links and images to quickly identify important information.

@@ -6,7 +6,7 @@ import datetime
 import asyncio
 from discord_bot import discord_options as dOpt
 import InsightExc
-
+from InsightUtilities import DiscordPermissionCheck
 
 class UnboundCommandBase(object):
     def __init__(self, unbound_service):
@@ -45,23 +45,15 @@ class UnboundCommandBase(object):
         return "Not implemented."
 
     def can_text(self, d_message: discord.Message):
-        if isinstance(d_message.channel, discord.TextChannel):
-            p: discord.Permissions = d_message.channel.permissions_for(d_message.channel.guild.me)
-            return p.send_messages
-        else:  # private convo so no need to check for permissions. Bot can embed
-            return True
+        return DiscordPermissionCheck.can_text(d_message)
 
     def can_embed(self, d_message: discord.Message):
-        if isinstance(d_message.channel, discord.TextChannel):
-            p: discord.Permissions = d_message.channel.permissions_for(d_message.channel.guild.me)
-            can_embed = p.embed_links and p.send_messages
-            if self.embed_only and not can_embed:
-                raise InsightExc.DiscordError.DiscordPermissions("Insight is lacking the **embed links** and **send "
-                                                                 "messages** roles in this channel. You must enable "
-                                                                 "these roles to use this command.")
-            return can_embed
-        else:  # private convo so no need to check for permissions. Bot can embed
-            return True
+        can_embed = DiscordPermissionCheck.can_embed(d_message)
+        if self.embed_only and not can_embed:
+            raise InsightExc.DiscordError.DiscordPermissions("Insight is lacking the **embed links** and **send "
+                                                             "messages** roles in this channel. You must enable "
+                                                             "these roles to use this command.")
+        return can_embed
 
     async def run_command(self, d_message: discord.Message, m_text: str = ""):
         if self.can_embed(d_message):

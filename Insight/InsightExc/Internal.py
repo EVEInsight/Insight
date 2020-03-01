@@ -18,3 +18,9 @@ class ThreadPauseTimeout(ThreadPauseExc):
         super().__init__(message)
 
 
+class DiscordDMUser(InsightException):
+
+    def __init__(self, message="DM User"):
+        super().__init__(message)
+
+

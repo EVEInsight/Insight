@@ -15,6 +15,8 @@ import janus
 import traceback
 import errno
 import InsightLogger
+from InsightUtilities import DiscordPermissionCheck
+import logging
 
 
 class discord_feed_service(object):
@@ -25,6 +27,7 @@ class discord_feed_service(object):
         self.channel_id = channel_discord_object.id
         self.logger = InsightLogger.InsightLogger.get_logger('Insight.feed.{}.{}'.format(str(self).replace(' ', ''), self.channel_id), 'Insight_feed.log', child=True)
         self.logger_filter = InsightLogger.InsightLogger.get_logger('Insight.filter.{}'.format(self.channel_id), 'Insight_filter.log', child=True)
+        self.log_mail_error = InsightLogger.InsightLogger.get_logger('MailError.{}'.format(self.channel_id), 'MailError.log', child=False, console_print=True, console_level=logging.WARNING)
         self.service = service_object
         self.channel_manager = self.service.channel_manager
         self.discord_client = self.service.channel_manager.get_discord_client()
@@ -225,7 +228,7 @@ class discord_feed_service(object):
     async def post_all(self):
         while self.channel_manager.exists(self):
             try:
-                __item = await asyncio.wait_for(self.kmQueue.async_q.get(), timeout=3600)
+                mitem = await asyncio.wait_for(self.kmQueue.async_q.get(), timeout=3600)
             except asyncio.TimeoutError:
                 continue
             except asyncio.CancelledError:
@@ -238,55 +241,67 @@ class discord_feed_service(object):
                 async with self.lock:
                     if self.cached_feed_table.feed_running and self.channel_manager.exists(self):
                         st = InsightLogger.InsightLogger.time_start()
-                        if isinstance(__item, base_visual):
-                            await __item()
-                            await self.channel_manager.add_delay(__item.get_load_time())
+                        if isinstance(mitem, base_visual):
+                            await mitem()
+                            if mitem.send_attempt_count <= 1:
+                                await self.channel_manager.add_delay(mitem.get_load_time())
                         else:
-                            await self.channel_discord_object.send(str(__item))
+                            await self.channel_discord_object.send(str(mitem))
                         InsightLogger.InsightLogger.time_log(self.logger, st, 'Send message/KM')
-            except discord.Forbidden as ex:
+            except InsightExc.DiscordError.DiscordPermissions:
                 try:
-                    self.logger.warning('Status: {} Code: {} Text: {}'.format(ex.status, ex.code, ex.text))
-                    await self.channel_discord_object.send(
-                        "Permissions are incorrectly set for the bot. See https://github.com/Nathan-LS/Insight#permissions\n\nRun the '!start' command to resume the feed once permissions are correctly set.")
+                    self.log_mail_error.info("Permissions missing for mail. KM INFO: {}".format(mitem.debug_info()))
+                    await mitem.requeue(self.kmQueue)
+                    if DiscordPermissionCheck.can_text(self.channel_discord_object):
+                        await self.channel_discord_object.send(
+                            "Insight attempted to post killmail ID: {} but there was an issue with permissions. "
+                            "\n\nEnsure Insight has the embed links and send messages permissions for this channel.\n"
+                            "See https://github.com/Nathan-LS/Insight#permissions\n\nRun the '!start' command to "
+                            "resume the feed once permissions are correctly set.".format(mitem.km_id))
                 except:
-                    pass
+                    print(traceback.print_exc())
                 finally:
                     await self.remove()
             except discord.HTTPException as ex:
                 try:
-                    self.logger.warning('Status: {} Code: {} Text: {}'.format(ex.status, ex.code, ex.text))
+                    if isinstance(mitem, base_visual):
+                        self.log_mail_error.info('Status: {} Code: {} Text: {}. KM Debug info: {}'.format(ex.status, ex.code, ex.text,
+                                                                                               mitem.debug_info()))
+                    else:
+                        self.logger.warning('Status: {} Code: {} Text: {}. MESSAGE TO SEND: {}'.format(ex.status, ex.code, ex.text,
+                                                                                                          mitem))
                     if ex.status == 404:  # channel deleted
                         await self.channel_manager.delete_feed(self.channel_id)
                     elif 500 <= ex.status < 600:
-                        if isinstance(__item, base_visual):
-                            await self.kmQueue.async_q.put(__item)
+                        if isinstance(mitem, base_visual):
+                            await mitem.requeue(self.kmQueue)
                     else:
-                        print('Error {} - when sending KM. discord.HTTPException'.format(ex.status))
+                        pass
                 except Exception as ex:
                     print(ex)
             except InsightExc.DiscordError.MessageMaxRetryExceed:
-                print('Error - max message retry limit exceeded when sending KM.')
-                self.logger.error('Max message retry limit exceeded when sending KM.')
+                self.log_mail_error.info('Max message retry limit exceeded when sending KM. KM INFO: {}'.format(mitem.debug_info()))
                 continue
             except OSError as ex:
                 self.logger.warning(str(ex))
                 if ex.errno == errno.ECONNRESET or ex.errno == errno.ENETRESET:
-                    if isinstance(__item, base_visual):
-                        await self.kmQueue.async_q.put(__item)
+                    if isinstance(mitem, base_visual):
+                        await mitem.requeue(self.kmQueue)
                 else:
-                    print('Error {} - when sending KM. OSError'.format(ex))
+                    if isinstance(mitem, base_visual):
+                        self.log_mail_error.error('Error {} - when sending KM. OSError. KM INFO: {}'.format(ex, mitem.debug_info()))
             except Exception as ex:
-                print('Error {} - when sending KM. Other'.format(ex))
+                if isinstance(mitem, base_visual):
+                    self.log_mail_error.error('Error {} - when sending KM. Other. KM INFO: {}'.format(ex, mitem.debug_info()))
                 self.logger.exception(ex)
-            __item = None  # remove reference
+            mitem = None  # remove reference
             await asyncio.sleep(.1)
 
     async def remove(self):
-        """Temp pause an error feed instead of removing it completely. Resume again in 45 minutes."""
+        """Temp pause an error feed instead of removing it completely. Resume again in 120 minutes."""
         try:
             if self.cached_feed_table.feed_running:
-                remaining = 120
+                remaining = 240
                 self.cached_feed_table.feed_running = False
                 while remaining > 0 and not self.cached_feed_table.feed_running:
                     remaining -= 1
