@@ -3,10 +3,13 @@ import difflib
 import InsightExc
 from .InsightSingleton import InsightSingleton
 import datetime
+import InsightLogger
+from functools import partial
 
 
 class InsightCommands(metaclass=InsightSingleton):
     def __init__(self):
+        self.logger = InsightLogger.InsightLogger.get_logger('CommandParser', 'CommandParser.log')
         self.commands = {
             'about':    ['about', 'info'],
             'help':     ['help', 'commands'],
@@ -27,28 +30,48 @@ class InsightCommands(metaclass=InsightSingleton):
         }
         self.all_commands = [c for i in self.commands.values() for c in i]
         self.notfound_timers = {}
-        self.lock = asyncio.Lock(loop=asyncio.get_event_loop())
+        self.loop = asyncio.get_event_loop()
+        self.lock = asyncio.Lock(loop=self.loop)
 
     def __similar(self, message_txt):
         return difflib.get_close_matches(message_txt.lower(), self.all_commands)
 
+    def get_matching_coro(self, channel_id: int, prefixes: list, message_txt: str, **kwargs):
+        msg_lower = self.strip_prefix(prefixes, message_txt).lower()
+        for key, val in self.commands.items():
+            if any(msg_lower.startswith(i) for i in val):
+                coro = kwargs.get(key)
+                if asyncio.iscoroutine(coro):
+                    self.logger.info("{} command hit: {} available prefix count: {} coro command: {}".format(str(channel_id), True, len(prefixes), key))
+                    return coro
+                else:
+                    raise InsightExc.Internal.InsightException("Could not call coroutine. Keyword argument missing.")
+        self.logger.info("{} command hit: {} available prefix count: {} similar commands: {}".format(str(channel_id), False, len(prefixes), str(self.__similar(message_txt))))
+        return None
+
     async def parse_and_run(self, channel_id: int, prefixes: list, message_txt: str, **kwargs):
-        if not self.is_command(prefixes, message_txt):
+        if not await self.is_command_async(prefixes, message_txt):
             return
         else:
-            msg_lower = self.strip_prefix(prefixes, message_txt).lower()
-            for key, val in self.commands.items():
-                if any(msg_lower.startswith(i) for i in val):
-                    coro = kwargs.get(key)
-                    if asyncio.iscoroutine(coro):
-                        await coro
-                        return
-                    else:
-                        raise InsightExc.Internal.InsightException("Could not call coroutine. Keyword argument missing.")
-            await self.raise_notfound(channel_id, prefixes, message_txt)
+            selected_coro = await self.loop.run_in_executor(None, partial(self.get_matching_coro,
+                                                                                         channel_id, prefixes,
+                                                                                         message_txt, **kwargs))
+            if asyncio.iscoroutine(selected_coro):
+                await selected_coro
+                return
+            else:
+                await self.raise_notfound(channel_id, prefixes, message_txt)
 
-    def is_command(self, prefixes: list, message_txt: str)->bool:
-        return any(message_txt.startswith(i.lower()) for i in prefixes)
+    def is_command(self, prefixes: list, message_txt: str, channel_id: int = None) -> bool:
+        command_hit = any(message_txt.startswith(i.lower()) for i in prefixes)
+        if channel_id:
+            self.logger.info("{} prefix hit: {} available prefix count: {}".format(str(channel_id),
+                                                                                   command_hit, len(prefixes)))
+        return command_hit
+
+    async def is_command_async(self, prefixes: list, message_txt: str, channel_id: int = None) -> bool:
+        return await self.loop.run_in_executor(None, partial(self.is_command, prefixes,
+                                                                            message_txt, channel_id))
 
     def strip_prefix(self, prefixes: list, message_txt: str)->str:
         for p in prefixes:

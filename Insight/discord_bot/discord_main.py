@@ -24,7 +24,7 @@ class Discord_Insight_Client(discord.Client):
         self.serverManager = service.ServerManager(self.service, self)
         self.commandLookup = InsightUtilities.InsightCommands()
         self.background_tasks = background_tasks(self)
-        self.threadpool_insight = ThreadPoolExecutor(max_workers=5)
+        self.threadpool_insight = ThreadPoolExecutor(max_workers=6)
         self.threadpool_zk = ThreadPoolExecutor(max_workers=2)
         self.threadpool_unbound = ThreadPoolExecutor(max_workers=1)
         self.unbound_commands = UnboundUtilityCommands(self)
@@ -153,7 +153,7 @@ class Discord_Insight_Client(discord.Client):
         await self.wait_until_ready()
         if message.author.id == self.user.id or message.author.bot:
             return
-        if not self.commandLookup.is_command(await self.serverManager.get_server_prefixes(message.channel), message.content):
+        if not await self.commandLookup.is_command_async(await self.serverManager.get_server_prefixes(message.channel), message.content, message.channel.id):
             return
         lg = InsightLogger.InsightLogger.get_logger('Insight.command.{}.{}'.format(str(type(message.channel)).replace(' ', ''),
                                                                            message.channel.id), 'Insight_command.log', child=True)
