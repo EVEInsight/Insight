@@ -10,7 +10,7 @@ In the event of a permission issue or API delay/outage Insight will attempt to r
     * First failure: Resend attempt after 1 minute
     * Second failure: Resend attempt after 10 minutes
     * Third failure: Resend attempt after 60 minutes
-    * Fourth failure: Resend attempt after 120 minutes
+    * Fourth failure: Resend attempt after 1 day
     * Further failures: Mail is discarded and logged in the ```MailError.log``` file.
 ## Changes
 * Bumped the versions for multiple dependencies including discord.py. 
