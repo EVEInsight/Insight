@@ -11,6 +11,7 @@ class About(UnboundCommandBase):
         s += "Released under the GNU General Public License v3.0\n\n"
         s += "**Links:**\n"
         for l in [
+            "[EVEInsight.net](https://eveinsight.net)",
             "[Insight on GitHub](https://github.com/Nathan-LS/Insight)",
             "[Insight on Docker Hub](https://hub.docker.com/r/nathanls/insight/)",
             "[View ChangeLog](https://github.com/Nathan-LS/Insight/blob/master/ChangeLog.md)",

@@ -1,3 +1,24 @@
+# v1.5.0
+This version of Insight is a general maintenance release addressing minor underlying issues with Insight.
+## Notices
+* The pyinstaller binary/executable release of Insight is no longer supported in this release and releases going forward. The pyinstaller scripts exist under ```scripts/``` if you wish to experiment with pyinstaller. Please switch to [Docker](https://hub.docker.com/r/nathanls/insight).
+## New features
+* A new website has been created at [eveinsight.net](https://eveinsight.net) to better market Insight and show off features to new users.
+* A new wiki has been created at [wiki.eveinsight.net](https://wiki.eveinsight.net) to replace the GitHub wiki. All further wiki-related articles will be posted to this new wiki.
+* Insight better handles issues and requeueing of mails if there is an issue with posting to channels. 
+In the event of a permission issue or API delay/outage Insight will attempt to resend a mail with the following delays:
+    * First failure: Resend attempt after 1 minute
+    * Second failure: Resend attempt after 10 minutes
+    * Third failure: Resend attempt after 60 minutes
+    * Fourth failure: Resend attempt after 120 minutes
+    * Further failures: Mail is discarded and logged in the ```MailError.log``` file.
+## Changes
+* Bumped the versions for multiple dependencies including discord.py. 
+* The Docker variant runs Insight as a newly created user. Permissions are automatically updated for the database and related files by the EntryPoint script.
+* Insight will better handle permission issues on killmail posting to prevent throwing too many errors at the Discord api.
+* Most wiki references have been updated to the new wiki at wiki.eveinsight.net. Some miscellaneous links have been updated to eveinsight.net. 
+* Improved command parsing to use thread pools instead of using resources under the asnycio event loop. 
+* Added improved logging for command parsing to more easily diagnose issues with Insight sometimes not responding to commands on certain servers.
 # v1.4.0
 ## New features
 * Server-wide command prefix modification support. Users can now add and remove Insight prefixes via the **!prefix** command.

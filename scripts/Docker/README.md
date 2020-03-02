@@ -82,7 +82,7 @@ like this:
 6. Save your config file and rename it from ```default-config.ini``` to ```config.ini```.
 
 # Updating
-This Docker repository utilizes automated builds. The Docker images are automatically updated whenever there are new commits to the [Git repo](https://github.com/Nathan-LS/Insight). You can update your image locally by running:
+This Docker repository utilizes automated builds. The Docker images are automatically updated whenever there are new commits to the [Git repo](https://github.com/Nathan-LS/Insight). You can update your image locally by running a pull command and restarting the Docker container:
 ```
 docker pull nathanls/insight
 ```
