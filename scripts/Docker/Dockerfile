@@ -45,6 +45,7 @@ COPY --from=SDE /sqlite-latest.sqlite ./sqlite-latest.sqlite
 RUN git clone -b $INSIGHT_BRANCH --single-branch $INSIGHT_REPO
 RUN cp /InsightDocker/python-client /InsightDocker/python-client-2 -R
 USER root
+RUN pip3 install wheel setuptools
 WORKDIR /InsightDocker/python-client-2
 RUN python3 setup.py install
 WORKDIR /InsightDocker/Insight
