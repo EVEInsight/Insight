@@ -16,7 +16,6 @@ import traceback
 import errno
 import InsightLogger
 from InsightUtilities import DiscordPermissionCheck
-import logging
 
 
 class discord_feed_service(object):
@@ -27,7 +26,7 @@ class discord_feed_service(object):
         self.channel_id = channel_discord_object.id
         self.logger = InsightLogger.InsightLogger.get_logger('Insight.feed.{}.{}'.format(str(self).replace(' ', ''), self.channel_id), 'Insight_feed.log', child=True)
         self.logger_filter = InsightLogger.InsightLogger.get_logger('Insight.filter.{}'.format(self.channel_id), 'Insight_filter.log', child=True)
-        self.log_mail_error = InsightLogger.InsightLogger.get_logger('MailError.{}'.format(self.channel_id), 'MailError.log', child=False, console_print=True, console_level=logging.WARNING)
+        self.log_mail_error = InsightLogger.InsightLogger.get_logger('MailError.{}'.format(self.channel_id), 'MailError.log', child=True)
         self.service = service_object
         self.channel_manager = self.service.channel_manager
         self.discord_client = self.service.channel_manager.get_discord_client()

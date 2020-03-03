@@ -13,6 +13,7 @@ import janus
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
 import InsightLogger
+import time
 
 
 class zk(object):
@@ -131,6 +132,7 @@ class zk(object):
             self.service.channel_manager.post_message(msg)
             db: Session = self.service.get_session()
             try:
+                time.sleep(1)
                 results = db.query(dbRow.tb_kills).filter(dbRow.tb_kills.kill_id >=self.service.cli_args.debug_km).limit(self.service.cli_args.debug_limit).all()
                 db.close()
                 for km in results:
