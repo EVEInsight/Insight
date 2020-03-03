@@ -176,6 +176,10 @@ class base_visual(object):
             return cls
 
     @classmethod
+    def appearance_url(cls) -> str:
+        return "https://wiki.eveinsight.net/appearances"
+
+    @classmethod
     def appearance_options(cls):
         yield cls
 

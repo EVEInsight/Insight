@@ -96,6 +96,10 @@ class visual_enfeed(base_visual):
                "large fields and images. Size: Very large"
 
     @classmethod
+    def appearance_url(cls) -> str:
+        return "https://wiki.eveinsight.net/appearances/entity"
+
+    @classmethod
     def appearance_options(cls):
         yield VisualEnfeedCompact
         yield VisualEnfeedCompact2

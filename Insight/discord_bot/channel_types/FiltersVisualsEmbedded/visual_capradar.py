@@ -109,6 +109,10 @@ class visual_capradar(base_visual):
         return tb_capRadar
 
     @classmethod
+    def appearance_url(cls) -> str:
+        return "https://wiki.eveinsight.net/appearances/radar"
+
+    @classmethod
     def appearance_options(cls):
         yield VisualCapRadarUtilityMinimal
         yield VisualCapRadarUtility

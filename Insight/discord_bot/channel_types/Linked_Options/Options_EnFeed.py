@@ -23,9 +23,6 @@ class Options_EnFeed(Base_Feed.base_activefeed):
         yield (self.InsightOption_minValue, False)
         yield from super().yield_options()
 
-    def appearance_url(self) -> str:
-        return "https://wiki.eveinsight.net/appearances/entity"
-
     async def InsightOptionRequired_add(self, message_object:discord.Message):
         """Add a new tracked entity  - Add an entity (pilot, corp, or alliance) to track involved PvP activity. You can add more than 1 entity to a channel."""
 

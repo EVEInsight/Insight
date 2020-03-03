@@ -115,6 +115,10 @@ class VisualProximityWatch(base_visual):
         return tb_capRadar
 
     @classmethod
+    def appearance_url(cls) -> str:
+        return "https://wiki.eveinsight.net/appearances/proximity"
+
+    @classmethod
     def appearance_options(cls):
         yield VisualProximityWatchMinimal
         yield cls

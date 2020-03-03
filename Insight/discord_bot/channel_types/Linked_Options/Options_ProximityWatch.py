@@ -16,9 +16,6 @@ class Options_ProximityIntel(opt_capradar):
         yield (self.InsightOption_sync, False)
         yield from super(opt_capradar, self).yield_options()
 
-    def appearance_url(self) -> str:
-        return "https://wiki.eveinsight.net/appearances/proximity"
-
     async def InsightOptionRequired_addRegSys(self, message_object: discord.Message):
         """Add a new system, constellation, or region watch - Add a new watch to display hostile activity occurring near you."""
         def make_options(search_str):
