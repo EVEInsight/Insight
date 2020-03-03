@@ -1,3 +1,8 @@
+# v1.5.1
+## Fixes
+* Fixed an issue where the MailError log file was not being properly rotated. Retry attempts are now logged as info.
+* Corrected appearance gallery URLs for derived/preconfigured feeds.
+* Fixed an issue on entity and derived feeds utilizing the utility appearance where mails would not post involving a final blow from a single unknown NPC attacker.
 # v1.5.0
 This version of Insight is a general maintenance release addressing minor underlying issues with Insight.
 ## Notices
