@@ -151,7 +151,7 @@ class base_visual(object):
         self.feed.discord_client.loop.create_task(self.queue_task(discord_queue))
 
     def debug_info(self):
-        return "KM ID: {} Feed: {} Appearance: {} TextChannel: {} Attempt: {}".format(self.km_id, type(self.feed), type(self),
+        return "KM ID: {} Feed: {} AppearanceID: {} TextChannel: {} Attempt: {}".format(self.km_id, type(self.feed), self.appearance_id(),
                                                                           self.channel.id, self.send_attempt_count)
 
     def feed_specific_row_type(cls):

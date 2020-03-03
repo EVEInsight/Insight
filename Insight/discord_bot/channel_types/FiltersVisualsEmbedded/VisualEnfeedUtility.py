@@ -12,6 +12,8 @@ class VisualEnfeedUtility(visual_enfeed):
             if self.vi.str_corp_name() else ""
         v_field += "Alliance: [{}]({})".format(self.vi.str_alliance_name(), self.vi.str_alliance_zk())\
             if self.vi.str_alliance_name() else ""
+        if v_field == "":
+            v_field = "Ship: ?\nPilot: ?\nCorp: ?"
         self.embed.add_field(name="Victim", value=v_field, inline=True)
 
     def field_fb(self):
@@ -24,6 +26,8 @@ class VisualEnfeedUtility(visual_enfeed):
             if self.fb.str_corp_name() else ""
         fb_field += "Alliance: [{}]({})".format(self.fb.str_alliance_name(), self.fb.str_alliance_zk())\
             if self.fb.str_alliance_name() else ""
+        if fb_field == "":
+            fb_field = "Ship: ?\nPilot: ?\nCorp: ?"
         self.embed.add_field(name="Final Blow", value=fb_field, inline=True)
 
     def field_details(self):
