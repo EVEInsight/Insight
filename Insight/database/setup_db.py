@@ -11,7 +11,7 @@ class setup_database(object):
     def __init__(self, service_module):
         self.service = service_module
         self.initial_load()
-        self.engine = create_engine('sqlite:///{}'.format(service_module.config_file['sqlite_database']['filename']),
+        self.engine = create_engine('sqlite:///{}'.format(self.service.config.get("SQLITE_DB_PATH")),
                                     connect_args={'check_same_thread':False,'timeout':3000}, echo=False)
         DB.Base.Base.metadata.create_all(self.engine)
         self._dbSession = sessionmaker(bind=self.engine)
@@ -19,7 +19,7 @@ class setup_database(object):
         self.verify_tokens()
 
     def initial_load(self):
-        engine = create_engine('sqlite:///{}'.format(self.service.config_file['sqlite_database']['filename']),
+        engine = create_engine('sqlite:///{}'.format(self.service.config.get("SQLITE_DB_PATH")),
                                connect_args={'check_same_thread': True, 'timeout': 3000}, echo=False)
         DB.version.versionBase.metadata.create_all(engine)
         ses = sessionmaker(bind=engine)

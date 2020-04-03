@@ -6,7 +6,6 @@ from . import EVEsso
 from . import RouteMapper
 from . import InsightAdmins
 import database
-import configparser
 import InsightUtilities
 import discord
 from distutils.version import LooseVersion
@@ -21,9 +20,8 @@ class service_module(object):
     def __init__(self, multiproc_dict):
         self._multiproc_dict: dict = multiproc_dict
         self.cli_args = InsightUtilities.InsightArgumentParser.get_cli_args()
+        self.config = InsightUtilities.ConfigLoader()
         self.set_crash_recovery(self.cli_args.crash_recovery, None)
-        self.config_file = configparser.ConfigParser()
-        self.config_file.read(self.get_config_file(self.cli_args.config))
         self._header_dict = {}
         self.welcome()
         self._import_everything_flag = False
@@ -45,7 +43,7 @@ class service_module(object):
         if self._header_dict.get(key) is None:
             try:
                 tmp_dict = {}
-                from_field = self.config_file.get('headers', 'from', fallback='')
+                from_field = self.config.get("HEADERS_FROM_EMAIL")
                 if from_field:
                     tmp_dict['From'] = from_field
                 else:
@@ -60,16 +58,6 @@ class service_module(object):
                 traceback.print_exc()
                 sys.exit(1)
         return self._header_dict[key]
-
-    def get_config_file(self, file_path):
-        try:
-            with open(file_path, 'r'):
-                return file_path
-        except FileNotFoundError:
-            print("The config file '{0}' could not be found. Rename file 'default-config.ini' to '{0}'. "
-                  "If you are using Insight with Docker make sure to check your volume directory, rename the "
-                  "'default-config.ini' to 'config.ini', and populate the configuration values.".format(file_path))
-            sys.exit(1)
 
     def _read_motd(self):
         filename = 'motd.txt'
@@ -90,11 +78,11 @@ class service_module(object):
 
     def _import_check(self):
         try:
-            with open(self.config_file['sqlite_database']['filename'],'r'):
+            with open(self.config.get("SQLITE_DB_PATH"),'r'):
                 if not self.cli_args.skip_api_import:
                     self._import_everything_flag = True
         except FileNotFoundError:
-            print("{} does not exist. Forcing first time static data import.".format(self.config_file['sqlite_database']['filename']))
+            print("{} does not exist. Forcing first time static data import.".format(self.config.get("SQLITE_DB_PATH")))
             self._import_everything_flag = True
 
     def get_session(self)-> Session:
@@ -111,6 +99,7 @@ class service_module(object):
 
     def welcome(self):
         """Prints a welcome message with current version and displays alerts if new project updates are available."""
+        sys.stderr.flush()
         div = '==============================================================================================='
         print(div)
         print('Insight {} (Database {}) (discord.py v{}) on {} with Python/{}'.format(str(self.get_version()),
@@ -124,7 +113,7 @@ class service_module(object):
     def update_available(self):
         giturl = 'https://api.github.com/repos/Nathan-LS/Insight/releases/latest'
         try:
-            resp = requests.get(url=giturl, headers=self.get_headers(lib_requests=True), timeout=25, verify=True)
+            resp = requests.get(url=giturl, headers=self.get_headers(lib_requests=True), timeout=5, verify=True)
             if resp.status_code == 200:
                 data = resp.json()
                 new_version = LooseVersion(data.get('tag_name'))

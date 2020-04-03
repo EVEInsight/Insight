@@ -28,6 +28,15 @@ LABEL maintainer="nathan@nathan-s.com"
 LABEL url="https://github.com/Nathan-LS/Insight"
 ARG INSIGHT_BRANCH=master
 ARG INSIGHT_REPO=https://github.com/Nathan-LS/Insight.git
+
+ENV SQLITE_DB_PATH="Database.db"
+ENV HEADERS_FROM_EMAIL=""
+ENV DISCORD_TOKEN=""
+ENV CCP_CLIENT_ID=""
+ENV CCP_SECRET_KEY=""
+ENV CCP_CALLBACK_URL=""
+ENV DISCORDBOTS_APIKEY=""
+
 RUN apt-get update && apt-get install -y \
  git \
  build-essential \

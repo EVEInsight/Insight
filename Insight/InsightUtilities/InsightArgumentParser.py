@@ -30,10 +30,6 @@ class InsightArgumentParser(object):
                             type=str, default="sqlite-latest.sqlite")
         parser.add_argument("--crash_recovery", "-cr", action="store_true",
                             help="Automatically reboot Insight in the event of an application crash.", default=False)
-        parser.add_argument("--build-binary", "-b", action="store_true",
-                            help="Utilize the Docker image to build a binary package of Insight.", default=False)
-        parser.add_argument("--docker-init", "-d", action="store_true",
-                            help="Initialize the Docker volume with the configuration and README files.", default=False)
         parser.add_argument("--auth", "-a", action="store_true",
                             help="Boot Insight in SSO token authorization code converter mode. Given an authorization "
                                  "token, Insight will provide a raw refresh_token. Mainly used for unit testing.",

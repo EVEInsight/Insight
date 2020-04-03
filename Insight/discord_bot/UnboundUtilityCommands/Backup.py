@@ -19,7 +19,7 @@ class Backup(UnboundCommandBase):
             backup_name = datetime.datetime.utcnow().strftime('%m_%d_%Y_%H_%M') + '-backup'
             backup_path = os.path.join('backups', backup_name)
             shutil.copytree('logs', os.path.join(backup_path, 'logs'))
-            shutil.copy2(self.service.config_file.get('sqlite_database', 'filename'), backup_path)
+            shutil.copy2(self.service.config.get("SQLITE_DB_PATH"), backup_path)
             shutil.make_archive(os.path.join('backups', backup_name), 'zip', backup_path)
             shutil.rmtree(backup_path)
             return "Successfully backed up the Insight database to {}.zip".format(backup_path)

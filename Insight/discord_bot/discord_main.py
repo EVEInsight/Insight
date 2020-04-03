@@ -216,10 +216,10 @@ class Discord_Insight_Client(discord.Client):
 
     @staticmethod
     def start_bot(service_module, multiproc_dict):
-        if service_module.config_file["discord"]["token"]:
+        if service_module.config.get("DISCORD_TOKEN"):
             client = Discord_Insight_Client(service_module, multiproc_dict)
             try:
-                client.run(service_module.config_file["discord"]["token"])
+                client.run(service_module.config.get("DISCORD_TOKEN"))
                 client.cleanup_close()
             except KeyboardInterrupt:
                 client.cleanup_close()

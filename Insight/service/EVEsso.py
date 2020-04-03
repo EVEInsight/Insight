@@ -40,9 +40,9 @@ class EVEsso(object):
 
     def _get_config(self):
         """gets the configuration from the config file, exits if invalid or no keys"""
-        self._client_id = self.service.config_file["ccp_developer"]["client_id"]
-        self._client_secret = self.service.config_file["ccp_developer"]["secret_key"]
-        self._callback = self.service.config_file["ccp_developer"]["callback_url"]
+        self._client_id = self.service.config.get("CCP_CLIENT_ID")
+        self._client_secret = self.service.config.get("CCP_SECRET_KEY")
+        self._callback = self.service.config.get("CCP_CALLBACK_URL")
         if not self._client_id or not self._client_secret or not self._callback:
             print("You are missing a CCP developer application key and secret. Please set these in the config file.")
             sys.exit(1)

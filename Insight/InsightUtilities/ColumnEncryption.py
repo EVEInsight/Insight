@@ -11,7 +11,7 @@ class ColumnEncryption(metaclass=InsightSingleton):
         cli_args = InsightArgumentParser.get_cli_args()
         self._config_file_path = cli_args.config
 
-    def _generate_new_key(self)->str:
+    def _generate_new_key(self) -> str:
         return str(secrets.token_urlsafe(64))
 
     def _set_key(self, new_key):
@@ -35,7 +35,7 @@ class ColumnEncryption(metaclass=InsightSingleton):
         except FileNotFoundError:
             print("The config file '{0}' could not be found. Rename file 'default-config.ini' to '{0}'. "
                   "If you are using Insight with Docker make sure to check your volume directory, rename the "
-                  "'default-config.ini' to 'config.ini', and populate the configuration values.".format(self._config_file_path))
+                  "'default-config.ini' to 'config.ini'.".format(self._config_file_path))
             sys.exit(1)
 
     def get_key(self):

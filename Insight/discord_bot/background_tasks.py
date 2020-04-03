@@ -90,7 +90,7 @@ class background_tasks(object):
 
     async def discordbots_api(self):
         await self.client.wait_until_ready()
-        api_token = self.client.service.config_file.get("discordbots.org", "discordbots_apikey", fallback=None)
+        api_token = self.client.service.config.get("DISCORDBOTS_APIKEY")
         db_url = "https://discordbots.org/api/bots/{}/stats".format(str(self.client.user.id))
         db_headers = {"Content-Type": "application/json", "Authorization": str(api_token), **self.client.service.get_headers()}
         if api_token:
