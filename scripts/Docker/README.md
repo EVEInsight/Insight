@@ -1,6 +1,6 @@
 # Supported tags and ```Dockerfile``` links
-* ```latest``` ([master/Dockerfile](https://github.com/Nathan-LS/Insight/blob/master/scripts/Docker/Dockerfile))
-* ```development``` ([development/Dockerfile](https://github.com/Nathan-LS/Insight/blob/master/scripts/Docker/Dockerfile))
+* [```1.5.3```, ```1.5```, ```stable```, ```latest```](https://github.com/Nathan-LS/Insight/blob/master/scripts/Docker/Dockerfile)
+* [```1.6.0```, ```1.6```, ```development```](https://github.com/Nathan-LS/Insight/blob/development/scripts/Docker/Dockerfile)
 
 # Quick reference
 * **Where to get help:**

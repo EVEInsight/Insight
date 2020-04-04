@@ -1,2 +1,15 @@
 #!/bin/bash
+INSIGHT_VERSION_PATCH="1.6.0"
+INSIGHT_VERSION_MINOR=$(echo "$INSIGHT_VERSION_PATCH" | sed 's/.[0-9]$//')
 docker build --build-arg INSIGHT_BRANCH=$SOURCE_BRANCH -f $DOCKERFILE_PATH -t $IMAGE_NAME .
+
+if [[ "SOURCE_BRANCH" == "master" ]]; then
+  docker tag $IMAGE_NAME $DOCKER_REPO:stable
+  docker push $DOCKER_REPO:stable
+fi
+
+docker tag $IMAGE_NAME $DOCKER_REPO:$INSIGHT_VERSION_PATCH
+docker push $DOCKER_REPO:$INSIGHT_VERSION_PATCH
+
+docker tag $IMAGE_NAME $DOCKER_REPO:$INSIGHT_VERSION_MINOR
+docker push $DOCKER_REPO:$INSIGHT_VERSION_MINOR
