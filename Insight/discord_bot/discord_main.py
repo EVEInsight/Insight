@@ -117,10 +117,6 @@ class Discord_Insight_Client(discord.Client):
         self.__multiproc_dict['notify_userid'] = d_author.id
         await self.shutdown_self()
 
-    async def update_self(self, d_author: discord.User):
-        self.__multiproc_dict['flag_update'] = True
-        await self.reboot_self(d_author)
-
     async def on_guild_join(self, guild: discord.Guild):
         self.logger.info('Joined server ({}) with {} members.'.format(guild.name, guild.member_count))
         channel: discord.TextChannel = guild.system_channel

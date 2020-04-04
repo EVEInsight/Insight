@@ -39,7 +39,7 @@ class TestOptionsDirectMessage_AddNewToken(AbstractBotReplyTesting.AbstractBotRe
         EVEsso.get_token_from_auth = self.mock_replace
 
     def test_InsightOption_addTokenValidCallBack(self):
-        self.reply("https://insight.nathan-s.com/Insight/callback?code=ExampleCallbackAuthCode")
+        self.reply("https://github.eveinsight.net/Insight/callback?code=ExampleCallbackAuthCode")
         self.reply("1")
         self.reply("0")
         self.reply("1")

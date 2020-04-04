@@ -47,8 +47,6 @@ class Main(object):
                     shared_dict['notify_msg'] = 'Insight successfully rebooted.'
                 else:
                     break
-                if shared_dict['flag_update'] is True:
-                    InsightMain.InsightUpdater.insight_update(shared_dict)
 
 
 if __name__ == "__main__":

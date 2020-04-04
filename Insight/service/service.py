@@ -49,7 +49,7 @@ class service_module(object):
                 else:
                     print("You are missing the 'from' email field in your config file. It is recommended to set this to "
                           "your webmaster email to include in HTTP request headers from Insight.")
-                tmp_dict['Maintainer'] = 'nathan@nathan-s.com (https://github.com/Nathan-LS/Insight)'
+                tmp_dict['Maintainer'] = 'admin@eveinsight.net (https://git.eveinsight.net)'
                 web_lib = 'requests/{}'.format(requests.__version__) if lib_requests else 'aiohttp/{}'.format(aiohttp.__version__)
                 tmp_dict['User-Agent'] = 'Insight/{} ({}; {}) Python/{}'.format(str(self.get_version()), platform.platform(aliased=True, terse=True), web_lib, platform.python_version())
                 self._header_dict[key] = tmp_dict

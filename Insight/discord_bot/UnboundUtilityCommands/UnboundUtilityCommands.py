@@ -1,4 +1,4 @@
-from . import Dscan, EightBall, Quit, Admin, AdminResetNames, Backup, Reboot, Update, MemoryDiagnostic, Prefix, About, \
+from . import Dscan, EightBall, Quit, Admin, AdminResetNames, Backup, Reboot, MemoryDiagnostic, Prefix, About, \
     Help, MailExport
 import discord
 import discord_bot
@@ -21,7 +21,6 @@ class UnboundUtilityCommands(object):
         self.admin_resetnames = AdminResetNames.AdminResetNames(self)
         self.admin_backup = Backup.Backup(self)
         self.admin_reboot = Reboot.Reboot(self)
-        self.admin_update = Update.Update(self)
         self.admin_mem = MemoryDiagnostic.MemoryDiagnostic(self)
         self.admin_mail_export = MailExport.MailExport(self)
 

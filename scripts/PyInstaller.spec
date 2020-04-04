@@ -23,7 +23,6 @@ added_hiddenimports.extend(collect_submodules('cryptography'))
 added_hiddenimports.extend(collect_submodules('networkx'))
 added_hiddenimports.extend(collect_submodules('aiohttp'))
 added_hiddenimports.extend(collect_submodules('multiprocessing'))
-added_hiddenimports.extend(collect_submodules('GitPython'))
 added_hiddenimports.extend(collect_submodules('shutil'))
 added_hiddenimports.extend(collect_submodules('logging'))
 

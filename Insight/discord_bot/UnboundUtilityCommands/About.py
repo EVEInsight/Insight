@@ -26,7 +26,6 @@ class About(UnboundCommandBase):
             "[NetworkX](https://github.com/networkx/networkx)",
             "[AIOHTTP](https://aiohttp.readthedocs.io/en/stable/)",
             "[janus](https://github.com/aio-libs/janus)",
-            "[GitPython](https://github.com/gitpython-developers/GitPython)",
             "[Pympler](https://github.com/pympler/pympler)",
             "[cryptography](https://cryptography.io/en/latest/)",
             "[swagger-client](https://github.com/swagger-api/swagger-codegen)"

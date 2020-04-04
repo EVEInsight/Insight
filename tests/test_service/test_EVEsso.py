@@ -30,11 +30,11 @@ class TestEVEsso(AbstractSSOTesting):
 
     def test_clean_auth_code(self):
         self.assertEqual("ExampleCallbackAuthCode",
-                         self.sso.clean_auth_code("https://nathan-s.com/?code=ExampleCallbackAuthCode"))
+                         self.sso.clean_auth_code("https://github.eveinsight.net/?code=ExampleCallbackAuthCode"))
         self.assertEqual("ExampleCallbackAuthCode",
-                         self.sso.clean_auth_code("https://nathan-s.com?code=ExampleCallbackAuthCode"))
+                         self.sso.clean_auth_code("https://github.eveinsight.net?code=ExampleCallbackAuthCode"))
         with self.assertRaises(KeyError):
-            self.sso.clean_auth_code("https://nathan-s.com=ExampleCallbackAuthCode")
+            self.sso.clean_auth_code("https://github.eveinsight.net=ExampleCallbackAuthCode")
 
     @unittest.SkipTest
     def test_get_token_from_auth(self):

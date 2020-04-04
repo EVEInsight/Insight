@@ -45,12 +45,12 @@ class TestServiceModuleNoMockWithConfigFile(InsightTestBase):
         with self.subTest("aiohttp"):
             h = self.service.get_headers()
             self.assertEqual(h, self.service._header_dict.get("aiohttp"))
-            self.assertEqual(h.get("Maintainer"), "nathan@nathan-s.com (https://github.com/Nathan-LS/Insight)")
+            self.assertEqual(h.get("Maintainer"), "admin@eveinsight.net (https://github.eveinsight.net)")
             self.assertTrue("aiohttp/" in h.get("User-Agent"))
         with self.subTest("requests"):
             h = self.service.get_headers(lib_requests=True)
             self.assertEqual(h, self.service._header_dict.get("requests"))
-            self.assertEqual(h.get("Maintainer"), "nathan@nathan-s.com (https://github.com/Nathan-LS/Insight)")
+            self.assertEqual(h.get("Maintainer"), "admin@eveinsight.net (https://github.eveinsight.net)")
             self.assertTrue("requests/" in h.get("User-Agent"))
 
     def test_get_config_file(self):
