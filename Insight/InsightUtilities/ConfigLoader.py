@@ -26,10 +26,8 @@ class ConfigLoader(metaclass=InsightSingleton):
         self.config_file = configparser.ConfigParser()
         self.config_file.read(self._config_file_path)
 
-    def parse_config_val(self, ref_key, cfile_section, cfile_option, env_key, fail_if_empty=False, fallback_val="",
-                         nonotify=False):
-        config_key = ref_key.upper()
-        config_val = os.getenv(env_key, None)
+    def _parse_config_val(self, ref_key, cfile_section, cfile_option, fail_if_empty, fallback_val, nonotify):
+        config_val = os.getenv(ref_key, None)
         if config_val is not None:
             pass
         else:
@@ -43,15 +41,52 @@ class ConfigLoader(metaclass=InsightSingleton):
                 sys.stderr.write("Error: The config value: '{}' must be set in either an environmental variable "
                                  "or the config file.\nENV var to set: '{}'\n"
                                  "Config file section and option to set: '{}' -> '{}'\n\n"
-                                 "".format(ref_key, env_key, cfile_section, cfile_option))
+                                 "".format(ref_key, ref_key, cfile_section, cfile_option))
                 sys.exit(1)
             else:
                 if not nonotify:
                     sys.stderr.write("No config value was set for '{}' through either environmental variables or the config file. "
                           "Using the default value of: '{}'\n".format(ref_key, fallback_val))
                 config_val = fallback_val
+        return config_val
+
+    def parse_str(self, ref_key, cfile_section, cfile_option, fail_if_empty=False, fallback_val="",
+                  nonotify=False):
+        config_key = ref_key.upper()
+        config_val = self._parse_config_val(ref_key, cfile_section, cfile_option, fail_if_empty,
+                                            fallback_val, nonotify)
         self.config_mapping[config_key] = config_val
-        return
+
+    def parse_int(self, ref_key, cfile_section, cfile_option, fail_if_empty=False, fallback_val=0,
+                  nonotify=False):
+        config_key = ref_key.upper()
+        config_val = self._parse_config_val(ref_key, cfile_section, cfile_option, fail_if_empty,
+                                            fallback_val, nonotify)
+        try:
+            config_val = int(config_val)
+        except ValueError:
+            sys.stderr.write("Error with input for variable '{}'. Got '{}' but was expecting a valid integer.\n"
+                             "".format(ref_key, config_val))
+            sys.exit(1)
+        self.config_mapping[config_key] = config_val
+
+    def parse_bool(self, ref_key, cfile_section, cfile_option, fail_if_empty=False, fallback_val=False,
+                  nonotify=False):
+        config_key = ref_key.upper()
+        config_val = self._parse_config_val(ref_key, cfile_section, cfile_option, fail_if_empty,
+                                            fallback_val, nonotify)
+        try:
+            if config_val.lower() in ["true", "t", "1"]:
+                config_val = True
+            elif config_val.lower() in ["false", "f", "0"]:
+                config_val = False
+            else:
+                raise ValueError
+        except ValueError:
+            sys.stderr.write("Error with input for variable '{}'. Got '{}' but was expecting a valid boolean.\n"
+                             "".format(ref_key, config_val))
+            sys.exit(1)
+        self.config_mapping[config_key] = config_val
 
     def get(self, ref_key: str):
         val = self.config_mapping.get(ref_key)
@@ -62,11 +97,15 @@ class ConfigLoader(metaclass=InsightSingleton):
         return val
 
     def _load_all_options(self):
-        self.parse_config_val("SQLITE_DB_PATH", "sqlite_database", "filename", "SQLITE_DB_PATH", True)
-        self.parse_config_val("HEADERS_FROM_EMAIL", "headers", "from", "HEADERS_FROM_EMAIL", False, "")
-        self.parse_config_val("DISCORD_TOKEN", "discord", "token", "DISCORD_TOKEN", True)
-        self.parse_config_val("CCP_CLIENT_ID", "ccp_developer", "client_id", "CCP_CLIENT_ID", True)
-        self.parse_config_val("CCP_SECRET_KEY", "ccp_developer", "secret_key", "CCP_SECRET_KEY", True)
-        self.parse_config_val("CCP_CALLBACK_URL", "ccp_developer", "callback_url", "CCP_CALLBACK_URL", False, "https://github.eveinsight.net/Insight/callback")
-        self.parse_config_val("DISCORDBOTS_APIKEY", "discordbots.org", "discordbots_apikey", "DISCORDBOTS_APIKEY",
-                              False, "", True)
+
+        self.parse_str("SQLITE_DB_PATH", "sqlite_database", "filename", True)
+        self.parse_str("HEADERS_FROM_EMAIL", "headers", "from", False, "")
+        self.parse_str("DISCORD_TOKEN", "discord", "token", True)
+        self.parse_str("CCP_CLIENT_ID", "ccp_developer", "client_id", True)
+        self.parse_str("CCP_SECRET_KEY", "ccp_developer", "secret_key", True)
+        self.parse_str("CCP_CALLBACK_URL", "ccp_developer", "callback_url", False,
+                       "https://github.eveinsight.net/Insight/callback")
+        self.parse_str("DISCORDBOTS_APIKEY", "discordbots.org", "discordbots_apikey", False, "", True)
+        self.parse_bool("INSIGHT_STATUS_CPUMEM", "NULL", "NULL", False, True, False)
+        self.parse_bool("INSIGHT_STATUS_VERSION_FEEDCOUNT", "NULL", "NULL", False, True, False)
+        self.parse_bool("INSIGHT_STATUS_TIME", "NULL", "NULL", False, True, False)

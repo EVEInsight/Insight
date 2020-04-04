@@ -65,20 +65,24 @@ class background_tasks(object):
                 if update:
                     status_str = 'Update available. See console. '
                 else:
-                    status_str = 'CPU:{}% MEM:{:.1f}GB {} Feeds: {} [Stats 5m] '.format(str(int(psutil.cpu_percent())),
-                                                                                       psutil.virtual_memory()[3] / 2. ** 30,
-                                                                                       str(self.client.service.get_version()),
-                                                                                       self.client.channel_manager.feed_count())
+                    status_str = ""
+                    if self.client.service.config.get("INSIGHT_STATUS_CPUMEM"):
+                        status_str += "CPU:{}% MEM:{:.1f}GB ".format(str(int(psutil.cpu_percent())),
+                                                                     psutil.virtual_memory()[3] / 2. ** 30)
+                    if self.client.service.config.get("INSIGHT_STATUS_VERSION_FEEDCOUNT"):
+                        status_str += "{} Feeds: {} ".format(str(self.client.service.get_version()),
+                                                             self.client.channel_manager.feed_count())
                 stats_zk = await self.client.loop.run_in_executor(None, self.client.service.zk_obj.get_stats)
                 d_status = discord.Status.online
-                if stats_zk[0] <= 10:
-                    d_status = discord.Status.idle
-                status_str += '[zK] Add: {}, Delay: {}m(+{}s) '.format(stats_zk[0], stats_zk[1], stats_zk[2])
-                stats_feeds = await self.client.channel_manager.avg_delay()
-                if stats_feeds[1] >= 10:
-                    d_status = discord.Status.dnd
-                status_str += '[Insight] Sent: {}, Delay: {}s '.format(str(stats_feeds[0]),
-                                                                       str(stats_feeds[1]))
+                if self.client.service.config.get("INSIGHT_STATUS_TIME"):
+                    if stats_zk[0] <= 10:
+                        d_status = discord.Status.idle
+                    status_str += '[Stats 5m] [zK] Add: {}, Delay: {}m(+{}s) '.format(stats_zk[0], stats_zk[1], stats_zk[2])
+                    stats_feeds = await self.client.channel_manager.avg_delay()
+                    if stats_feeds[1] >= 10:
+                        d_status = discord.Status.dnd
+                    status_str += '[Insight] Sent: {}, Delay: {}s '.format(str(stats_feeds[0]),
+                                                                           str(stats_feeds[1]))
                 game_act = discord.Activity(name=status_str, type=discord.ActivityType.watching)
                 await self.client.change_presence(activity=game_act, status=d_status)
                 lg.info(status_str)
