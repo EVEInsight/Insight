@@ -1,1 +1,0 @@
-from .InsightMain import InsightMain

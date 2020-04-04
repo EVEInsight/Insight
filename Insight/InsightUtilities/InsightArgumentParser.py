@@ -28,8 +28,6 @@ class InsightArgumentParser(object):
                             help="Specifies the name of the SDE database file relative to main.py. Download and extract the "
                                  "sqlite-latest.sqlite file from https://www.fuzzwork.co.uk/dump/",
                             type=str, default="sqlite-latest.sqlite")
-        parser.add_argument("--crash_recovery", "-cr", action="store_true",
-                            help="Automatically reboot Insight in the event of an application crash.", default=False)
         parser.add_argument("--auth", "-a", action="store_true",
                             help="Boot Insight in SSO token authorization code converter mode. Given an authorization "
                                  "token, Insight will provide a raw refresh_token. Mainly used for unit testing.",

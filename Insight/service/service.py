@@ -17,11 +17,9 @@ import sys
 
 
 class service_module(object):
-    def __init__(self, multiproc_dict):
-        self._multiproc_dict: dict = multiproc_dict
+    def __init__(self):
         self.cli_args = InsightUtilities.InsightArgumentParser.get_cli_args()
         self.config = InsightUtilities.ConfigLoader()
-        self.set_crash_recovery(self.cli_args.crash_recovery, None)
         self._header_dict = {}
         self.welcome()
         self._import_everything_flag = False
@@ -36,7 +34,6 @@ class service_module(object):
         self.zk_obj = zk.zk(self)
         self._admin_module = InsightAdmins.InsightAdmins()
         self.motd = self._read_motd()
-        self.set_crash_recovery(self.cli_args.crash_recovery, self._admin_module.get_default_admin())  # set id
 
     def get_headers(self, lib_requests=False) ->dict:
         key = 'requests' if lib_requests else 'aiohttp'
@@ -135,16 +132,9 @@ class service_module(object):
         print('Attempting to shut down the database...')
         self._db_manager.shutdown()
 
-    def set_crash_recovery(self, mode_flag: bool, notify_user_id):
-        if mode_flag is True and self._multiproc_dict.get('crash_recovery') is not True:
-            print('Insight crash recovery has been enabled. Insight will attempt to reboot up to 2 times in the '
-                  'span of 30 minutes in the event of a crash.')
-        self._multiproc_dict['crash_recovery'] = mode_flag
-        self._multiproc_dict['notify_userid'] = notify_user_id
-
     @classmethod
     def get_version(cls):
-        version_str = 'v1.5.1'
+        version_str = 'v1.6.0'
         return LooseVersion(version_str)
 
     @classmethod

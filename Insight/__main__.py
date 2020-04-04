@@ -1,54 +1,31 @@
+import InsightLogger
+InsightLogger.InsightLogger.logger_init()
+import warnings
+from sqlalchemy.exc import SAWarning
+from service.service import service_module
+from discord_bot.discord_main import Discord_Insight_Client
 import sys
-import multiprocessing
-import InsightMain
-import datetime
+import os
 
 
 class Main(object):
     @classmethod
     def main(cls):
-        manager = multiprocessing.Manager()
-        shared_dict = manager.dict()
-        shared_dict['flag_reboot'] = True
-        crash_count = 0
-        crash_count_time = datetime.datetime.utcnow() + datetime.timedelta(seconds=30)
-        while shared_dict.get('flag_reboot') is True:
-            shared_dict['flag_reboot'] = False
-            shared_dict['flag_update'] = False
-            shared_dict['crash_recovery'] = False
-            p1 = multiprocessing.Process(target=InsightMain.InsightMain.insight_run, args=(shared_dict,))
-            p1.start()
-            try:
-                p1.join()
-            except KeyboardInterrupt:
-                if p1.is_alive():
-                    print('Child process is still alive. Parent waiting to force terminate process.')
-                    p1.terminate()
-                    p1.join()
-                sys.exit(0)
-            if p1.exitcode != 0:
-                crash_count += 1
-                if shared_dict.get('crash_recovery') is True and crash_count < 3:
-                    if datetime.datetime.utcnow() > crash_count_time:
-                        crash_count = 0
-                        crash_count_time = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
-                    print('Insight exited with code: {} and is attempting to reboot via crash recovery.'
-                          ''.format(p1.exitcode))
-                    shared_dict['notify_msg'] = 'Insight exited with exit code: {} and has successfully rebooted.' \
-                                                ''.format(p1.exitcode)
-                    shared_dict['flag_reboot'] = True
-                    continue
-                print('Insight exited with exit code: {}'.format(p1.exitcode))
-                shared_dict['flag_reboot'] = False
-                sys.exit(p1.exitcode)
-            else:
-                if shared_dict['flag_reboot'] is True:
-                    print('Insight is rebooting.')
-                    shared_dict['notify_msg'] = 'Insight successfully rebooted.'
-                else:
-                    break
+        lg = InsightLogger.InsightLogger.get_logger('main', 'main.log')
+        lg.info('Insight is starting.')
+
+        warnings.filterwarnings(action='ignore', category=SAWarning,
+                                message='Dialect sqlite\+pysqlite does \*not\* support Decimal objects natively,[\s\S]+')  # SDE price conversion error which can be ignored
+        warnings.filterwarnings(action='ignore', category=RuntimeWarning, message='[\s\S]+ was never awaited')  # async option coroutines that are created but never used
+
+        service_mod = service_module()
+        lg.info('Insight has completed service loading and setup.')
+        Discord_Insight_Client.start_bot(service_mod)
+        lg.info('Insight is shutting down with a clean exit.')
+        sys.exit(0)
+        lg.error('The application did not close properly. Using a hard exit with os._exit(0).')
+        os._exit(0)
 
 
 if __name__ == "__main__":
-    multiprocessing.freeze_support()
     Main.main()

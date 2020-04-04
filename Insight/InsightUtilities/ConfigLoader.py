@@ -70,7 +70,7 @@ class ConfigLoader(metaclass=InsightSingleton):
             sys.exit(1)
         self.config_mapping[config_key] = config_val
 
-    def parse_bool(self, ref_key, cfile_section, cfile_option, fail_if_empty=False, fallback_val=False,
+    def parse_bool(self, ref_key, cfile_section, cfile_option, fail_if_empty=False, fallback_val="FALSE",
                   nonotify=False):
         config_key = ref_key.upper()
         config_val = self._parse_config_val(ref_key, cfile_section, cfile_option, fail_if_empty,
@@ -106,6 +106,6 @@ class ConfigLoader(metaclass=InsightSingleton):
         self.parse_str("CCP_CALLBACK_URL", "ccp_developer", "callback_url", False,
                        "https://github.eveinsight.net/Insight/callback")
         self.parse_str("DISCORDBOTS_APIKEY", "discordbots.org", "discordbots_apikey", False, "", True)
-        self.parse_bool("INSIGHT_STATUS_CPUMEM", "NULL", "NULL", False, True, False)
-        self.parse_bool("INSIGHT_STATUS_VERSION_FEEDCOUNT", "NULL", "NULL", False, True, False)
-        self.parse_bool("INSIGHT_STATUS_TIME", "NULL", "NULL", False, True, False)
+        self.parse_bool("INSIGHT_STATUS_CPUMEM", "NULL", "NULL", False, "TRUE", False)
+        self.parse_bool("INSIGHT_STATUS_VERSION_FEEDCOUNT", "NULL", "NULL", False, "TRUE", False)
+        self.parse_bool("INSIGHT_STATUS_TIME", "NULL", "NULL", False, "TRUE", False)

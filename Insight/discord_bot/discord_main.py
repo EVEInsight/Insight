@@ -13,12 +13,11 @@ import logging
 
 
 class Discord_Insight_Client(discord.Client):
-    def __init__(self, service_module, multiproc_dict):
+    def __init__(self, service_module):
         super().__init__(fetch_offline_members=True, heartbeat_timeout=20)
         self.logger = InsightLogger.InsightLogger.get_logger('Insight.main', 'Insight_main.log', console_print=True,
                                                              console_level=logging.INFO)
         self.service: service_module = service_module
-        self.__multiproc_dict: dict = multiproc_dict
         self.channel_manager: service.Channel_manager = self.service.channel_manager
         self.channel_manager.set_client(self)
         self.serverManager = service.ServerManager(self.service, self)
@@ -59,7 +58,6 @@ class Discord_Insight_Client(discord.Client):
         except Exception as ex:
             print(ex)
         await self.serverManager.loader()
-        self.loop.create_task(self.send_multiproc_status())
         await self.service.zk_obj.make_queues()
         self.loop.create_task(self.service.zk_obj.pull_kms_ws())
         await self.channel_manager.load_channels()
@@ -79,20 +77,6 @@ class Discord_Insight_Client(discord.Client):
         if self.service.motd:
             await self.loop.run_in_executor(None, partial(self.channel_manager.post_message, motd))
 
-    async def send_multiproc_status(self):
-        notify_user = self.__multiproc_dict.get('notify_userid')
-        msg = "Insight admin notification:\n\n{}".format(str(self.__multiproc_dict.get('notify_msg')))
-        if isinstance(notify_user, int) and self.__multiproc_dict.get('notify_msg') is not None:
-            await self.wait_until_ready()
-            d_user: discord.User = self.get_user(notify_user)
-            if d_user is not None:
-                try:
-                    await d_user.send(msg)
-                except Exception as ex:
-                    print(ex)
-        self.__multiproc_dict['notify_userid'] = None
-        self.__multiproc_dict['notify_msg'] = None
-
     def cleanup_close(self):
         print('Closing event loop...')
         asyncio.get_event_loop().close()
@@ -105,17 +89,13 @@ class Discord_Insight_Client(discord.Client):
         print('Insight successfully shut down.')
 
     async def shutdown_self(self):
+        print("===========Received command to shut down.===========")
         try:
             game_act = discord.Activity(name="Shutting down...", type=discord.ActivityType.watching)
             await self.change_presence(activity=game_act, status=discord.Status.dnd)
         except Exception as ex:
             print(ex)
         await self.logout()
-
-    async def reboot_self(self, d_author: discord.User):
-        self.__multiproc_dict['flag_reboot'] = True
-        self.__multiproc_dict['notify_userid'] = d_author.id
-        await self.shutdown_self()
 
     async def on_guild_join(self, guild: discord.Guild):
         self.logger.info('Joined server ({}) with {} members.'.format(guild.name, guild.member_count))
@@ -211,9 +191,9 @@ class Discord_Insight_Client(discord.Client):
                 await asyncio.sleep(20)
 
     @staticmethod
-    def start_bot(service_module, multiproc_dict):
+    def start_bot(service_module):
         if service_module.config.get("DISCORD_TOKEN"):
-            client = Discord_Insight_Client(service_module, multiproc_dict)
+            client = Discord_Insight_Client(service_module)
             try:
                 client.run(service_module.config.get("DISCORD_TOKEN"))
                 client.cleanup_close()
