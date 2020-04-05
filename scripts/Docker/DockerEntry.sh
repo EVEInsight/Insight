@@ -2,7 +2,6 @@
 # This file should only be ran inside the Insight Docker container. This script copies the config file into the volume at run time and starts the bot with any param$
 /InsightDocker/PermissionSet.sh || exit 1
 cd /app
-INSIGHT_START_CMD="$@"
 for a in "$@"
 do
  if [ "$a" = "-b" ] || [ "$a" = "--build-binary" ]; then

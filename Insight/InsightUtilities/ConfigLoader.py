@@ -27,8 +27,8 @@ class ConfigLoader(metaclass=InsightSingleton):
         self.config_file.read(self._config_file_path)
 
     def _parse_config_val(self, ref_key, cfile_section, cfile_option, fail_if_empty, fallback_val, nonotify):
-        config_val = os.getenv(ref_key, None)
-        if config_val is not None:
+        config_val = os.getenv(ref_key, "")
+        if config_val:
             pass
         else:
             try:
