@@ -1,5 +1,5 @@
 # Supported tags and ```Dockerfile``` links
-* [```1.5.3```, ```1.5```, ```stable```, ```latest```](https://github.com/Nathan-LS/Insight/blob/master/scripts/Docker/Dockerfile)
+* [```1.5.1```, ```1.5```, ```stable```, ```latest```](https://github.com/Nathan-LS/Insight/blob/master/scripts/Docker/Dockerfile)
 * [```1.6.0-dev```, ```1.6-dev```, ```unstable```, ```development```](https://github.com/Nathan-LS/Insight/blob/development/scripts/Docker/Dockerfile)
 
 # Quick reference
@@ -48,7 +48,7 @@ Example ```stack.yml``` for ```insight```:
 version: '3.1'
 services:
   insight:
-    image: nathanls/insight
+    image: nathanls/insight:stable
     restart: always
     volumes:
       - ./:/app

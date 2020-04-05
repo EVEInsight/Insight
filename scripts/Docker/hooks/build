@@ -3,7 +3,7 @@ INSIGHT_VERSION_PATCH="1.6.0"
 INSIGHT_VERSION_MINOR=$(echo "$INSIGHT_VERSION_PATCH" | sed 's/.[0-9]$//')
 docker build --build-arg INSIGHT_BRANCH=$SOURCE_BRANCH -f $DOCKERFILE_PATH -t $IMAGE_NAME .
 
-if [[ "SOURCE_BRANCH" == "master" ]]; then
+if [[ "$SOURCE_BRANCH" == "master" ]]; then
   docker tag $IMAGE_NAME $DOCKER_REPO:stable
   docker push $DOCKER_REPO:stable
 
@@ -14,7 +14,7 @@ if [[ "SOURCE_BRANCH" == "master" ]]; then
   docker push $DOCKER_REPO:$INSIGHT_VERSION_MINOR
 fi
 
-if [[ "SOURCE_BRANCH" == "development" ]]; then
+if [[ "$SOURCE_BRANCH" == "development" ]]; then
   docker tag $IMAGE_NAME $DOCKER_REPO:unstable
   docker push $DOCKER_REPO:unstable
 
