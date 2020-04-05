@@ -10,6 +10,7 @@ from .UnboundUtilityCommands import UnboundUtilityCommands
 import asyncio
 import InsightLogger
 import logging
+import os
 
 
 class Discord_Insight_Client(discord.Client):
@@ -47,7 +48,9 @@ class Discord_Insight_Client(discord.Client):
         print('Loaded Discord cache with: {} servers, {} channels, {} users.'.format(len(self.guilds),
                                                                         len(list(self.get_all_channels())),
                                                                         len(self.users)))
-        print("Use 'CTRL-C' to shut down Insight from the console or run the '!quit' command from any Discord channel.")
+        print("Use 'CTRL-C' to shut down Insight from the console or run the '!quit' command from any Discord channel. "
+              "Alternative options: Send SIGINT signal to the Insight process or run 'docker stop ContainerID' for a "
+              "graceful shutdown.".format(os.getpid()))
         print('-------------------')
 
     async def setup_tasks(self):
@@ -77,25 +80,31 @@ class Discord_Insight_Client(discord.Client):
         if self.service.motd:
             await self.loop.run_in_executor(None, partial(self.channel_manager.post_message, motd))
 
-    def cleanup_close(self):
-        print('Closing event loop...')
-        asyncio.get_event_loop().close()
-        print('Closing Insight thread pool...')
-        self.threadpool_insight.shutdown(wait=True)
-        print('Closing zKillboard thread pool...')
-        self.threadpool_zk.shutdown(wait=True)
-        self.threadpool_unbound.shutdown(wait=True)
-        self.service.shutdown()
-        print('Insight successfully shut down.')
-
-    async def shutdown_self(self):
-        print("===========Received command to shut down.===========")
+    async def close(self):
         try:
-            game_act = discord.Activity(name="Shutting down...", type=discord.ActivityType.watching)
-            await self.change_presence(activity=game_act, status=discord.Status.dnd)
+            print("===========Received signal to shut down.===========")
+            print("Logging out from Discord...")
+            await super().close()
+            print("Done")
+            print('Closing Insight thread pool...')
+            self.threadpool_insight.shutdown(wait=True)
+            print("Done")
+            print('Closing zKillboard thread pool...')
+            self.threadpool_zk.shutdown(wait=True)
+            print("Done")
+            print('Closing zKillboard thread pool...')
+            self.threadpool_unbound.shutdown(wait=True)
+            print("Done")
+            print("Closing service module and database connections...")
+            self.service.shutdown()
+            print("Done")
+            print('Insight was successfully shut down.')
+            lg = InsightLogger.InsightLogger.get_logger('main', 'main.log')
+            lg.info('Insight is shutting down with a clean exit.')
+            sys.exit(0)
         except Exception as ex:
             print(ex)
-        await self.logout()
+            sys.exit(1)
 
     async def on_guild_join(self, guild: discord.Guild):
         self.logger.info('Joined server ({}) with {} members.'.format(guild.name, guild.member_count))
@@ -194,11 +203,7 @@ class Discord_Insight_Client(discord.Client):
     def start_bot(service_module):
         if service_module.config.get("DISCORD_TOKEN"):
             client = Discord_Insight_Client(service_module)
-            try:
-                client.run(service_module.config.get("DISCORD_TOKEN"))
-                client.cleanup_close()
-            except KeyboardInterrupt:
-                client.cleanup_close()
+            client.run(service_module.config.get("DISCORD_TOKEN"))
         else:
             print("Missing a Discord Application token. Please make sure to set this variable in the config file '{}'".format(service_module.cli_args.config))
             sys.exit(1)

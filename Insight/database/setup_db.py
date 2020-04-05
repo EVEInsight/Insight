@@ -65,7 +65,7 @@ class setup_database(object):
         try:
             self._dbSession.close_all()
             self.engine.dispose()
-            print('Successfully closed the database.')
+            print('Successfully closed the database connections.')
         except Exception as ex:
             print('Error when closing database: {}'.format(ex))
 

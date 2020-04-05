@@ -1,4 +1,6 @@
 from .UnboundCommandBase import *
+import os
+import signal
 
 
 class Quit(UnboundCommandBase):
@@ -17,4 +19,4 @@ class Quit(UnboundCommandBase):
                                     "you can safely ignore.")
             resp = await options()
             if resp:
-                await self.client.shutdown_self()
+                os.kill(os.getpid(), signal.SIGINT)

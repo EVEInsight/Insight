@@ -149,7 +149,7 @@ to blacklist from appearing on the radar, accessible by the ```!sync``` command.
 | experimental | Deprecated branch. |
 
 # Hosting Insight
-There are three ways to run and host Insight yourself if you do not wish to use the [public bot](#links).
+There are two ways to run and host Insight yourself if you do not wish to use the [public bot](#links).
 #### [Docker](https://hub.docker.com/r/nathanls/insight/)
 The recommended and easiest method to host Insight. Images are automatically built on new commits.
 1. Create and navigate to a directory where you wish to store Insight configuration, logs, and database.
@@ -163,11 +163,6 @@ The recommended and easiest method to host Insight. Images are automatically bui
     $ docker pull nathanls/insight && docker run --name insight-container-name -it --rm -v ${PWD}:/app nathanls/insight
     ```
 See [Insight on Docker Hub](https://hub.docker.com/r/nathanls/insight/) and [Docker docs](https://docs.docker.com/) for more information about using Docker.
-
-#### [Binaries](https://github.com/Nathan-LS/Insight/releases)
-Packaged binaries are available for Windows and Linux under [releases](https://github.com/Nathan-LS/Insight/releases). Executables are built with PyInstaller using the installer script in ```/scripts/PyInstaller.spec```. New binaries are built for stable point releases. Docker or Python are not required to be installed when running binary releases.
-
-Follow the instructions in ```Installation.md```, edit ```default-config.ini``` and you are ready to go! There are no additional downloads or package management systems to deal with.
 
 #### [Source](https://wiki.eveinsight.net/install/source)
 Requires a Python 3.6 interpreter (<=3.5 and >=3.7 not supported).

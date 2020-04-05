@@ -4,7 +4,6 @@ import warnings
 from sqlalchemy.exc import SAWarning
 from service.service import service_module
 from discord_bot.discord_main import Discord_Insight_Client
-import sys
 import os
 
 
@@ -21,9 +20,6 @@ class Main(object):
         service_mod = service_module()
         lg.info('Insight has completed service loading and setup.')
         Discord_Insight_Client.start_bot(service_mod)
-        lg.info('Insight is shutting down with a clean exit.')
-        sys.exit(0)
-        lg.error('The application did not close properly. Using a hard exit with os._exit(0).')
         os._exit(0)
 
 
