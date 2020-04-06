@@ -19,9 +19,10 @@ import sys
 class service_module(object):
     def __init__(self):
         self.cli_args = InsightUtilities.InsightArgumentParser.get_cli_args()
+        self.welcome()
         self.config = InsightUtilities.ConfigLoader()
         self._header_dict = {}
-        self.welcome()
+        self.update_available()
         self._import_everything_flag = False
         self._import_check()
         self._db_manager = database.setup_database(self)
@@ -95,8 +96,7 @@ class service_module(object):
         self._sc_session.remove()
 
     def welcome(self):
-        """Prints a welcome message with current version and displays alerts if new project updates are available."""
-        sys.stderr.flush()
+        """Prints a welcome message with current version."""
         div = '==============================================================================================='
         print(div)
         print('Insight {} (Database {}) (discord.py v{}) on {} with Python/{}'.format(str(self.get_version()),
@@ -104,7 +104,8 @@ class service_module(object):
                                                                                       str(discord.__version__),
                                                                                       platform.platform(aliased=True, terse=True),
                                                                                       platform.python_version()))
-        self.update_available()
+        print("Insight is released under the GNU General Public License v3.0. See the included 'License.md' file.")
+        print("Additional support is available at https://wiki.eveinsight.net")
         print(div)
 
     def update_available(self):
