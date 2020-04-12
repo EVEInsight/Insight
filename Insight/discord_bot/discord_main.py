@@ -32,6 +32,7 @@ class Discord_Insight_Client(discord.Client):
         self.loop.create_task(self.setup_tasks())
         self.channelLocks = InsightUtilities.AsyncLockManager(self.loop)
         self.channelSemaphores = InsightUtilities.AsyncSemaphoreManager(self.loop)
+        self.limiter = InsightUtilities.LimitManager()
 
     def get_invite_url(self):
         try:

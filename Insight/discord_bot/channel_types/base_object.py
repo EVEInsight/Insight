@@ -115,11 +115,11 @@ class discord_feed_service(object):
     async def proxy_lock(self, awaitable_coro, user_author, required_level, ignore_channel_setting=False):
         """call a command coroutine by proxy with a lock to prevent multiple commands running at once i.e: !settings"""
         self.check_permission(user_author, required_level, ignore_channel_setting)
-        time_limit = datetime.datetime.utcnow() + datetime.timedelta(seconds=15)
+        time_limit = datetime.datetime.utcnow() + datetime.timedelta(seconds=60)
         while self.lock.locked():  # timeout after 15 seconds of waiting. async wait_for has issues in 3.6
             if datetime.datetime.utcnow() >= time_limit:
                 raise InsightExc.DiscordError.LockTimeout
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.1)
         async with self.lock:
             if not self.channel_manager.exists(self) and self.is_loadable_feed():
                 raise InsightExc.DiscordError.UnboundFeed
@@ -294,7 +294,7 @@ class discord_feed_service(object):
                     self.log_mail_error.error('Error {} - when sending KM. Other. KM INFO: {}'.format(ex, mitem.debug_info()))
                 self.logger.exception(ex)
             mitem = None  # remove reference
-            await asyncio.sleep(.1)
+            await asyncio.sleep(.2)
 
     async def remove(self):
         """Temp pause an error feed instead of removing it completely. Resume again in 120 minutes."""
