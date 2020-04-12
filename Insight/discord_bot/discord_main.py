@@ -2,6 +2,7 @@ import discord
 from concurrent.futures import ThreadPoolExecutor
 import service
 from .background_tasks import background_tasks
+from InsightUtilities import LimitManager
 import InsightUtilities
 import sys
 from functools import partial
@@ -32,7 +33,7 @@ class Discord_Insight_Client(discord.Client):
         self.loop.create_task(self.setup_tasks())
         self.channelLocks = InsightUtilities.AsyncLockManager(self.loop)
         self.channelSemaphores = InsightUtilities.AsyncSemaphoreManager(self.loop)
-        self.limiter = InsightUtilities.LimitManager()
+        self.limiter = LimitManager()
 
     def get_invite_url(self):
         try:
@@ -124,11 +125,13 @@ class Discord_Insight_Client(discord.Client):
                 embed.color = discord.Color(659493)
                 embed.set_author(name='Insight welcome message')
                 embed.description = message
-                await channel.send(embed=embed)
+                async with (await LimitManager.cm(channel)):
+                    await channel.send(embed=embed)
             elif permissions.send_messages:
                 message = message.replace('**', "'")
                 message = message.replace('[GitHub]', " ")
-                await channel.send(content=message)
+                async with (await LimitManager.cm(channel)):
+                    await channel.send(content=message)
             else:
                 return
 
@@ -168,7 +171,8 @@ class Discord_Insight_Client(discord.Client):
             except InsightExc.InsightException as ex:
                 lg.exception(ex)
                 try:
-                    await message.channel.send("{}\n{}".format(message.author.mention, str(ex)))
+                    async with (await LimitManager.cm(message)):
+                        await message.channel.send("{}\n{}".format(message.author.mention, str(ex)))
                 except:
                     pass
                 await asyncio.sleep(30)
@@ -178,7 +182,8 @@ class Discord_Insight_Client(discord.Client):
                         message.channel.permissions_for(message.channel.guild.me).send_messages:
                     try:
                         msg = "Insight received a permission error. Ensure Insight has the correct permissions in this channel as listed on the project Git page. https://github.com/Nathan-LS/Insight#permissions"
-                        await message.channel.send("{}\n{}".format(message.author.mention, msg))
+                        async with (await LimitManager.cm(message)):
+                            await message.channel.send("{}\n{}".format(message.author.mention, msg))
                     except:
                         pass
                 await asyncio.sleep(30)
@@ -187,15 +192,17 @@ class Discord_Insight_Client(discord.Client):
                 await asyncio.sleep(60)
             except asyncio.CancelledError:
                 try:
-                    await message.channel.send("{}\nInsight is shutting down. This coroutine has been canceled."
-                                               .format(message.author.mention))
+                    async with (await LimitManager.cm_hp(message)):
+                        await message.channel.send("{}\nInsight is shutting down. This coroutine has been canceled."
+                                                   .format(message.author.mention))
                 except:
                     pass
             except Exception as ex:
                 lg.exception(ex)
                 try:
-                    await message.channel.send(
-                        "{}\nUncaught exception: '{}'.".format(message.author.mention, str(ex.__class__.__name__)))
+                    async with (await LimitManager.cm(message)):
+                        await message.channel.send(
+                            "{}\nUncaught exception: '{}'.".format(message.author.mention, str(ex.__class__.__name__)))
                 except:
                     pass
                 await asyncio.sleep(20)

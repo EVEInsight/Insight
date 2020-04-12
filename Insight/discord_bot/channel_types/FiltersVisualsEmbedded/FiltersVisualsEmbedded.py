@@ -4,7 +4,7 @@ import traceback
 import InsightExc
 import asyncio
 import InsightLogger
-from InsightUtilities import DiscordPermissionCheck
+from InsightUtilities import DiscordPermissionCheck, LimitManager
 import janus
 
 
@@ -125,12 +125,14 @@ class base_visual(object):
             self.send_attempt_count += 1
             if self.text_only:
                 if DiscordPermissionCheck.can_text(self.channel):
-                    await self.channel.send(content=self.message_txt)
+                    async with (await LimitManager.cm(self.channel)):
+                        await self.channel.send(content=self.message_txt)
                 else:
                     raise InsightExc.DiscordError.DiscordPermissions
             else:
                 if DiscordPermissionCheck.can_embed(self.channel):
-                    await self.channel.send(content=self.message_txt, embed=self.embed)
+                    async with (await LimitManager.cm(self.channel)):
+                        await self.channel.send(content=self.message_txt, embed=self.embed)
                 else:
                     raise InsightExc.DiscordError.DiscordPermissions
 

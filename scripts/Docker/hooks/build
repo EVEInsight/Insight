@@ -25,5 +25,3 @@ if [[ "$SOURCE_BRANCH" == "development" ]]; then
   docker push $DOCKER_REPO:"$INSIGHT_VERSION_MINOR-dev"
 fi
 
-docker tag $IMAGE_NAME $DOCKER_REPO:$SOURCE_COMMIT
-docker push $DOCKER_REPO:$SOURCE_COMMIT

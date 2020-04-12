@@ -3,6 +3,7 @@ import discord
 import asyncio
 import InsightExc
 import datetime
+from InsightUtilities import LimitManager
 
 
 class option_calls_coroutine(object):
@@ -187,13 +188,17 @@ class mapper_index(object):
                 p: discord.Permissions = self.message.channel.permissions_for(self.message.channel.guild.me)
                 if p.embed_links:
                     try:
-                        await self.message.channel.send(embed=self.get_embed())
+                        async with (await LimitManager.cm_hp(self.message)):
+                            await self.message.channel.send(embed=self.get_embed())
                     except InsightExc.DiscordError.EmbedOptionsError:
-                        await self.message.channel.send(str(self))
+                        async with (await LimitManager.cm_hp(self.message)):
+                            await self.message.channel.send(str(self))
                 else:
-                    await self.message.channel.send(str(self))
+                    async with (await LimitManager.cm_hp(self.message)):
+                        await self.message.channel.send(str(self))
             else:
-                await self.message.channel.send(embed=self.get_embed())
+                async with (await LimitManager.cm_hp(self.message)):
+                    await self.message.channel.send(embed=self.get_embed())
             __response = await self.discord_client.wait_for('message', check=is_author, timeout=self._timeout_seconds)
             return await self.response_action(__response.content)
         except asyncio.TimeoutError:
