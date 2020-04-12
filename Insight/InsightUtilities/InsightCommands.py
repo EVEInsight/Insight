@@ -26,7 +26,8 @@ class InsightCommands(metaclass=InsightSingleton):
             'unlock':   ['unlock'],
             'quit':     ['quit'],
             'admin':    ['admin'],
-            'prefix':   ['prefix']
+            'prefix':   ['prefix'],
+            'limits':   ['limits', "limit", "ratelimits", "rates"]
         }
         self.all_commands = [c for i in self.commands.values() for c in i]
         self.notfound_timers = {}

@@ -21,8 +21,8 @@ class LimitManager(metaclass=InsightSingleton):
         self.interval_guild = self.config.get("LIMITER_GUILD_INTERVAL")
         self.limit_channel = self.config.get("LIMITER_CHANNEL_TICKETS")
         self.interval_channel = self.config.get("LIMITER_CHANNEL_INTERVAL")
-        self.limiter_global = LimitClient(None, self.limit_global, self.interval_global, "global")
-        self.limiter_dm = LimitClient(self.limiter_global, self.limit_dm, self.interval_dm)
+        self.limiter_global = LimitClient(None, self.limit_global, self.interval_global, "Global", True)
+        self.limiter_dm = LimitClient(self.limiter_global, self.limit_dm, self.interval_dm, "Global DM", True)
         self.servers = {}
         self.channels = {}
         self.users = {}
@@ -71,12 +71,12 @@ class LimitManager(metaclass=InsightSingleton):
                 raise InsightExc.userInput.InsightProgrammingError("Unknown object type when getting limit manager.")
 
     @classmethod
-    async def cm(cls, discord_object):
+    async def cm(cls, discord_object) -> LimitClient:
         lm = LimitManager()
         return await lm.get_cm(discord_object)
 
     @classmethod
-    async def cm_hp(cls, discord_object):
+    async def cm_hp(cls, discord_object) -> LimitClient:
         """"High priority context manager"""
         lm = LimitManager()
         return LimitClientHP(await lm.get_cm(discord_object))

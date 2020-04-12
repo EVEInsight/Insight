@@ -4,7 +4,7 @@ import time
 
 
 class LimitClient(object):
-    def __init__(self, parent_limiter=None, provisioned_amount=1000, second_interval=1, id_name=""):
+    def __init__(self, parent_limiter=None, provisioned_amount=1000, second_interval=1, id_name="", redact=False):
         if parent_limiter and not isinstance(parent_limiter, LimitClient):
             raise InsightExc.Internal.InsightException("Invalid parent limiter.")
         self.loop = asyncio.get_event_loop()
@@ -15,6 +15,7 @@ class LimitClient(object):
         self.task_queue = asyncio.PriorityQueue(loop=self.loop)
         self.process_queue = self.loop.create_task(self._process_queue())
         self.identifier = id_name
+        self.redact = redact
 
     def limited(self) -> bool:
         return self.semaphores.locked()
@@ -22,8 +23,17 @@ class LimitClient(object):
     def remaining(self) -> int:
         return self.semaphores._value
 
+    def used_tickets(self):
+        return self.provisioned_amount - self.remaining()
+
+    def get_self_and_parent_stats(self, no_redact=False):
+        stats = [self.stats(no_redact)]
+        if self.parent_limiter:
+            stats += self.parent_limiter.get_self_and_parent_stats(no_redact)
+        return stats
+
     def usage_ratio(self):
-        used_tickets = self.provisioned_amount - self.remaining()
+        used_tickets = self.used_tickets()
         if used_tickets == 0:
             return 0
         else:
@@ -32,6 +42,15 @@ class LimitClient(object):
     def priority_value(self, high_priority=False) -> int:
         penalty = 100 if high_priority else 150
         return int((self.usage_ratio() * 100) + penalty)
+
+    def stats(self, no_redact=False):
+        if self.redact and not no_redact:
+            return {"usage_ratio": round(self.usage_ratio() * 100, 1), "allocation": "REDACTED", "interval": "REDACTED",
+                    "used_tickets": "REDACTED", "available": "REDACTED", "name": self.identifier,
+                    "remaining_ratio": round((1 - self.usage_ratio()) * 100, 1)}
+        return {"usage_ratio": round(self.usage_ratio() * 100, 1), "allocation": self.provisioned_amount,
+                "interval": self.interval, "used_tickets": self.used_tickets(), "available": self.remaining(),
+                "name": self.identifier, "remaining_ratio": round((1 - self.usage_ratio()) * 100, 1)}
 
     async def _process_queue(self):
         while True:

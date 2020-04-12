@@ -15,6 +15,7 @@ class UnboundCommandBase(object):
         self.client = self.unbound.client
         self.service = self.client.service
         self.embed_only = False
+        self.loop = self.client.loop
 
     def command_description(self):
         return "Not implemented."

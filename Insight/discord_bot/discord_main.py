@@ -166,7 +166,8 @@ class Discord_Insight_Client(discord.Client):
                                                            admin=feed.proxy_lock(feed.command_admin(message), message.author, 2, ignore_channel_setting=True),
                                                            eightball=feed.proxy_lock(feed.command_8ball(message), message.author, 0),
                                                            dscan=feed.proxy_lock(feed.command_dscan(message), message.author, 0),
-                                                           prefix=feed.proxy_lock(feed.command_prefix(message), message.author, 1, ignore_channel_setting=True))
+                                                           prefix=feed.proxy_lock(feed.command_prefix(message), message.author, 1, ignore_channel_setting=True),
+                                                           limits=feed.proxy_lock(feed.command_limits(message), message.author, 1))
                 await asyncio.sleep(3)
             except InsightExc.InsightException as ex:
                 lg.exception(ex)

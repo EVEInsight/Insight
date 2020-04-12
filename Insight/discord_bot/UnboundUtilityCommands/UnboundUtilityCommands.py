@@ -1,5 +1,5 @@
 from . import Dscan, EightBall, Quit, Admin, AdminResetNames, Backup, MemoryDiagnostic, Prefix, About, \
-    Help, MailExport
+    Help, MailExport, Limits
 import discord
 import discord_bot
 
@@ -22,6 +22,7 @@ class UnboundUtilityCommands(object):
         self.admin_backup = Backup.Backup(self)
         self.admin_mem = MemoryDiagnostic.MemoryDiagnostic(self)
         self.admin_mail_export = MailExport.MailExport(self)
+        self.limits = Limits.Limits(self)
 
     async def strip_command(self, message_object: discord.Message):
         prefixes = await self.serverManager.get_server_prefixes(message_object.channel)
@@ -47,3 +48,6 @@ class UnboundUtilityCommands(object):
 
     async def command_help(self, message_object: discord.Message):
         await self.help.run_command(message_object, await self.strip_command(message_object))
+
+    async def command_limits(self, message_object: discord.Message):
+        await self.limits.run_command(message_object, await self.strip_command(message_object))

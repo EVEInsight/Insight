@@ -15,7 +15,7 @@ class Help(UnboundCommandBase):
     def generate_header(self):
         return "These are all of the available Insight commands. Note: Some commands may not be usable in all channel types and may require a feed service.\n\n"
 
-    def generate_commands(self, as_list = False):
+    def generate_commands(self, as_list=False):
         s = ""
         commands = [
             "**{p}about** - Display Insight credits, version information, and bot invite links.",
@@ -24,6 +24,7 @@ class Help(UnboundCommandBase):
             "**{p}dscan** - Coming soon!",
             "**{p}8ball** - Shake the 8ball.",
             "**{p}help** - Display command information and prefixes.",
+            "**{p}limits** - Display channel / server rate limits and usage stats.",
             "**{p}lock** - Lock a feed service from being modified by users without certain Discord channel roles.",
             "**{p}prefix** - Manage server-wide command prefixes for this bot.",
             "**{p}quit** - Close and shut down the Insight application service.",
