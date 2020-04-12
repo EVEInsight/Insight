@@ -9,3 +9,4 @@ from .InsightArgumentParser import InsightArgumentParser
 from .DiscordPermissionCheck import DiscordPermissionCheck
 from .ConfigLoader import ConfigLoader
 from .LimitSystem.LimitManager import LimitManager
+from .Misc.ComparableFuture import ComparableFuture

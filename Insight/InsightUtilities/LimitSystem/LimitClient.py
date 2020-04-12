@@ -1,6 +1,7 @@
 import asyncio
 import InsightExc
 import time
+from InsightUtilities.Misc.ComparableFuture import ComparableFuture
 
 
 class LimitClient(object):
@@ -56,17 +57,18 @@ class LimitClient(object):
         while True:
             try:
                 r: tuple = await self.task_queue.get()
-                f: asyncio.Future = r[1][1]
+                cf: ComparableFuture = r[1]
+                f = cf.get_future()
                 await self._consume_ticket()
                 self.loop.call_soon_threadsafe(f.set_result, 0)
-                #print("{} - {} -- remaining {}".format(self.identifier, r[1][0], self.remaining()))
             except Exception as ex:
                 print(ex)
                 await asyncio.sleep(5)
 
     async def _consume_ticket_future_task(self, priority_level):
-        f = asyncio.Future()
-        await self.task_queue.put((priority_level, (time.time(), f)))
+        cf = ComparableFuture(asyncio.Future())
+        f = cf.get_future()
+        await self.task_queue.put((priority_level, cf))
         await f
 
     async def _consume_ticket(self):
