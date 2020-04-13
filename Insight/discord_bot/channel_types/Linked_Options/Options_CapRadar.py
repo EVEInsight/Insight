@@ -235,9 +235,14 @@ class Options_CapRadar(Base_Feed.base_activefeed):
 
         __options = discord_options.mapper_return_noOptions_requiresInt(self.cfeed.discord_client, message_object)
         __options.set_main_header(
-            "Enter the maximum killmail occurrence delay(in minutes) before killmails are ignored. A mail that occurred more than your set 'X' many minutes ago will be ignored.")
-        __options.set_footer_text("Enter an integer:")
+            "Enter the maximum killmail occurrence delay(in minutes) before killmails are ignored. \n\nEx: If you set "
+            "this option to '5' then mails that appear on zKillboard that have a killmail occurrence time greater "
+            "than 5 minutes ago will not be processed by the feed.\n\nSet this to '0' for no limit and to post kills "
+            "regardless of time they occurred.")
+        __options.set_footer_text("Enter a number: ")
         _max_age = await __options()
+        if _max_age == "0":  # set to one year for infinite process delay
+            _max_age = 525600
         await self.cfeed.discord_client.loop.run_in_executor(None, partial(change_limit, _max_age))
         await self.reload(message_object)
 

@@ -60,3 +60,8 @@ class ShortSearchCriteria(InsightException):
         if not message:
             message = "The minimum search length is {} characters. Please refine your search.".format(min_length)
         super().__init__(message)
+
+
+class InvalidInput(InsightException):
+    def __init__(self, message="Invalid input."):
+        super().__init__(message)
