@@ -7,6 +7,7 @@ from sqlalchemy.orm import *
 from sqlalchemy import *
 from typing import List
 import InsightExc
+from InsightUtilities import LimitManager
 
 
 class Options_EnFeed(Base_Feed.base_activefeed):
@@ -194,7 +195,8 @@ class Options_EnFeed(Base_Feed.base_activefeed):
         val = get_number(resp)
         await self.cfeed.discord_client.loop.run_in_executor(None, partial(set_min_value, val))
         await self.reload(message_object)
-        await message_object.channel.send("Minimum ISK value is now set at: {:,.2f} ISK.".format(val))
+        async with (await LimitManager.cm_hp(message_object.channel)):
+            await message_object.channel.send("Minimum ISK value is now set at: {:,.2f} ISK.".format(val))
 
 
 from .. import enFeed

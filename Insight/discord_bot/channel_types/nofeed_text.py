@@ -53,12 +53,15 @@ class discord_text_nofeed_exist(discord_feed_service):
                 try:
                     await self.discord_client.loop.run_in_executor(None,partial(dbRow.tb_channels.set_feed_running,self.channel_id,True,self.service))
                     await self.async_load_table()
-                    await message_object.channel.send("Feed service started.")
+                    async with (await LimitManager.cm_hp(message_object.channel)):
+                        await message_object.channel.send("Feed service started.")
                 except Exception as ex:
-                    await message_object.channel.send("Something went wrong when running this command.\n\nException: {}".format(str(ex)))
+                    async with (await LimitManager.cm_hp(message_object.channel)):
+                        await message_object.channel.send("Something went wrong when running this command.\n\nException: {}".format(str(ex)))
             else:
-                await message_object.channel.send(
-                    "{}\nThe channel feed is already running.".format(message_object.author.mention))
+                async with (await LimitManager.cm_hp(message_object.channel)):
+                    await message_object.channel.send(
+                        "{}\nThe channel feed is already running.".format(message_object.author.mention))
 
     async def command_stop(self,message_object:discord.Message):
         """!stop - Pause a channel feed."""
@@ -69,12 +72,15 @@ class discord_text_nofeed_exist(discord_feed_service):
                 try:
                     await self.discord_client.loop.run_in_executor(None,partial(dbRow.tb_channels.set_feed_running,self.channel_id,False,self.service))
                     await self.async_load_table()
-                    await message_object.channel.send("Feed service stopped.")
+                    async with (await LimitManager.cm_hp(message_object.channel)):
+                        await message_object.channel.send("Feed service stopped.")
                 except Exception as ex:
-                    await message_object.channel.send("Something went wrong when running this command.\n\nException: {}".format(str(ex)))
+                    async with (await LimitManager.cm_hp(message_object.channel)):
+                        await message_object.channel.send("Something went wrong when running this command.\n\nException: {}".format(str(ex)))
             else:
-                await message_object.channel.send(
-                    "{}\nThe channel feed is already stopped.".format(message_object.author.mention))
+                async with (await LimitManager.cm_hp(message_object.channel)):
+                    await message_object.channel.send(
+                        "{}\nThe channel feed is already stopped.".format(message_object.author.mention))
 
     async def command_remove(self,message_object:discord.Message):
         """!remove - Delete the currently configured feed service in this channel."""
@@ -85,11 +91,14 @@ class discord_text_nofeed_exist(discord_feed_service):
             __question.set_main_header("Are you sure to want to remove this channel feed, deleting all configured settings?\n")
             if await __question():
                 if await self.channel_manager.delete_feed(self.channel_id):
-                    await message_object.channel.send("Successfully deleted this channel feed.")
+                    async with (await LimitManager.cm_hp(message_object.channel)):
+                        await message_object.channel.send("Successfully deleted this channel feed.")
                 else:
-                    await message_object.channel.send("Something went wrong when removing the channel.")
+                    async with (await LimitManager.cm_hp(message_object.channel)):
+                        await message_object.channel.send("Something went wrong when removing the channel.")
             else:
-                await message_object.channel.send("No changes were made")
+                async with (await LimitManager.cm_hp(message_object.channel)):
+                    await message_object.channel.send("No changes were made")
 
     async def command_status(self, message_object: discord.Message):
         """!status - Display information about the currently running feed."""
@@ -98,7 +107,8 @@ class discord_text_nofeed_exist(discord_feed_service):
         else:
             resp = "Feed type: {}\n".format(str(self))
             resp += "Currently running: {}\n".format(str(self.cached_feed_table.feed_running))
-            await message_object.channel.send(resp)
+            async with (await LimitManager.cm_hp(message_object.channel)):
+                await message_object.channel.send(resp)
 
     async def command_lock(self, message_object: discord.Message):
         """!lock - Lock a feed service from being modified by users without certain Discord channel roles."""
@@ -125,17 +135,19 @@ class discord_text_nofeed_exist(discord_feed_service):
                 await service_module.channel_manager.add_feed_object(__tmp_feed_object)
                 async for option in __tmp_feed_object.linked_options.get_option_coroutines(required_only=True):
                     await option(message_object)
-                await message_object.channel.send(
-                    "Created a new feed! You can manage feed configuration and access additional settings with the "
-                    "'!settings' command.")
+                async with (await LimitManager.cm_hp(message_object.channel)):
+                    await message_object.channel.send(
+                        "Created a new feed! You can manage feed configuration and access additional settings with the "
+                        "'!settings' command.")
                 await __tmp_feed_object.command_start(message_object)
                 lg = InsightLogger.InsightLogger.get_logger('Insight.main', 'Insight_main.log')
                 lg.info('New {} in {}'.format(str(__tmp_feed_object), __tmp_feed_object.str_channel_server()))
             except Exception as ex:
                 await service_module.channel_manager.delete_feed(__tmp_feed_object.channel_id)
                 try:
-                    await message_object.channel.send(
-                        "Something went wrong when creating a new feed. Run the command '!create' to start over.")
+                    async with (await LimitManager.cm_hp(message_object.channel)):
+                        await message_object.channel.send(
+                            "Something went wrong when creating a new feed. Run the command '!create' to start over.")
                 except:
                     pass
                 raise ex

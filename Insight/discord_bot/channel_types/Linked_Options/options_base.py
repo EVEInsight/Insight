@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from functools import partial
 import traceback
 from database.db_tables import tb_channels
+from InsightUtilities import LimitManager
 
 
 class Options_Base(object):
@@ -27,7 +28,8 @@ class Options_Base(object):
     async def reload(self, message_object):
         await self.cfeed.async_load_table()
         if message_object is not None:
-            await message_object.channel.send('ok')
+            async with (await LimitManager.cm_hp(message_object.channel)):
+                await message_object.channel.send('ok')
 
     def __row_modify(self, row, merge=False):
         db: Session = self.cfeed.service.get_session()

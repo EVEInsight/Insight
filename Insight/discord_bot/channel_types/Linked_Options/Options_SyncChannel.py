@@ -5,6 +5,7 @@ from functools import partial
 from sqlalchemy.orm import Session
 import asyncio
 import InsightExc
+from InsightUtilities import LimitManager
 
 
 class Options_Sync(options_base.Options_Base):
@@ -40,14 +41,16 @@ class Options_Sync(options_base.Options_Base):
                 db.close()
 
         if isinstance(user_channel, direct_message.direct_message):
-            await message_object.channel.send(
-                "{}\nI opened a direct message with you. Please read it.".format(message_object.author.mention))
+            async with (await LimitManager.cm_hp(message_object.channel)):
+                await message_object.channel.send(
+                    "{}\nI opened a direct message with you. Please read it.".format(message_object.author.mention))
             try:
                 __token = await user_channel.linked_options.InsightOptionAbstract_addchannel()
                 await self.cfeed.discord_client.loop.run_in_executor(None, partial(write_token, __token))
                 await self.InsightOption_syncnow(message_object)
             except:
-                await message_object.channel.send("No changes were made to the token configuration for this channel")
+                async with (await LimitManager.cm_hp(message_object.channel)):
+                    await message_object.channel.send("No changes were made to the token configuration for this channel")
 
     async def InsightOption_removeToken(self, message_object: discord.Message):
         """Remove token - Remove a token from the channel along with any synced contacts."""
@@ -96,12 +99,14 @@ class Options_Sync(options_base.Options_Base):
                 self.previous_sync_count = previousTokenCount
 
         if message_object is not None:
-            await self.cfeed.channel_discord_object.send("Syncing ally contact blacklist now")
+            async with (await LimitManager.cm_hp(self.cfeed.channel_discord_object)):
+                await self.cfeed.channel_discord_object.send("Syncing ally contact blacklist now")
             __resp = await self.cfeed.discord_client.loop.run_in_executor(None, sync_contacts)
         else:
             __resp = await self.cfeed.discord_client.loop.run_in_executor(None, partial(sync_contacts, True))
         if __resp is not None:
-            await self.cfeed.channel_discord_object.send(__resp)
+            async with (await LimitManager.cm_hp(self.cfeed.channel_discord_object)):
+                await self.cfeed.channel_discord_object.send(__resp)
         await self.reload(message_object)
 
     async def InsightOption_viewtokens(self, message_object: discord.Message):
@@ -122,7 +127,8 @@ class Options_Sync(options_base.Options_Base):
                 db.close()
 
         resp = await self.cfeed.discord_client.loop.run_in_executor(None, view_tokens)
-        await message_object.channel.send("{}\n{}".format(message_object.author.mention, resp))
+        async with (await LimitManager.cm_hp(message_object.channel)):
+            await message_object.channel.send("{}\n{}".format(message_object.author.mention, resp))
 
 
 from discord_bot import discord_options as dOpt

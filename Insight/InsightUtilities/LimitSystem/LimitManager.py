@@ -68,6 +68,7 @@ class LimitManager(metaclass=InsightSingleton):
             elif isinstance(discord_object, discord.DMChannel):
                 return self.get_user_limiter(discord_object.recipient)
             else:
+                print("Unknown object type when getting limit manager. {}".format(type(discord_object)))
                 raise InsightExc.userInput.InsightProgrammingError("Unknown object type when getting limit manager.")
 
     @classmethod

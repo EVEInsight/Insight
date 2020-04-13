@@ -15,7 +15,7 @@ import janus
 import traceback
 import errno
 import InsightLogger
-from InsightUtilities import DiscordPermissionCheck
+from InsightUtilities import DiscordPermissionCheck, LimitManager
 
 
 class discord_feed_service(object):
@@ -115,8 +115,8 @@ class discord_feed_service(object):
     async def proxy_lock(self, awaitable_coro, user_author, required_level, ignore_channel_setting=False):
         """call a command coroutine by proxy with a lock to prevent multiple commands running at once i.e: !settings"""
         self.check_permission(user_author, required_level, ignore_channel_setting)
-        time_limit = datetime.datetime.utcnow() + datetime.timedelta(seconds=45)
-        while self.lock.locked():  # timeout after 45 seconds of waiting. async wait_for has issues in 3.6
+        time_limit = datetime.datetime.utcnow() + datetime.timedelta(seconds=60)
+        while self.lock.locked():  # timeout after 60 seconds of waiting. async wait_for has issues in 3.6
             if datetime.datetime.utcnow() >= time_limit:
                 raise InsightExc.DiscordError.LockTimeout
             await asyncio.sleep(0.1)
@@ -249,18 +249,20 @@ class discord_feed_service(object):
                             if mitem.send_attempt_count <= 1:
                                 await self.channel_manager.add_delay(mitem.get_load_time())
                         else:
-                            await self.channel_discord_object.send(str(mitem))
+                            async with (await LimitManager.cm_hp(self.channel_discord_object)):
+                                await self.channel_discord_object.send(str(mitem))
                         InsightLogger.InsightLogger.time_log(self.logger, st, 'Send message/KM')
             except InsightExc.DiscordError.DiscordPermissions:
                 try:
                     self.log_mail_error.info("Permissions missing for mail. KM INFO: {}".format(mitem.debug_info()))
                     await mitem.requeue(self.kmQueue)
                     if DiscordPermissionCheck.can_text(self.channel_discord_object):
-                        await self.channel_discord_object.send(
-                            "Insight attempted to post killmail ID: {} but there was an issue with permissions. "
-                            "\n\nEnsure Insight has the embed links and send messages permissions for this channel.\n"
-                            "See https://github.com/Nathan-LS/Insight#permissions\n\nRun the '!start' command to "
-                            "resume the feed once permissions are correctly set.".format(mitem.km_id))
+                        async with (await LimitManager.cm_hp(self.channel_discord_object)):
+                            await self.channel_discord_object.send(
+                                "Insight attempted to post killmail ID: {} but there was an issue with permissions. "
+                                "\n\nEnsure Insight has the embed links and send messages permissions for this channel.\n"
+                                "See https://github.com/Nathan-LS/Insight#permissions\n\nRun the '!start' command to "
+                                "resume the feed once permissions are correctly set.".format(mitem.km_id))
                 except:
                     print(traceback.print_exc())
                 finally:
@@ -333,7 +335,8 @@ class discord_feed_service(object):
         return await self.discord_client.loop.run_in_executor(None, non_async_delete)
 
     async def command_not_supported_sendmessage(self, message_object:discord.Message):
-        await message_object.channel.send("{}\nThis command is not supported in channel of type: {}\n".format(message_object.author.mention,str(self)))
+        async with (await LimitManager.cm_hp(message_object.channel)):
+            await message_object.channel.send("{}\nThis command is not supported in channel of type: {}\n".format(message_object.author.mention,str(self)))
 
     async def background_contact_sync(self, message=None, suppress=False):
         pass

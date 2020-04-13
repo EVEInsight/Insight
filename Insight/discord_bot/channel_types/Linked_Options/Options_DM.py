@@ -4,6 +4,7 @@ import discord
 from functools import partial
 from sqlalchemy.orm import Session
 import InsightExc
+from InsightUtilities import LimitManager
 
 
 class Options_DM(options_base.Options_Base):
@@ -127,7 +128,8 @@ class Options_DM(options_base.Options_Base):
 
     async def InsightOption_syncnow(self, message_object: discord.Message):
         """Force sync - Force an API pull on all of your tokens. Note: Insight automatically syncs your tokens every 6 hours."""
-        await message_object.channel.send("Syncing your tokens now")
+        async with (await LimitManager.cm_hp(message_object.channel)):
+            await message_object.channel.send("Syncing your tokens now")
         await self.cfeed.discord_client.loop.run_in_executor(None, partial(tb_tokens.sync_all_tokens,
                                                                            self.cfeed.user_id, self.cfeed.service))
         await self.InsightOption_viewtokens(message_object)
@@ -135,11 +137,13 @@ class Options_DM(options_base.Options_Base):
     async def InsightOption_viewtokens(self, message_object: discord.Message):
         """View my tokens - View information on all tokens you have with Insight."""
         resp = await self.cfeed.discord_client.loop.run_in_executor(None, self.printout_my_tokens)
-        await message_object.channel.send("{}\n{}".format(message_object.author.mention, resp))
+        async with (await LimitManager.cm(message_object.channel)):
+            await message_object.channel.send("{}\n{}".format(message_object.author.mention, resp))
 
     async def InsightOptionAbstract_addchannel(self):
-        message_object = await self.cfeed.channel_discord_object.send(
-            "This tool will assist in adding a token to a channel")
+        async with (await LimitManager.cm_hp(self.cfeed.channel_discord_object)):
+            message_object = await self.cfeed.channel_discord_object.send(
+                "This tool will assist in adding a token to a channel")
         message_object.author = self.cfeed.discord_client.get_user(self.cfeed.user_id)
 
         def make_options():

@@ -3,6 +3,7 @@ from database.db_tables.eve import tb_kills
 import json
 import os
 from functools import partial
+from InsightUtilities import LimitManager
 
 
 class MailExport(UnboundCommandBase):
@@ -48,4 +49,5 @@ class MailExport(UnboundCommandBase):
             options.set_main_header("Copy and paste mail ids separated by space/newlines.")
             resp: str = await options()
             status_message = await self.client.loop.run_in_executor(None, partial(self.export_ids, resp))
-            await d_message.channel.send(status_message)
+            async with (await LimitManager.cm_hp(d_message.channel)):
+                await d_message.channel.send(status_message)

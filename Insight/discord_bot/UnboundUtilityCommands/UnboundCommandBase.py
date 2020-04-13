@@ -30,7 +30,7 @@ class UnboundCommandBase(object):
     async def send_status_message(self, d_message: discord.Message, message_str: str):
         try:
             print(message_str)
-            async with (await LimitManager.cm_hp(d_message)):
+            async with (await LimitManager.cm_hp(d_message.channel)):
                 await d_message.channel.send('{}\n{}'.format(d_message.author.mention, message_str))
         except Exception as ex:
             print(ex)
@@ -60,7 +60,7 @@ class UnboundCommandBase(object):
 
     async def run_command(self, d_message: discord.Message, m_text: str = ""):
         if self.can_embed(d_message):
-            async with (await LimitManager.cm_hp(d_message)):
+            async with (await LimitManager.cm_hp(d_message.channel)):
                 await d_message.channel.send(content='{}\n'.format(d_message.author.mention), embed=await self.get_embed(d_message, m_text))
         elif self.can_text(d_message):
             response_text = "{}\n{}".format(d_message.author.mention, await self.get_text(d_message, m_text))

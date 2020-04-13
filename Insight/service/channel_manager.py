@@ -9,6 +9,7 @@ import queue
 import sys
 import traceback
 import InsightExc
+from InsightUtilities import LimitManager
 import InsightUtilities
 
 
@@ -164,7 +165,8 @@ class Channel_manager(object):
 
     async def get_user_dm(self, message_object: discord.Message):
         assert isinstance(message_object, discord.Message)
-        await message_object.author.send("Opening a new conversation! Hello!")
+        async with (await LimitManager.cm_hp(message_object.channel)):
+            await message_object.author.send("Opening a new conversation! Hello!")
         dm = message_object.author.dm_channel
         return cType.insight_directMessage(dm, self.service)
 
