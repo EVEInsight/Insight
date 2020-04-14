@@ -1,7 +1,9 @@
 from . import Dscan, EightBall, Quit, Admin, AdminResetNames, Backup, MemoryDiagnostic, Prefix, About, \
-    Help, MailExport, Limits
+    Help, MailExport, Limits, Roll
 import discord
 import discord_bot
+from functools import partial
+from typing import List
 
 
 class UnboundUtilityCommands(object):
@@ -23,10 +25,17 @@ class UnboundUtilityCommands(object):
         self.admin_mem = MemoryDiagnostic.MemoryDiagnostic(self)
         self.admin_mail_export = MailExport.MailExport(self)
         self.limits = Limits.Limits(self)
+        self.randomroll = Roll.Roll(self)
 
     async def strip_command(self, message_object: discord.Message):
         prefixes = await self.serverManager.get_server_prefixes(message_object.channel)
         return self.commandParser.strip_non_command(prefixes, message_object.content)
+
+    def _do_split(self, input_str: str) -> list:
+        return input_str.split()
+
+    async def split_text(self, input_str: str) -> List[str]:
+        return await self.client.loop.run_in_executor(None, partial(self._do_split, input_str))
 
     async def command_dscan(self, message_object: discord.Message):
         await self.dscan.run_command(message_object, await self.strip_command(message_object))
@@ -51,3 +60,6 @@ class UnboundUtilityCommands(object):
 
     async def command_limits(self, message_object: discord.Message):
         await self.limits.run_command(message_object, await self.strip_command(message_object))
+
+    async def command_roll(self, message_object: discord.Message):
+        await self.randomroll.run_command(message_object, await self.strip_command(message_object))

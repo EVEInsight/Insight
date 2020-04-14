@@ -18,7 +18,9 @@ class Limits(UnboundCommandBase):
                "then a separate server limiter.\n\n\nWhat to do if you are reaching the rate limit regularly:" \
                "\n\n* Reduce the number of feeds on your Discord server or change the settings of your feeds to reduce " \
                "the number of mails posted.\n\n* Host Insight yourself and set your own rate limits to provide " \
-               "dedicated service. [Insight Wiki on self-hosting](https://wiki.eveinsight.net/install)"
+               "dedicated service. [Insight Wiki on self-hosting](https://wiki.eveinsight.net/install)\n\n" \
+               "Additional resources regarding rate limit mechanics are available on the wiki. " \
+               "[Rate Limits Wiki](https://wiki.eveinsight.net/user/limits)."
 
     async def get_embed(self, d_message: discord.Message, message_text: str, **kwargs) -> discord.Embed:
         e = discord.Embed()

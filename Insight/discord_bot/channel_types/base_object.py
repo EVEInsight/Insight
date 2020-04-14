@@ -189,6 +189,10 @@ class discord_feed_service(object):
         """!limits - List current rate limit usage."""
         await self.discord_client.unbound_commands.command_limits(message_object)
 
+    async def command_roll(self, message_object):
+        """!roll - Roll a random number between 0 and 100."""
+        await self.discord_client.unbound_commands.command_roll(message_object)
+
     def add_km(self, km):
         if self.kmQueue.sync_q.qsize() >= 100:
             self.logger.info('Emptying KM queue with a total of: {} elements.'.format(self.kmQueue.sync_q.qsize()))

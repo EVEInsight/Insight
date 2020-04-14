@@ -29,6 +29,7 @@ class Help(UnboundCommandBase):
             "**{p}prefix** - Manage server-wide command prefixes for this bot.",
             "**{p}quit** - Close and shut down the Insight application service.",
             "**{p}remove** - Delete the currently configured feed service in this channel.",
+            "**{p}roll** - Roll a random number between 0 and 100.",
             "**{p}settings** - Modify feed settings and behavior. Alias: **{p}config**",
             "**{p}start** - Start/resume a channel feed from being paused.",
             "**{p}status** - Display information about the currently running feed.",
@@ -49,7 +50,7 @@ class Help(UnboundCommandBase):
     def generate_links(self):
         return "For more detailed command, feed type, or configuration information check out the project " \
              "[wiki](https://wiki.eveinsight.net).\nAdditional live support is available via the " \
-             "[Insight support Discord server](https://discord.gg/Np3FCUn).\n"
+             "[Insight support Discord server](https://discord.eveinsight.net).\n"
 
     async def get_prefix_str(self, d_message:discord.Message):
         set_pref_str = ""
