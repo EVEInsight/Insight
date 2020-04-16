@@ -38,6 +38,7 @@ class discord_feed_service(object):
         self.template_loader()
         self.load_table()
         self.last_mention = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
+        self.last_prune = datetime.datetime.utcnow()
         self.appearance_class = None
         self.lock = asyncio.Lock(loop=self.discord_client.loop)
         InsightLogger.InsightLogger.time_log(self.logger, st, 'Feed loading and setup')
@@ -193,14 +194,49 @@ class discord_feed_service(object):
         """!roll - Roll a random number between 0 and 100."""
         await self.discord_client.unbound_commands.command_roll(message_object)
 
-    def add_km(self, km):
-        if self.kmQueue.sync_q.qsize() >= 100:
-            self.logger.info('Emptying KM queue with a total of: {} elements.'.format(self.kmQueue.sync_q.qsize()))
+    def can_prune_queue(self):
+        """check if the last prune was over 30 minutes ago and thus able to be pruned"""
+        return ((datetime.datetime.utcnow() - self.last_prune).total_seconds()) >= 1800
+
+    def set_prune_time(self):
+        self.last_prune = datetime.datetime.utcnow()
+
+    def prune_queue(self, purge_all_mails=False):
+        self.set_prune_time()
+        if purge_all_mails:
+            self.logger.info('Emptying KM queue with a total of: {} items.'.format(self.kmQueue.sync_q.qsize()))
             while True:
                 try:
                     self.kmQueue.sync_q.get_nowait()
                 except queue.Empty:
                     break
+        else:
+            requeue_items = []
+            original_size = 0
+            while True:
+                try:
+                    qitem = self.kmQueue.sync_q.get_nowait()
+                    original_size += 1
+                    if isinstance(qitem, base_visual):
+                        if (qitem.get_attempt_count()) <= 1 and (qitem.get_seconds_since_instance_creation() <= 1800):
+                            requeue_items.append(qitem) # requeue if first attempt and mail has been in the queue for less than 30 minutes
+                        elif qitem.get_attempt_count() >= 2:
+                            requeue_items.append(qitem)  # requeue mails still waiting on failed attempt retries
+                        else:
+                            continue # remove from queue
+                    else: # str or non km
+                        requeue_items.append(qitem)
+                except queue.Empty:
+                    break
+            for k in requeue_items:
+                self.kmQueue.sync_q.put_nowait(k)
+            prune_count = original_size - len(requeue_items)
+            if prune_count > 0:
+                self.logger.info('Pruned {} of {} mails in the queue.'.format(prune_count, original_size))
+
+    def add_km(self, km):
+        if self.kmQueue.sync_q.qsize() >= 15 and self.can_prune_queue():
+            self.prune_queue()
         if self.cached_feed_table.feed_running:
             assert isinstance(km, dbRow.tb_kills)
             __visual = self.linked_visual(km)

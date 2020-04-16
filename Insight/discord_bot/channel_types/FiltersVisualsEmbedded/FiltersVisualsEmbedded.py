@@ -52,6 +52,9 @@ class base_visual(object):
     def update_modified_time(self):
         self.last_modified_time = datetime.datetime.utcnow()
 
+    def get_attempt_count(self):
+        return self.send_attempt_count
+
     def get_load_time(self):
         return self.km.loaded_time
 
