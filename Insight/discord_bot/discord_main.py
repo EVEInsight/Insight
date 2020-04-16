@@ -25,7 +25,7 @@ class Discord_Insight_Client(discord.Client):
         self.serverManager = service.ServerManager(self.service, self)
         self.commandLookup = InsightUtilities.InsightCommands()
         self.background_tasks = background_tasks(self)
-        self.threadpool_insight = ThreadPoolExecutor(max_workers=6)
+        self.threadpool_insight = ThreadPoolExecutor(max_workers=8)
         self.threadpool_zk = ThreadPoolExecutor(max_workers=2)
         self.threadpool_unbound = ThreadPoolExecutor(max_workers=1)
         self.unbound_commands = UnboundUtilityCommands(self)

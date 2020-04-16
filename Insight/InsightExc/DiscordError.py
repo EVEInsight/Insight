@@ -64,3 +64,9 @@ class FeedConvertReload(InsightException):
 class EmbedOptionsError(InsightException):
     def __init__(self):
         super().__init__('Embed options error')
+
+
+class QueueDelayInvalidatesFilter(InsightException):
+    def __init__(self):
+        super().__init__('The message is invalid as it has been in the queue too long and fails the time condition'
+                         'filters now.')

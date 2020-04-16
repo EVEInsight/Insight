@@ -6,6 +6,7 @@ import asyncio
 import InsightLogger
 from InsightUtilities import DiscordPermissionCheck, LimitManager
 import janus
+from functools import partial
 
 
 class internal_options(enum.Enum):
@@ -34,11 +35,22 @@ class base_visual(object):
         self.color = discord.Color(800680)
         self.text_only = False
         self.send_attempt_count = 0
+        self.init_time = datetime.datetime.utcnow()  # the time that this filter class was created.
+        self.last_modified_time = datetime.datetime.utcnow()  # the time that the filters and var sets are done.
 
         self.fb: tb_attackers = None
         self.vi: tb_victims = None
         self.hv: tb_attackers = None
         self.system: tb_systems = None
+
+    def get_seconds_since_last_modify(self):
+        return (datetime.datetime.utcnow() - self.last_modified_time).total_seconds()
+
+    def get_seconds_since_instance_creation(self):
+        return (datetime.datetime.utcnow() - self.init_time).total_seconds()
+
+    def update_modified_time(self):
+        self.last_modified_time = datetime.datetime.utcnow()
 
     def get_load_time(self):
         return self.km.loaded_time
@@ -80,6 +92,7 @@ class base_visual(object):
 
         self.embed.url = self.km.str_zk_link()
         self.embed.timestamp = self.km.get_time()
+        self.update_modified_time()
 
     def make_text_heading(self):
         pass
@@ -104,6 +117,9 @@ class base_visual(object):
         self.make_footer()
         self.set_frame_color()
 
+    def passes_filter(self):
+        return bool(self)
+
     def __bool__(self):
         try:
             __resp = self.run_filter()
@@ -118,7 +134,22 @@ class base_visual(object):
             traceback.print_exc()
             return False
 
+    async def refresh_visual(self):
+        """The mail has been in the queue for a while. This function checks to make sure it still fulfils the time
+        constraints of the filter settings and remakes the visual with updated information. The mail is discarded
+        if it is no longer valid due to time constraints."""
+        new_visual = await asyncio.get_event_loop().run_in_executor(None, partial(self.feed.linked_visual, self.km))
+        if await (asyncio.get_event_loop()).run_in_executor(None, new_visual.passes_filter):
+            self.embed = new_visual.embed
+            self.message_txt = new_visual.message_txt
+            self.update_modified_time()
+            return
+        else:
+            raise InsightExc.DiscordError.QueueDelayInvalidatesFilter
+
     async def __call__(self, *args, **kwargs):
+        if self.get_seconds_since_last_modify() >= 25:
+            await self.refresh_visual()
         if self.send_attempt_count >= 5:
             raise InsightExc.DiscordError.MessageMaxRetryExceed
         else:
@@ -153,8 +184,10 @@ class base_visual(object):
         self.feed.discord_client.loop.create_task(self.queue_task(discord_queue))
 
     def debug_info(self):
-        return "KM ID: {} Feed: {} AppearanceID: {} TextChannel: {} Attempt: {}".format(self.km_id, type(self.feed), self.appearance_id(),
-                                                                          self.channel.id, self.send_attempt_count)
+        return {"km_id": self.km_id, "feed_class": type(self.feed), "appearance_id": self.appearance_id(),
+                "channel_id": self.channel.id, "total_attempts": self.send_attempt_count,
+                "total_queue_seconds": self.get_seconds_since_instance_creation(),
+                "last_modified_seconds": self.get_seconds_since_last_modify()}
 
     def feed_specific_row_type(cls):
         raise NotImplementedError

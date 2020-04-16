@@ -256,6 +256,10 @@ class discord_feed_service(object):
                             async with (await LimitManager.cm_hp(self.channel_discord_object)):
                                 await self.channel_discord_object.send(str(mitem))
                         InsightLogger.InsightLogger.time_log(self.logger, st, 'Send message/KM')
+            except InsightExc.DiscordError.QueueDelayInvalidatesFilter:
+                self.logger.info('Mail removed after failing filter recheck for being in the queue too long. '
+                                 '{}'.format(mitem.debug_info()))
+                continue
             except InsightExc.DiscordError.DiscordPermissions:
                 try:
                     self.log_mail_error.info("Permissions missing for mail. KM INFO: {}".format(mitem.debug_info()))
