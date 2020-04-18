@@ -28,9 +28,6 @@ class LimitManager(metaclass=InsightSingleton):
         self.users = {}
         self.lock = asyncio.Lock(loop=self.loop)
 
-    async def __aenter__(self, discord_object):
-        pass
-
     def get_guild_limiter(self, discord_guild_object: discord.Guild) -> LimitClient:
         limiter = self.servers.get(discord_guild_object.id)
         if not limiter:

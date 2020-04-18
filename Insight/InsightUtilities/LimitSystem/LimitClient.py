@@ -1,6 +1,6 @@
 import asyncio
 import InsightExc
-import time
+from functools import partial
 from InsightUtilities.Misc.ComparableFuture import ComparableFuture
 
 
@@ -60,7 +60,7 @@ class LimitClient(object):
                 cf: ComparableFuture = r[1]
                 f = cf.get_future()
                 await self._consume_ticket()
-                self.loop.call_soon_threadsafe(f.set_result, 0)
+                self.loop.call_soon_threadsafe(partial(f.set_result, 0))
             except Exception as ex:
                 print(ex)
                 await asyncio.sleep(5)
