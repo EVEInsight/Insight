@@ -44,7 +44,7 @@ class InsightLogger(object):
                 sh_console.setLevel(console_level)
                 logger.addHandler(sh_console)
             fh = TimedRotatingFileHandler(cls.path(file_name), when='midnight', interval=1, backupCount=30, delay=True,
-                                          utc=True)
+                                          utc=True, encoding="utf-8")
             fh.setFormatter(f_fmt)
             fh.setLevel(level)
             logger.addHandler(fh)
