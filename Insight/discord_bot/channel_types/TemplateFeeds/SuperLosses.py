@@ -41,7 +41,7 @@ class SuperLosses(enFeed):
                 self.embed.color = discord.Color(2640791)
 
             def max_delta(self):
-                return datetime.timedelta(days=30)
+                return datetime.timedelta(days=365)
 
         return VisualSuperLosses
 

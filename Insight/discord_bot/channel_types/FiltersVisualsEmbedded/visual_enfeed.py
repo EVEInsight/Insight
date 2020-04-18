@@ -83,7 +83,7 @@ class visual_enfeed(base_visual):
         return False
 
     def max_delta(self):
-        return datetime.timedelta(days=1)
+        return datetime.timedelta(days=60)
 
     @classmethod
     def feed_specific_row_type(cls):

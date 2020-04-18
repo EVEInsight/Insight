@@ -1,9 +1,47 @@
+# Release Notes
+# v1.6.0
+> In Development
+{.is-danger}
+
+Version 1.6 will bring about various new features and improvements to Insight.
+## New Features
+* A new configuration loader that will read ENV vars and fall back to the config file if missing.
+    * Notes: New Docker user no longer have to start Insight with ```--docker-init``` or edit config files as they can simply pass all config options as ENV variables through compose / stack files.
+* Customizable rate limiting through the rate limiter. Server administrators can configure per-channel, server, DM, and global rate limits for Insight. See the [wiki article](https://wiki.eveinsight.net/user/limits) for more information on how this works.
+* The ```!limit``` command was added for end-users to track their channel and server rate usage.
+* The ```!roll``` command which returns a random number between 0 and 100.
+* Insight's status that normally displays the CPU/MEM and feed stats can be adjusted to selectively exclude parts of the status. The ```Currently Watching:``` status can be blank / disabled through the use of new Insight ENV variables.
+## Changes
+* Removed the Git self-updating feature.
+* Removed the multiprocessing/forking architecture of Insight. These features allowed Insight to be rebooted automatically or via commands for non-Docker variants.
+* Added new tags on Docker hub which should make it easier to switch between point releases on Insight.
+* Reworked the Docker image so that Insight does't need a pseudo-tty for console output. Docker users can remove ```stdin_open: true``` and ```tty: true``` from their compose / stack files.
+* The Docker variant now uses unbuffered output for Python.
+### Feeds
+* Pending mails for a channel will have their filters rechecked if they have been queued for longer than 25 seconds.
+Mails failing their checks due to queue delays will be dropped from the queue.
+* Mails will have their time text readjusted if they have been queued for longer than 25 seconds. Example: Radar feeds with printouts originally stating "Time: 20 seconds ago" would then state "Time: 45 seconds ago" after delay readjustments.
+* Queues with 15 or more messages will have messages that have been in the queue longer than 30 minutes dropped. Rechecks occur on 30 minutes intervals.
+* Adjusted the max time delta on entity and super losses so freshly loaded mails from months ago will post.
+### Radar, proximity, and related feeds
+* Adjusted the text on the max delta setting for easier clarification.
+* Setting max time delta option to 0 on new feeds now sets the delta to pseudo-infinite (1 year). Existing feeds that have this option to 0 will not be modified and thus won't likely post mails.
+## Fixes
+* Fixed some issues with Insight's shutdown code and reworked the signal listeners so that Insight will actually shut down when receiving ```SIGTERM``` or ```SIGINT```.
+* Fixed Docker code to properly start Insight so that it receives shutdown signals.
+* Fixed an issue where log messages would fail and print a traceback if the channel or server name contained emojis. 
 # v1.5.1
+> Released on March 2, 2020
+{.is-info}
+
 ## Fixes
 * Fixed an issue where the MailError log file was not being properly rotated. Retry attempts are now logged as info.
 * Corrected appearance gallery URLs for derived/preconfigured feeds.
 * Fixed an issue on entity and derived feeds utilizing the utility appearance where mails would not post involving a final blow from a single unknown NPC attacker.
 # v1.5.0
+> Released on March 1, 2020
+{.is-info}
+
 This version of Insight is a general maintenance release addressing minor underlying issues with Insight.
 ## Notices
 * The pyinstaller binary/executable release of Insight is no longer supported in this release and releases going forward. The pyinstaller scripts exist under ```scripts/``` if you wish to experiment with pyinstaller. Please switch to [Docker](https://hub.docker.com/r/nathanls/insight).
@@ -25,6 +63,9 @@ In the event of a permission issue or API delay/outage Insight will attempt to r
 * Improved command parsing to use thread pools instead of using resources under the asnycio event loop. 
 * Added improved logging for command parsing to more easily diagnose issues with Insight sometimes not responding to commands on certain servers.
 # v1.4.0
+> Released on February 7, 2019
+{.is-info}
+
 ## New features
 * Server-wide command prefix modification support. Users can now add and remove Insight prefixes via the **!prefix** command.
 * Docker support. Insight is available to run as a Docker container with all dependencies packaged.
@@ -51,10 +92,16 @@ In the event of a permission issue or API delay/outage Insight will attempt to r
 * Added a memory diagnostic logger that will log memory and reference count changes over time.
 * Numerous test additions for further stability and easier debugging going forward.
 # v1.3.1
+> Released on November 18, 2018
+{.is-info}
+
 ## Fixes
 * Fixed an issue when running Insight on computers without Git. Attempting to run Insight on a computer without Git would result in an application crash. The Insight updater now attempts to import the GitPython library within the update function and catches the error in the event of no valid Git executable.
 
 # v1.3.0
+> Released on November 18, 2018
+{.is-info}
+
 v1.3.0 is the latest update to Insight which includes numerous backend improvements for further application stability. 
 ## New features
 * Added a "Big Kills" feed that displays all mails valued greater than a customized minimum ISK value.
@@ -127,6 +174,9 @@ v1.3.0 is the latest update to Insight which includes numerous backend improveme
 * Added numerous internal exceptions to support new functionality.
 
 # v1.2.0
+> Released on September 9, 2018
+{.is-info}
+
 ## New features
 * Entity feed
     * Users can now set a minimum ISK value filter. [(#11)](https://github.com/Nathan-LS/Insight/issues/14)
@@ -160,6 +210,9 @@ v1.3.0 is the latest update to Insight which includes numerous backend improveme
 * Extensive changes to visual embed variables and function calls for easier code navigation.
 
 # v1.1.0
+> Released on August 22, 2018
+{.is-info}
+
 ## New features
 * Settings
     * Rich embed visual switching
@@ -174,6 +227,9 @@ v1.3.0 is the latest update to Insight which includes numerous backend improveme
 * Added a ```View tokens``` option to radar feeds to see all linked tokens in the channel. [Commit](https://github.com/Nathan-LS/Insight/commit/225e544077bb54b55eff617fe5a10a801b218a00)
 
 # v1.0.0
+> Released on August 3, 2018
+{.is-info}
+
 v1.0.0 is the initial public release/announcement of the Insight Project. This rewrite of the bot was in progress for the past month and focused on redesigning the original
 project with a clear set of direction and purpose. This release of Insight is feature-complete and stable. v1.0.0 has a few bug fixes and focuses on polishing.
 ## New features
@@ -196,21 +252,23 @@ project with a clear set of direction and purpose. This release of Insight is fe
 * Added a Stargate location name importer to import names from the SDE.
     * Stargate games are NULL in the mapDenormalize SDE datebase table. The SDE only lists stargate names in the invNames table so a custom function was added to import this table.
 
-# v0.13.1
-## Changes
+# Legacy Releases
+## v0.13.1
+
+### Changes
 * Merged AT system 1 and AT system 2 streams into one channel.
     * There were issues with alliance tournament systems changing so both preconfigured feeds were merged. The stream now tracks losses in the entire
     alliance tournament region instead of specific systems to catch system changes.
 * Added an invalid feed catcher.
     * Insight will automatically detect and remove discontinued feeds.
 
-# v0.13.0
-## Breaking Changes/Announcements
+## v0.13.0
+### Breaking Changes/Announcements
 * Insight versions below v0.12.1 will have all SSO tokens and synced contacts dropped as a result of token encryption and table restructuring. Users will have to manually add their tokens back and reassign them to intended radar feeds. 
 * There are new fields in the configuration file so ensure you merge changes from ```default-config.ini``` to your ```config.ini``` file.
 * 2 new required modules in ```requirements.txt```. Ensure you run ```pip install -r requirements.txt``` to update your python installation if you are running Insight from source (not needed for binary versions). 
 
-## New Features
+### New Features
 * SSO token encryption
      * All tokens are now encrypted using an automatically generated secret key in the configuration file. Losing or modifying this key will corrupt the token tables and prompt for a token wipe.
 * New preconfigured feeds (#6) 
@@ -231,7 +289,7 @@ project with a clear set of direction and purpose. This release of Insight is fe
     * Mentions are only accessible in the base radar feed. 
          * **Capital Radar** - Mention mode is determined by the setting for the highest valued attacking ship group.
 
-## Changes
+### Changes
 * Contact syncing tasks now runs every 1.5 hours instead of 10 hours.
 * On automated contact syncing, Insight will only post a contact updated message if there were modifications.
      * Previously, Insight would always post alert messages to radar feeds on any background syncing actions. Insight will post one initial message on the first background sync after bot startup, and further messages will be suppressed if no modifications occurred. 
@@ -246,7 +304,7 @@ project with a clear set of direction and purpose. This release of Insight is fe
           * **Red** - Abnormal delays posting visuals/messages to channel feeds caused by either Insight overloading or Discord API outages.
 * Replace startup argument ```-api``` with ```-noapi```. Insight, by default, will check and import any missing items from the SDE database on startup. Start Insight with ```-noapi``` to disable the initial check. Note: You should only skip data importing in a debug environment as the bot will will behave abnormally if it is missing static data.
 
-## Technical 
+### Technical 
 * Added custom exceptions module for simpler exception handling and returned error messages to the user.
 * SQL Updater
     * v0.12.1 - Drop the following tables for restructuring:
