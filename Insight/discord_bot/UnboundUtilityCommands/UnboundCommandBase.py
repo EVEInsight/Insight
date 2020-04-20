@@ -9,6 +9,7 @@ import InsightExc
 from InsightUtilities import DiscordPermissionCheck, LimitManager
 
 
+
 class UnboundCommandBase(object):
     def __init__(self, unbound_service):
         self.unbound: UnboundUtilityCommands = unbound_service

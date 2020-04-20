@@ -12,6 +12,7 @@ import asyncio
 import InsightLogger
 import logging
 import os
+import InsightSubsystems
 
 
 class Discord_Insight_Client(discord.Client):
@@ -19,6 +20,7 @@ class Discord_Insight_Client(discord.Client):
         super().__init__(fetch_offline_members=True, heartbeat_timeout=20)
         self.logger = InsightLogger.InsightLogger.get_logger('Insight.main', 'Insight_main.log', console_print=True,
                                                              console_level=logging.INFO)
+        self.insight_ready_event = asyncio.Event()
         self.service: service_module = service_module
         self.channel_manager: service.Channel_manager = self.service.channel_manager
         self.channel_manager.set_client(self)
@@ -34,6 +36,7 @@ class Discord_Insight_Client(discord.Client):
         self.channelLocks = InsightUtilities.AsyncLockManager(self.loop)
         self.channelSemaphores = InsightUtilities.AsyncSemaphoreManager(self.loop)
         self.limiter = LimitManager()
+        self.subsystems = InsightSubsystems.SubsystemLoader(discord_client=self)
 
     def get_invite_url(self):
         try:
@@ -56,6 +59,7 @@ class Discord_Insight_Client(discord.Client):
         print('-------------------')
 
     async def setup_tasks(self):
+        self.loop.create_task(self.subsystems.start_tasks())
         await self.wait_until_ready()
         try:
             game_act = discord.Activity(name="Starting...", type=discord.ActivityType.watching)
@@ -74,6 +78,7 @@ class Discord_Insight_Client(discord.Client):
         self.loop.create_task(self.service.zk_obj.coroutine_process_json(self.threadpool_zk))
         self.loop.create_task(self.channel_manager.auto_refresh())
         self.loop.create_task(self.channel_manager.auto_channel_refresh())
+        self.insight_ready_event.set()
 
     async def post_motd(self):
         div = '================================='
@@ -85,6 +90,9 @@ class Discord_Insight_Client(discord.Client):
     async def close(self):
         try:
             print("===========Received signal to shut down.===========")
+            print("Stopping Insight subsystems...")
+            await self.subsystems.stop_tasks()
+            print("Done")
             print("Logging out from Discord...")
             await super().close()
             print("Done")

@@ -85,4 +85,5 @@ class InsightLogger(object):
         cls.get_logger('Insight.command', 'Insight_command.log')
         cls.get_logger('Tokens', 'Tokens.log')
         cls.get_logger('InsightUtilities', 'InsightUtilities.log', level=logging.DEBUG)
+        cls.get_logger('Subsystem', 'Subsystem.log', level=logging.DEBUG)
         cls.get_logger('MailError', 'MailError.log', console_print=True, console_level=logging.WARNING)
