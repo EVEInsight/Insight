@@ -25,3 +25,11 @@ if [[ "$SOURCE_BRANCH" == "development" ]]; then
   docker push $DOCKER_REPO:"$INSIGHT_VERSION_MINOR-dev"
 fi
 
+if [[ "$SOURCE_BRANCH" == "development-postgres" ]]; then
+  docker tag $IMAGE_NAME $DOCKER_REPO:"$INSIGHT_VERSION_PATCH-dev-postgres"
+  docker push $DOCKER_REPO:"$INSIGHT_VERSION_PATCH-dev"
+
+  docker tag $IMAGE_NAME $DOCKER_REPO:"$INSIGHT_VERSION_MINOR-dev-postgres"
+  docker push $DOCKER_REPO:"$INSIGHT_VERSION_MINOR-dev-postgres"
+fi
+

@@ -10,17 +10,19 @@ class setup_database(object):
 
     def __init__(self, service_module):
         self.service = service_module
+        self.connection_str = "postgresql+psycopg2://{user}:{pw}@{host}:{port}/{db}".format(
+            user=self.service.config.get("POSTGRES_USER"), pw=self.service.config.get("POSTGRES_PASSWORD"),
+            host=self.service.config.get("POSTGRES_HOST"), port=self.service.config.get("POSTGRES_PORT"),
+            db=self.service.config.get("POSTGRES_DB"))
         self.initial_load()
-        self.engine = create_engine('sqlite:///{}'.format(self.service.config.get("SQLITE_DB_PATH")),
-                                    connect_args={'check_same_thread':False,'timeout':3000}, echo=False)
+        self.engine = create_engine(self.connection_str, echo=False, pool_size=20, max_overflow=20)
         DB.Base.Base.metadata.create_all(self.engine)
         self._dbSession = sessionmaker(bind=self.engine)
         self.sc_session = scoped_session(self._dbSession)
         self.verify_tokens()
 
     def initial_load(self):
-        engine = create_engine('sqlite:///{}'.format(self.service.config.get("SQLITE_DB_PATH")),
-                               connect_args={'check_same_thread': True, 'timeout': 3000}, echo=False)
+        engine = create_engine(self.connection_str, echo=False)
         DB.version.versionBase.metadata.create_all(engine)
         ses = sessionmaker(bind=engine)
         session_ob = ses()
