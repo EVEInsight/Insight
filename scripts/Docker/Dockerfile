@@ -55,7 +55,6 @@ ENV PYTHONUNBUFFERED=1
 RUN apt-get update && apt-get install -y \
  git \
  build-essential \
- pgloader \
  zip \
  && rm -rf /var/lib/apt/lists/*
 
