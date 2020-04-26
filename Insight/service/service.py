@@ -27,6 +27,7 @@ class service_module(object):
         self._import_check()
         self._db_manager = database.setup_database(self)
         self._sc_session: scoped_session = self._db_manager.get_scoped_session()
+        InsightUtilities.DBSessions(sc_session=self._sc_session)
         self.static_data_import = static_data.static_data_import(self, self._import_everything_flag)
         self.routes = RouteMapper.RouteMapper(self)
         self.routes.setup_load()
