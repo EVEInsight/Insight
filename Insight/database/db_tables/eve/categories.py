@@ -70,3 +70,10 @@ class Categories(dec_Base.Base,individual_api_pulling,index_api_updating,sde_imp
     @classmethod
     def get_query_filter(cls, sde_base):
         return sde_base.categoryID
+
+    def to_jsonDictionary(self) -> dict:
+        return {
+            "category_id": self.category_id,
+            "category_name": self.name,
+            "published": self.published
+        }

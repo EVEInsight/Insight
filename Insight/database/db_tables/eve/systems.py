@@ -216,6 +216,19 @@ class Systems(dec_Base.Base, name_only, individual_api_pulling, index_api_updati
         except:
             return ""
 
+    def to_jsonDictionary(self) -> dict:
+        return {
+            "system_id": self.system_id,
+            "system_name": self.name,
+            "security_class": self.security_class,
+            "security_status": self.security_status,
+            "star_id": self.star_id,
+            "pos_x": self.pos_x,
+            "pos_y": self.pos_y,
+            "pos_z": self.pos_z,
+            "constellation": self.object_constellation.to_jsonDictionary() if self.object_constellation else None
+        }
+
 
 from ..filters import *
 from ..eve import *

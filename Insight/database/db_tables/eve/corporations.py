@@ -34,3 +34,9 @@ class Corporations(dec_Base.Base,name_only):
     @classmethod
     def primary_key_row(cls):
         return cls.corporation_id
+
+    def to_jsonDictionary(self) -> dict:
+        return {
+            "corporation_id": self.corporation_id,
+            "corporation_name": self.corporation_name
+        }

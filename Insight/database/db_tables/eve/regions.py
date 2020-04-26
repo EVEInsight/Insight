@@ -84,3 +84,9 @@ class Regions(dec_Base.Base, name_only, individual_api_pulling, index_api_updati
     @classmethod
     def get_query_filter(cls, sde_base):
         return sde_base.regionID
+
+    def to_jsonDictionary(self) -> dict:
+        return {
+            "region_id": self.region_id,
+            "region_name": self.name
+        }

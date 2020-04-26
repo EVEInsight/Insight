@@ -118,7 +118,12 @@ class Attackers(dec_Base.Base, Base_Str_ATKv):
             "final_blow": self.final_blow,
             "security_status": self.security_status,
             "ship_type_id": self.ship_type_id,
-            "weapon_type_id": self.weapon_type_id
+            "weapon_type_id": self.weapon_type_id,
+            "character": self.object_pilot.to_jsonDictionary() if self.object_pilot else None,
+            "corporation": self.object_corp.to_jsonDictionary() if self.object_corp else None,
+            "alliance": self.object_alliance.to_jsonDictionary() if self.object_alliance else None,
+            "ship": self.object_ship.to_jsonDictionary() if self.object_ship else None,
+            "weapon": self.object_weapon.to_jsonDictionary() if self.object_weapon else None
         }
 
 

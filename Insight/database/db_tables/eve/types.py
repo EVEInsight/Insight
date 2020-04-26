@@ -131,4 +131,10 @@ class Types(dec_Base.Base,name_only,index_api_updating,sde_impoter):
         except Exception as ex:
             print(ex)
 
-
+    def to_jsonDictionary(self) -> dict:
+        return {
+            "type_id": self.type_id,
+            "type_name": self.type_name,
+            "basePrice": float(self.basePrice) if self.basePrice else None,
+            "group": self.object_group.to_jsonDictionary() if self.object_group else None
+        }

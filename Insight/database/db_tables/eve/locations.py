@@ -89,5 +89,17 @@ class Locations(dec_Base.Base,table_row,sde_impoter):
     def row_action(cls,row,db_session):
         db_session.add(row)
 
+    def to_jsonDictionary(self) -> dict:
+        return {
+            "location_id": self.location_id,
+            "location_name": self.name,
+            "pos_x": self.pos_x,
+            "pos_y": self.pos_y,
+            "pos_z": self.pos_z,
+            "radius": self.radius,
+            "type": self.object_type.to_jsonDictionary() if self.object_type else None,
+            "group": self.object_group.to_jsonDictionary() if self.object_group else None
+        }
+
 
 from . import types,groups

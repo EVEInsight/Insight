@@ -70,7 +70,7 @@ class Victims(dec_Base.Base, table_row, Base_Str_ATKv):
                 return False
         return False
 
-    def to_jsonDictionary(self)->dict:
+    def to_jsonDictionary(self) -> dict:
         return {
             "alliance_id": self.alliance_id,
             "character_id": self.character_id,
@@ -82,7 +82,11 @@ class Victims(dec_Base.Base, table_row, Base_Str_ATKv):
                 "y": self.pos_y,
                 "z": self.pos_z
             },
-            "ship_type_id": self.ship_type_id
+            "ship_type_id": self.ship_type_id,
+            "character": self.object_pilot.to_jsonDictionary() if self.object_pilot else None,
+            "corporation": self.object_corp.to_jsonDictionary() if self.object_corp else None,
+            "alliance": self.object_alliance.to_jsonDictionary() if self.object_alliance else None,
+            "ship": self.object_ship.to_jsonDictionary() if self.object_ship else None
         }
 
 

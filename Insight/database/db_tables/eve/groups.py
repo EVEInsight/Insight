@@ -79,3 +79,11 @@ class Groups(dec_Base.Base,individual_api_pulling,index_api_updating,sde_impoter
     @classmethod
     def get_query_filter(cls, sde_base):
         return sde_base.groupID
+
+    def to_jsonDictionary(self) -> dict:
+        return {
+            "group_id": self.group_id,
+            "group_name": self.name,
+            "published": self.published,
+            "category": self.object_category.to_jsonDictionary() if self.object_category else None
+        }

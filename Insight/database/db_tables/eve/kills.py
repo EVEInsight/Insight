@@ -385,7 +385,9 @@ class Kills(dec_Base.Base, table_row):
             "killmail_id": self.kill_id,
             "killmail_time": str(self.killmail_time),
             "solar_system_id": self.solar_system_id,
-            "victim": self.object_victim.to_jsonDictionary()
+            "victim": self.object_victim.to_jsonDictionary() if self.object_victim else None,
+            "system": self.object_system.to_jsonDictionary() if self.object_system else None,
+            "location": self.object_location.to_jsonDictionary() if self.object_location else None
         }}
         zkb = {"zkb": {
             "locationID": self.locationID,
@@ -399,3 +401,4 @@ class Kills(dec_Base.Base, table_row):
             "href": self.href
         }}
         return {"package": {**kID, **km, **zkb}}
+

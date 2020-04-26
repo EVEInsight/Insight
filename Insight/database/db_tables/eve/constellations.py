@@ -99,3 +99,13 @@ class Constellations(dec_Base.Base, name_only, individual_api_pulling, index_api
     @classmethod
     def get_query_filter(cls, sde_base):
         return sde_base.constellationID
+
+    def to_jsonDictionary(self) -> dict:
+        return {
+            "constellation_id": self.constellation_id,
+            "constellation_name": self.name,
+            "pos_x": self.pos_x,
+            "pos_y": self.pos_y,
+            "pos_z": self.pos_z,
+            "region": self.object_region.to_jsonDictionary() if self.object_region else None
+        }

@@ -34,3 +34,9 @@ class Characters(dec_Base.Base,name_only):
     @classmethod
     def primary_key_row(cls):
         return cls.character_id
+
+    def to_jsonDictionary(self) -> dict:
+        return {
+            "character_id": self.character_id,
+            "character_name": self.character_name
+        }

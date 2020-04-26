@@ -34,3 +34,9 @@ class Alliances(dec_Base.Base,name_only):
     @classmethod
     def primary_key_row(cls):
         return cls.alliance_id
+
+    def to_jsonDictionary(self) -> dict:
+        return {
+            "alliance_id": self.alliance_id,
+            "alliance_name": self.alliance_name
+        }

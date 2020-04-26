@@ -19,6 +19,9 @@ class table_row(object):
     def load_fk_objects(self):
         pass
 
+    def to_jsonDictionary(self) -> dict:
+        return {}
+
     @staticmethod
     def get_configuration():
         configuration = swagger_client.Configuration()
