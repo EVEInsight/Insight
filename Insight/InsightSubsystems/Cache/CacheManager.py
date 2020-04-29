@@ -10,7 +10,7 @@ class CacheManager(SubsystemBase):
         super().__init__(subsystemloader)
         self.tp = ThreadPoolExecutor(max_workers=5)
         self.client = NoRedisClient.NoRedisClient(self.config, self.tp)
-        # self.TopKMs = CacheEndpoint.TopKMs(cache_manager=self)
+        self.TopKMs = CacheEndpoint.TopKMs(cache_manager=self)
         # self.TopKMsEmbed = CacheEndpoint.TopKMsEmbed(cache_manager=self)
 
     async def start_subsystem(self):

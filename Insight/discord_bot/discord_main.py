@@ -30,13 +30,13 @@ class Discord_Insight_Client(discord.Client):
         self.threadpool_insight = ThreadPoolExecutor(max_workers=8)
         self.threadpool_zk = ThreadPoolExecutor(max_workers=2)
         self.threadpool_unbound = ThreadPoolExecutor(max_workers=1)
+        self.subsystems = InsightSubsystems.SubsystemLoader(discord_client=self)
         self.unbound_commands = UnboundUtilityCommands(self)
         self.loop.set_default_executor(self.threadpool_insight)
         self.loop.create_task(self.setup_tasks())
         self.channelLocks = InsightUtilities.AsyncLockManager(self.loop)
         self.channelSemaphores = InsightUtilities.AsyncSemaphoreManager(self.loop)
         self.limiter = LimitManager()
-        self.subsystems = InsightSubsystems.SubsystemLoader(discord_client=self)
 
     def get_invite_url(self):
         try:

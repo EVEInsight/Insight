@@ -387,7 +387,12 @@ class Kills(dec_Base.Base, table_row):
             "solar_system_id": self.solar_system_id,
             "victim": self.object_victim.to_jsonDictionary() if self.object_victim else None,
             "system": self.object_system.to_jsonDictionary() if self.object_system else None,
-            "location": self.object_location.to_jsonDictionary() if self.object_location else None
+            "location": self.object_location.to_jsonDictionary() if self.object_location else None,
+            "fittedValue": self.fittedValue,
+            "totalValue": self.totalValue,
+            "npc": self.npc,
+            "solo": self.solo,
+            "awox": self.awox
         }}
         zkb = {"zkb": {
             "locationID": self.locationID,
