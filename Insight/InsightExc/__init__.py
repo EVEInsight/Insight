@@ -4,3 +4,4 @@ from . import databaseError as Db
 from . import SSO
 from . import DiscordError
 from . import Internal
+from . import Subsystem

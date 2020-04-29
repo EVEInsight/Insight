@@ -7,7 +7,7 @@ import discord_bot
 class SubsystemBase(metaclass=InsightSingleton):
     def __init__(self, subsystemloader):
         self.lg = InsightLogger.InsightLogger.get_logger('Subsystem.{}'.format(self.__class__.__name__),
-                                                         'InsightUtilities.log', child=True)
+                                                         'Subsystem.log', child=True)
         self.subsystems: SubsystemLoader = subsystemloader
         self.loop = self.subsystems.client.loop
         self.client: discord_bot.Discord_Insight_Client = self.subsystems.client
