@@ -11,3 +11,4 @@ from .ConfigLoader import ConfigLoader
 from .LimitSystem.LimitManager import LimitManager
 from .Misc.ComparableFuture import ComparableFuture
 from .DBSessions import DBSessions
+from .StaticHelpers import *
