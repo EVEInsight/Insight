@@ -12,3 +12,5 @@ from .LimitSystem.LimitManager import LimitManager
 from .Misc.ComparableFuture import ComparableFuture
 from .DBSessions import DBSessions
 from .StaticHelpers import *
+from .EmbedLimitedHelper import EmbedLimitedHelper
+
