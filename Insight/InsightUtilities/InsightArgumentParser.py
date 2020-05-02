@@ -8,23 +8,23 @@ class InsightArgumentParser(object):
         parser.add_argument("--config", "-c",
                             help="Specifies a config file other than the default 'config.ini' to run the program with",
                             default="config.ini")
-        parser.add_argument("--debug_km","-km",
+        parser.add_argument("--debug-km", "-k",
                             help="Start the application in debug mode to send kms starting at and above this id through all channel feeds.",
                             type=int)
-        parser.add_argument("--force_ctime","-fc",
+        parser.add_argument("--force-ctime", "-f",
                             action="store_true",
                             help="If --debug_km is set, this flag will push kms to feeds with their time occurrence set to now.",
                             default=False)
-        parser.add_argument("--debug_limit","-limit",
+        parser.add_argument("--debug-limit", "-l",
                             help="Sets the total limit of debug kms to push through feeds before exiting the program. Default is unlimited.",
                             type=int)
-        parser.add_argument("--skip_api_import", "-noapi", action="store_true",
+        parser.add_argument("--skip-api-import", "-n", action="store_true",
                             help="Skip startup API static data import check.", default=False)
-        parser.add_argument("--websocket", "-ws", action="store_true",
+        parser.add_argument("--websocket", "-w", action="store_true",
                             help="Enable the experimental secondary ZK websocket connection.", default=False)
-        parser.add_argument("--defer_tasks", "-defer", action="store_true",
+        parser.add_argument("--defer-tasks", "-d", action="store_true",
                             help="Defers slow tasks to run later instead of at startup.", default=False)
-        parser.add_argument("--sde_db","-sde",
+        parser.add_argument("--sde-db", "-s",
                             help="Specifies the name of the SDE database file relative to main.py. Download and extract the "
                                  "sqlite-latest.sqlite file from https://www.fuzzwork.co.uk/dump/",
                             type=str, default="sqlite-latest.sqlite")

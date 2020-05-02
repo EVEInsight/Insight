@@ -88,4 +88,4 @@ RUN chmod 2750 /InsightDocker/PermissionSet.sh
 RUN chmod 600 /InsightDocker/sqlite-latest.sqlite
 USER insight
 WORKDIR /app
-ENTRYPOINT ["/InsightDocker/DockerEntry.sh", "python3", "/InsightDocker/Insight/Insight", "-sde", "/InsightDocker/sqlite-latest.sqlite"]
+ENTRYPOINT ["/InsightDocker/DockerEntry.sh", "python3", "/InsightDocker/Insight/Insight", "--sde-db", "/InsightDocker/sqlite-latest.sqlite"]

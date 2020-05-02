@@ -32,7 +32,7 @@ class TestServiceModuleNoMockWithConfigFile(InsightTestBase):
         super().setUp()
         self.config_path = self.get_resource_path("config")
         self.copy_file_into_cwid(self.config_path, "config.ini")
-        self.set_sys_args("-noapi")
+        self.set_sys_args("-n")
         self.service = ServiceModuleMock2()
 
     def tearDown(self):
