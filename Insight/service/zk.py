@@ -211,7 +211,7 @@ class zk(object):
                 while self.run:
                     next_delay = datetime.datetime.utcnow()
                     try:
-                        async with client.ws_connect(self.url_websocket(), heartbeat=10) as ws:
+                        async with client.ws_connect(self.url_websocket(), heartbeat=10, receive_timeout=120) as ws:
                             lg.info('ZK WebSocket connection established.')
                             await ws.send_json(data={"action": "sub", "channel": "killstream"})
                             async for msg in ws:
@@ -227,8 +227,11 @@ class zk(object):
                                     lg.warning("ZK WS error response.")
                                 else:
                                     lg.warning("ZK WebSocket unknown response.")
+                    except asyncio.TimeoutError:
+                        lg.info("Websocket timeout. Restarting the websocket connection.")
+                        await asyncio.sleep(15)
                     except Exception as ex:
-                        lg_msg = 'ZK WebSocket error: {}'.format(str(ex))
+                        lg_msg = 'ZK WebSocket error: {} - {}'.format(type(ex), str(ex))
                         print(lg_msg)
                         lg.warning(lg_msg)
                         lg.exception(ex)
