@@ -11,6 +11,7 @@ class CacheManager(SubsystemBase):
         self.tp = ThreadPoolExecutor(max_workers=5)
         self.client = NoRedisClient.NoRedisClient(self.config, self.tp)
         self.MostExpensiveKMs = CacheEndpoint.MostExpensiveKMs(cache_manager=self)
+        self.KMStats = CacheEndpoint.KMStats(cache_manager=self)
         self.MostExpensiveKMsEmbed = CacheEndpoint.MostExpensiveKMsEmbed(cache_manager=self)
 
     async def start_subsystem(self):

@@ -10,6 +10,7 @@ class MostExpensiveKMsEmbed(AbstractEmbedEndpoint):
     def __init__(self, cache_manager):
         super().__init__(cache_manager)
         self.MostExpensiveKMs = self.cm.MostExpensiveKMs
+        self.KMStats = self.cm.KMStats
 
     def default_ttl(self) -> int:
         return 1800
@@ -22,16 +23,21 @@ class MostExpensiveKMsEmbed(AbstractEmbedEndpoint):
 
     async def _do_endpoint_logic(self, last_hours: int, server_prefix: str) -> dict:
         top_kms = await self.MostExpensiveKMs.get(batch_limit=25, last_hours=last_hours)
+        km_stats = await self.KMStats.get(last_hours=last_hours)
         return await self.run_executor(self._do_endpoint_logic_sync, last_hours=last_hours,
-                                       server_prefix=server_prefix, topkms_dict=top_kms)
+                                       server_prefix=server_prefix, topkms_dict=top_kms, km_stats=km_stats)
 
-    def _do_endpoint_logic_sync(self, last_hours: int, server_prefix: str, topkms_dict: dict) -> dict:
+    def _do_endpoint_logic_sync(self, last_hours: int, server_prefix: str, topkms_dict: dict, km_stats: dict) -> dict:
         total_days = int(last_hours / 24) if last_hours > 0 else 0
         time_period_str = "{} days".format(total_days) if total_days > 1 else "{} hours".format(last_hours)
         e = EmbedLimitedHelper()
         e.set_color(self.default_color())
         e.set_timestamp(datetime.utcnow())
-        e.set_description("Most expensive kills over the last {}".format(time_period_str))
+        total_kills = "{:,}".format(Helpers.get_nested_value(km_stats, 0, "totalKills"))
+        total_value = MathHelper.str_isk(Helpers.get_nested_value(km_stats, 0, "totalValue"), True)
+        desc = "Over the last {} there have been a total of **{}** kills worth a total of **{} ISK.**".\
+            format(time_period_str, total_kills, total_value)
+        e.set_description(desc)
         e.set_author(name="Most expensive kills over the last {}".format(time_period_str),
                      url="https://zkillboard.com/kills/bigkills/",
                      icon_url=URLHelper.type_image(3764, 32))
