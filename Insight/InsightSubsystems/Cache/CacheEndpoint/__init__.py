@@ -1,2 +1,2 @@
-from InsightSubsystems.Cache.CacheEndpoint.TopKMs import TopKMs
-#from InsightSubsystems.Cache.CacheEndpoint.TopKMsEmbed import TopKMsEmbed
+from InsightSubsystems.Cache.CacheEndpoint.MostExpensiveKMs import MostExpensiveKMs
+from InsightSubsystems.Cache.CacheEndpoint.MostExpensiveKMsEmbed import MostExpensiveKMsEmbed
