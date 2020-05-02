@@ -4,7 +4,6 @@ from .UnboundCommandBase import *
 class Help(UnboundCommandBase):
     def __init__(self, unbound_service):
         super().__init__(unbound_service)
-        self.serverManager = self.unbound.serverManager
         self.header = self.generate_header()
         self.commands = self.generate_commands()
         self.commands_as_list = self.generate_commands(as_list=True)
@@ -36,6 +35,7 @@ class Help(UnboundCommandBase):
             "**{p}stop** - Pause a channel feed.",
             "**{p}sync** - Manage contact EVE tokens for a radar or proximity watch feed. Contact token syncing "
             "allows you to ignore allies in tracked ships from appearing as potential targets.",
+            "**{p}top** - List the most expensive kills over the last week.",
             "**{p}unlock** - Unlock a feed service to allow any Discord channel user to modify feed configuration."
         ]
         if as_list:

@@ -9,7 +9,6 @@ import InsightExc
 from InsightUtilities import DiscordPermissionCheck, LimitManager
 
 
-
 class UnboundCommandBase(object):
     def __init__(self, unbound_service):
         self.unbound: UnboundUtilityCommands = unbound_service
@@ -17,6 +16,7 @@ class UnboundCommandBase(object):
         self.service = self.client.service
         self.embed_only = False
         self.loop = self.client.loop
+        self.serverManager = self.unbound.serverManager
 
     def command_description(self):
         return "Not implemented."

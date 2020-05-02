@@ -194,6 +194,10 @@ class discord_feed_service(object):
         """!roll - Roll a random number between 0 and 100."""
         await self.discord_client.unbound_commands.command_roll(message_object)
 
+    async def command_top(self, message_object):
+        """!top - Get top mails."""
+        await self.discord_client.unbound_commands.command_top(message_object)
+
     def can_prune_queue(self):
         """check if the last prune was over 30 minutes ago and thus able to be pruned"""
         return ((datetime.datetime.utcnow() - self.last_prune).total_seconds()) >= 1800

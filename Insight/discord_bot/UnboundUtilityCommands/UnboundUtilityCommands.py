@@ -1,5 +1,5 @@
 from . import Dscan, EightBall, Quit, Admin, AdminResetNames, Backup, MemoryDiagnostic, Prefix, About, \
-    Help, MailExport, Limits, Roll
+    Help, MailExport, Limits, Roll, Top
 import discord
 import discord_bot
 from functools import partial
@@ -26,6 +26,7 @@ class UnboundUtilityCommands(object):
         self.admin_mail_export = MailExport.MailExport(self)
         self.limits = Limits.Limits(self)
         self.randomroll = Roll.Roll(self)
+        self.top = Top.Top(self)
 
     async def strip_command(self, message_object: discord.Message):
         prefixes = await self.serverManager.get_server_prefixes(message_object.channel)
@@ -63,3 +64,6 @@ class UnboundUtilityCommands(object):
 
     async def command_roll(self, message_object: discord.Message):
         await self.randomroll.run_command(message_object, await self.strip_command(message_object))
+
+    async def command_top(self, message_object: discord.Message):
+        await self.top.run_command(message_object, await self.strip_command(message_object))
