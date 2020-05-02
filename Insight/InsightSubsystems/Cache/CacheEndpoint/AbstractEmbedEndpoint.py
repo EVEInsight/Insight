@@ -11,7 +11,8 @@ class AbstractEmbedEndpoint(AbstractEndpoint):
         return discord.Color(659493)
 
     def make_embed(self, d: dict) -> discord.Embed:
-        e = discord.Embed.from_dict(d)
+        discord_embed_dict = Helpers.get_nested_value(d, {}, "embed")
+        e = discord.Embed.from_dict(discord_embed_dict)
         return e
 
     async def get(self, **kwargs) -> discord.Embed:

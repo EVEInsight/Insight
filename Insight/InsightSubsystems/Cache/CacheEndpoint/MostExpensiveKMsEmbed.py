@@ -2,8 +2,9 @@ from InsightSubsystems.Cache.CacheEndpoint.AbstractEmbedEndpoint import Abstract
 from InsightUtilities.StaticHelpers import *
 from InsightUtilities import EmbedLimitedHelper
 import discord
-from datetime import datetime
+from datetime import datetime, timedelta
 import InsightExc
+from dateutil.parser import parse as dateTimeParser
 
 
 class MostExpensiveKMsEmbed(AbstractEmbedEndpoint):
@@ -28,31 +29,35 @@ class MostExpensiveKMsEmbed(AbstractEmbedEndpoint):
                                        server_prefix=server_prefix, topkms_dict=top_kms, km_stats=km_stats)
 
     def _do_endpoint_logic_sync(self, last_hours: int, server_prefix: str, topkms_dict: dict, km_stats: dict) -> dict:
+        expire_ttl = self.extract_min_ttl(topkms_dict, km_stats)
+        expire = datetime.utcnow() + timedelta(seconds=expire_ttl)
+        expire_str = "{} UTC".format(expire.strftime("%H:%M"))
         total_days = int(last_hours / 24) if last_hours > 0 else 0
         time_period_str = "{} days".format(total_days) if total_days > 1 else "{} hours".format(last_hours)
         e = EmbedLimitedHelper()
         e.set_color(self.default_color())
         e.set_timestamp(datetime.utcnow())
-        total_kills = "{:,}".format(Helpers.get_nested_value(km_stats, 0, "totalKills"))
-        total_value = MathHelper.str_isk(Helpers.get_nested_value(km_stats, 0, "totalValue"), True)
+        e.set_title("Most expensive kills over the last {}".format(time_period_str))
+        e.set_url("https://zkillboard.com/kills/bigkills/")
+        total_kills = "{:,}".format(Helpers.get_nested_value(km_stats, 0, "data", "totalKills"))
+        total_value = MathHelper.str_isk(Helpers.get_nested_value(km_stats, 0, "data", "totalValue"), True)
         desc = "Over the last {} there have been a total of **{}** kills worth a total of **{} ISK.**".\
             format(time_period_str, total_kills, total_value)
         e.set_description(desc)
-        e.set_author(name="Most expensive kills over the last {}".format(time_period_str),
-                     url="https://zkillboard.com/kills/bigkills/",
+        e.set_author(name="Most Expensive KM Stats", url="https://zkillboard.com/kills/bigkills/",
                      icon_url=URLHelper.type_image(3764, 32))
-        e.set_footer(text="Run '{}top help' for additional usages of this command.".format(server_prefix),
-                     icon_url=URLHelper.type_image(3764, 32))
+        e.set_footer(text="Run '{}top help' for additional usages of this command. This command uses cached data "
+                          "and the next refresh of the data will be available at {}".format(server_prefix, expire_str))
         tb_set = False
         counter = 1
-        for k in Helpers.get_nested_value(topkms_dict, [], "kills"):
+        for k in Helpers.get_nested_value(topkms_dict, [], "data", "kills"):
             body = ""
             ship_name = Helpers.get_nested_value(k, "", "package", "killmail", "victim", "ship", "type_name")
             ship_id = Helpers.get_nested_value(k, "", "package", "killmail", "victim", "ship", "type_id")
             km_value = MathHelper.str_isk((Helpers.get_nested_value(k, 0, "package", "killmail", "totalValue")))
             km_id = Helpers.get_nested_value(k, 0, "package", "killmail", "killmail_id")
             if not tb_set and ship_id:
-                e.set_image(url=URLHelper.type_image(type_id=ship_id, resolution=256))
+                e.set_image(url=URLHelper.type_image(type_id=ship_id, resolution=128))
                 tb_set = True
             header = "**{}. {} ({})**".format(counter, ship_name, km_value)
             p_name = Helpers.get_nested_value(k, "", "package", "killmail", "victim", "character", "character_name")
@@ -73,6 +78,8 @@ class MostExpensiveKMsEmbed(AbstractEmbedEndpoint):
             system_name = Helpers.get_nested_value(k, "", "package", "killmail", "system", "system_name")
             region_name = Helpers.get_nested_value(k, "", "package", "killmail", "system", "constellation", "region",
                                                    "region_name")
+            dt = dateTimeParser(Helpers.get_nested_value(k, datetime.utcnow(), "package", "killmail", "killmail_time"))
+            body += "Time: {}\n".format(dt.strftime("%Y-%m-%d %H:%M"))
             dotlan_url = URLHelper.str_dotlan_map(system_name, region_name)
             s = "System: [{}({})]({})\n".format(system_name, region_name, dotlan_url)
             body += s
@@ -85,4 +92,8 @@ class MostExpensiveKMsEmbed(AbstractEmbedEndpoint):
             except InsightExc.Utilities.EmbedMaxTotalCharLimit:
                 break
         j = e.to_dict()
-        return j
+        return_result = {
+            "embed": j,
+        }
+        self.set_min_ttl(return_result, expire_ttl)
+        return return_result

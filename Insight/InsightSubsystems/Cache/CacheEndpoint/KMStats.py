@@ -7,7 +7,7 @@ from sqlalchemy import func
 
 class KMStats(AbstractEndpoint):
     def default_ttl(self) -> int:
-        return 1800
+        return 900
 
     def _get_unprefixed_key_hash_sync(self, last_hours: int):
         return "{}".format(last_hours)
@@ -31,10 +31,12 @@ class KMStats(AbstractEndpoint):
         finally:
             db.close()
         return {
-            "filters": {
-                "start_time": str(start_time),
-                "end_time": str(end_time)
-            },
-            "totalKills": stats.mailCount,
-            "totalValue": stats.totalValueSum
+            "data": {
+                "filters": {
+                    "start_time": str(start_time),
+                    "end_time": str(end_time)
+                },
+                "totalKills": stats.mailCount,
+                "totalValue": stats.totalValueSum
+            }
         }

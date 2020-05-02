@@ -62,6 +62,7 @@ class InsightLogger(object):
             logger_object.warning(log_m)
         else:
             logger_object.info(log_m)
+        return passed_time
 
     @classmethod
     def time_log_min(cls, logger_object: logging.Logger, start_time: LoggerStartTime, msg: str, min_ms: int = 5000):

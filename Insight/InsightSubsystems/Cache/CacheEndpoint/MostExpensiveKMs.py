@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 class MostExpensiveKMs(AbstractEndpoint):
     def default_ttl(self) -> int:
-        return 1800
+        return 900
 
     def _get_unprefixed_key_hash_sync(self, batch_limit: int, last_hours: int):
         return "{}:{}".format(batch_limit, last_hours)
@@ -25,9 +25,11 @@ class MostExpensiveKMs(AbstractEndpoint):
         finally:
             db.close()
         return {
-            "filters": {
-                "total": len(kills),
-                "start_hours": last_hours
-            },
-            "kills": kills
+            "data": {
+                "filters": {
+                    "total": len(kills),
+                    "start_hours": last_hours
+                },
+                "kills": kills
+            }
         }

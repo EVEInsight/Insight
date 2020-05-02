@@ -45,7 +45,7 @@ class RedisClient(AbstractBaseClient):
             return True
 
     async def get(self, key_str: str) -> dict:
-        result = await self.client.get(key=key_str)
+        result = await self.client.get(key=key_str, encoding="utf-8")
         if result is None:
             raise InsightExc.Subsystem.KeyDoesNotExist
         else:
@@ -53,3 +53,10 @@ class RedisClient(AbstractBaseClient):
 
     async def set(self, key_str: str, ttl: int, data_dict: dict):
         await self.client.set(key=key_str, expire=ttl, value=await self.serialize(data_dict))
+
+    async def get_ttl(self, key_str: str) -> int:
+        ttl = await self.client.ttl(key=key_str)
+        if ttl == -2:
+            raise InsightExc.Subsystem.KeyDoesNotExist
+        return ttl
+

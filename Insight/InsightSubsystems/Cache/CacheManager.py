@@ -3,11 +3,13 @@ from InsightSubsystems.Cache.Clients import RedisClient, NoRedisClient
 from InsightSubsystems.Cache import CacheEndpoint
 import sys
 from concurrent.futures import ThreadPoolExecutor
+import InsightLogger
 
 
 class CacheManager(SubsystemBase):
     def __init__(self, subsystemloader):
         super().__init__(subsystemloader)
+        self.lg_cache = InsightLogger.InsightLogger.get_logger('Cache.Manager', 'Cache.log', child=True)
         self.tp = ThreadPoolExecutor(max_workers=5)
         self.client = NoRedisClient.NoRedisClient(self.config, self.tp)
         self.MostExpensiveKMs = CacheEndpoint.MostExpensiveKMs(cache_manager=self)
@@ -30,7 +32,26 @@ class CacheManager(SubsystemBase):
         self.client.tp.shutdown(wait=True)
 
     async def get_cache(self, key_str: str) -> dict:
-        return await self.client.get(key_str)
+        st = InsightLogger.InsightLogger.time_start()
+        data = await self.client.get(key_str)
+        ttl = await self.client.get_ttl(key_str)
+        query_ms = InsightLogger.InsightLogger.time_log(self.lg_cache, st, 'get "{}" ttl: {}'.format(key_str, ttl),
+                                                        warn_higher=2000, seconds=False)
+        data["redis"] = {
+            "ttl": ttl,
+            "query": query_ms
+        }
+        return data
 
     async def set_cache(self, key_str: str, ttl: int, data_dict: dict):
         await self.client.set(key_str, ttl, data_dict)
+
+    async def set_and_get_cache(self, key_str: str, ttl: int, data_dict: dict):
+        st = InsightLogger.InsightLogger.time_start()
+        await self.set_cache(key_str, ttl, data_dict)
+        d = await self.get_cache(key_str)
+        ttl = d["redis"]["ttl"]
+        query_ms = InsightLogger.InsightLogger.time_log(self.lg_cache, st, 'set+get "{}" ttl: {}'.format(key_str, ttl),
+                                                        warn_higher=2000, seconds=False)
+        d["redis"]["query"] = query_ms
+        return d

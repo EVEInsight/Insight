@@ -4,6 +4,7 @@ import InsightExc
 import asyncio
 from functools import partial
 import InsightLogger
+from InsightUtilities.StaticHelpers import *
 
 
 class AbstractEndpoint(metaclass=InsightSingleton):
@@ -42,10 +43,10 @@ class AbstractEndpoint(metaclass=InsightSingleton):
                 else:
                     return k
 
-    async def _set(self, key_str: str, ttl: int, data_object: dict):
-        if ttl is None:
-            ttl = self.ttl
-        await self.cm.set_cache(key_str, ttl, data_dict=data_object)
+    async def _set(self, key_str: str, data_object: dict) -> dict:
+        ttl = Helpers.get_nested_value(data_object, self.default_ttl(), "redis", "ttl")
+        data_object.pop("redis", None)
+        return await self.cm.set_and_get_cache(key_str, ttl, data_dict=data_object)
 
     async def get(self, **kwargs) -> dict:
         try:
@@ -54,9 +55,11 @@ class AbstractEndpoint(metaclass=InsightSingleton):
                 try:
                     return await self.cm.get_cache(cache_key)
                 except InsightExc.Subsystem.KeyDoesNotExist:
+                    st = InsightLogger.InsightLogger.time_start()
                     result = await self._do_endpoint_logic(**kwargs)
-                    await self._set(cache_key, self.ttl, result)
-                    return result
+                    InsightLogger.InsightLogger.time_log(self.lg, st, 'logic - key: "{}"'.format(cache_key),
+                                                         warn_higher=5000, seconds=False)
+                    return await self._set(cache_key, result)
         except Exception as ex:
             self.lg.exception(ex)
             raise ex
@@ -70,4 +73,20 @@ class AbstractEndpoint(metaclass=InsightSingleton):
     def default_ttl(self) -> int:
         return 3600
 
+    def extract_min_ttl(self, *args):
+        min_ttl = self.default_ttl()
+        for d in args:
+            ttl = Helpers.get_nested_value(d, 0, "redis", "ttl")
+            if ttl < min_ttl:
+                min_ttl = ttl
+        if min_ttl <= 0:
+            min_ttl = 1
+        return min_ttl
 
+    def set_min_ttl(self, d: dict, ttl: int):
+        if "redis" in d:
+            d["redis"]["ttl"] = ttl
+        else:
+            d["redis"] = {
+                "ttl": ttl
+            }

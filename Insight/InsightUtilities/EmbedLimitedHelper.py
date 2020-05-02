@@ -14,6 +14,7 @@ class EmbedLimitedHelper(discord.Embed):
         self.limit_field_value = 1024
         self.limit_description = 2048
         self.limit_footer_text = 2048
+        self.limit_title = 256
         self.count_fields = 0
         self.count_total_chars = 0
 
@@ -96,5 +97,14 @@ class EmbedLimitedHelper(discord.Embed):
     def set_timestamp(self, utc_time: datetime):
         self.timestamp = utc_time
 
+    def set_title(self, text):
+        char_count = self.char_count(text)
+        self._char_check(char_count, self.limit_title)
+        self._increment_counter(char_count)
+        self.title = text
 
+    def set_url(self, url):
+        char_count = self.char_count(url)
+        self._increment_counter(char_count)
+        self.url = url
 

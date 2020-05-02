@@ -21,20 +21,19 @@ class AbstractBaseClient(object):
         raise InsightExc.Subsystem.NoRedis
 
     def _serialize(self, obj: dict):
-        st = InsightLogger.InsightLogger.time_start()
         s = json.dumps(obj)
-        InsightLogger.InsightLogger.time_log(self.lg, st, 'Object serialize.')
         return s
 
     async def serialize(self, obj: dict) -> str:
         return await self.loop.run_in_executor(self.tp, partial(self._serialize, obj))
 
     def _derialize(self, obj: str) -> dict:
-        st = InsightLogger.InsightLogger.time_start()
         d = json.loads(obj)
-        InsightLogger.InsightLogger.time_log(self.lg, st, 'Object deserialize.')
         return d
 
     async def deserialize(self, obj: str) -> dict:
         return await self.loop.run_in_executor(self.tp, partial(self._derialize, obj))
+
+    async def get_ttl(self, key_str: str) -> int:
+        raise InsightExc.Subsystem.NoRedis
 
