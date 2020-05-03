@@ -102,12 +102,7 @@ class sqlUpdater(object):
 
     def sqlV_2_5_0(self):
         """v2.5.0"""
-        yield "CREATE INDEX ix_attackers_character_id on attackers (character_id);"
-        yield "CREATE INDEX ix_attackers_corporation_id on attackers (corporation_id);"
-        yield "CREATE INDEX ix_attackers_alliance_id on attackers (alliance_id);"
-        yield "CREATE INDEX ix_victims_character_id on victims (character_id);"
-        yield "CREATE INDEX ix_victims_corporation_id on victims (corporation_id);"
-        yield "CREATE INDEX ix_victims_alliance_id on victims (alliance_id);"
+        yield "UPDATE kills SET locationID = NULL WHERE locationID = 0;"
 
     def update_all(self):
         """Updates tables, returning the latest successful updated version"""

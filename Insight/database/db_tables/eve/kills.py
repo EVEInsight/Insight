@@ -40,7 +40,11 @@ class Kills(dec_Base.Base, table_row):
             self.solar_system_id = killmail_dict.get("solar_system_id")
         zkb_dict = data.get("zkb")
         if zkb_dict:
-            self.locationID = zkb_dict.get("locationID")
+            loc_id = zkb_dict.get("locationID")
+            if loc_id and loc_id >= 1:
+                self.locationID = loc_id
+            else:
+                self.locationID = loc_id
             self.hash = zkb_dict.get("hash")
             self.fittedValue = zkb_dict.get("fittedValue")
             self.totalValue = zkb_dict.get("totalValue")
