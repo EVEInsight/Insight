@@ -44,7 +44,7 @@ class Kills(dec_Base.Base, table_row):
             if loc_id and loc_id >= 1:
                 self.locationID = loc_id
             else:
-                self.locationID = loc_id
+                self.locationID = None
             self.hash = zkb_dict.get("hash")
             self.fittedValue = zkb_dict.get("fittedValue")
             self.totalValue = zkb_dict.get("totalValue")
