@@ -86,7 +86,7 @@ class service_module(object):
                     self.config.get("SQLITE_DB_PATH")))
                 self._import_everything_flag = True
         else:
-            return not self.cli_args.skip_api_import
+            self._import_everything_flag = not self.cli_args.skip_api_import
 
     def get_session(self) -> Session:
         """
