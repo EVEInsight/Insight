@@ -10,19 +10,38 @@ class setup_database(object):
 
     def __init__(self, service_module):
         self.service = service_module
-        self.connection_str = "postgresql+psycopg2://{user}:{pw}@{host}:{port}/{db}".format(
-            user=self.service.config.get("POSTGRES_USER"), pw=self.service.config.get("POSTGRES_PASSWORD"),
-            host=self.service.config.get("POSTGRES_HOST"), port=self.service.config.get("POSTGRES_PORT"),
-            db=self.service.config.get("POSTGRES_DB"))
+        self.using_postgres = False
+        if self.service.config.get("DB_DRIVER") == "postgres":
+            self.using_postgres = True
+            self.connection_str = "postgresql+psycopg2://{user}:{pw}@{host}:{port}/{db}".format(
+                user=self.service.config.get("POSTGRES_USER"), pw=self.service.config.get("POSTGRES_PASSWORD"),
+                host=self.service.config.get("POSTGRES_HOST"), port=self.service.config.get("POSTGRES_PORT"),
+                db=self.service.config.get("POSTGRES_DB"))
+        elif self.service.config.get("DB_DRIVER") == "sqlite3":
+            self.connection_str = "sqlite:///{}".format(self.service.config.get("SQLITE_DB_PATH"))
+        else:
+            print("Invalid value: '{}' for DB_DRIVER. Must be either 'postgres' or 'sqlite3'.\n".
+                  format(self.service.config.get("DB_DRIVER")))
+            sys.exit(1)
         self.initial_load()
-        self.engine = create_engine(self.connection_str, echo=False, pool_size=20, max_overflow=20)
+        if self.using_postgres:
+            self.engine = create_engine(self.connection_str, echo=False,
+                                        pool_size=self.service.config.get("POSTGRES_POOLSIZE"),
+                                        max_overflow=self.service.config.get("POSTGRES_POOLOVERFLOW"))
+        else:
+            self.engine = create_engine(self.connection_str, connect_args={'check_same_thread': False, 'timeout': 3000},
+                                        echo=False)
         DB.Base.Base.metadata.create_all(self.engine)
         self._dbSession = sessionmaker(bind=self.engine)
         self.sc_session = scoped_session(self._dbSession)
         self.verify_tokens()
 
     def initial_load(self):
-        engine = create_engine(self.connection_str, echo=False)
+        if self.using_postgres:
+            engine = create_engine(self.connection_str, echo=False)
+        else:
+            engine = create_engine(self.connection_str, connect_args={'check_same_thread': True, 'timeout': 3000},
+                                   echo=False)
         DB.version.versionBase.metadata.create_all(engine)
         ses = sessionmaker(bind=engine)
         session_ob = ses()
