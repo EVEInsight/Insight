@@ -15,6 +15,8 @@ class CacheManager(SubsystemBase):
         self.MostExpensiveKMs = CacheEndpoint.MostExpensiveKMs(cache_manager=self)
         self.KMStats = CacheEndpoint.KMStats(cache_manager=self)
         self.MostExpensiveKMsEmbed = CacheEndpoint.MostExpensiveKMsEmbed(cache_manager=self)
+        self.CharacterNameToID = CacheEndpoint.CharacterNameToID(cache_manager=self)
+        self.BulkCharacterNameToID = CacheEndpoint.BulkCharacterNameToID(cache_manager=self)
 
     async def start_subsystem(self):
         try:
@@ -39,19 +41,21 @@ class CacheManager(SubsystemBase):
                                                         warn_higher=2000, seconds=False)
         data["redis"] = {
             "ttl": ttl,
-            "query": query_ms
+            "queryms": query_ms,
+            "cacheHit": True
         }
         return data
 
     async def set_cache(self, key_str: str, ttl: int, data_dict: dict):
         await self.client.set(key_str, ttl, data_dict)
 
-    async def set_and_get_cache(self, key_str: str, ttl: int, data_dict: dict):
-        st = InsightLogger.InsightLogger.time_start()
+    async def set_and_get_cache(self, key_str: str, ttl: int, data_dict: dict, operation_start_time):
         await self.set_cache(key_str, ttl, data_dict)
         d = await self.get_cache(key_str)
         ttl = d["redis"]["ttl"]
-        query_ms = InsightLogger.InsightLogger.time_log(self.lg_cache, st, 'set+get "{}" ttl: {}'.format(key_str, ttl),
-                                                        warn_higher=2000, seconds=False)
-        d["redis"]["query"] = query_ms
+        query_ms = InsightLogger.InsightLogger.time_log(self.lg_cache, operation_start_time,
+                                                        'set+get "{}" ttl: {}'.format(key_str, ttl), warn_higher=5000,
+                                                        seconds=False)
+        d["redis"]["queryms"] = query_ms
+        d["redis"]["cacheHit"] = False
         return d

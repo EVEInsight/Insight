@@ -1,3 +1,5 @@
 from InsightSubsystems.Cache.CacheEndpoint.MostExpensiveKMs import MostExpensiveKMs
 from InsightSubsystems.Cache.CacheEndpoint.MostExpensiveKMsEmbed import MostExpensiveKMsEmbed
 from InsightSubsystems.Cache.CacheEndpoint.KMStats import KMStats
+from InsightSubsystems.Cache.CacheEndpoint.CharacterNameToID import CharacterNameToID
+from InsightSubsystems.Cache.CacheEndpoint.BulkCharacterNameToID import BulkCharacterNameToID

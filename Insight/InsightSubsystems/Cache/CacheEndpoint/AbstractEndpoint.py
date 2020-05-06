@@ -43,10 +43,11 @@ class AbstractEndpoint(metaclass=InsightSingleton):
                 else:
                     return k
 
-    async def _set(self, key_str: str, data_object: dict) -> dict:
+    async def _set(self, key_str: str, data_object: dict, endpoint_start_time) -> dict:
         ttl = Helpers.get_nested_value(data_object, self.default_ttl(), "redis", "ttl")
         data_object.pop("redis", None)
-        return await self.cm.set_and_get_cache(key_str, ttl, data_dict=data_object)
+        return await self.cm.set_and_get_cache(key_str, ttl, data_dict=data_object,
+                                               operation_start_time=endpoint_start_time)
 
     async def get(self, **kwargs) -> dict:
         try:
@@ -59,7 +60,7 @@ class AbstractEndpoint(metaclass=InsightSingleton):
                     result = await self._do_endpoint_logic(**kwargs)
                     InsightLogger.InsightLogger.time_log(self.lg, st, 'logic - key: "{}"'.format(cache_key),
                                                          warn_higher=5000, seconds=False)
-                    return await self._set(cache_key, result)
+                    return await self._set(cache_key, result, st)
         except Exception as ex:
             self.lg.exception(ex)
             raise ex
@@ -71,7 +72,7 @@ class AbstractEndpoint(metaclass=InsightSingleton):
         raise NotImplementedError
 
     def default_ttl(self) -> int:
-        return 3600
+        return 108000  # 30 days
 
     def extract_min_ttl(self, *args):
         min_ttl = self.default_ttl()
