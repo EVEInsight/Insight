@@ -8,9 +8,9 @@ class Attackers(dec_Base.Base, Base_Str_ATKv):
 
     no_pk = Column(Integer,primary_key=True,autoincrement=True,nullable=False)
     kill_id = Column(Integer,ForeignKey("kills.kill_id"),nullable=False, index=True, autoincrement=False)
-    character_id = Column(Integer,ForeignKey("characters.character_id"),default=None, nullable=True)
-    corporation_id = Column(Integer,ForeignKey("corporations.corporation_id"), default=None, nullable=True)
-    alliance_id = Column(Integer,ForeignKey("alliances.alliance_id"), default=None, nullable=True)
+    character_id = Column(Integer,ForeignKey("characters.character_id"),default=None, nullable=True, index=True)
+    corporation_id = Column(Integer,ForeignKey("corporations.corporation_id"), default=None, nullable=True, index=True)
+    alliance_id = Column(Integer,ForeignKey("alliances.alliance_id"), default=None, nullable=True, index=True)
     damage_done = Column(Float, default=0.0, nullable=False)
     final_blow = Column(Boolean, default=False, nullable=False)
     security_status = Column(Float, default=0.0, nullable=False)

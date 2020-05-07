@@ -7,9 +7,9 @@ class Victims(dec_Base.Base, table_row, Base_Str_ATKv):
     __tablename__ = 'victims'
 
     kill_id = Column(Integer,ForeignKey("kills.kill_id"), primary_key=True,nullable=False, autoincrement=False)
-    character_id = Column(Integer,ForeignKey("characters.character_id"),default=None, nullable=True)
-    corporation_id = Column(Integer,ForeignKey("corporations.corporation_id"), default=None, nullable=True)
-    alliance_id = Column(Integer,ForeignKey("alliances.alliance_id"), default=None, nullable=True)
+    character_id = Column(Integer,ForeignKey("characters.character_id"),default=None, nullable=True, index=True)
+    corporation_id = Column(Integer,ForeignKey("corporations.corporation_id"), default=None, nullable=True, index=True)
+    alliance_id = Column(Integer,ForeignKey("alliances.alliance_id"), default=None, nullable=True, index=True)
     damage_taken = Column(Float, default=0.0, nullable=False)
     pos_x = Column(Float, default=0, nullable=False)
     pos_y = Column(Float,default=0,nullable=False)

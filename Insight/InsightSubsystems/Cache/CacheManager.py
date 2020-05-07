@@ -17,6 +17,7 @@ class CacheManager(SubsystemBase):
         self.MostExpensiveKMsEmbed = CacheEndpoint.MostExpensiveKMsEmbed(cache_manager=self)
         self.CharacterNameToID = CacheEndpoint.CharacterNameToID(cache_manager=self)
         self.BulkCharacterNameToID = CacheEndpoint.BulkCharacterNameToID(cache_manager=self)
+        self.LastShip = CacheEndpoint.LastShip(cache_manager=self)
 
     async def start_subsystem(self):
         try:

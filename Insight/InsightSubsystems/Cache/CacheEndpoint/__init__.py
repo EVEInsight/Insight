@@ -3,3 +3,4 @@ from InsightSubsystems.Cache.CacheEndpoint.MostExpensiveKMsEmbed import MostExpe
 from InsightSubsystems.Cache.CacheEndpoint.KMStats import KMStats
 from InsightSubsystems.Cache.CacheEndpoint.CharacterNameToID import CharacterNameToID
 from InsightSubsystems.Cache.CacheEndpoint.BulkCharacterNameToID import BulkCharacterNameToID
+from InsightSubsystems.Cache.CacheEndpoint.LastShip import LastShip
