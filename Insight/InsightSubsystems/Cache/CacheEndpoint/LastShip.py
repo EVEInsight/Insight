@@ -25,7 +25,7 @@ class LastShip(AbstractEndpoint):
         super().__init__(cache_manager)
 
     def default_ttl(self) -> int:
-        return 30
+        return 7200
 
     def _get_unprefixed_key_hash_sync(self, char_id: int):
         return "{}".format(char_id)
@@ -87,48 +87,50 @@ class LastShip(AbstractEndpoint):
         db = self.db_sessions.get_session()
         d = {
             "data": {
-                "unknown": True
+                "known": False,
+                "queryID": char_id
             }
         }
         try:
-            involved_row = self.get_last_ship(db, char_id)
-            if isinstance(involved_row, tb_attackers) or isinstance(involved_row, tb_victims):
-                d["data"]["unknown"] = False
-                if isinstance(involved_row, tb_attackers):
-                    d["data"]["attacker"] = True
-                else:
-                    d["data"]["attacker"] = False
-                if isinstance(involved_row.object_pilot, tb_characters):
-                    d["data"]["character"] = involved_row.object_pilot.to_jsonDictionary()
-                if isinstance(involved_row.object_corp, tb_corporations):
-                    d["data"]["corporation"] = involved_row.object_corp.to_jsonDictionary()
-                if isinstance(involved_row.object_alliance, tb_alliances):
-                    d["data"]["alliance"] = involved_row.object_alliance.to_jsonDictionary()
-                if isinstance(involved_row.object_ship, tb_types):
-                    d["data"]["ship"] = involved_row.object_ship.to_jsonDictionary()
-                    if isinstance(involved_row.object_ship.object_group, tb_groups):
-                        group_id = involved_row.object_ship.object_group.group_id
-                        if group_id:
-                            if group_id in self.super_titans:
-                                d["data"]["isSuperTitan"] = True
-                            else:
-                                d["data"]["isSuperTitan"] = False
-                            if group_id in self.regular_capitals:
-                                d["data"]["isRegularCap"] = True
-                            else:
-                                d["data"]["isRegularCap"] = False
-                if isinstance(involved_row, tb_attackers):
-                    if isinstance(involved_row.object_weapon, tb_types):
-                        d["data"]["weapon"] = involved_row.object_weapon.to_jsonDictionary()
-                km = involved_row.object_kill
-                if isinstance(km, tb_kills):
-                    if isinstance(km.object_system, tb_systems):
-                        d["data"]["system"] = km.object_system.to_jsonDictionary()
-                    if isinstance(km.killmail_time, datetime):
-                        d["data"]["time"] = str(km.killmail_time)
+            if char_id and isinstance(char_id, int):
+                involved_row = self.get_last_ship(db, char_id)
+                if isinstance(involved_row, tb_attackers) or isinstance(involved_row, tb_victims):
+                    d["data"]["known"] = True
+                    if isinstance(involved_row, tb_attackers):
+                        d["data"]["attacker"] = True
                     else:
-                        d["data"]["time"] = str(datetime(year=2008, month=5, day=6))
-                    d["data"]["km"] = km.to_jsonDictionary()
+                        d["data"]["attacker"] = False
+                    if isinstance(involved_row.object_pilot, tb_characters):
+                        d["data"]["character"] = involved_row.object_pilot.to_jsonDictionary()
+                    if isinstance(involved_row.object_corp, tb_corporations):
+                        d["data"]["corporation"] = involved_row.object_corp.to_jsonDictionary()
+                    if isinstance(involved_row.object_alliance, tb_alliances):
+                        d["data"]["alliance"] = involved_row.object_alliance.to_jsonDictionary()
+                    if isinstance(involved_row.object_ship, tb_types):
+                        d["data"]["ship"] = involved_row.object_ship.to_jsonDictionary()
+                        if isinstance(involved_row.object_ship.object_group, tb_groups):
+                            group_id = involved_row.object_ship.object_group.group_id
+                            if group_id:
+                                if group_id in self.super_titans:
+                                    d["data"]["isSuperTitan"] = True
+                                else:
+                                    d["data"]["isSuperTitan"] = False
+                                if group_id in self.regular_capitals:
+                                    d["data"]["isRegularCap"] = True
+                                else:
+                                    d["data"]["isRegularCap"] = False
+                    if isinstance(involved_row, tb_attackers):
+                        if isinstance(involved_row.object_weapon, tb_types):
+                            d["data"]["weapon"] = involved_row.object_weapon.to_jsonDictionary()
+                    km = involved_row.object_kill
+                    if isinstance(km, tb_kills):
+                        if isinstance(km.object_system, tb_systems):
+                            d["data"]["system"] = km.object_system.to_jsonDictionary()
+                        if isinstance(km.killmail_time, datetime):
+                            d["data"]["time"] = str(km.killmail_time)
+                        else:
+                            d["data"]["time"] = str(datetime(year=2008, month=5, day=6))
+                        d["data"]["km"] = km.to_jsonDictionary()
         finally:
             db.close()
         return d
