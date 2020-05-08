@@ -15,7 +15,12 @@ class BulkCharacterNameToID(AbstractEndpoint):
         return "{}".format(hash(char_names))
 
     async def get(self, char_names: list) -> dict:
-        set_char_names = await self.run_executor(self.make_frozen_set, char_names=char_names)
+        if isinstance(char_names, list):
+            set_char_names = await self.run_executor(self.make_frozen_set, char_names=char_names)
+        elif isinstance(char_names, frozenset):
+            set_char_names = char_names
+        else:
+            raise TypeError
         return await super().get(char_names=set_char_names)
 
     async def _do_endpoint_logic(self, char_names: frozenset) -> dict:
