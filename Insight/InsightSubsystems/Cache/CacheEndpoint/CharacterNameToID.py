@@ -3,10 +3,12 @@ from database.db_tables import tb_characters
 
 
 class CharacterNameToID(AbstractEndpoint):
-    def default_ttl(self) -> int:
+    @staticmethod
+    def default_ttl() -> int:
         return 3600
 
-    def _get_unprefixed_key_hash_sync(self, char_name: str):
+    @staticmethod
+    def _get_unprefixed_key_hash_sync(char_name: str):
         return "{}".format(char_name)
 
     async def get(self, char_name: str) -> dict:

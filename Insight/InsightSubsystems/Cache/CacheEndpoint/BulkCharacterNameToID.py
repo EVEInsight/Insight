@@ -8,15 +8,13 @@ class BulkCharacterNameToID(AbstractEndpoint):
         super().__init__(cache_manager)
         self.CharacterNameToId = self.cm.CharacterNameToID
 
-    def make_frozen_set(self, char_names: list):
-        return frozenset(char_names)
-
-    def _get_unprefixed_key_hash_sync(self, char_names: frozenset):
+    @staticmethod
+    def _get_unprefixed_key_hash_sync(char_names: frozenset):
         return "{}".format(hash(char_names))
 
     async def get(self, char_names: list) -> dict:
         if isinstance(char_names, list):
-            set_char_names = await self.run_executor(self.make_frozen_set, char_names=char_names)
+            set_char_names = await self.executor_thread(self.make_frozen_set, char_names=char_names)
         elif isinstance(char_names, frozenset):
             set_char_names = char_names
         else:
@@ -28,9 +26,10 @@ class BulkCharacterNameToID(AbstractEndpoint):
         results = []
         for f in asyncio.as_completed(awaitables, timeout=5):
             results.append(await f)
-        return await self.run_executor(self.make_return_dict, char_data=results)
+        return await self.executor_thread(self.make_return_dict, results)
 
-    def make_return_dict(self, char_data: list) -> dict:
+    @classmethod
+    def make_return_dict(cls, char_data: list) -> dict:
         return_dict = {
             "data": {
                 "characters": [],
@@ -48,5 +47,5 @@ class BulkCharacterNameToID(AbstractEndpoint):
             else:
                 return_dict["data"]["unknown"].append(Helpers.get_nested_value(d, False, "data"))
                 return_dict["data"]["total_unknown"] += 1
-        self.set_min_ttl(return_dict, self.extract_min_ttl(*char_data))
+        cls.set_min_ttl(return_dict, cls.extract_min_ttl(*char_data))
         return return_dict

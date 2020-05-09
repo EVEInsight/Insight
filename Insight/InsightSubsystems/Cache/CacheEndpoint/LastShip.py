@@ -1,7 +1,6 @@
 from InsightSubsystems.Cache.CacheEndpoint.AbstractEndpoint import AbstractEndpoint
 from database.db_tables import tb_kills, tb_victims, tb_attackers, tb_types, tb_groups, tb_categories, \
     tb_characters, tb_corporations, tb_alliances, tb_systems
-from typing import List
 from sqlalchemy.orm import Session
 from datetime import datetime
 
@@ -24,10 +23,12 @@ class LastShip(AbstractEndpoint):
         ]
         super().__init__(cache_manager)
 
-    def default_ttl(self) -> int:
+    @staticmethod
+    def default_ttl() -> int:
         return 7200
 
-    def _get_unprefixed_key_hash_sync(self, char_id: int):
+    @staticmethod
+    def _get_unprefixed_key_hash_sync(char_id: int):
         return "{}".format(char_id)
 
     async def get(self, char_id: int) -> dict:

@@ -3,8 +3,8 @@ from functools import partial
 
 
 class Helpers(object):
-    @classmethod
-    def get_nested_value(cls, d: dict, default_value=None, *args):
+    @staticmethod
+    def get_nested_value(d: dict, default_value=None, *args):
         for k in args:
             try:
                 d = d.get(k)

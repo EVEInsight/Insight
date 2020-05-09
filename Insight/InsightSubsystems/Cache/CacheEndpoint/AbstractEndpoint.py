@@ -10,6 +10,7 @@ from InsightUtilities.StaticHelpers import *
 class AbstractEndpoint(metaclass=InsightSingleton):
     def __init__(self, cache_manager):
         self.cm: CacheManager.CacheManager = cache_manager
+        self.pool = self.cm.tp
         self.key_prefix = str(str(self.__class__.__name__).replace("_", ""))
         self.lg = InsightLogger.InsightLogger.get_logger('Cache.{}'.format(self.key_prefix), 'Cache.log', child=True)
         self.lock = asyncio.Lock(loop=self.cm.loop)
@@ -18,17 +19,28 @@ class AbstractEndpoint(metaclass=InsightSingleton):
         self.ttl = self.default_ttl()
         self.key_locks = AsyncLockManager(self.cm.loop)
         self.loop = self.cm.loop
-        self.thread_pool = self.cm.tp
         self.db_sessions: DBSessions = DBSessions()
 
-    async def run_executor(self, callback, **kwargs):
-        return await self.loop.run_in_executor(self.thread_pool, partial(callback, **kwargs))
+    async def executor_thread(self, callback, *args, **kwargs):
+        return await self.loop.run_in_executor(self.cm.tp, partial(callback, *args, **kwargs))
 
-    def _get_unprefixed_key_hash_sync(self, **kwargs) -> str:
+    async def executor_proc(self, callback, *args, **kwargs):
+        return await self.loop.run_in_executor(self.cm.pool, partial(callback, *args, **kwargs))
+
+    @staticmethod
+    def make_frozen_set(list_items: list):
+        return frozenset(list_items)
+
+    @staticmethod
+    def frozenset_to_set(frozen_set: frozenset):
+        return set(frozen_set)
+
+    @staticmethod
+    def _get_unprefixed_key_hash_sync(**kwargs) -> str:
         raise NotImplementedError
 
     async def _get_unprefixed_key_hash(self, **kwargs) -> str:
-        return await self.loop.run_in_executor(self.thread_pool, partial(self._get_unprefixed_key_hash_sync, **kwargs))
+        return await self.executor_thread(self._get_unprefixed_key_hash_sync, **kwargs)
 
     async def _get_prefixed_key(self, unprefixed_key: str) -> str:
         if unprefixed_key is None:
@@ -66,16 +78,18 @@ class AbstractEndpoint(metaclass=InsightSingleton):
             raise ex
 
     async def _do_endpoint_logic(self, **kwargs) -> dict:
-        return await self.loop.run_in_executor(self.thread_pool, partial(self._do_endpoint_logic_sync, **kwargs))
+        return await self.executor_thread(self._do_endpoint_logic_sync, **kwargs)
 
     def _do_endpoint_logic_sync(self, **kwargs) -> dict:
         raise NotImplementedError
 
-    def default_ttl(self) -> int:
+    @staticmethod
+    def default_ttl() -> int:
         return 108000  # 30 days
 
-    def extract_min_ttl(self, *args):
-        min_ttl = self.default_ttl()
+    @classmethod
+    def extract_min_ttl(cls, *args):
+        min_ttl = cls.default_ttl()
         for d in args:
             ttl = Helpers.get_nested_value(d, 0, "redis", "ttl")
             if ttl < min_ttl:
@@ -84,7 +98,8 @@ class AbstractEndpoint(metaclass=InsightSingleton):
             min_ttl = 1
         return min_ttl
 
-    def set_min_ttl(self, d: dict, ttl: int):
+    @staticmethod
+    def set_min_ttl(d: dict, ttl: int):
         if "redis" in d:
             d["redis"]["ttl"] = ttl
         else:

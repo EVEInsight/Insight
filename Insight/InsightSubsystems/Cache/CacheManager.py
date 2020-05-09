@@ -16,7 +16,8 @@ class CacheManager(SubsystemBase):
         if self.config.get("MULTIPROCESS"):
             mp.set_start_method('spawn')
             self.pool = ProcessPoolExecutor()
-        self.client = NoRedisClient.NoRedisClient(self.config, self.pool)
+            print("Cache manager multiprocess support is enabled.")
+        self.client = NoRedisClient.NoRedisClient(self.config, self.tp)
         self.MostExpensiveKMs = CacheEndpoint.MostExpensiveKMs(cache_manager=self)
         self.KMStats = CacheEndpoint.KMStats(cache_manager=self)
         self.MostExpensiveKMsEmbed = CacheEndpoint.MostExpensiveKMsEmbed(cache_manager=self)
@@ -28,7 +29,7 @@ class CacheManager(SubsystemBase):
 
     async def start_subsystem(self):
         try:
-            redis = RedisClient.RedisClient(self.config, self.pool)
+            redis = RedisClient.RedisClient(self.config, self.tp)
             if await redis.establish_connection():
                 self.client = redis
                 print("Redis connection established.")

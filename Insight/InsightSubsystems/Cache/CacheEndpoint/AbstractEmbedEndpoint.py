@@ -7,7 +7,8 @@ from functools import partial
 
 
 class AbstractEmbedEndpoint(AbstractEndpoint):
-    def default_color(self) -> discord.Color:
+    @staticmethod
+    def default_color() -> discord.Color:
         return discord.Color(659493)
 
     def make_embed(self, d: dict) -> discord.Embed:
@@ -17,4 +18,4 @@ class AbstractEmbedEndpoint(AbstractEndpoint):
 
     async def get(self, **kwargs) -> discord.Embed:
         response = await super().get(**kwargs)
-        return await self.loop.run_in_executor(self.thread_pool, partial(self.make_embed, response))
+        return await self.executor_thread(self.make_embed, response)

@@ -1,6 +1,6 @@
 from InsightUtilities import ConfigLoader
 import asyncio
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 import json
 from functools import partial
 import InsightExc

@@ -13,10 +13,12 @@ class MostExpensiveKMsEmbed(AbstractEmbedEndpoint):
         self.MostExpensiveKMs = self.cm.MostExpensiveKMs
         self.KMStats = self.cm.KMStats
 
-    def default_ttl(self) -> int:
+    @staticmethod
+    def default_ttl() -> int:
         return 1800
 
-    def _get_unprefixed_key_hash_sync(self, last_hours: int, server_prefix: str):
+    @staticmethod
+    def _get_unprefixed_key_hash_sync(last_hours: int, server_prefix: str):
         return "{}:{}".format(last_hours, server_prefix)
 
     async def get(self, last_hours: int = 24, server_prefix: str = "?") -> discord.Embed:
@@ -25,17 +27,18 @@ class MostExpensiveKMsEmbed(AbstractEmbedEndpoint):
     async def _do_endpoint_logic(self, last_hours: int, server_prefix: str) -> dict:
         top_kms = await self.MostExpensiveKMs.get(batch_limit=25, last_hours=last_hours)
         km_stats = await self.KMStats.get(last_hours=last_hours)
-        return await self.run_executor(self._do_endpoint_logic_sync, last_hours=last_hours,
-                                       server_prefix=server_prefix, topkms_dict=top_kms, km_stats=km_stats)
+        return await self.executor_proc(self._do_endpoint_logic_sync, last_hours=last_hours,
+                                        server_prefix=server_prefix, topkms_dict=top_kms, km_stats=km_stats)
 
-    def _do_endpoint_logic_sync(self, last_hours: int, server_prefix: str, topkms_dict: dict, km_stats: dict) -> dict:
-        expire_ttl = self.extract_min_ttl(topkms_dict, km_stats)
+    @classmethod
+    def _do_endpoint_logic_sync(cls, last_hours: int, server_prefix: str, topkms_dict: dict, km_stats: dict) -> dict:
+        expire_ttl = cls.extract_min_ttl(topkms_dict, km_stats)
         expire = datetime.utcnow() + timedelta(seconds=expire_ttl)
         expire_str = "{} UTC".format(expire.strftime("%H:%M"))
         total_days = int(last_hours / 24) if last_hours > 0 else 0
         time_period_str = "{} days".format(total_days) if total_days > 1 else "{} hours".format(last_hours)
         e = EmbedLimitedHelper()
-        e.set_color(self.default_color())
+        e.set_color(cls.default_color())
         e.set_timestamp(datetime.utcnow())
         e.set_title("Most expensive kills over the last {}".format(time_period_str))
         e.set_url("https://zkillboard.com/kills/bigkills/")
@@ -95,5 +98,5 @@ class MostExpensiveKMsEmbed(AbstractEmbedEndpoint):
         return_result = {
             "embed": j,
         }
-        self.set_min_ttl(return_result, expire_ttl)
+        cls.set_min_ttl(return_result, expire_ttl)
         return return_result

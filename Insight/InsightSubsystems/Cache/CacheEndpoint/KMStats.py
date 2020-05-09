@@ -6,10 +6,12 @@ from sqlalchemy import func
 
 
 class KMStats(AbstractEndpoint):
-    def default_ttl(self) -> int:
+    @staticmethod
+    def default_ttl() -> int:
         return 900
 
-    def _get_unprefixed_key_hash_sync(self, last_hours: int):
+    @staticmethod
+    def _get_unprefixed_key_hash_sync(last_hours: int):
         return "{}".format(last_hours)
 
     async def get(self, last_hours: int = 24) -> dict:
