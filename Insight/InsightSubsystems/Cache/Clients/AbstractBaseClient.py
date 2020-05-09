@@ -1,6 +1,6 @@
 from InsightUtilities import ConfigLoader
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 import json
 from functools import partial
 import InsightExc
@@ -8,11 +8,11 @@ import InsightLogger
 
 
 class AbstractBaseClient(object):
-    def __init__(self, config_class, thread_pool):
+    def __init__(self, config_class, concurrent_pool):
         self.lg = InsightLogger.InsightLogger.get_logger('Cache.Client', 'Cache.log', child=True)
         self.config: ConfigLoader = config_class
         self.loop = asyncio.get_event_loop()
-        self.tp: ThreadPoolExecutor = thread_pool
+        self.pool: ThreadPoolExecutor = concurrent_pool
 
     async def get(self, key_str: str) -> dict:
         raise InsightExc.Subsystem.NoRedis
@@ -20,19 +20,19 @@ class AbstractBaseClient(object):
     async def set(self, key_str: str, ttl: int, data_dict: dict):
         raise InsightExc.Subsystem.NoRedis
 
-    def _serialize(self, obj: dict):
-        s = json.dumps(obj)
-        return s
+    @staticmethod
+    def _serialize(obj: dict):
+        return json.dumps(obj)
 
     async def serialize(self, obj: dict) -> str:
-        return await self.loop.run_in_executor(self.tp, partial(self._serialize, obj))
+        return await self.loop.run_in_executor(self.pool, partial(self._serialize, obj))
 
-    def _derialize(self, obj: str) -> dict:
-        d = json.loads(obj)
-        return d
+    @staticmethod
+    def _deserialize(obj: str) -> dict:
+        return json.loads(obj)
 
     async def deserialize(self, obj: str) -> dict:
-        return await self.loop.run_in_executor(self.tp, partial(self._derialize, obj))
+        return await self.loop.run_in_executor(self.pool, partial(self._deserialize, obj))
 
     async def get_ttl(self, key_str: str) -> int:
         raise InsightExc.Subsystem.NoRedis

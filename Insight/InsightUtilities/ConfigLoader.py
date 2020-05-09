@@ -123,5 +123,6 @@ class ConfigLoader(metaclass=InsightSingleton):
         self.parse_int("REDIS_PORT", "NULL", "NULL", False, 6379, True)
         self.parse_str("REDIS_PASSWORD", "NULL", "NULL", False, "", True)
         self.parse_int("REDIS_DB", "NULL", "NULL", False, 0, True)
+        self.parse_bool("MULTIPROCESS", "NULL", "NULL", False, "FALSE", True)
 
 

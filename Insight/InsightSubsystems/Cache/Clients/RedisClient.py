@@ -6,8 +6,8 @@ import InsightExc
 
 
 class RedisClient(AbstractBaseClient):
-    def __init__(self, config_class, thread_pool):
-        super().__init__(config_class, thread_pool)
+    def __init__(self, config_class, concurrent_pool):
+        super().__init__(config_class, concurrent_pool)
         self.host = self.config.get("REDIS_HOST")
         self.password = self.config.get("REDIS_PASSWORD")
         self.port = self.config.get("REDIS_PORT")

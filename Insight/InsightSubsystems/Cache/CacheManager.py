@@ -2,8 +2,9 @@ from InsightSubsystems.SubsystemBase import SubsystemBase
 from InsightSubsystems.Cache.Clients import RedisClient, NoRedisClient
 from InsightSubsystems.Cache import CacheEndpoint
 import sys
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 import InsightLogger
+import multiprocessing as mp
 
 
 class CacheManager(SubsystemBase):
@@ -11,7 +12,11 @@ class CacheManager(SubsystemBase):
         super().__init__(subsystemloader)
         self.lg_cache = InsightLogger.InsightLogger.get_logger('Cache.Manager', 'Cache.log', child=True)
         self.tp = ThreadPoolExecutor(max_workers=5)
-        self.client = NoRedisClient.NoRedisClient(self.config, self.tp)
+        self.pool = self.tp  # can be reference to existing thread pool or a new multiproc pool if enabled
+        if self.config.get("MULTIPROCESS"):
+            mp.set_start_method('spawn')
+            self.pool = ProcessPoolExecutor()
+        self.client = NoRedisClient.NoRedisClient(self.config, self.pool)
         self.MostExpensiveKMs = CacheEndpoint.MostExpensiveKMs(cache_manager=self)
         self.KMStats = CacheEndpoint.KMStats(cache_manager=self)
         self.MostExpensiveKMsEmbed = CacheEndpoint.MostExpensiveKMsEmbed(cache_manager=self)
@@ -23,7 +28,7 @@ class CacheManager(SubsystemBase):
 
     async def start_subsystem(self):
         try:
-            redis = RedisClient.RedisClient(self.config, self.tp)
+            redis = RedisClient.RedisClient(self.config, self.pool)
             if await redis.establish_connection():
                 self.client = redis
                 print("Redis connection established.")
@@ -34,7 +39,9 @@ class CacheManager(SubsystemBase):
             print(ex)
 
     async def stop_subsystem(self):
-        self.client.tp.shutdown(wait=True)
+        self.tp.shutdown(wait=True)
+        if isinstance(self.pool, ProcessPoolExecutor):
+            self.pool.shutdown(wait=True)
 
     async def get_cache(self, key_str: str) -> dict:
         st = InsightLogger.InsightLogger.time_start()
