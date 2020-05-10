@@ -26,6 +26,8 @@ class CacheManager(SubsystemBase):
         self.LastShip = CacheEndpoint.LastShip(cache_manager=self)
         self.BulkCharacterIDsToLastShip = CacheEndpoint.BulkCharacterIDsToLastShip(cache_manager=self)
         self.BulkCharacterNamesToLastShip = CacheEndpoint.BulkCharacterNamesToLastShip(cache_manager=self)
+        self.LocalScan = CacheEndpoint.LocalScan(cache_manager=self)
+        #self.LocalScanEmbed = CacheEndpoint.LocalScanEmbed(cache_manager=self)
 
     async def start_subsystem(self):
         try:

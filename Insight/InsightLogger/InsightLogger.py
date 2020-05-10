@@ -30,7 +30,7 @@ class InsightLogger(object):
         logger = logging.getLogger(name)
         if len(logger.handlers) == 0 and not child:
             logger.setLevel(level)
-            f_fmt = logging.Formatter('%(asctime)s %(threadName)23s:%(name)-40s %(levelname)-8s - %(message)s')
+            f_fmt = logging.Formatter('%(asctime)s %(process)10s:%(threadName)s:%(name)-40s %(levelname)-8s - %(message)s')
             f_fmt.converter = time.gmtime
             if console_print:
                 if console_level >= logging.WARNING:

@@ -1,6 +1,6 @@
 from InsightSubsystems.Cache.CacheEndpoint.AbstractEndpoint import AbstractEndpoint
 from database.db_tables import tb_kills, tb_victims, tb_attackers, tb_types, tb_groups, tb_categories, \
-    tb_characters, tb_corporations, tb_alliances, tb_systems
+    tb_characters, tb_corporations, tb_alliances, tb_systems, tb_locations
 from sqlalchemy.orm import Session
 from datetime import datetime
 
@@ -129,6 +129,8 @@ class LastShip(AbstractEndpoint):
                             d["data"]["system"] = km.object_system.to_jsonDictionary()
                         if isinstance(km.killmail_time, datetime):
                             d["data"]["time"] = str(km.killmail_time)
+                        if isinstance(km.object_location, tb_locations):
+                            d["data"]["location"] = km.object_location.to_jsonDictionary()
                         else:
                             d["data"]["time"] = str(datetime(year=2008, month=5, day=6))
                         d["data"]["km"] = km.to_jsonDictionary()
