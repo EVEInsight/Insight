@@ -95,7 +95,7 @@ class Kills(dec_Base.Base, table_row):
         try:
             k_id = data.get("killID")
             if k_id:
-                if not db.query(exists().where(cls.kill_id == k_id)).scalar():
+                if not cls.session_exists(k_id, db):
                     __row = cls(data)
                     __row.load_fk_objects()
                     db.merge(__row)
