@@ -1,5 +1,6 @@
 from .base_objects import *
 from .sde_importer import sde_impoter
+from InsightUtilities.StaticHelpers import URLHelper
 
 
 class Locations(dec_Base.Base,table_row,sde_impoter):
@@ -98,7 +99,8 @@ class Locations(dec_Base.Base,table_row,sde_impoter):
             "pos_z": self.pos_z,
             "radius": self.radius,
             "type": self.object_type.to_jsonDictionary() if self.object_type else None,
-            "group": self.object_group.to_jsonDictionary() if self.object_group else None
+            "group": self.object_group.to_jsonDictionary() if self.object_group else None,
+            "urlZK": URLHelper.zk_location(self.location_id)
         }
 
 

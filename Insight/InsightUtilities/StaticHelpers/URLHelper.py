@@ -40,6 +40,20 @@ class URLHelper(object):
             return ""
 
     @staticmethod
+    def zk_system(system_id):
+        try:
+            return "https://zkillboard.com/system/{}/".format(system_id)
+        except:
+            return ""
+
+    @staticmethod
+    def zk_location(location_id):
+        try:
+            return "https://zkillboard.com/location/{}/".format(location_id)
+        except:
+            return ""
+
+    @staticmethod
     def str_dotlan_map(system_name: str, region_name: str):
         try:
             s_name = system_name.replace(' ', '_')

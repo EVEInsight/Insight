@@ -6,6 +6,7 @@ import operator
 import math
 from sqlalchemy import exists
 import traceback
+from InsightUtilities.StaticHelpers import URLHelper
 
 
 class Kills(dec_Base.Base, table_row):
@@ -392,7 +393,8 @@ class Kills(dec_Base.Base, table_row):
             "totalValue": self.totalValue,
             "npc": self.npc,
             "solo": self.solo,
-            "awox": self.awox
+            "awox": self.awox,
+            "urlZK": URLHelper.zk_url(self.kill_id)
         }}
         zkb = {"zkb": {
             "locationID": self.locationID,

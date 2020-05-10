@@ -1,4 +1,5 @@
 from .base_objects import *
+from InsightUtilities.StaticHelpers import URLHelper
 
 
 class Alliances(dec_Base.Base,name_only):
@@ -38,5 +39,6 @@ class Alliances(dec_Base.Base,name_only):
     def to_jsonDictionary(self) -> dict:
         return {
             "alliance_id": self.alliance_id,
-            "alliance_name": self.alliance_name
+            "alliance_name": self.alliance_name,
+            "urlZK": URLHelper.zk_alliance(self.alliance_id)
         }

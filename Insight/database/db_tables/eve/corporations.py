@@ -1,4 +1,5 @@
 from .base_objects import *
+from InsightUtilities.StaticHelpers import URLHelper
 
 
 class Corporations(dec_Base.Base,name_only):
@@ -38,5 +39,6 @@ class Corporations(dec_Base.Base,name_only):
     def to_jsonDictionary(self) -> dict:
         return {
             "corporation_id": self.corporation_id,
-            "corporation_name": self.corporation_name
+            "corporation_name": self.corporation_name,
+            "urlZK": URLHelper.zk_corporation(self.corporation_id)
         }

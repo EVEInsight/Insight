@@ -2,6 +2,7 @@ from .base_objects import *
 from . import constellations
 from .sde_importer import *
 import math
+from InsightUtilities.StaticHelpers import URLHelper
 
 
 class Systems(dec_Base.Base, name_only, individual_api_pulling, index_api_updating, sde_impoter):
@@ -226,7 +227,9 @@ class Systems(dec_Base.Base, name_only, individual_api_pulling, index_api_updati
             "pos_x": self.pos_x,
             "pos_y": self.pos_y,
             "pos_z": self.pos_z,
-            "constellation": self.object_constellation.to_jsonDictionary() if self.object_constellation else None
+            "constellation": self.object_constellation.to_jsonDictionary() if self.object_constellation else None,
+            "urlDotlanMap": self.str_dotlan_map(),
+            "urlZK": URLHelper.zk_system(self.system_id)
         }
 
 
