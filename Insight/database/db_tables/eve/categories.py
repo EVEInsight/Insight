@@ -49,7 +49,6 @@ class Categories(dec_Base.Base,individual_api_pulling,index_api_updating,sde_imp
         new_row = cls(__row.categoryID)
         new_row.name = __row.categoryName
         new_row.published = __row.published
-        new_row.load_fk_objects()
         return new_row
 
     @hybrid_property

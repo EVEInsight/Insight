@@ -32,6 +32,10 @@ class Constellations(dec_Base.Base, name_only, individual_api_pulling, index_api
             for system_id in self._systems:
                 self.object_systems.append(systems.Systems(system_id))
 
+    def session_add_nonexists_fk(self, db: Session):
+        if self.region_id and not regions.Regions.session_exists(self.region_id, db):
+            db.add(regions.Regions(self.region_id))
+
     def get_id(self):
         return self.constellation_id
 
@@ -78,7 +82,6 @@ class Constellations(dec_Base.Base, name_only, individual_api_pulling, index_api
         new_row.pos_x = __row.x
         new_row.pos_y = __row.y
         new_row.pos_z = __row.z
-        new_row.load_fk_objects()
         return new_row
 
     @hybrid_property

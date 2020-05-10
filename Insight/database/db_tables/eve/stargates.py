@@ -19,13 +19,18 @@ class Stargates(dec_Base.Base, sde_impoter, individual_api_pulling):
         self.object_system_from = systems.Systems(self.system_from)
         self.object_system_to = systems.Systems(self.system_to)
 
+    def session_add_nonexists_fk(self, db: Session):
+        if self.system_from and not systems.Systems.session_exists(self.system_from, db):
+            db.add(systems.Systems(self.system_from))
+        if self.system_to and not systems.Systems.session_exists(self.system_to, db):
+            db.add(systems.Systems(self.system_to))
+
     def compare_sde(self, other):
         return self.system_from == other.fromSolarSystemID and self.system_to == other.toSolarSystemID
 
     @classmethod
     def make_from_sde(cls, row):
         new_row = cls(row.fromSolarSystemID, row.toSolarSystemID)
-        new_row.load_fk_objects()
         return new_row
 
     @classmethod
@@ -38,7 +43,14 @@ class Stargates(dec_Base.Base, sde_impoter, individual_api_pulling):
             for g in gates:
                 r = db.query(cls).filter(cls.system_from == g.fromSolarSystemID, cls.system_to == g.toSolarSystemID).one_or_none()
                 if r is None:
-                    db.merge(cls.make_from_sde(g))
+                    new_row = cls.make_from_sde(g)
+                    new_row.session_add_nonexists_fk(db)
+                    db.add(new_row)
+                    add_count += 1
+                else:
+                    new_row = cls.make_from_sde(g)
+                    new_row.load_fk_objects()
+                    db.merge(new_row)
                     add_count += 1
             db.commit()
             if add_count > 0:

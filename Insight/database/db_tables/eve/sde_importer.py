@@ -26,29 +26,34 @@ class sde_impoter(object):
         raise NotImplementedError
 
     @classmethod
-    def row_action(cls,row,db_session):
-        db_session.merge(row)
-
-    @classmethod
     def import_all_sde(cls,service_module,sde_session,sde_base):
         db: Session = service_module.get_session()
         try:
             missing_ids = cls.get_missing_ids(service_module,sde_session,sde_base)
             length_missing_ids = len(missing_ids)
             if length_missing_ids > 0:
-                print("Need to import {} {}".format(str(length_missing_ids),cls.__name__))
+                print("Insight needs to import {} {} from the SDE. Importing now...".format(str(length_missing_ids),
+                                                                                            cls.__name__))
             else:
                 print("No {} to import".format(cls.__name__))
                 return
-            for chunk in name_only.split_lists(missing_ids,75000):
+            for chunk in name_only.split_lists(missing_ids, 75000):
                 start = datetime.datetime.utcnow()
                 try:
                     for sde_id in chunk:
                         try:
                             __row = sde_session.query(sde_base).filter(cls.get_query_filter(sde_base) == sde_id).one()
-                            cls.row_action(cls.make_from_sde(__row), db) #add for locations, merge for everything else
+                            if cls.session_exists(sde_id, db):
+                                new_row = cls.make_from_sde(__row)
+                                new_row.load_fk_objects()
+                                db.merge(new_row)
+                            else:
+                                new_row = cls.make_from_sde(__row)
+                                new_row.session_add_nonexists_fk(db)
+                                db.add(new_row)
                         except Exception as ex:
                             print(ex)
+                            raise ex
                     db.commit()
                     print("Imported {} {} from the SDE in {} seconds".format(str(len(chunk)),cls.__name__,str((datetime.datetime.utcnow() - start).total_seconds())))
                 except Exception as ex:

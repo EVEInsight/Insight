@@ -22,6 +22,12 @@ class Locations(dec_Base.Base,table_row,sde_impoter):
     def __init__(self, eve_id: int):
         self.location_id = eve_id
 
+    def session_add_nonexists_fk(self, db: Session):
+        if self.typeID and not types.Types.session_exists(self.typeID, db):
+            db.add(types.Types(self.typeID))
+        if self.groupID and not groups.Groups.session_exists(self.groupID, db):
+            db.add(groups.Groups(self.groupID))
+
     def get_id(self):
         return self.location_id
 
@@ -85,10 +91,6 @@ class Locations(dec_Base.Base,table_row,sde_impoter):
     @classmethod
     def get_query_filter(cls, sde_base):
         return sde_base.itemID
-
-    @classmethod
-    def row_action(cls,row,db_session):
-        db_session.add(row)
 
     def to_jsonDictionary(self) -> dict:
         return {
