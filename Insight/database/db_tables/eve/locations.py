@@ -8,8 +8,8 @@ class Locations(dec_Base.Base,table_row,sde_impoter):
 
     location_id = Column(Integer, primary_key=True, nullable=False,autoincrement=False)
     name = Column(String,default=None,nullable=True)
-    typeID = Column(Integer,ForeignKey("types.type_id"),nullable=True)
-    groupID = Column(Integer,ForeignKey("groups.group_id"),nullable=True)
+    typeID = Column(Integer,ForeignKey("types.type_id"),nullable=True, index=True)
+    groupID = Column(Integer,ForeignKey("groups.group_id"),nullable=True, index=True)
     pos_x = Column(Float,default=None,nullable=True)
     pos_y = Column(Float, default=None, nullable=True)
     pos_z = Column(Float, default=None, nullable=True)

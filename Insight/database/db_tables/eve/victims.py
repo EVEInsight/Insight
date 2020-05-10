@@ -14,7 +14,7 @@ class Victims(dec_Base.Base, table_row, Base_Str_ATKv):
     pos_x = Column(Float, default=0, nullable=False)
     pos_y = Column(Float,default=0,nullable=False)
     pos_z = Column(Float,default=0,nullable=False)
-    ship_type_id = Column(Integer,ForeignKey("types.type_id"), default=None, nullable=True)
+    ship_type_id = Column(Integer,ForeignKey("types.type_id"), default=None, nullable=True, index=True)
 
     object_kill = relationship("Kills",uselist=False,back_populates="object_victim")
     object_pilot = relationship("Characters",uselist=False,back_populates="object_loses",lazy="joined")

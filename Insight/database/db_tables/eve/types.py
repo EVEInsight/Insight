@@ -10,7 +10,7 @@ class Types(dec_Base.Base,name_only,index_api_updating,sde_impoter):
     type_name = Column(String,default=None,nullable=True, index=True)
     description = Column(String,default="")
     basePrice = Column(DECIMAL(19,4),default=None,nullable=True)
-    group_id = Column(Integer,ForeignKey("groups.group_id"),nullable=True)
+    group_id = Column(Integer,ForeignKey("groups.group_id"),nullable=True, index=True)
     api_Expires = Column(DateTime,default=None,nullable=True)
     api_Last_Modified = Column(DateTime,default=None,nullable=True)
 
