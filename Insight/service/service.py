@@ -145,5 +145,5 @@ class service_module(object):
 
     @classmethod
     def get_db_version(cls):
-        version_str = 'v2.5.0'
+        version_str = 'v2.6.0'
         return LooseVersion(version_str)

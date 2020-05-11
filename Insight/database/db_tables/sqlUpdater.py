@@ -100,8 +100,8 @@ class sqlUpdater(object):
         """v2.4.0"""
         yield "ALTER TABLE tokens ADD error_count INTEGER DEFAULT 0 NOT NULL;"
 
-    def sqlV_2_5_0(self):
-        """v2.5.0"""
+    def sqlV_2_6_0(self):
+        """v2.6.0"""
         yield "UPDATE kills SET locationID = NULL WHERE locationID = 0;"
 
     def update_all(self):
