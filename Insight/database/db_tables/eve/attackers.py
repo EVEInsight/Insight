@@ -14,8 +14,8 @@ class Attackers(dec_Base.Base, Base_Str_ATKv):
     damage_done = Column(Float, default=0.0, nullable=False)
     final_blow = Column(Boolean, default=False, nullable=False)
     security_status = Column(Float, default=0.0, nullable=False)
-    ship_type_id = Column(Integer,ForeignKey("types.type_id"), default=None, nullable=True)
-    weapon_type_id = Column(Integer,ForeignKey("types.type_id"),default=None, nullable=True) #not compared with anything
+    ship_type_id = Column(Integer,ForeignKey("types.type_id"), default=None, nullable=True, index=True)
+    weapon_type_id = Column(Integer,ForeignKey("types.type_id"),default=None, nullable=True, index=True) #not compared with anything
 
     object_kill = relationship("Kills",uselist=False,back_populates="object_attackers")
     object_pilot = relationship("Characters",uselist=False,back_populates="object_attackers",lazy="joined")

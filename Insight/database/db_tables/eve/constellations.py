@@ -11,7 +11,7 @@ class Constellations(dec_Base.Base, name_only, individual_api_pulling, index_api
     pos_x = Column(Float,default=None,nullable=True)
     pos_y = Column(Float, default=None, nullable=True)
     pos_z = Column(Float, default=None, nullable=True)
-    region_id = Column(Integer, ForeignKey("regions.region_id"),nullable=True)
+    region_id = Column(Integer, ForeignKey("regions.region_id"),nullable=True, index=True)
 
     api_ETag = Column(String,default=None,nullable=True)
     api_Expires = Column(DateTime,default=None,nullable=True)

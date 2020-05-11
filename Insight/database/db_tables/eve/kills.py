@@ -13,9 +13,9 @@ class Kills(dec_Base.Base, table_row):
     __tablename__ = 'kills'
 
     kill_id = Column(Integer,primary_key=True, nullable=False, autoincrement=False)
-    killmail_time = Column(DateTime,default=None,nullable=True)
-    solar_system_id = Column(Integer, ForeignKey("systems.system_id"), default=None, nullable=True)
-    locationID = Column(Integer,ForeignKey("locations.location_id"),default=None,nullable=True)
+    killmail_time = Column(DateTime,default=None,nullable=True, index=True)
+    solar_system_id = Column(Integer, ForeignKey("systems.system_id"), default=None, nullable=True, index=True)
+    locationID = Column(Integer, ForeignKey("locations.location_id"), default=None, nullable=True, index=True)
     hash = Column(String,default=None,nullable=True)
     fittedValue = Column(Float,default=0.0,nullable=False)
     totalValue = Column(Float,default=0.0,nullable=False)
