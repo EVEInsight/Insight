@@ -72,3 +72,6 @@ class CacheManager(SubsystemBase):
         d["redis"]["queryms"] = query_ms
         d["redis"]["cacheHit"] = False
         return d
+
+    async def delete_key(self, key_name):
+        await self.client.delete(key_name)

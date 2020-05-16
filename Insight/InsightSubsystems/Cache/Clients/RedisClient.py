@@ -60,3 +60,6 @@ class RedisClient(AbstractBaseClient):
             raise InsightExc.Subsystem.KeyDoesNotExist
         return ttl
 
+    async def delete(self, key_str: str):
+        await self.client.delete(key_str)
+
