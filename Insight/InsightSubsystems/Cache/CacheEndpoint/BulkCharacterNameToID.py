@@ -9,6 +9,10 @@ class BulkCharacterNameToID(AbstractEndpoint):
         self.CharacterNameToId = self.cm.CharacterNameToID
 
     @staticmethod
+    def default_ttl() -> int:
+        return 7200  # 2 hours
+
+    @staticmethod
     def _get_unprefixed_key_hash_sync(char_names: frozenset):
         return "{}".format(hash(char_names))
 

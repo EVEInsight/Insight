@@ -117,4 +117,5 @@ class LocalScan(AbstractEndpoint):
             "totalQueried": len(char_names),
             "totalUnknownNames": len(char_names) - len(known_ships)
         }
+        cls.set_min_ttl(return_dict, cls.extract_min_ttl(data_dict))
         return return_dict

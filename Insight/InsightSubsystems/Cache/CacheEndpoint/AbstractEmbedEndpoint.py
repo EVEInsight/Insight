@@ -8,6 +8,10 @@ from functools import partial
 
 class AbstractEmbedEndpoint(AbstractEndpoint):
     @staticmethod
+    def default_ttl() -> int:
+        return 30
+
+    @staticmethod
     def default_color() -> discord.Color:
         return discord.Color(659493)
 

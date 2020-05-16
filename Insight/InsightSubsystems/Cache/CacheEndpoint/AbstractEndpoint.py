@@ -85,7 +85,7 @@ class AbstractEndpoint(metaclass=InsightSingleton):
 
     @staticmethod
     def default_ttl() -> int:
-        return 108000  # 30 days
+        return 60  # 60 seconds
 
     @classmethod
     def extract_min_ttl(cls, *args):

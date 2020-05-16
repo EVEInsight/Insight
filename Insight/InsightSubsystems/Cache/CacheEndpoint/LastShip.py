@@ -25,7 +25,7 @@ class LastShip(AbstractEndpoint):
 
     @staticmethod
     def default_ttl() -> int:
-        return 7200
+        return 7200  # 2 hours
 
     @staticmethod
     def _get_unprefixed_key_hash_sync(char_id: int):
