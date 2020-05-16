@@ -15,7 +15,7 @@ class MostExpensiveKMsEmbed(AbstractEmbedEndpoint):
 
     @staticmethod
     def default_ttl() -> int:
-        return 1800
+        return 900  # 15 minutes
 
     @staticmethod
     def _get_unprefixed_key_hash_sync(last_hours: int, server_prefix: str):
