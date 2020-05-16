@@ -35,6 +35,8 @@ class CacheManager(SubsystemBase):
             if await redis.establish_connection():
                 self.client = redis
                 print("Redis connection established.")
+                if redis.purge_keys:
+                    await redis.redis_purge_all_keys()
             else:
                 sys.stderr.write("Insight is operating without Redis. Please connect Insight to Redis for all functions"
                                  " to properly work.")
