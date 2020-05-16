@@ -18,6 +18,16 @@ class EmbedLimitedHelper(discord.Embed):
         self.count_fields = 0
         self.count_total_chars = 0
 
+        self.field_start_chars = ""
+        self.field_end_chars = ""
+        self.field_buffer_length = 0
+        self.field_bound_length = 0
+        self.field_buffer = ""
+        self.field_buffer_name = ""
+        self.field_buffer_continued_name = ""
+        self.field_buffer_is_continued = False
+        self.field_buffer_inline = False
+
     def _increment_counter(self, increment_length):
         if (self.count_total_chars + increment_length >= self.limit_total_char) or \
                 ((len(self) + increment_length) >= self.limit_total_char):
@@ -59,6 +69,45 @@ class EmbedLimitedHelper(discord.Embed):
 
         self._increment_counter(char_count)
         super().set_author(name=name, url=url, icon_url=icon_url)
+
+    def field_buffer_start_bounds(self, start_chars: str = "", end_chars: str = ""):
+        self.field_start_chars = start_chars
+        self.field_end_chars = end_chars
+        self.field_bound_length = len(self.field_start_chars) + len(self.field_end_chars)
+
+    def field_buffer_end_bounds(self):
+        self._field_buffer_encase()
+        self.field_start_chars = ""
+        self.field_end_chars = ""
+
+    def field_buffer_start(self, name: str, name_continued: str, inline=False):
+        self.field_buffer_is_continued = False
+        self.field_buffer_inline = inline
+        self.field_buffer_name = name
+        self.field_buffer_continued_name = name_continued
+
+    def field_buffer_end(self):
+        self._field_buffer_finalize()
+        self.field_buffer_is_continued = False
+        self.field_buffer_name = ""
+        self.field_buffer_continued_name = ""
+
+    def field_buffer_add(self, value: str):
+        if self.field_buffer_length + len(value) + self.field_bound_length >= self.limit_field_value:
+            self._field_buffer_finalize()
+        self.field_buffer_length += len(value)
+        self.field_buffer += value
+
+    def _field_buffer_encase(self):
+        self.field_buffer = "{}{}{}".format(self.field_start_chars, self.field_buffer, self.field_end_chars)
+
+    def _field_buffer_finalize(self):
+        self._field_buffer_encase()
+        field_name = self.field_buffer_name if not self.field_buffer_is_continued else self.field_buffer_continued_name
+        self.add_field(name=field_name, value=self.field_buffer, inline=self.field_buffer_inline)
+        self.field_buffer = ""
+        self.field_buffer_is_continued = True
+        self.field_buffer_length = 0
 
     def add_field(self, *, name, value, inline=True):
         char_count = 0
