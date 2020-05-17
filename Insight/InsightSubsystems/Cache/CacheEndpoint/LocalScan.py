@@ -39,6 +39,9 @@ class LocalScan(AbstractEndpoint):
         bucket_systems = TrackingBucketDual("systemID", "system", "characters", value_as_list=True)
         bucket_locations = TrackingBucketDual("locationID", "location", "characters", value_as_list=True)
         bucket_mails = TrackingBucketDual("kmID", "km", "characters", value_as_list=True)
+        total_alive = 0
+        total_dead = 0
+        total_unknown = 0
         all_characters = {}
         for e in known_ships:
             is_unknown = False
@@ -50,6 +53,14 @@ class LocalScan(AbstractEndpoint):
             if not Helpers.get_nested_value(e, None, "ship", "type_name"):
                 is_unknown = True
             is_attacker = Helpers.get_nested_value(e, False, "attacker")
+            if is_attacker:
+                total_alive += 1
+                if is_unknown:
+                    total_unknown += 1
+            else:
+                total_dead += 1
+                if is_unknown:
+                    total_unknown += 1
             char_id = Helpers.get_nested_value(e, None, "character", "character_id")
             ship_data = Helpers.get_nested_value(e, {}, "ship")
             ship_id = Helpers.get_nested_value(ship_data, 0, "type_id")
@@ -114,6 +125,10 @@ class LocalScan(AbstractEndpoint):
             "kmHighestRatio": bucket_mails.get_top_dict(),
             "kms": bucket_mails.get_sorted_dict(),
             "queriedNames": list(char_names),
+            "totalAlive": total_alive,
+            "totalDead": total_dead,
+            "totalUnknown": total_unknown,
+            "total": len(known_ships),
             "totalQueried": len(char_names),
             "totalUnknownNames": len(char_names) - len(known_ships)
         }

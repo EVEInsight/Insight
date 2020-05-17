@@ -17,26 +17,27 @@ class TrackingBucketEntity(object):
         self.characters = TrackingBucket("organizationID", "characters", value_as_list=True)
         self.total = 0
         self.alive = 0
+        self.unknown = 0
         self.dead = 0
 
     def add_ship(self, seconds_ago: float, ship_id: int, character_id: int, system_id: int, location_id: int,
                  km_id: int, is_attacker: bool, is_unknown: bool):
         if is_unknown:
             ship_id = 0
-        ship_counts = self.ships.setdefault(ship_id, {"shipID": ship_id, "alive": 0, "lost": 0, "total": 0, "avgSeconds": 0})
+        ship_counts = self.ships.setdefault(ship_id, {"shipID": ship_id, "alive": 0, "dead": 0, "total": 0, "avgSeconds": 0})
         ship_delays: list = self.ship_delays.setdefault(ship_id, [])
         ship_delays.append(seconds_ago)
-        self.total += 1
         if is_attacker:
-            ship_counts["alive"] += 1
             self.alive += 1
+            ship_counts["alive"] += 1
+            if is_unknown:
+                self.unknown += 1
         else:
-            if not is_unknown:
-                ship_counts["lost"] += 1
-                self.dead += 1
-            else:
-                ship_counts["alive"] += 1
-                self.alive += 1
+            self.dead += 1
+            ship_counts["dead"] += 1
+            if is_unknown:
+                self.unknown += 1
+        self.total += 1
         ship_counts["total"] += 1
         if character_id:
             self.characters.add_item(self.id, character_id)
@@ -69,8 +70,9 @@ class TrackingBucketEntity(object):
             "locationCounts": self.locations.get_sorted_list(),
             "kmHighestRatio": self.mails.get_top_dict(),
             "kmCounts": self.mails.get_sorted_list(),
-            "alive": self.alive,
-            "dead": self.dead,
+            "totalAlive": self.alive,
+            "totalUnknown": self.unknown,
+            "totalDead": self.dead,
             "total": self.total
         }
         return return_dict
