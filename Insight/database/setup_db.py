@@ -27,7 +27,8 @@ class setup_database(object):
         if self.using_postgres:
             self.engine = create_engine(self.connection_str, echo=False,
                                         pool_size=self.service.config.get("POSTGRES_POOLSIZE"),
-                                        max_overflow=self.service.config.get("POSTGRES_POOLOVERFLOW"))
+                                        max_overflow=self.service.config.get("POSTGRES_POOLOVERFLOW"),
+                                        pool_pre_ping=True)
         else:
             self.engine = create_engine(self.connection_str, connect_args={'check_same_thread': False, 'timeout': 3000},
                                         echo=False)
