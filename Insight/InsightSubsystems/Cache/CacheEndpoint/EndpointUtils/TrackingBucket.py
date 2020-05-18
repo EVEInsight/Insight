@@ -28,6 +28,12 @@ class TrackingBucket(object):
         d["total"] += 1
         self.total += 1
 
+    def append_item_unique(self, outer_key_name, inner_key_name, item_to_append):
+        d: dict = self.data.get(outer_key_name)
+        append_list = d.setdefault(inner_key_name, [])
+        if item_to_append not in append_list:
+            append_list.append(item_to_append)
+
     def get_sorted_list(self):
         items = []
         for pair in sorted(self.data.items(), key=lambda x: x[1]["total"], reverse=True):
@@ -35,17 +41,22 @@ class TrackingBucket(object):
         return items
 
     def get_sorted_dict(self):
+        self.set_ratios()
         od = OrderedDict()
         for d in self.get_sorted_list():
             od[d.get(self.ordered_dict_sort_key)] = d
         return od
 
+    def set_ratios(self):
+        for v in self.data.values():
+            v["ratio"] = v["total"] / self.total
+
     def get_top_dict(self):
         if len(self.data) == 0:
             return None
         else:
-            d = max(self.data.values(), key=itemgetter("total"))
-            d["ratio"] = d["total"] / self.total
+            self.set_ratios()
+            d = max(self.data.values(), key=itemgetter("ratio"))
             return d
 
     def to_dict(self) -> dict:
