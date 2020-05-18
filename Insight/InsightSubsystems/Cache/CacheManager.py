@@ -10,9 +10,9 @@ class CacheManager(SubsystemBase):
     def __init__(self, subsystemloader):
         super().__init__(subsystemloader)
         self.lg_cache = InsightLogger.InsightLogger.get_logger('Cache.Manager', 'Cache.log', child=True)
-        self.tp = ThreadPoolExecutor(max_workers=5)
+        self.tp = ThreadPoolExecutor(max_workers=self.config.get("SUBSYSTEM_CACHE_THREADS"))
         self.pool = self.tp  # can be reference to existing thread pool or a new multiproc pool if enabled
-        if self.config.get("MULTIPROCESS"):
+        if self.config.get("SUBSYSTEM_CACHE_MULTIPROCESS"):
             self.pool = ProcessPoolExecutor()
             print("Cache manager multiprocess support is enabled.")
         self.client = NoRedisClient.NoRedisClient(self.config, self.tp)
