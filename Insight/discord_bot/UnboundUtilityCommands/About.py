@@ -6,6 +6,10 @@ class About(UnboundCommandBase):
         super().__init__(unbound_service)
         self.resp = self.generate_response()
 
+    @classmethod
+    def mention(cls):
+        return False
+
     def generate_response(self):
         s = "Insight {} by Nathan-LS. An EVE Online killmail feed bot for Discord.\n\n".format(str(self.service.get_version()))
         s += "Released under the GNU General Public License v3.0\n\n"

@@ -14,6 +14,7 @@ from functools import partial
 from concurrent.futures import ThreadPoolExecutor
 import InsightLogger
 import time
+from InsightSubsystems.Cache.CacheEndpoint import LastShip
 
 
 class zk(object):
@@ -256,6 +257,7 @@ class zk(object):
 
     async def coroutine_filters(self, zk_thread_pool: ThreadPoolExecutor):
         lg = InsightLogger.InsightLogger.get_logger('ZK.filters', 'ZK.log', child=True)
+        LastShipEndpoint: LastShip = LastShip()
         msg = "Started zk filter coroutine."
         print(msg)
         lg.info(msg)
@@ -266,6 +268,7 @@ class zk(object):
                 st = InsightLogger.InsightLogger.time_start()
                 await loop.run_in_executor(zk_thread_pool, partial(self.service.channel_manager.send_km, km))
                 InsightLogger.InsightLogger.time_log(lg, st, 'Filer pass km_id: {}'.format(km.kill_id), 2500)
+                LastShipEndpoint.reset_last_ships_background(km)
             except Exception as ex:
                 print(ex)
 

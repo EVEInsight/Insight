@@ -5,7 +5,7 @@ from database.db_tables import tb_characters
 class CharacterNameToID(AbstractEndpoint):
     @staticmethod
     def default_ttl() -> int:
-        return 3600
+        return 7200  # 2 days
 
     @staticmethod
     def _get_unprefixed_key_hash_sync(char_name: str):
@@ -27,14 +27,14 @@ class CharacterNameToID(AbstractEndpoint):
                     "id": c.character_id,
                     "found": True
                 }
-                self.set_min_ttl(d, 172800)  # 2 days
+                self.set_min_ttl(d, self.default_ttl())
             else:
                 d["data"] = {
                     "name": char_name,
                     "id": None,
                     "found": False
                 }
-                self.set_min_ttl(d, 14400)  # 4 hours
+                self.set_min_ttl(d, 10800)  # 3 hours
         finally:
             db.close()
         return d

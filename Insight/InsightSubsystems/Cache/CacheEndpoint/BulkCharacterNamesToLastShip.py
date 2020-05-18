@@ -22,6 +22,10 @@ class BulkCharacterNamesToLastShip(AbstractEndpoint):
         set_char_names = await self.executor_thread(self.make_frozen_set, list_items=char_names)
         return await super().get(char_names=set_char_names)
 
+    @classmethod
+    def _sort_known_characters_by_name(cls, known_ships: list):
+        return sorted(known_ships, key=lambda x: x["character"]["character_name"].lower())
+
     async def _do_endpoint_logic(self, char_names: frozenset) -> dict:
         char_ids_resolved = await self.BulkCharacterNameToID.get(char_names=char_names)
         valid_char_ids_packed = await Helpers.async_get_nested_value(char_ids_resolved, [], self.pool,
@@ -37,7 +41,7 @@ class BulkCharacterNamesToLastShip(AbstractEndpoint):
             unknown_char_names.remove(known_char_name)
         return_dict = {
             "data": {
-                "known": known,
+                "known": await self.executor_thread(self._sort_known_characters_by_name, known),
                 "unknownNames": list(unknown_char_names),
                 "totalQuery": len(char_names),
                 "totalKnown": len(known),

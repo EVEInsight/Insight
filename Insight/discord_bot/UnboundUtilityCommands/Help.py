@@ -11,6 +11,10 @@ class Help(UnboundCommandBase):
         self.links = self.generate_links()
         self.str_only = self.header + self.commands + self.prefix + self.links
 
+    @classmethod
+    def mention(cls):
+        return False
+
     def generate_header(self):
         return "These are all of the available Insight commands. Note: Some commands may not be usable in all channel types and may require a feed service.\n\n"
 
@@ -20,11 +24,11 @@ class Help(UnboundCommandBase):
             "**{p}about** - Display Insight credits, version information, and bot invite links.",
             "**{p}admin** - Access the Insight admin console to execute administrator functionality.",
             "**{p}create** - Begin setting up a new feed service in this channel. Alias: **{p}new**",
-            "**{p}dscan** - Coming soon!",
             "**{p}8ball** - Shake the 8ball.",
             "**{p}help** - Display command information and prefixes.",
             "**{p}limits** - Display channel / server rate limits and usage stats.",
             "**{p}lock** - Lock a feed service from being modified by users without certain Discord channel roles.",
+            "**{p}lscan** - Local scan. Copy and paste local pilots for a ship and affiliation overview.",
             "**{p}prefix** - Manage server-wide command prefixes for this bot.",
             "**{p}quit** - Close and shut down the Insight application service.",
             "**{p}remove** - Delete the currently configured feed service in this channel.",

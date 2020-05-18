@@ -65,3 +65,11 @@ class ShortSearchCriteria(InsightException):
 class InvalidInput(InsightException):
     def __init__(self, message="Invalid input."):
         super().__init__(message)
+
+
+class EmbedPermissionRequired(InsightException):
+    def __init__(self, message="This function requires Discord 'embed links' permissions to function and will "
+                               "not function in text-only mode.\n\n"
+                               "See https://support.discord.com/hc/en-us/sections/202856377-Permissions "
+                               "for assistance with permissions."):
+        super().__init__(message)

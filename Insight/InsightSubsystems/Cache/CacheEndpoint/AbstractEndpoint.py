@@ -77,6 +77,15 @@ class AbstractEndpoint(metaclass=InsightSingleton):
             self.lg.exception(ex)
             raise ex
 
+    async def delete_no_fail(self, **kwargs):
+        try:
+            cache_key = await self._get_prefixed_key(await self._get_unprefixed_key_hash(**kwargs))
+            async with (await self.key_locks.get_object(cache_key)):
+                return await self.cm.delete_key(cache_key)
+        except Exception as ex:
+            self.lg.exception(ex)
+            print(ex)
+
     async def _do_endpoint_logic(self, **kwargs) -> dict:
         return await self.executor_thread(self._do_endpoint_logic_sync, **kwargs)
 
@@ -85,7 +94,7 @@ class AbstractEndpoint(metaclass=InsightSingleton):
 
     @staticmethod
     def default_ttl() -> int:
-        return 108000  # 30 days
+        return 60  # 60 seconds
 
     @classmethod
     def extract_min_ttl(cls, *args):
@@ -106,3 +115,4 @@ class AbstractEndpoint(metaclass=InsightSingleton):
             d["redis"] = {
                 "ttl": ttl
             }
+

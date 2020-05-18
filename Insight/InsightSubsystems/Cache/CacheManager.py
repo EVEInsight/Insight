@@ -4,7 +4,6 @@ from InsightSubsystems.Cache import CacheEndpoint
 import sys
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 import InsightLogger
-import multiprocessing as mp
 
 
 class CacheManager(SubsystemBase):
@@ -14,7 +13,6 @@ class CacheManager(SubsystemBase):
         self.tp = ThreadPoolExecutor(max_workers=5)
         self.pool = self.tp  # can be reference to existing thread pool or a new multiproc pool if enabled
         if self.config.get("MULTIPROCESS"):
-            mp.set_start_method('spawn')
             self.pool = ProcessPoolExecutor()
             print("Cache manager multiprocess support is enabled.")
         self.client = NoRedisClient.NoRedisClient(self.config, self.tp)
@@ -27,7 +25,7 @@ class CacheManager(SubsystemBase):
         self.BulkCharacterIDsToLastShip = CacheEndpoint.BulkCharacterIDsToLastShip(cache_manager=self)
         self.BulkCharacterNamesToLastShip = CacheEndpoint.BulkCharacterNamesToLastShip(cache_manager=self)
         self.LocalScan = CacheEndpoint.LocalScan(cache_manager=self)
-        #self.LocalScanEmbed = CacheEndpoint.LocalScanEmbed(cache_manager=self)
+        self.LocalScanEmbedBase = CacheEndpoint.LocalScanEmbedBase(cache_manager=self)
 
     async def start_subsystem(self):
         try:
@@ -35,6 +33,8 @@ class CacheManager(SubsystemBase):
             if await redis.establish_connection():
                 self.client = redis
                 print("Redis connection established.")
+                if redis.purge_keys:
+                    await redis.redis_purge_all_keys()
             else:
                 sys.stderr.write("Insight is operating without Redis. Please connect Insight to Redis for all functions"
                                  " to properly work.")
@@ -72,3 +72,6 @@ class CacheManager(SubsystemBase):
         d["redis"]["queryms"] = query_ms
         d["redis"]["cacheHit"] = False
         return d
+
+    async def delete_key(self, key_name):
+        await self.client.delete(key_name)

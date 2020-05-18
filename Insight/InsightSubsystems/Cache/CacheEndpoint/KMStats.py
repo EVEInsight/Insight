@@ -8,7 +8,7 @@ from sqlalchemy import func
 class KMStats(AbstractEndpoint):
     @staticmethod
     def default_ttl() -> int:
-        return 900
+        return 900  # 15 minutes
 
     @staticmethod
     def _get_unprefixed_key_hash_sync(last_hours: int):

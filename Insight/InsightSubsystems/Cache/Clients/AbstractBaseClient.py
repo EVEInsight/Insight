@@ -20,6 +20,9 @@ class AbstractBaseClient(object):
     async def set(self, key_str: str, ttl: int, data_dict: dict):
         raise InsightExc.Subsystem.NoRedis
 
+    async def delete(self, key_str: str):
+        pass # no error on non redis client
+
     @staticmethod
     def _serialize(obj: dict):
         return json.dumps(obj)

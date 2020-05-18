@@ -173,7 +173,7 @@ class Discord_Insight_Client(discord.Client):
                                                            quit=feed.proxy_lock(feed.command_quit(message), message.author, 2, ignore_channel_setting=True),
                                                            admin=feed.proxy_lock(feed.command_admin(message), message.author, 2, ignore_channel_setting=True),
                                                            eightball=feed.proxy_lock(feed.command_8ball(message), message.author, 0),
-                                                           dscan=feed.proxy_lock(feed.command_dscan(message), message.author, 0),
+                                                           lscan=feed.proxy_lock(feed.command_localscan(message), message.author, 0),
                                                            prefix=feed.proxy_lock(feed.command_prefix(message), message.author, 1, ignore_channel_setting=True),
                                                            limits=feed.proxy_lock(feed.command_limits(message), message.author, 1),
                                                            roll=feed.proxy_lock(feed.command_roll(message), message.author, 0),

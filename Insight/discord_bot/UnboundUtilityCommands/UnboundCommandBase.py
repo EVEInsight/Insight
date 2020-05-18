@@ -18,6 +18,10 @@ class UnboundCommandBase(object):
         self.loop = self.client.loop
         self.serverManager = self.unbound.serverManager
 
+    @classmethod
+    def mention(cls):
+        return True
+
     def command_description(self):
         return "Not implemented."
 
@@ -46,7 +50,7 @@ class UnboundCommandBase(object):
         return e
 
     async def get_text(self, d_message: discord.Message, message_text: str, **kwargs)->str:
-        return "Not implemented."
+        raise InsightExc.userInput.EmbedPermissionRequired
 
     def can_text(self, d_message: discord.Message):
         return DiscordPermissionCheck.can_text(d_message)
@@ -62,9 +66,17 @@ class UnboundCommandBase(object):
     async def run_command(self, d_message: discord.Message, m_text: str = ""):
         if self.can_embed(d_message):
             async with (await LimitManager.cm_hp(d_message.channel)):
-                await d_message.channel.send(content='{}\n'.format(d_message.author.mention), embed=await self.get_embed(d_message, m_text))
+                embed = await self.get_embed(d_message, m_text)
+                if self.mention():
+                    await d_message.channel.send(content='{}\n'.format(d_message.author.mention), embed=embed)
+                else:
+                    await d_message.channel.send(embed=embed)
         elif self.can_text(d_message):
-            response_text = "{}\n{}".format(d_message.author.mention, await self.get_text(d_message, m_text))
+            text = await self.get_text(d_message, m_text)
+            if self.mention():
+                response_text = "{}\n{}".format(d_message.author.mention, text)
+            else:
+                response_text = "{}".format(text)
             if len(response_text) > 2000:
                 response_text = response_text[:1850] + "\n!!Truncated - Enable embed links to get remainder of " \
                                                        "message through Discord rich embeds!!"

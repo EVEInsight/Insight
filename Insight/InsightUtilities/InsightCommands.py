@@ -21,7 +21,7 @@ class InsightCommands(metaclass=InsightSingleton):
             'remove':   ['remove', 'delete'],
             'status':   ['status'],
             'eightball':['ball', '8ball', 'magic', '8'],
-            'dscan':    ['dscan', 'localscan', 'shipscan', 'scan'],
+            'lscan':    ['dscan', 'localscan', 'shipscan', 'scan', "lscan"],
             'lock':     ['lock'],
             'unlock':   ['unlock'],
             'quit':     ['quit'],

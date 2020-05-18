@@ -25,7 +25,7 @@ class LastShip(AbstractEndpoint):
 
     @staticmethod
     def default_ttl() -> int:
-        return 7200
+        return 7200  # 2 hours
 
     @staticmethod
     def _get_unprefixed_key_hash_sync(char_id: int):
@@ -33,6 +33,9 @@ class LastShip(AbstractEndpoint):
 
     async def get(self, char_id: int) -> dict:
         return await super().get(char_id=char_id)
+
+    async def delete_no_fail(self, char_id: int):
+        return await super().delete_no_fail(char_id=char_id)
 
     def _generator_last_ships(self, db: Session, character_id: int, attacker=True):
         mail_pos = 2e+9
@@ -129,11 +132,30 @@ class LastShip(AbstractEndpoint):
                             d["data"]["system"] = km.object_system.to_jsonDictionary()
                         if isinstance(km.killmail_time, datetime):
                             d["data"]["time"] = str(km.killmail_time)
-                        if isinstance(km.object_location, tb_locations):
-                            d["data"]["location"] = km.object_location.to_jsonDictionary()
                         else:
                             d["data"]["time"] = str(datetime(year=2008, month=5, day=6))
+                        if isinstance(km.object_location, tb_locations):
+                            d["data"]["location"] = km.object_location.to_jsonDictionary()
                         d["data"]["km"] = km.to_jsonDictionary()
         finally:
             db.close()
         return d
+
+    def reset_last_ships_background(self, new_km: tb_kills):
+        self.loop.create_task(self._reset_last_ship(new_km))
+
+    async def _reset_last_ship(self, new_km: tb_kills):
+        pilot_ids = await self.executor_thread(self._extract_characters, new_km)
+        for pilot_id in pilot_ids:
+            await self.delete_no_fail(char_id=pilot_id)
+
+    def _extract_characters(self, new_km: tb_kills):
+        char_ids = []
+        if new_km.object_attackers:
+            for a in new_km.object_attackers:
+                char_id = a.character_id
+                if char_id:
+                    char_ids.append(char_id)
+        if new_km.object_victim and new_km.object_victim.character_id:
+            char_ids.append(new_km.object_victim.character_id)
+        return char_ids

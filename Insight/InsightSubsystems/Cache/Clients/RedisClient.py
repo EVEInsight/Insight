@@ -12,6 +12,7 @@ class RedisClient(AbstractBaseClient):
         self.password = self.config.get("REDIS_PASSWORD")
         self.port = self.config.get("REDIS_PORT")
         self.db = self.config.get("REDIS_DB")
+        self.purge_keys = self.config.get("REDIS_PURGE")
         self.client: aioredis.Redis = None
 
     async def establish_connection(self):
@@ -59,4 +60,11 @@ class RedisClient(AbstractBaseClient):
         if ttl == -2:
             raise InsightExc.Subsystem.KeyDoesNotExist
         return ttl
+
+    async def delete(self, key_str: str):
+        await self.client.delete(key_str)
+
+    async def redis_purge_all_keys(self):
+        await self.client.flushdb()
+        print("All keys in Redis database '{}' have been purged.".format(self.db))
 

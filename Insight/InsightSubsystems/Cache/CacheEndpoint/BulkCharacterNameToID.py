@@ -9,6 +9,10 @@ class BulkCharacterNameToID(AbstractEndpoint):
         self.CharacterNameToId = self.cm.CharacterNameToID
 
     @staticmethod
+    def default_ttl() -> int:
+        return 7200  # 2 hours
+
+    @staticmethod
     def _get_unprefixed_key_hash_sync(char_names: frozenset):
         return "{}".format(hash(char_names))
 
@@ -24,7 +28,7 @@ class BulkCharacterNameToID(AbstractEndpoint):
     async def _do_endpoint_logic(self, char_names: frozenset) -> dict:
         awaitables = [self.CharacterNameToId.get(c) for c in char_names]
         results = []
-        for f in asyncio.as_completed(awaitables, timeout=5):
+        for f in asyncio.as_completed(awaitables, timeout=15):
             results.append(await f)
         return await self.executor_thread(self.make_return_dict, results)
 
