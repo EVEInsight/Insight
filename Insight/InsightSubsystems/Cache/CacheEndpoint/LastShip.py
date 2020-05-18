@@ -132,10 +132,10 @@ class LastShip(AbstractEndpoint):
                             d["data"]["system"] = km.object_system.to_jsonDictionary()
                         if isinstance(km.killmail_time, datetime):
                             d["data"]["time"] = str(km.killmail_time)
-                        if isinstance(km.object_location, tb_locations):
-                            d["data"]["location"] = km.object_location.to_jsonDictionary()
                         else:
                             d["data"]["time"] = str(datetime(year=2008, month=5, day=6))
+                        if isinstance(km.object_location, tb_locations):
+                            d["data"]["location"] = km.object_location.to_jsonDictionary()
                         d["data"]["km"] = km.to_jsonDictionary()
         finally:
             db.close()

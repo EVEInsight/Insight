@@ -42,7 +42,7 @@ class LocalScan(AbstractEndpoint):
         total_alive = 0
         total_dead = 0
         total_unknown = 0
-        all_characters = {}
+        all_characters = OrderedDict()
         for e in known_ships:
             is_unknown = False
             seconds_ago = (datetime.utcnow() - dateTimeParser(Helpers.get_nested_value(e, datetime.utcnow(), "time"))).total_seconds()
@@ -62,6 +62,7 @@ class LocalScan(AbstractEndpoint):
                 if is_unknown:
                     total_unknown += 1
             char_id = Helpers.get_nested_value(e, None, "character", "character_id")
+            char_name = Helpers.get_nested_value(e, "UNKNOWN NAME", "character", "character_name")
             ship_data = Helpers.get_nested_value(e, {}, "ship")
             ship_id = Helpers.get_nested_value(ship_data, 0, "type_id")
             system_data = Helpers.get_nested_value(e, {}, "system")
@@ -71,10 +72,10 @@ class LocalScan(AbstractEndpoint):
             km_data = Helpers.get_nested_value(e, {}, "km", "package", "killmail")
             km_id = Helpers.get_nested_value(km_data, 0, "killmail_id")
             corp_data = Helpers.get_nested_value(e, None, "corporation")
-            corp_id = Helpers.get_nested_value(corp_data, 0, "corporation_id")
+            corp_id = Helpers.get_nested_value(corp_data, None, "corporation_id")
             corp_name = Helpers.get_nested_value(corp_data, None, "corporation_name")
             alliance_data = Helpers.get_nested_value(e, None, "alliance")
-            alliance_id = Helpers.get_nested_value(alliance_data, 0, "alliance_id")
+            alliance_id = Helpers.get_nested_value(alliance_data, None, "alliance_id")
             alliance_name = Helpers.get_nested_value(alliance_data, None, "alliance_name")
             if alliance_id:
                 alliance_bucket = bucket_alliance.setdefault(
@@ -98,6 +99,7 @@ class LocalScan(AbstractEndpoint):
                     bucket_ships.add_item(ship_id, ship_data, char_id)
                 all_d = {
                     "characterID": char_id,
+                    "characterName": char_name,
                     "corporationID": corp_id,
                     "allianceID": alliance_id,
                     "shipID": ship_id,
