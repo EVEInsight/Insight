@@ -4,6 +4,10 @@ from functools import partial
 
 
 class Limits(UnboundCommandBase):
+    @classmethod
+    def mention(cls):
+        return False
+
     async def get_limiters(self, message, no_redact=False):
         l = await LimitManager.cm(message)
         return await self.loop.run_in_executor(None, partial(l.get_self_and_parent_stats, no_redact))
