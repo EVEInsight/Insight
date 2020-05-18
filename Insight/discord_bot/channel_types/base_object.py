@@ -170,9 +170,9 @@ class discord_feed_service(object):
         """!8ball - Shake the 8ball."""
         await self.discord_client.unbound_commands.command_8ball(message_object)
 
-    async def command_dscan(self, message_object):
-        """!dscan - Coming soon!"""
-        await self.discord_client.unbound_commands.command_dscan(message_object)
+    async def command_localscan(self, message_object):
+        """!localscan - Copy and paste local pilots for ship and affiliation overview."""
+        await self.discord_client.unbound_commands.command_localscan(message_object)
 
     async def command_quit(self, message_object):
         """!quit - Close and shut down the Insight application service."""

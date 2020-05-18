@@ -1,4 +1,4 @@
-from . import Dscan, EightBall, Quit, Admin, AdminResetNames, Backup, MemoryDiagnostic, Prefix, About, \
+from . import LocalScan, EightBall, Quit, Admin, AdminResetNames, Backup, MemoryDiagnostic, Prefix, About, \
     Help, MailExport, Limits, Roll, Top
 import discord
 import discord_bot
@@ -13,7 +13,7 @@ class UnboundUtilityCommands(object):
         self.serverManager = self.client.serverManager
         self.commandParser = self.client.commandLookup
         self.threadpool_unbound = self.client.threadpool_unbound
-        self.dscan = Dscan.Dscan(self)
+        self.localscan = LocalScan.LocalScan(self)
         self.eightBall = EightBall.EightBall(self)
         self.prefix = Prefix.Prefix(self)
         self.about = About.About(self)
@@ -38,8 +38,8 @@ class UnboundUtilityCommands(object):
     async def split_text(self, input_str: str) -> List[str]:
         return await self.client.loop.run_in_executor(None, partial(self._do_split, input_str))
 
-    async def command_dscan(self, message_object: discord.Message):
-        await self.dscan.run_command(message_object, await self.strip_command(message_object))
+    async def command_localscan(self, message_object: discord.Message):
+        await self.localscan.run_command(message_object, await self.strip_command(message_object))
 
     async def command_8ball(self, message_object: discord.Message):
         await self.eightBall.run_command(message_object, await self.strip_command(message_object))
