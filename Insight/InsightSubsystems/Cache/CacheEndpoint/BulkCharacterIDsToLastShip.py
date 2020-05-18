@@ -30,7 +30,7 @@ class BulkCharacterIDsToLastShip(AbstractEndpoint):
         known_ship_data = []
         unknown_ids = []
         redis_ttls = []
-        for f in asyncio.as_completed(awaitables_last_ship, timeout=5):
+        for f in asyncio.as_completed(awaitables_last_ship, timeout=15):
             last_ship_d = await f
             if not await Helpers.async_get_nested_value(last_ship_d, True, self.pool, "data", "known"):
                 unknown_ids.append(await Helpers.async_get_nested_value(last_ship_d,
