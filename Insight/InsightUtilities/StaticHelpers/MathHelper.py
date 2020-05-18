@@ -20,8 +20,8 @@ class MathHelper(object):
     @staticmethod
     def str_min_seconds_convert(seconds_input: float, modifier_full=False):
         try:
-            if seconds_input >= 2.628e+6:
-                num = float(seconds_input / 2.628e+6)
+            if seconds_input >= 3.154e+7:
+                num = float(seconds_input / 3.154e+7)
                 return "{:.1f}y".format(num) if not modifier_full else "{:.1f} year".format(num)
             elif seconds_input >= 86400:
                 num = float(seconds_input / 86400)
