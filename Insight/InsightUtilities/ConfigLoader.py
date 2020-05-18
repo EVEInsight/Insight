@@ -131,6 +131,7 @@ class ConfigLoader(metaclass=InsightSingleton):
         self.parse_int("POSTGRES_POOLSIZE", "NULL", "NULL", fail_if_empty=False, fallback_val=20, nonotify=True)
         self.parse_int("POSTGRES_POOLOVERFLOW", "NULL", "NULL", fail_if_empty=False, fallback_val=10, nonotify=True)
         self.parse_bool("REDIS_PURGE", "NULL", "NULL", False, "TRUE", True)
-        self.parse_bool("MULTIPROCESS", "NULL", "NULL", False, "FALSE", True)
+        self.parse_int("SUBSYSTEM_CACHE_THREADS", "NULL", "NULL", False, 20, True)
+        self.parse_bool("SUBSYSTEM_CACHE_MULTIPROCESS", "NULL", "NULL", False, "FALSE", True)
 
 
