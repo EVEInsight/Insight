@@ -7,10 +7,11 @@ from datetime import datetime
 
 class LastShip(AbstractEndpoint):
     def __init__(self, cache_manager):
-        self.categories = [
+        self.wl_categories = [
             6, # ships
             65 # structures
         ]
+        self.group_id_pod = 29
         self.super_titans = [
             30, # titans
             659 # supercarriers
@@ -50,9 +51,9 @@ class LastShip(AbstractEndpoint):
                 join(tb_groups, tb_types.group_id == tb_groups.group_id). \
                 join(tb_categories, tb_groups.category_id == tb_categories.category_id). \
                 filter(row_class.character_id == character_id). \
-                filter(tb_categories.category_id.in_(self.categories)). \
+                filter(tb_categories.category_id.in_(self.wl_categories)). \
                 filter(tb_kills.kill_id < mail_pos). \
-                order_by(tb_kills.killmail_time.desc()).limit(2)
+                order_by(tb_kills.killmail_time.desc()).limit(1)
             rows = q.all()
             for row in rows:
                 if row.kill_id < mail_pos:
@@ -62,25 +63,42 @@ class LastShip(AbstractEndpoint):
                 break
         return
 
+    def get_group_id(self, db_row):
+        if isinstance(db_row, tb_attackers) or isinstance(db_row, tb_victims):
+            if isinstance(db_row.object_ship, tb_types):
+                if isinstance(db_row.object_ship.object_group, tb_groups):
+                    return db_row.object_ship.object_group.group_id
+        return -1
+
     def get_last_ship(self, db: Session, character_id: int):
         gen_kms_a = self._generator_last_ships(db, character_id, attacker=True)
         gen_kms_v = self._generator_last_ships(db, character_id, attacker=False)
-        return_item = None
+        return_item = (None, True)
         try:
-            return_item = next(gen_kms_a)
+            return_item = (next(gen_kms_a), True)
         except StopIteration:
             pass
         try:
             v_item: tb_victims = next(gen_kms_v)
-            a_item: tb_attackers = return_item
+            v_group: int = self.get_group_id(v_item)
+            a_item: tb_attackers = return_item[0]
+            a_group = self.get_group_id(a_item)
             if isinstance(a_item, tb_attackers):
-                a_time = a_item.object_kill.killmail_time
-                v_time = v_item.object_kill.killmail_time
+                a_time: datetime = a_item.object_kill.killmail_time
+                v_time: datetime = v_item.object_kill.killmail_time
                 if a_time and v_time:
                     if v_time >= a_time:
-                        return_item = v_item
+                        if v_group == self.group_id_pod and (v_time - a_time).total_seconds() <= 900:
+                            return_item = (a_item, False)
+                        else:
+                            return_item = (v_item, False)
+                    else:
+                        if a_group == self.group_id_pod and (a_time - v_time).total_seconds() <= 900:
+                            return_item = (v_item, False)
+                        else:
+                            return_item = (a_item, True)
                 elif v_time:
-                    return_item = v_item
+                    return_item = (v_item, False)
                 else:
                     pass
         except StopIteration:
@@ -97,13 +115,10 @@ class LastShip(AbstractEndpoint):
         }
         try:
             if char_id and isinstance(char_id, int):
-                involved_row = self.get_last_ship(db, char_id)
+                involved_row, is_alive = self.get_last_ship(db, char_id)
                 if isinstance(involved_row, tb_attackers) or isinstance(involved_row, tb_victims):
                     d["data"]["known"] = True
-                    if isinstance(involved_row, tb_attackers):
-                        d["data"]["attacker"] = True
-                    else:
-                        d["data"]["attacker"] = False
+                    d["data"]["attacker"] = is_alive
                     if isinstance(involved_row.object_pilot, tb_characters):
                         d["data"]["character"] = involved_row.object_pilot.to_jsonDictionary()
                     if isinstance(involved_row.object_corp, tb_corporations):
