@@ -20,7 +20,7 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
 
     async def get(self, char_names: list) -> discord.Embed:
         set_char_names = await self.executor_thread(self.make_frozen_set, list_items=char_names)
-        seconds_ago_threshold = 1e+10
+        seconds_ago_threshold = int(1e+10)
         return await super().get(char_names=set_char_names, seconds_ago_threshold=seconds_ago_threshold)
 
     async def _do_endpoint_logic(self, char_names: frozenset, seconds_ago_threshold: int) -> dict:
@@ -32,12 +32,22 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
         char_data = Helpers.get_nested_value(scan, {}, "characters", char_id)
         char_name = Helpers.get_nested_value(char_data, "", "characterName")[:14]
         is_attacker = Helpers.get_nested_value(char_data, True, "attacker")
+        is_super_titan = Helpers.get_nested_value(char_data, False, "isSuperTitan")
+        is_regular_cap = Helpers.get_nested_value(char_data, False, "isRegularCap")
         ship_id = Helpers.get_nested_value(char_data, 0, "shipID")
         ship_name = Helpers.get_nested_value(scan, "UNKNOWN", "ships", ship_id, "ship", "type_name")
+        base_ship_value = Helpers.get_nested_value(scan, 0, "ships", ship_id, "ship", "basePrice")
         delta_seconds = Helpers.get_nested_value(char_data, 0, "seconds")
         delta_str = MathHelper.str_min_seconds_convert(delta_seconds)
-        ship_name_str = (ship_name if is_attacker else "(DEAD){}".format(ship_name))[:14]
-        field_line = "{:<15}{:<15}{}".format(char_name, ship_name_str, delta_str)
+        ship_name_str = ""
+        if is_super_titan or base_ship_value >= 15e+9:  # alert if super or ship hull is 10b+
+            ship_name_str += "❗"
+        elif is_regular_cap or base_ship_value >= 7.5e+9:
+            ship_name_str += "❕"
+        else:
+            pass
+        ship_name_str += (ship_name if is_attacker else "(DEAD){}".format(ship_name))[:14]
+        field_line = "{:<15}{:<16}{}".format(char_name, ship_name_str, delta_str)
         e.field_buffer_add(field_line)
 
     @classmethod
@@ -97,7 +107,7 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
         for grp in list(alliances.values()) + list(corporations.values()):
             if global_tabbed_grps >= 5:
                 break
-            if e.check_remaining_lower_limits_ratio(.20, .20):
+            if e.check_remaining_lower_limits_ratio(.15, .15):
                 break
             global_tabbed_grps += 1
             list_grp_character_ids = Helpers.get_nested_value(grp, {}, "characters").keys()
@@ -113,7 +123,7 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
             for system_ratio in Helpers.get_nested_value(grp, {}, "systems").values():
                 if grp_tabbed_systems >= 3:
                     break
-                if e.check_remaining_lower_limits_ratio(.60, .60):
+                if e.check_remaining_lower_limits_ratio(.25, .25):
                     break
                 grp_tabbed_systems += 1
                 system_id = Helpers.get_nested_value(system_ratio, 0, "systemID")
@@ -123,7 +133,7 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
                 for location_id in Helpers.get_nested_value(system_ratio, [], "locationIDs"):
                     if grp_tabbed_locations >= 3:
                         break
-                    if e.check_remaining_lower_limits_ratio(.60, .60):
+                    if e.check_remaining_lower_limits_ratio(.25, .25):
                         break
                     grp_tabbed_locations += 1
                     location_data = Helpers.get_nested_value(scan, {}, "locations", location_id)
@@ -132,7 +142,7 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
                     character_ids_location = Helpers.get_nested_value(grp, [], "locations", location_id, "characterIDs")
                     e.field_buffer_add("--{}".format(location_name))
                     for character_id in character_ids_location:
-                        if e.check_remaining_lower_limits_ratio(.40, .40):
+                        if e.check_remaining_lower_limits_ratio(.10, .10):
                             break
                         cls._add_pilot_ship(e, scan, character_id)
                         set_grp_character_ids.remove(str(character_id))
@@ -142,7 +152,7 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
                 e.field_buffer_add("-Misc Locations")
                 for character_id in list_grp_character_ids:
                     if character_id in set_grp_character_ids:
-                        if e.check_remaining_lower_limits_ratio(.15, .15):
+                        if e.check_remaining_lower_limits_ratio(.10, .10):
                             break
                         cls._add_pilot_ship(e, scan, character_id)
                         set_grp_character_ids.remove(str(character_id))
