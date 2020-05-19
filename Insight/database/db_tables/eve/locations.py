@@ -40,7 +40,7 @@ class Locations(dec_Base.Base,table_row,sde_impoter):
         new_row = cls(__row.itemID)
         new_row.name = __row.itemName
         new_row.typeID = __row.typeID
-        new_row.groupID = __row.groupID
+        new_row.groupID = __row.groupID if __row.groupID >= 0 else None  #todo location 40009087 in mapDemoralize has an invalid group id of -1. Might be error in either sde or esi. Location is Jita IV - Moon 4
         new_row.pos_x = __row.x
         new_row.pos_y = __row.y
         new_row.pos_z = __row.z
