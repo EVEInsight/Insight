@@ -46,10 +46,10 @@ class LastShip(AbstractEndpoint):
             else:
                 row_class = tb_victims
             q = db.query(row_class). \
-                join(tb_kills, row_class.kill_id == tb_kills.kill_id). \
-                join(tb_types, row_class.ship_type_id == tb_types.type_id). \
-                join(tb_groups, tb_types.group_id == tb_groups.group_id). \
-                join(tb_categories, tb_groups.category_id == tb_categories.category_id). \
+                join(tb_kills, row_class.kill_id == tb_kills.kill_id, isouter=False). \
+                join(tb_types, row_class.ship_type_id == tb_types.type_id, isouter=False). \
+                join(tb_groups, tb_types.group_id == tb_groups.group_id, isouter=False). \
+                join(tb_categories, tb_groups.category_id == tb_categories.category_id, isouter=False). \
                 filter(row_class.character_id == character_id). \
                 filter(tb_categories.category_id.in_(self.wl_categories)). \
                 filter(tb_kills.kill_id < mail_pos). \

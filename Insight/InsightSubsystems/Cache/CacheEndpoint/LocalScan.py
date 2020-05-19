@@ -105,6 +105,8 @@ class LocalScan(AbstractEndpoint):
                     "shipID": ship_id,
                     "attacker": is_attacker,
                     "unknown": is_unknown,
+                    "isSuperTitan": Helpers.get_nested_value(e, False, "isSuperTitan"),
+                    "isRegularCap": Helpers.get_nested_value(e, False, "isRegularCap"),
                     "seconds": seconds_ago,
                     "systemID": system_id,
                     "locationID": location_id
