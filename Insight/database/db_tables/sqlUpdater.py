@@ -102,32 +102,32 @@ class sqlUpdater(object):
 
     def sqlV_2_5_0(self):
         """v2.5.0"""
-        yield "CREATE INDEX IF NOT EXISTS ix_kills_killmail_time on kills (killmail_time);"
-        yield "CREATE INDEX IF NOT EXISTS ix_kills_solar_system_id on kills (solar_system_id);"
-        yield "CREATE INDEX IF NOT EXISTS ix_kills_locationID on kills (locationID);"
+        yield 'CREATE INDEX IF NOT EXISTS ix_kills_killmail_time on kills ("killmail_time");'
+        yield 'CREATE INDEX IF NOT EXISTS ix_kills_solar_system_id on kills ("solar_system_id");'
+        yield 'CREATE INDEX IF NOT EXISTS ix_kills_locationID on kills ("locationID");'
 
-        yield "CREATE INDEX IF NOT EXISTS ix_attackers_character_id on attackers (character_id);"
-        yield "CREATE INDEX IF NOT EXISTS ix_attackers_corporation_id on attackers (corporation_id);"
-        yield "CREATE INDEX IF NOT EXISTS ix_attackers_alliance_id on attackers (alliance_id);"
-        yield "CREATE INDEX IF NOT EXISTS ix_attackers_ship_type_id on attackers (ship_type_id);"
-        yield "CREATE INDEX IF NOT EXISTS ix_attackers_weapon_type_id on attackers (weapon_type_id);"
+        yield 'CREATE INDEX IF NOT EXISTS ix_attackers_character_id on attackers ("character_id");'
+        yield 'CREATE INDEX IF NOT EXISTS ix_attackers_corporation_id on attackers ("corporation_id");'
+        yield 'CREATE INDEX IF NOT EXISTS ix_attackers_alliance_id on attackers ("alliance_id");'
+        yield 'CREATE INDEX IF NOT EXISTS ix_attackers_ship_type_id on attackers ("ship_type_id");'
+        yield 'CREATE INDEX IF NOT EXISTS ix_attackers_weapon_type_id on attackers ("weapon_type_id");'
 
-        yield "CREATE INDEX IF NOT EXISTS ix_systems_constellation_id on systems (constellation_id);"
-        yield "CREATE INDEX IF NOT EXISTS ix_constellations_region_id on constellations (region_id);"
-        yield "CREATE INDEX IF NOT EXISTS ix_locations_typeID on locations (typeID);"
-        yield "CREATE INDEX IF NOT EXISTS ix_locations_groupID on locations (groupID);"
+        yield 'CREATE INDEX IF NOT EXISTS ix_systems_constellation_id on systems ("constellation_id");'
+        yield 'CREATE INDEX IF NOT EXISTS ix_constellations_region_id on constellations ("region_id");'
+        yield 'CREATE INDEX IF NOT EXISTS ix_locations_typeID on locations ("typeID");'
+        yield 'CREATE INDEX IF NOT EXISTS ix_locations_groupID on locations ("groupID");'
 
-        yield "CREATE INDEX IF NOT EXISTS ix_types_group_id on types (group_id);"
-        yield "CREATE INDEX IF NOT EXISTS ix_groups_category_id on groups (category_id);"
+        yield 'CREATE INDEX IF NOT EXISTS ix_types_group_id on types ("group_id");'
+        yield 'CREATE INDEX IF NOT EXISTS ix_groups_category_id on groups ("category_id");'
 
-        yield "CREATE INDEX IF NOT EXISTS ix_victims_character_id on victims (character_id);"
-        yield "CREATE INDEX IF NOT EXISTS ix_victims_corporation_id on victims (corporation_id);"
-        yield "CREATE INDEX IF NOT EXISTS ix_victims_alliance_id on victims (alliance_id);"
-        yield "CREATE INDEX IF NOT EXISTS ix_victims_ship_type_id on victims (ship_type_id);"
+        yield 'CREATE INDEX IF NOT EXISTS ix_victims_character_id on victims ("character_id");'
+        yield 'CREATE INDEX IF NOT EXISTS ix_victims_corporation_id on victims ("corporation_id");'
+        yield 'CREATE INDEX IF NOT EXISTS ix_victims_alliance_id on victims ("alliance_id");'
+        yield 'CREATE INDEX IF NOT EXISTS ix_victims_ship_type_id on victims ("ship_type_id");'
 
     def sqlV_2_6_0(self):
         """v2.6.0"""
-        yield "UPDATE kills SET locationID = NULL WHERE locationID = 0;"
+        yield 'UPDATE kills SET "locationID" = NULL WHERE "locationID" = 0;'
 
     def update_all(self):
         """Updates tables, returning the latest successful updated version"""
