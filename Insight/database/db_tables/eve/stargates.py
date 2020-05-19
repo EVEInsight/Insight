@@ -40,18 +40,15 @@ class Stargates(dec_Base.Base, sde_impoter, individual_api_pulling):
         add_count = 0
         try:
             gates = sde_session.query(sde_base).all()
+            existing_gate_pairs = set(db.query(cls.system_from, cls.system_to).all())
             for g in gates:
-                r = db.query(cls).filter(cls.system_from == g.fromSolarSystemID, cls.system_to == g.toSolarSystemID).one_or_none()
-                if r is None:
+                if not (g.fromSolarSystemID, g.toSolarSystemID) in existing_gate_pairs:
                     new_row = cls.make_from_sde(g)
                     new_row.session_add_nonexists_fk(db)
                     db.add(new_row)
                     add_count += 1
                 else:
-                    new_row = cls.make_from_sde(g)
-                    new_row.load_fk_objects()
-                    db.merge(new_row)
-                    add_count += 1
+                    pass
             db.commit()
             if add_count > 0:
                 print("Imported {} {} from the SDE in {} seconds".format(str(add_count), cls.__name__, str(
