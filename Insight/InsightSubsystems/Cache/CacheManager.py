@@ -59,6 +59,10 @@ class CacheManager(SubsystemBase):
         }
         return data
 
+    async def get_cache_with_key(self, key_str: str) -> tuple:
+        result = await self.get_cache(key_str)
+        return (key_str, result)
+
     async def set_cache(self, key_str: str, ttl: int, data_dict: dict):
         await self.client.set(key_str, ttl, data_dict)
 

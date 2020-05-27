@@ -23,7 +23,7 @@ class RedisClient(AbstractBaseClient):
         try:
             self.client = await aioredis.create_redis_pool("redis://:{}@{}:{}/{}".
                                                            format(self.password, self.host, self.port, self.db),
-                                                           timeout=5, encoding="utf-8")
+                                                           timeout=5, encoding="utf-8", minsize=5, maxsize=25)
             test_ok = await self.test_connection()
             if test_ok:
                 return True
