@@ -17,6 +17,7 @@ class setup_database(object):
         self._dbSession = sessionmaker(bind=self.engine)
         self.sc_session = scoped_session(self._dbSession)
         self.verify_tokens()
+        self.clear_tmp_tables()
 
     def initial_load(self):
         engine = create_engine('sqlite:///{}'.format(self.service.config.get("SQLITE_DB_PATH")),
@@ -61,6 +62,16 @@ class setup_database(object):
                 print("Unknown response. No changes were made.")
                 sys.exit(1)
 
+    def clear_tmp_tables(self):
+        db: Session = self.sc_session()
+        try:
+            tb_temp_intjoin.clear_tmp_table(db)
+            tb_temp_strjoin.clear_tmp_table(db)
+        except Exception as ex:
+            print("Error when clearing tmp tables. {}".format(ex))
+        finally:
+            db.close()
+
     def shutdown(self):
         try:
             self._dbSession.close_all()
@@ -70,4 +81,5 @@ class setup_database(object):
             print('Error when closing database: {}'.format(ex))
 
 
-from .db_tables import tb_contacts_alliances, tb_contacts_corps, tb_contacts_pilots, tb_tokens, tb_discord_tokens
+from .db_tables import tb_contacts_alliances, tb_contacts_corps, tb_contacts_pilots, tb_tokens, tb_discord_tokens, \
+    tb_temp_intjoin, tb_temp_strjoin
