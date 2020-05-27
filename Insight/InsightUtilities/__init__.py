@@ -13,4 +13,5 @@ from .Misc.ComparableFuture import ComparableFuture
 from .DBSessions import DBSessions
 from .StaticHelpers import *
 from .EmbedLimitedHelper import EmbedLimitedHelper
+from .MultiLock import MultiLock
 
