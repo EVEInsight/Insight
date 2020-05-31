@@ -26,19 +26,18 @@ class BulkCharacterIDsToLastShip(AbstractEndpoint):
         return await super().get(char_ids=set_char_ids)
 
     async def _do_endpoint_logic(self, char_ids: frozenset) -> dict:
-        awaitables_last_ship = [self.LastShip.get(c) for c in char_ids]
+        last_ships: dict = await self.LastShip.get(char_ids=char_ids)
+        redis_times = []
         known_ship_data = []
         unknown_ids = []
-        redis_ttls = []
-        for f in asyncio.as_completed(awaitables_last_ship, timeout=15):
-            last_ship_d = await f
+        for char_id, last_ship_d in last_ships.items():
             if not await Helpers.async_get_nested_value(last_ship_d, True, self.pool, "data", "known"):
-                unknown_ids.append(await Helpers.async_get_nested_value(last_ship_d,
-                                                                              -1, self.pool, "data", "queryID"))
+                unknown_ids.append(char_id)
             else:
                 known_ship_data.append(await Helpers.async_get_nested_value(last_ship_d, {}, self.pool,
                                                                             "data"))
-            redis_ttls.append({"redis": await Helpers.async_get_nested_value(last_ship_d, {}, self.pool, "redis")})
+            redis_val = {"redis": await Helpers.async_get_nested_value(last_ship_d, {}, self.pool, "redis")}
+            redis_times.append(redis_val)
         return_dict = {
             "data": {
                 "known": known_ship_data,
@@ -48,6 +47,6 @@ class BulkCharacterIDsToLastShip(AbstractEndpoint):
                 "totalUnknownIDs": len(unknown_ids),
             }
         }
-        min_ttl = await self.executor_thread(self.extract_min_ttl, *redis_ttls)
+        min_ttl = await self.executor_thread(self.extract_min_ttl, *redis_times)
         self.set_min_ttl(return_dict, min_ttl)
         return return_dict
