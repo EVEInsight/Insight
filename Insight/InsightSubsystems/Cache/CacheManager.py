@@ -66,11 +66,12 @@ class CacheManager(SubsystemBase):
     async def set_cache(self, key_str: str, ttl: int, data_dict: dict):
         await self.client.set(key_str, ttl, data_dict)
 
-    async def set_and_get_cache(self, key_str: str, ttl: int, data_dict: dict, operation_start_time):
+    async def set_and_get_cache(self, key_str: str, ttl: int, data_dict: dict):
+        st = InsightLogger.InsightLogger.time_start()
         await self.set_cache(key_str, ttl, data_dict)
         d = await self.get_cache(key_str)
         ttl = d["redis"]["ttl"]
-        query_ms = InsightLogger.InsightLogger.time_log(self.lg_cache, operation_start_time,
+        query_ms = InsightLogger.InsightLogger.time_log(self.lg_cache, st,
                                                         'set+get "{}" ttl: {}'.format(key_str, ttl), warn_higher=5000,
                                                         seconds=False)
         d["redis"]["queryms"] = query_ms

@@ -55,11 +55,10 @@ class AbstractEndpoint(metaclass=InsightSingleton):
                 else:
                     return k
 
-    async def _set(self, key_str: str, data_object: dict, endpoint_start_time) -> dict:
+    async def _set(self, key_str: str, data_object: dict) -> dict:
         ttl = Helpers.get_nested_value(data_object, self.default_ttl(), "redis", "ttl")
         data_object.pop("redis", None)
-        return await self.cm.set_and_get_cache(key_str, ttl, data_dict=data_object,
-                                               operation_start_time=endpoint_start_time)
+        return await self.cm.set_and_get_cache(key_str, ttl, data_dict=data_object)
 
     async def get(self, **kwargs) -> dict:
         try:
@@ -70,9 +69,9 @@ class AbstractEndpoint(metaclass=InsightSingleton):
                 except InsightExc.Subsystem.KeyDoesNotExist:
                     st = InsightLogger.InsightLogger.time_start()
                     result = await self._do_endpoint_logic(**kwargs)
-                    InsightLogger.InsightLogger.time_log(self.lg, st, 'logic - key: "{}"'.format(cache_key),
+                    InsightLogger.InsightLogger.time_log(self.lg, st, 'entirety - key: "{}"'.format(cache_key),
                                                          warn_higher=5000, seconds=False)
-                    return await self._set(cache_key, result, st)
+                    return await self._set(cache_key, result)
         except Exception as ex:
             self.lg.exception(ex)
             raise ex
