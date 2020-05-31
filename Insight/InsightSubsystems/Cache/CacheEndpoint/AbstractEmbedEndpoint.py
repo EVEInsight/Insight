@@ -1,9 +1,6 @@
 from InsightSubsystems.Cache.CacheEndpoint.AbstractEndpoint import AbstractEndpoint
 import discord
-from discord.embeds import EmptyEmbed
 from InsightUtilities.StaticHelpers import *
-from datetime import datetime
-from functools import partial
 
 
 class AbstractEmbedEndpoint(AbstractEndpoint):

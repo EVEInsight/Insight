@@ -124,7 +124,11 @@ class ConfigLoader(metaclass=InsightSingleton):
         self.parse_str("REDIS_PASSWORD", "NULL", "NULL", False, "", True)
         self.parse_int("REDIS_DB", "NULL", "NULL", False, 0, True)
         self.parse_bool("REDIS_PURGE", "NULL", "NULL", False, "TRUE", True)
-        self.parse_int("SUBSYSTEM_CACHE_THREADS", "NULL", "NULL", False, 20, True)
-        self.parse_bool("SUBSYSTEM_CACHE_MULTIPROCESS", "NULL", "NULL", False, "FALSE", True)
+        self.parse_bool("REDIS_PURGE", "NULL", "NULL", False, "TRUE", True)
+        self.parse_int("REDIS_CONNECTIONS_MIN", "NULL", "NULL", False, 50, True)
+        self.parse_int("REDIS_CONNECTIONS_MAX", "NULL", "NULL", False, 100, True)
+        self.parse_int("SUBSYSTEM_CACHE_THREADS", "NULL", "NULL", False, 8, True)
+        self.parse_int("SUBSYSTEM_CACHE_PROCESSES", "NULL", "NULL", False, max(os.cpu_count(), 8), True)
+        self.parse_bool("SUBSYSTEM_CACHE_MULTIPROCESS", "NULL", "NULL", False, "TRUE", True)
 
 
