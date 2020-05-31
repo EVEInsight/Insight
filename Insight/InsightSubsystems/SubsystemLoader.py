@@ -3,6 +3,7 @@ import discord_bot
 import service
 import InsightLogger
 from InsightSubsystems.Cache.CacheManager import CacheManager
+from InsightSubsystems.Cron.CronManager import CronManager
 
 
 class SubsystemLoader(metaclass=InsightSingleton):
@@ -14,6 +15,7 @@ class SubsystemLoader(metaclass=InsightSingleton):
         self.loop = self.client.loop
         self.subsystems = []
         self.subsystems.append(CacheManager(subsystemloader=self))
+        self.subsystems.append(CronManager(subsystemloader=self))
 
     async def start_tasks(self):
         self.lg.info("Waiting for ready signal.")

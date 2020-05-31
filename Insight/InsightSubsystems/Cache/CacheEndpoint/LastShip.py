@@ -4,6 +4,7 @@ from database.db_tables import tb_kills, tb_victims, tb_attackers, tb_types, tb_
 from sqlalchemy.orm import Session
 from datetime import datetime
 from sqlalchemy import func
+import asyncio
 
 
 class LastShip(AbstractMultiEndpoint):
@@ -24,6 +25,10 @@ class LastShip(AbstractMultiEndpoint):
             883 # cap industrial
         ]
         super().__init__(cache_manager)
+        self.precache: bool = self.config.get("SUBSYSTEM_CACHE_LASTSHIP_PRECACHE")
+        self.lock_char_ids_recent_activity = asyncio.Lock(loop=self.loop)
+        self.char_ids_recent_activity = set()
+        self.ttl = self.config.get("SUBSYSTEM_CACHE_LASTSHIP_TTL")
 
     @staticmethod
     def default_ttl() -> int:
@@ -191,6 +196,8 @@ class LastShip(AbstractMultiEndpoint):
         pilot_ids = await self.executor_thread(self._extract_characters, new_km)
         for pilot_id in pilot_ids:
             await self.delete_no_fail(char_id=pilot_id)
+            async with self.lock_char_ids_recent_activity:
+                self.char_ids_recent_activity.add(pilot_id)
 
     def _extract_characters(self, new_km: tb_kills):
         char_ids = []
@@ -202,3 +209,16 @@ class LastShip(AbstractMultiEndpoint):
         if new_km.object_victim and new_km.object_victim.character_id:
             char_ids.append(new_km.object_victim.character_id)
         return char_ids
+
+    async def cron_precache_operation(self):
+        async with self.lock_char_ids_recent_activity:
+            if not self.precache:
+                self.char_ids_recent_activity = set()
+            if len(self.char_ids_recent_activity) > 0:
+                self.lg.info("Starting precache of {} character IDs.".format(len(self.char_ids_recent_activity)))
+                old_set = self.char_ids_recent_activity
+                self.char_ids_recent_activity = set()
+                await self.get(char_ids=old_set)  # safe for set does not have to be list
+
+    def ttl_override(self) -> int:
+        return self.ttl
