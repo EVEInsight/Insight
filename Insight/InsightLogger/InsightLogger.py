@@ -88,4 +88,5 @@ class InsightLogger(object):
         cls.get_logger('InsightUtilities', 'InsightUtilities.log', level=logging.DEBUG)
         cls.get_logger('Subsystem', 'Subsystem.log', level=logging.DEBUG)
         cls.get_logger('Cache', 'Cache.log', level=logging.DEBUG)
+        cls.get_logger('Cron', 'Cron.log', level=logging.DEBUG)
         cls.get_logger('MailError', 'MailError.log', console_print=True, console_level=logging.WARNING)

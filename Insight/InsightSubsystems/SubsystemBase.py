@@ -14,6 +14,7 @@ class SubsystemBase(metaclass=InsightSingleton):
         self.service = self.subsystems.service
         self.zk = self.service.zk_obj
         self.config: ConfigLoader = ConfigLoader()
+        self.insight_ready_event = self.subsystems.insight_ready_event
 
     async def start_subsystem(self):
         print("Starting subsystem: {}".format(self.__class__.__name__))

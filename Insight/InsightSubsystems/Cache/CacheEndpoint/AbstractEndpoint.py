@@ -16,10 +16,10 @@ class AbstractEndpoint(metaclass=InsightSingleton):
         self.lock = asyncio.Lock(loop=self.cm.loop)
         self.lock_key_strings = asyncio.Lock(loop=self.cm.loop)
         self.key_strings = {}
-        self.ttl = self.default_ttl()
         self.key_locks = AsyncLockManager(self.cm.loop)
         self.loop = self.cm.loop
         self.db_sessions: DBSessions = DBSessions()
+        self.config = self.cm.config
 
     async def executor_thread(self, callback, *args, **kwargs):
         return await self.loop.run_in_executor(self.cm.tp, partial(callback, *args, **kwargs))
@@ -56,7 +56,10 @@ class AbstractEndpoint(metaclass=InsightSingleton):
                     return k
 
     async def _set(self, key_str: str, data_object: dict) -> dict:
-        ttl = Helpers.get_nested_value(data_object, self.default_ttl(), "redis", "ttl")
+        default_ttl = self.ttl_override()
+        if default_ttl == -1:
+            default_ttl = self.default_ttl()
+        ttl = Helpers.get_nested_value(data_object, default_ttl, "redis", "ttl")
         data_object.pop("redis", None)
         return await self.cm.set_and_get_cache(key_str, ttl, data_dict=data_object)
 
@@ -94,6 +97,9 @@ class AbstractEndpoint(metaclass=InsightSingleton):
     @staticmethod
     def default_ttl() -> int:
         return 60  # 60 seconds
+
+    def ttl_override(self) -> int:
+        return -1  # returns -1 when not set to imply using default ttl
 
     @classmethod
     def extract_min_ttl(cls, *args):
