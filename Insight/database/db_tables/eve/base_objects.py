@@ -19,6 +19,19 @@ class table_row(object):
     def load_fk_objects(self):
         pass
 
+    def session_add_nonexists_fk(self, db: Session):
+        """check and add nonexist fk objects to the session for db.session.add() queries. Do not use this for merges
+         otherwise an overwrite on the fk can occur."""
+        pass
+
+    @classmethod
+    def session_exists(cls, primary_key, db: Session) -> bool:
+        q = db.query(cls).filter(cls.primary_key_row() == primary_key)
+        if db.query(literal(True)).filter(q.exists()).scalar():
+            return True
+        else:
+            return False
+
     def to_jsonDictionary(self) -> dict:
         return {}
 

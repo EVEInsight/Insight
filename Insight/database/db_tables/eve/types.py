@@ -26,6 +26,10 @@ class Types(dec_Base.Base,name_only,index_api_updating,sde_impoter):
         if self.group_id:
             self.object_group = groups.Groups(self.group_id)
 
+    def session_add_nonexists_fk(self, db: Session):
+        if self.group_id and not groups.Groups.session_exists(self.group_id, db):
+            db.add(groups.Groups(self.group_id))
+
     def get_id(self):
         return self.type_id
 
@@ -60,7 +64,6 @@ class Types(dec_Base.Base,name_only,index_api_updating,sde_impoter):
         new_row.group_id = __row.groupID
         new_row.description = __row.description
         new_row.basePrice = __row.basePrice
-        new_row.load_fk_objects()
         return new_row
 
     @hybrid_property

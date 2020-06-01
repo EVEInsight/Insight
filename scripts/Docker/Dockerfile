@@ -1,4 +1,4 @@
-FROM swaggerapi/swagger-codegen-cli:latest as SwaggerBuilder
+FROM swaggerapi/swagger-codegen-cli:2.4.13 as SwaggerBuilder
 
 FROM openjdk:12-jdk-alpine as SwaggerRunner
 COPY --from=SwaggerBuilder /opt/swagger-codegen-cli/swagger-codegen-cli.jar ./swagger-codegen-cli.jar
@@ -23,12 +23,13 @@ RUN wget https://www.fuzzwork.co.uk/dump/sqlite-latest.sqlite.bz2.md5
 RUN md5sum -c sqlite-latest.sqlite.bz2.md5
 RUN bunzip2 sqlite-latest.sqlite.bz2
 
-FROM python:3.6-slim-stretch
+FROM python:3.6-slim-buster
 LABEL maintainer="nathan@nathan-s.com"
 LABEL url="https://github.com/Nathan-LS/Insight"
 ARG INSIGHT_BRANCH=master
 ARG INSIGHT_REPO=https://github.com/Nathan-LS/Insight.git
 
+ENV DB_DRIVER="sqlite3"
 ENV SQLITE_DB_PATH="Database.db"
 ENV HEADERS_FROM_EMAIL=""
 ENV DISCORD_TOKEN=""
@@ -53,6 +54,13 @@ ENV REDIS_HOST=""
 ENV REDIS_PORT=""
 ENV REDIS_DB=""
 ENV REDIS_PASSWORD=""
+ENV POSTGRES_HOST=""
+ENV POSTGRES_PORT=5432
+ENV POSTGRES_USER=""
+ENV POSTGRES_PASSWORD=""
+ENV POSTGRES_DB=""
+ENV POSTGRES_POOLSIZE=""
+ENV POSTGRES_POOLOVERFLOW=""
 ENV REDIS_PURGE=""
 ENV SUBSYSTEM_CACHE_THREADS=""
 ENV SUBSYSTEM_CACHE_MULTIPROCESS=""
@@ -60,10 +68,19 @@ ENV SUBSYSTEM_CACHE_MULTIPROCESS=""
 ENV PYTHONUNBUFFERED=1
 
 RUN apt-get update && apt-get install -y \
+ apt-utils \
+ curl \
+ ca-certificates \
+ gnupg
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+RUN apt-get update && apt-get install -y \
  git \
  build-essential \
  zip \
- && rm -rf /var/lib/apt/lists/*
+ libpq-dev \
+ pgloader
+RUN rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /InsightDocker /app /home/insight
 RUN addgroup -gid 1007 insight

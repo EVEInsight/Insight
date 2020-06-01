@@ -63,7 +63,6 @@ class Regions(dec_Base.Base, name_only, individual_api_pulling, index_api_updati
     def make_from_sde(cls,__row):
         new_row = cls(__row.regionID)
         new_row.name = __row.regionName
-        new_row.load_fk_objects()
         return new_row
 
     @hybrid_property

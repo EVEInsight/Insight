@@ -76,15 +76,19 @@ class service_module(object):
                 return None
 
     def _import_check(self):
-        try:
-            with open(self.config.get("SQLITE_DB_PATH"),'r'):
-                if not self.cli_args.skip_api_import:
-                    self._import_everything_flag = True
-        except FileNotFoundError:
-            print("{} does not exist. Forcing first time static data import.".format(self.config.get("SQLITE_DB_PATH")))
-            self._import_everything_flag = True
+        if self.config.get("DB_DRIVER") == "sqlite3":
+            try:
+                with open(self.config.get("SQLITE_DB_PATH"), 'r'):
+                    if not self.cli_args.skip_api_import:
+                        self._import_everything_flag = True
+            except FileNotFoundError:
+                print("{} does not exist. Forcing first time static data import.".format(
+                    self.config.get("SQLITE_DB_PATH")))
+                self._import_everything_flag = True
+        else:
+            self._import_everything_flag = not self.cli_args.skip_api_import
 
-    def get_session(self)-> Session:
+    def get_session(self) -> Session:
         """
 
         :rtype: Session
@@ -141,5 +145,5 @@ class service_module(object):
 
     @classmethod
     def get_db_version(cls):
-        version_str = 'v2.5.0'
+        version_str = 'v2.6.0'
         return LooseVersion(version_str)

@@ -22,6 +22,12 @@ class Locations(dec_Base.Base,table_row,sde_impoter):
     def __init__(self, eve_id: int):
         self.location_id = eve_id
 
+    def session_add_nonexists_fk(self, db: Session):
+        if self.typeID and not types.Types.session_exists(self.typeID, db):
+            db.add(types.Types(self.typeID))
+        if self.groupID and not groups.Groups.session_exists(self.groupID, db):
+            db.add(groups.Groups(self.groupID))
+
     def get_id(self):
         return self.location_id
 
@@ -34,7 +40,7 @@ class Locations(dec_Base.Base,table_row,sde_impoter):
         new_row = cls(__row.itemID)
         new_row.name = __row.itemName
         new_row.typeID = __row.typeID
-        new_row.groupID = __row.groupID
+        new_row.groupID = __row.groupID if __row.groupID >= 0 else None  #todo location 40009087 in mapDemoralize has an invalid group id of -1. Might be error in either sde or esi. Location is Jita IV - Moon 4
         new_row.pos_x = __row.x
         new_row.pos_y = __row.y
         new_row.pos_z = __row.z
@@ -85,10 +91,6 @@ class Locations(dec_Base.Base,table_row,sde_impoter):
     @classmethod
     def get_query_filter(cls, sde_base):
         return sde_base.itemID
-
-    @classmethod
-    def row_action(cls,row,db_session):
-        db_session.add(row)
 
     def to_jsonDictionary(self) -> dict:
         return {

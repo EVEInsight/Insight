@@ -29,6 +29,10 @@ class Groups(dec_Base.Base,individual_api_pulling,index_api_updating,sde_impoter
             for object_id in self._types:
                 self.object_types.append(types.Types(object_id))
 
+    def session_add_nonexists_fk(self, db: Session):
+        if self.category_id and not categories.Categories.session_exists(self.category_id, db):
+            db.add(categories.Categories(self.category_id))
+
     def get_id(self):
         return self.group_id
 
@@ -58,7 +62,6 @@ class Groups(dec_Base.Base,individual_api_pulling,index_api_updating,sde_impoter
         new_row.name = __row.groupName
         new_row.category_id = __row.categoryID
         new_row.published = __row.published
-        new_row.load_fk_objects()
         return new_row
 
     @hybrid_property

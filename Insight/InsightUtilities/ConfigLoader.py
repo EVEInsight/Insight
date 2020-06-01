@@ -97,8 +97,8 @@ class ConfigLoader(metaclass=InsightSingleton):
         return val
 
     def _load_all_options(self):
-
-        self.parse_str("SQLITE_DB_PATH", "sqlite_database", "filename", True)
+        self.parse_str("DB_DRIVER", "NULL", "NULL", fail_if_empty=True)
+        self.parse_str("SQLITE_DB_PATH", "sqlite_database", "filename", fail_if_empty=False)
         self.parse_str("HEADERS_FROM_EMAIL", "headers", "from", False, "")
         self.parse_str("DISCORD_TOKEN", "discord", "token", True)
         self.parse_str("CCP_CLIENT_ID", "ccp_developer", "client_id", True)
@@ -123,6 +123,13 @@ class ConfigLoader(metaclass=InsightSingleton):
         self.parse_int("REDIS_PORT", "NULL", "NULL", False, 6379, True)
         self.parse_str("REDIS_PASSWORD", "NULL", "NULL", False, "", True)
         self.parse_int("REDIS_DB", "NULL", "NULL", False, 0, True)
+        self.parse_str("POSTGRES_HOST", "NULL", "NULL", fail_if_empty=False, nonotify=True)
+        self.parse_int("POSTGRES_PORT", "NULL", "NULL", fail_if_empty=False, fallback_val=5432, nonotify=True)
+        self.parse_str("POSTGRES_USER", "NULL", "NULL", fail_if_empty=False, nonotify=True)
+        self.parse_str("POSTGRES_PASSWORD", "NULL", "NULL", fail_if_empty=False, nonotify=True)
+        self.parse_str("POSTGRES_DB", "NULL", "NULL", fail_if_empty=False, nonotify=True)
+        self.parse_int("POSTGRES_POOLSIZE", "NULL", "NULL", fail_if_empty=False, fallback_val=20, nonotify=True)
+        self.parse_int("POSTGRES_POOLOVERFLOW", "NULL", "NULL", fail_if_empty=False, fallback_val=10, nonotify=True)
         self.parse_bool("REDIS_PURGE", "NULL", "NULL", False, "TRUE", True)
         self.parse_bool("REDIS_PURGE", "NULL", "NULL", False, "TRUE", True)
         self.parse_int("REDIS_CONNECTIONS_MIN", "NULL", "NULL", False, 50, True)
