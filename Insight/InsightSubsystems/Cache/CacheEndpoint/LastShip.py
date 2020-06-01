@@ -1,7 +1,7 @@
 from InsightSubsystems.Cache.CacheEndpoint.AbstractMultiEndpoint import AbstractMultiEndpoint
 from database.db_tables import tb_kills, tb_victims, tb_attackers, tb_types, tb_groups, tb_categories, \
     tb_characters, tb_corporations, tb_alliances, tb_systems, tb_locations, tb_temp_intjoin
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from datetime import datetime
 from sqlalchemy import func
 import asyncio
@@ -44,41 +44,71 @@ class LastShip(AbstractMultiEndpoint):
     async def delete_no_fail(self, char_id: int):
         return await super().delete_no_fail(query_item=char_id)
 
+    def query_victim(self, db: Session, random_key, epoch):
+        all_km_ids_pilots = db.query(
+            tb_victims.character_id, tb_victims.kill_id
+        ).select_from(tb_temp_intjoin). \
+            join(tb_victims, tb_temp_intjoin.int_field == tb_victims.character_id, isouter=False). \
+            join(tb_types, tb_victims.ship_type_id == tb_types.type_id, isouter=False). \
+            join(tb_groups, tb_types.group_id == tb_groups.group_id, isouter=False). \
+            filter(tb_groups.category_id.in_(self.wl_categories)). \
+            filter(tb_temp_intjoin.key == random_key, tb_temp_intjoin.epoch == epoch).subquery()
+
+        all_kms_with_row_nums = db.query(
+            all_km_ids_pilots.c.character_id,
+            all_km_ids_pilots.c.kill_id,
+            (func.ROW_NUMBER().over(partition_by=all_km_ids_pilots.c.character_id,
+                                    order_by=tb_kills.killmail_time.desc())).label("time_rank")
+        ).select_from(all_km_ids_pilots). \
+            join(tb_kills, tb_kills.kill_id == all_km_ids_pilots.c.kill_id, isouter=False).subquery()
+
+        most_recent_pk = db.query(all_kms_with_row_nums.c.character_id, all_kms_with_row_nums.c.kill_id). \
+            select_from(all_kms_with_row_nums). \
+            filter(all_kms_with_row_nums.c.time_rank == 1).subquery()
+
+        queried_chars_to_victims = db.query(most_recent_pk.c.character_id, tb_victims). \
+            select_from(most_recent_pk). \
+            join(tb_victims, tb_victims.kill_id == most_recent_pk.c.kill_id, isouter=False).\
+            options(selectinload("object_kill").selectinload("object_victim"))
+
+        return queried_chars_to_victims
+
+    def query_attacker(self, db: Session, random_key, epoch):
+        all_km_ids_pilots = db.query(
+            tb_attackers.character_id, tb_attackers.no_pk, tb_attackers.kill_id
+        ).select_from(tb_temp_intjoin).\
+            join(tb_attackers, tb_temp_intjoin.int_field == tb_attackers.character_id, isouter=False).\
+            join(tb_types, tb_attackers.ship_type_id == tb_types.type_id, isouter=False).\
+            join(tb_groups, tb_types.group_id == tb_groups.group_id, isouter=False). \
+            filter(tb_groups.category_id.in_(self.wl_categories)).\
+            filter(tb_temp_intjoin.key == random_key, tb_temp_intjoin.epoch == epoch).subquery()
+
+        all_kms_with_row_nums = db.query(
+            all_km_ids_pilots.c.character_id,
+            all_km_ids_pilots.c.no_pk,
+            (func.ROW_NUMBER().over(partition_by=all_km_ids_pilots.c.character_id, order_by=tb_kills.killmail_time.desc())).label(
+                "time_rank")
+        ).select_from(all_km_ids_pilots).\
+            join(tb_kills, tb_kills.kill_id == all_km_ids_pilots.c.kill_id, isouter=False).subquery()
+
+        most_recent_pk = db.query(all_kms_with_row_nums.c.character_id, all_kms_with_row_nums.c.no_pk).\
+            select_from(all_kms_with_row_nums).\
+            filter(all_kms_with_row_nums.c.time_rank == 1).subquery()
+
+        queried_chars_to_attackers = db.query(most_recent_pk.c.character_id, tb_attackers).\
+            select_from(most_recent_pk).\
+            join(tb_attackers, tb_attackers.no_pk == most_recent_pk.c.no_pk, isouter=False). \
+            options(selectinload("object_kill").selectinload("object_attackers"))
+
+        return queried_chars_to_attackers
+
     def _last_ships(self, db: Session, random_key, epoch, attacker=True):
         if attacker:
-            row_class = tb_attackers
+            query = self.query_attacker(db, random_key, epoch)
         else:
-            row_class = tb_victims
-        allmails = db.query(
-            row_class, (func.ROW_NUMBER().over(partition_by=row_class.character_id, order_by=tb_kills.killmail_time.desc())).label("recent_rank")).\
-            select_from(row_class). \
-            join(tb_kills, row_class.kill_id == tb_kills.kill_id, isouter=False). \
-            join(tb_types, row_class.ship_type_id == tb_types.type_id, isouter=False). \
-            join(tb_groups, tb_types.group_id == tb_groups.group_id, isouter=False). \
-            join(tb_categories, tb_groups.category_id == tb_categories.category_id, isouter=False). \
-            filter(tb_categories.category_id.in_(self.wl_categories)).subquery()
-        if attacker:
-            lastship = db.query(allmails.c.no_pk, allmails.c.character_id).\
-                select_from(allmails) .\
-                filter(allmails.c.recent_rank == 1).subquery()
-        else:
-            lastship = db.query(allmails.c.kill_id, allmails.c.character_id).\
-                select_from(allmails) .\
-                filter(allmails.c.recent_rank == 1).subquery()
-        query_char_ids = db.query(tb_temp_intjoin.int_field). \
-            filter(tb_temp_intjoin.key == random_key, tb_temp_intjoin.epoch == epoch).subquery()
-        if attacker:
-            plastship = db.query(query_char_ids.c.int_field, row_class).\
-                select_from(query_char_ids).\
-                join(lastship, query_char_ids.c.int_field == lastship.c.character_id).\
-                join(row_class, lastship.c.no_pk == row_class.no_pk, isouter=True)
-        else:
-            plastship = db.query(query_char_ids.c.int_field, row_class).\
-                select_from(query_char_ids).\
-                join(lastship, query_char_ids.c.int_field == lastship.c.character_id).\
-                join(row_class, lastship.c.kill_id == row_class.kill_id, isouter=True)
+            query = self.query_victim(db, random_key, epoch)
         return_dict = {}
-        for t in plastship.all():
+        for t in query.all():
             return_dict[t[0]] = t[1]
         return return_dict
 
@@ -182,6 +212,7 @@ class LastShip(AbstractMultiEndpoint):
             db.commit()
             attackers = self._last_ships(db, random_key, epoch, attacker=True)
             victims = self._last_ships(db, random_key, epoch, attacker=False)
+            db.expunge_all()
             for c_id in character_ids:
                 last_ship, is_alive = self.get_last_ship(attackers.get(c_id), victims.get(c_id))
                 return_dict[c_id] = self._make_dict(c_id, last_ship, is_alive)
