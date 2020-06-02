@@ -26,11 +26,9 @@ class BulkCharacterNameToID(AbstractEndpoint):
         return await super().get(char_names=set_char_names)
 
     async def _do_endpoint_logic(self, char_names: frozenset) -> dict:
-        awaitables = [self.CharacterNameToId.get(c) for c in char_names]
-        results = []
-        for f in asyncio.as_completed(awaitables, timeout=15):
-            results.append(await f)
-        return await self.executor_thread(self.make_return_dict, results)
+        dict_result = await self.CharacterNameToId.get(char_names=char_names)
+        values_list_result = await self.executor_thread(list, dict_result.values())
+        return await self.executor_thread(self.make_return_dict, values_list_result)
 
     @classmethod
     def make_return_dict(cls, char_data: list) -> dict:
