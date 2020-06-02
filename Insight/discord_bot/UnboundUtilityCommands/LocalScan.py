@@ -1,6 +1,6 @@
 from .UnboundCommandBase import *
 from InsightSubsystems.Cache.CacheEndpoint.LocalScanEmbeds.LocalScanEmbedBase import LocalScanEmbedBase
-import re
+from InsightUtilities.StaticHelpers import RegexCheck
 from functools import partial
 
 
@@ -16,9 +16,8 @@ class LocalScan(UnboundCommandBase):
     def process_character_names(self, message_chars: str):
         return_names = []
         input_names = message_chars.split("\n")
-        valid_char_name_regex = re.compile(r"^[a-zA-Z0-9\-\' ]+$")
         for char_name in input_names:
-            if re.fullmatch(valid_char_name_regex, char_name):
+            if RegexCheck.is_valid_character_name(char_name):
                 return_names.append(char_name)
         return return_names
 
