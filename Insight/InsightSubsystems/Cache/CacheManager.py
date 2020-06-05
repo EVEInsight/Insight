@@ -55,7 +55,8 @@ class CacheManager(SubsystemBase):
         data["redis"] = {
             "ttl": ttl,
             "queryms": query_ms,
-            "cacheHit": True
+            "cacheHit": True,
+            "usesCache": True
         }
         return data
 
@@ -76,7 +77,14 @@ class CacheManager(SubsystemBase):
                                                         seconds=False)
         d["redis"]["queryms"] = query_ms
         d["redis"]["cacheHit"] = False
+        d["redis"]["usesCache"] = True
         return d
 
     async def delete_key(self, key_name):
         await self.client.delete(key_name)
+
+    async def serialize(self, obj: dict) -> str:
+        return await self.client.serialize(obj)
+
+    async def deserialize(self, obj: str) -> dict:
+        return await self.client.deserialize(obj)
