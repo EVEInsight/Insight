@@ -1,4 +1,4 @@
-from InsightSubsystems.Cache.CacheEndpoint.AbstractEndpoint import AbstractEndpoint
+from InsightSubsystems.Cache.CacheEndpoint.AbstractNoCacheEndpoint import AbstractNoCacheEndpoint
 from InsightUtilities.StaticHelpers import *
 from datetime import datetime
 from dateutil.parser import parse as dateTimeParser
@@ -8,14 +8,10 @@ from InsightSubsystems.Cache.CacheEndpoint.EndpointUtils.TrackingBucketEntity im
 from collections import OrderedDict
 
 
-class LocalScan(AbstractEndpoint):
+class LocalScan(AbstractNoCacheEndpoint):
     def __init__(self, cache_manager):
         super().__init__(cache_manager)
         self.BulkCharacterNamesToLastShip = self.cm.BulkCharacterNamesToLastShip
-
-    @staticmethod
-    def default_ttl() -> int:
-        return 30
 
     @staticmethod
     def _get_unprefixed_key_hash_sync(char_names: frozenset, seconds_ago_threshold: int):

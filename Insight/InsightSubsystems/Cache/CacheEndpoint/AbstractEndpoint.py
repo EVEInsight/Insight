@@ -27,6 +27,9 @@ class AbstractEndpoint(metaclass=InsightSingleton):
     async def executor_proc(self, callback, *args, **kwargs):
         return await self.loop.run_in_executor(self.cm.pool, partial(callback, *args, **kwargs))
 
+    async def get_lock(self, key_str: str):
+        return await self.key_locks.get_object(key=key_str)
+
     @staticmethod
     def make_frozen_set(list_items: list):
         return frozenset(list_items)
@@ -66,7 +69,7 @@ class AbstractEndpoint(metaclass=InsightSingleton):
     async def get(self, **kwargs) -> dict:
         try:
             cache_key = await self._get_prefixed_key(await self._get_unprefixed_key_hash(**kwargs))
-            async with (await self.key_locks.get_object(cache_key)):
+            async with (await self.get_lock(cache_key)):
                 try:
                     return await self.cm.get_cache(cache_key)
                 except InsightExc.Subsystem.KeyDoesNotExist:

@@ -29,7 +29,7 @@ class AbstractMultiEndpoint(AbstractEndpoint):
             for item in query_set:
                 cache_key = await self._get_prefixed_key(await self._get_unprefixed_key_hash(query_item=item,
                                                                                              **kwargs))
-                lock = await self.key_locks.get_object(cache_key)
+                lock = await self.get_lock(cache_key)
                 locks.append(lock)
             multilock = MultiLock(locks)
             cached_dict = {}

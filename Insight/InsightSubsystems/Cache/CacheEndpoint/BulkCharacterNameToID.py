@@ -1,16 +1,11 @@
-from InsightSubsystems.Cache.CacheEndpoint.AbstractEndpoint import AbstractEndpoint
-import asyncio
+from InsightSubsystems.Cache.CacheEndpoint.AbstractNoCacheEndpoint import AbstractNoCacheEndpoint
 from InsightUtilities.StaticHelpers import *
 
 
-class BulkCharacterNameToID(AbstractEndpoint):
+class BulkCharacterNameToID(AbstractNoCacheEndpoint):
     def __init__(self, cache_manager):
         super().__init__(cache_manager)
         self.CharacterNameToId = self.cm.CharacterNameToID
-
-    @staticmethod
-    def default_ttl() -> int:
-        return 7200  # 2 hours
 
     @staticmethod
     def _get_unprefixed_key_hash_sync(char_names: frozenset):
