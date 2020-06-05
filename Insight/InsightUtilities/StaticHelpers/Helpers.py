@@ -7,7 +7,13 @@ class Helpers(object):
     def get_nested_value(d: dict, default_value=None, *args):
         for k in args:
             try:
-                d = d.get(str(k))
+                if d is None:
+                    raise AttributeError
+                else:
+                    tmp_next_val = d.get(k)
+                    if tmp_next_val is None and not isinstance(k, str):
+                        tmp_next_val = d.get(str(k))
+                    d = tmp_next_val
             except AttributeError:
                 return default_value
         return d if d is not None else default_value
