@@ -15,17 +15,18 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
         return 30
 
     @staticmethod
-    def _get_unprefixed_key_hash_sync(char_names: frozenset, seconds_ago_threshold: int):
-        return "{}:{}".format(seconds_ago_threshold, hash(char_names))
+    def _get_unprefixed_key_hash_sync(char_names: frozenset, seconds_ago_threshold: int, server_prefix: str):
+        return "{}:{}:{}".format(seconds_ago_threshold, hash(char_names), server_prefix)
 
-    async def get(self, char_names: list) -> discord.Embed:
+    async def get(self, char_names: list, server_prefix: str) -> discord.Embed:
         set_char_names = await self.executor_thread(self.make_frozen_set, list_items=char_names)
         seconds_ago_threshold = int(1e+10)
-        return await super().get(char_names=set_char_names, seconds_ago_threshold=seconds_ago_threshold)
+        return await super().get(char_names=set_char_names, seconds_ago_threshold=seconds_ago_threshold,
+                                 server_prefix=server_prefix)
 
-    async def _do_endpoint_logic(self, char_names: frozenset, seconds_ago_threshold: int) -> dict:
+    async def _do_endpoint_logic(self, char_names: frozenset, seconds_ago_threshold: int, server_prefix: str) -> dict:
         local_scan = await self.LocalScan.get(char_names=char_names, seconds_ago_threshold=seconds_ago_threshold)
-        return await self.executor_proc(self._do_endpoint_logic_sync, scan=local_scan)
+        return await self.executor_proc(self._do_endpoint_logic_sync, scan=local_scan, server_prefix=server_prefix)
 
     @classmethod
     def _add_pilot_ship(cls, e: EmbedLimitedHelper, scan: dict, char_id: int):
@@ -81,7 +82,7 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
                 km_ratios_added += 1
 
     @classmethod
-    def _do_endpoint_logic_sync(cls, scan: dict) -> dict:
+    def _do_endpoint_logic_sync(cls, scan: dict, server_prefix: str) -> dict:
         list_all_character_ids = Helpers.get_nested_value(scan, {}, "characters").keys()
         set_all_character_ids = set(list_all_character_ids)
         e = EmbedLimitedHelper()
@@ -100,7 +101,7 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
                           "was a loss (DEAD).\n\n{}".format(str_stats))
         e.set_author(name="Scan of {} pilots".format(Helpers.get_nested_value(scan, 0, "totalQueried")),
                      icon_url=URLHelper.type_image(1952, 64))
-        e.set_footer(text="Run '!lscan help' for additional help and usage.")
+        e.set_footer(text="Run '{}s help' for additional help and usage.".format(server_prefix))
         alliances = Helpers.get_nested_value(scan, [], "alliances")
         corporations = Helpers.get_nested_value(scan, [], "corporations")
         global_tabbed_grps = 0
@@ -145,8 +146,8 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
                         if e.check_remaining_lower_limits_ratio(.10, .10):
                             break
                         cls._add_pilot_ship(e, scan, character_id)
-                        set_grp_character_ids.remove(str(character_id))
-                        set_all_character_ids.remove(str(character_id))
+                        set_grp_character_ids.remove(character_id)
+                        set_all_character_ids.remove(character_id)
                     e.field_buffer_add("")
             if len(set_grp_character_ids) > 0:
                 e.field_buffer_add("-Misc Locations")
@@ -155,8 +156,8 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
                         if e.check_remaining_lower_limits_ratio(.10, .10):
                             break
                         cls._add_pilot_ship(e, scan, character_id)
-                        set_grp_character_ids.remove(str(character_id))
-                        set_all_character_ids.remove(str(character_id))
+                        set_grp_character_ids.remove(character_id)
+                        set_all_character_ids.remove(character_id)
                 e.field_buffer_end_bounds()
             km_ratios = Helpers.get_nested_value(grp, {}, "kms").values()
             cls._add_summary_involved_mails(e, scan, km_ratios, max_to_post=3, ratio_threshold=.25)
@@ -172,7 +173,7 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
                     if e.check_remaining_lower_limits(350, 2):
                         break
                     cls._add_pilot_ship(e, scan, character_id)
-                    set_all_character_ids.remove(str(character_id))
+                    set_all_character_ids.remove(character_id)
             if len(set_all_character_ids) > 0:
                 e.field_buffer_add("----Truncated {}".format(len(set_all_character_ids)))
             e.field_buffer_end_bounds()
@@ -182,6 +183,5 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
         return_result = {
             "embed": e.to_dict(),
         }
-        cls.set_min_ttl(return_result, cls.extract_min_ttl(scan))
         return return_result
 

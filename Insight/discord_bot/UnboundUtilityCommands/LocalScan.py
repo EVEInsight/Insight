@@ -23,4 +23,5 @@ class LocalScan(UnboundCommandBase):
 
     async def get_embed(self, d_message: discord.Message, message_text: str, **kwargs) ->discord.Embed:
         valid_names = await self.loop.run_in_executor(None, partial(self.process_character_names, message_text))
-        return await self.LocalScanEmbedBase.get(char_names=valid_names)
+        prefix = await self.serverManager.get_min_prefix(d_message.channel)
+        return await self.LocalScanEmbedBase.get(char_names=valid_names, server_prefix=prefix)
