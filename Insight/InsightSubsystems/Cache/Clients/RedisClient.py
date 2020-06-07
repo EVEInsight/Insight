@@ -13,6 +13,8 @@ class RedisClient(AbstractBaseClient):
         self.port = self.config.get("REDIS_PORT")
         self.db = self.config.get("REDIS_DB")
         self.purge_keys = self.config.get("REDIS_PURGE")
+        self.min_connections = self.config.get("REDIS_CONNECTIONS_MIN")
+        self.max_connections = self.config.get("REDIS_CONNECTIONS_MAX")
         self.client: aioredis.Redis = None
 
     async def establish_connection(self):
@@ -23,7 +25,8 @@ class RedisClient(AbstractBaseClient):
         try:
             self.client = await aioredis.create_redis_pool("redis://:{}@{}:{}/{}".
                                                            format(self.password, self.host, self.port, self.db),
-                                                           timeout=5, encoding="utf-8", minsize=5, maxsize=25)
+                                                           timeout=5, encoding=None, minsize=self.min_connections,
+                                                           maxsize=self.max_connections)
             test_ok = await self.test_connection()
             if test_ok:
                 return True

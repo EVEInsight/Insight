@@ -81,6 +81,7 @@ class InsightLogger(object):
         cls.get_logger('sqlalchemy.dialects', 'sqlalchemy_dialects.log', level=logging.INFO)
         cls.get_logger('sqlalchemy.pool', 'sqlalchemy_pool.log', level=logging.INFO)
         cls.get_logger('sqlalchemy.orm', 'sqlalchemy_orm.log', level=logging.WARNING)
+        cls.get_logger('aioredis', 'aioredis.log', level=logging.DEBUG)
         cls.get_logger('Insight.feed', 'Insight_feed.log')
         cls.get_logger('Insight.filter', 'Insight_filter.log')
         cls.get_logger('Insight.command', 'Insight_command.log')
