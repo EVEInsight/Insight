@@ -21,7 +21,6 @@ class background_tasks(object):
     async def setup_backgrounds(self):
         await self.client.wait_until_ready()
         self.task_sync_contacts = self.client.loop.create_task(self.sync_contacts())
-        self.task_bot_status = self.client.loop.create_task(self.bot_status())
         self.task_discordbots_api = self.client.loop.create_task(self.discordbots_api())
         self.task_mem = self.client.loop.create_task(self.mem_profiler())
 
@@ -55,42 +54,6 @@ class background_tasks(object):
                 next_run = 21600 - (time.time() % 21600)  # get time to next 6 hour interval
                 next_run = next_run if next_run >= 7200 else 14400
                 await asyncio.sleep(next_run)
-
-    async def bot_status(self):
-        await self.client.wait_until_ready()
-        lg = InsightLogger.InsightLogger.get_logger('Insight.status', 'Insight_status.log')
-        while True:
-            try:
-                update = await self.client.loop.run_in_executor(None, self.client.service.update_available)
-                if update:
-                    status_str = 'Update available. See console. '
-                else:
-                    status_str = ""
-                    if self.client.service.config.get("INSIGHT_STATUS_CPUMEM"):
-                        status_str += "CPU:{}% MEM:{:.1f}GB ".format(str(int(psutil.cpu_percent())),
-                                                                     psutil.virtual_memory()[3] / 2. ** 30)
-                    if self.client.service.config.get("INSIGHT_STATUS_VERSION_FEEDCOUNT"):
-                        status_str += "{} Feeds: {} ".format(str(self.client.service.get_version()),
-                                                             self.client.channel_manager.feed_count())
-                stats_zk = await self.client.loop.run_in_executor(None, self.client.service.zk_obj.get_stats)
-                d_status = discord.Status.online
-                if self.client.service.config.get("INSIGHT_STATUS_TIME"):
-                    if stats_zk[0] <= 10:
-                        d_status = discord.Status.idle
-                    status_str += '[Stats 5m] [zK] Add: {}, Delay: {}m(+{}s) '.format(stats_zk[0], stats_zk[1], stats_zk[2])
-                    stats_feeds = await self.client.channel_manager.avg_delay()
-                    if stats_feeds[1] >= 10:
-                        d_status = discord.Status.dnd
-                    status_str += '[Insight] Sent: {}, Delay: {}s '.format(str(stats_feeds[0]),
-                                                                           str(stats_feeds[1]))
-                game_act = discord.Activity(name=status_str, type=discord.ActivityType.watching)
-                await self.client.change_presence(activity=game_act, status=d_status)
-                lg.info(status_str)
-            except Exception as ex:
-                print(ex)
-            next_run = 300 - (time.time() % 300)  # get time to next 5 minute interval
-            next_run = next_run if next_run >= 100 else 200
-            await asyncio.sleep(next_run)
 
     async def discordbots_api(self):
         await self.client.wait_until_ready()
