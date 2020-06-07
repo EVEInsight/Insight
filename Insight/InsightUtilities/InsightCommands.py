@@ -41,14 +41,19 @@ class InsightCommands(metaclass=InsightSingleton):
 
     def get_matching_coro(self, channel_id: int, prefixes: list, message_txt: str, **kwargs):
         msg_lower = self.strip_prefix(prefixes, message_txt).lower()
+        longest_command = ("", "")
         for key, val in self.commands.items():
-            if any(msg_lower.startswith(i) for i in val):
-                coro = kwargs.get(key)
-                if asyncio.iscoroutine(coro):
-                    self.logger.info("{} command hit: {} available prefix count: {} coro command: {}".format(str(channel_id), True, len(prefixes), key))
-                    return coro
-                else:
-                    raise InsightExc.Internal.InsightException("Could not call coroutine. Keyword argument missing.")
+            for i in val:
+                if msg_lower.startswith(i):
+                    if len(i) >= len(longest_command[0]):
+                        longest_command = (i, key)
+        if len(longest_command[0]) > 0:
+            coro = kwargs.get(longest_command[1])
+            if asyncio.iscoroutine(coro):
+                self.logger.info("{} command hit: {} available prefix count: {} coro command: {}".format(str(channel_id), True, len(prefixes), longest_command[1]))
+                return coro
+            else:
+                raise InsightExc.Internal.InsightException("Could not call coroutine. Keyword argument missing.")
         self.logger.info("{} command hit: {} available prefix count: {} similar commands: {}".format(str(channel_id), False, len(prefixes), str(self.__similar(message_txt))))
         return None
 
