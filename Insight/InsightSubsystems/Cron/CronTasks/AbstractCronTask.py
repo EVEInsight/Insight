@@ -17,6 +17,7 @@ class AbstractCronTask(metaclass=InsightSingleton):
         self.service = self.cm.service
         self.zk = self.cm.zk
         self.channel_manager = self.client.channel_manager
+        self.config = self.service.config
         self.task: asyncio.Task = None
 
     def loop_iteration(self) -> int:
@@ -57,6 +58,7 @@ class AbstractCronTask(metaclass=InsightSingleton):
                                                      format(self.__class__.__name__), seconds=False)
             except Exception as ex:
                 self.lg.exception(ex)
+                print("Error when running cron task. {} - EX: {}".format(self.__class__.__name__, ex))
             finally:
                 await asyncio.sleep(self.get_wait_time())
 

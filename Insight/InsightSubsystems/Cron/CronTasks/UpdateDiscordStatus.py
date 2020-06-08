@@ -1,5 +1,4 @@
 from InsightSubsystems.Cron.CronTasks.AbstractCronTask import AbstractCronTask
-from InsightSubsystems.Cache.CacheEndpoint import LastShip
 import psutil
 import discord
 import InsightLogger
@@ -8,7 +7,6 @@ import InsightLogger
 class UpdateDiscordStatus(AbstractCronTask):
     def __init__(self, cron_manager):
         super().__init__(cron_manager)
-        self.LastShip: LastShip = LastShip()
         self.lg_status = InsightLogger.InsightLogger.get_logger('Insight.status', 'Insight_status.log')
 
     def loop_iteration(self) -> int:
@@ -19,6 +17,9 @@ class UpdateDiscordStatus(AbstractCronTask):
 
     def interval_offset(self) -> int:
         return 0
+
+    def call_now(self) -> bool:
+        return True
 
     async def _run_task(self):
         update = await self.loop.run_in_executor(None, self.service.update_available)

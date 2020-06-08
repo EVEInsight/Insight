@@ -1,7 +1,6 @@
 import discord
 from concurrent.futures import ThreadPoolExecutor
 import service
-from .background_tasks import background_tasks
 from InsightUtilities import LimitManager
 import InsightUtilities
 import sys
@@ -26,7 +25,6 @@ class Discord_Insight_Client(discord.Client):
         self.channel_manager.set_client(self)
         self.serverManager = service.ServerManager(self.service, self)
         self.commandLookup = InsightUtilities.InsightCommands()
-        self.background_tasks = background_tasks(self)
         self.threadpool_insight = ThreadPoolExecutor(max_workers=8)
         self.threadpool_zk = ThreadPoolExecutor(max_workers=2)
         self.threadpool_unbound = ThreadPoolExecutor(max_workers=1)
@@ -72,7 +70,6 @@ class Discord_Insight_Client(discord.Client):
         await self.channel_manager.load_channels()
         await self.post_motd()
         self.loop.create_task(self.service.zk_obj.pull_kms_redisq())
-        self.loop.create_task(self.background_tasks.setup_backgrounds())
         self.loop.create_task(self.service.zk_obj.coroutine_filters(self.threadpool_zk))
         await self.loop.run_in_executor(None, self.service.zk_obj.debug_simulate)
         self.loop.create_task(self.service.zk_obj.coroutine_process_json(self.threadpool_zk))

@@ -1,3 +1,5 @@
 from InsightSubsystems.Cron.CronTasks.AbstractCronTask import AbstractCronTask
 from InsightSubsystems.Cron.CronTasks.LastShipPreCache import LastShipPreCache
 from InsightSubsystems.Cron.CronTasks.UpdateDiscordStatus import UpdateDiscordStatus
+from InsightSubsystems.Cron.CronTasks.DiscordBots import DiscordBots
+from InsightSubsystems.Cron.CronTasks.SyncContacts import SyncContacts

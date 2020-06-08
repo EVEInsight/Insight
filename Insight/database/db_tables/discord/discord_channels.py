@@ -132,7 +132,7 @@ class Channels(dec_Base.Base,discord_channel_base):
         else:
             return "This radar feed has no synced contact tokens. Contact tokens block your allies from " \
                    "appearing as potential targets in a radar or proximity feed. You can add a token by running the " \
-                   "'!sync' command. \nNote: This message will only appear once."
+                   "'!sync' command. \nNote: This message will only appear once for new radar and proximity feeds."
 
     def sync_api_contacts(self, service_module):
         db: Session = service_module.get_session()
