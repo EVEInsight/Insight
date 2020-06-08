@@ -5,8 +5,7 @@ import json
 from requests.auth import HTTPBasicAuth
 import swagger_client
 import InsightExc
-from sqlalchemy_utils import EncryptedType
-from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
+from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine, StringEncryptedType
 import InsightLogger
 import json
 import InsightUtilities
@@ -17,8 +16,8 @@ class Tokens(dec_Base.Base, sso_base):
 
     token_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     discord_user = Column(BIGINT, ForeignKey("discord_users.user_id"), nullable=False)
-    refresh_token = Column(EncryptedType(String, InsightUtilities.ColumnEncryption.helper_get_key(), AesEngine, 'pkcs5'), nullable=False)
-    token = Column(EncryptedType(String, InsightUtilities.ColumnEncryption.helper_get_key(), AesEngine, 'pkcs5'), nullable=True)
+    refresh_token = Column(StringEncryptedType(String, InsightUtilities.ColumnEncryption.helper_get_key(), AesEngine, 'pkcs5'), nullable=False)
+    token = Column(StringEncryptedType(String, InsightUtilities.ColumnEncryption.helper_get_key(), AesEngine, 'pkcs5'), nullable=True)
     character_id = Column(Integer, ForeignKey("characters.character_id"), nullable=True)
     corporation_id = Column(Integer, ForeignKey("corporations.corporation_id"), nullable=True)
     alliance_id = Column(Integer, ForeignKey("alliances.alliance_id"), nullable=True)
