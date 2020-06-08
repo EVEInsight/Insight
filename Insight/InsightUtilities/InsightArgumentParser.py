@@ -22,8 +22,6 @@ class InsightArgumentParser(object):
                             help="Skip startup API static data import check.", default=False)
         parser.add_argument("--websocket", "-w", action="store_true",
                             help="Enable the experimental secondary ZK websocket connection.", default=False)
-        parser.add_argument("--defer-tasks", "-d", action="store_true",
-                            help="Defers slow tasks to run later instead of at startup.", default=False)
         parser.add_argument("--sde-db", "-s",
                             help="Specifies the name of the SDE database file relative to main.py. Download and extract the "
                                  "sqlite-latest.sqlite file from https://www.fuzzwork.co.uk/dump/",
