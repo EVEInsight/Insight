@@ -19,9 +19,9 @@ class AbstractMultiEndpoint(AbstractEndpoint):
         st = InsightLogger.InsightLogger.time_start()
         try:
             if isinstance(query_list, set):
-                query_set = await self.executor_thread(copy.deepcopy, query_list)
+                query_set = await self.executor(copy.deepcopy, query_list)
             elif isinstance(query_list, list) or isinstance(query_list, frozenset):
-                query_set: set = await self.executor_thread(set, query_list)
+                query_set: set = await self.executor(set, query_list)
             else:
                 raise TypeError
             cache_hit = 0
@@ -70,7 +70,7 @@ class AbstractMultiEndpoint(AbstractEndpoint):
             raise ex
 
     async def _do_endpoint_logic(self, lookup_dict: dict, **kwargs) -> dict:
-        return await self.executor_thread(self._do_endpoint_logic_sync, lookup_dict, **kwargs)
+        return await self.executor(self._do_endpoint_logic_sync, lookup_dict, **kwargs)
 
     def _do_endpoint_logic_sync(self, lookup_dict: dict, **kwargs) -> dict:
         raise NotImplementedError

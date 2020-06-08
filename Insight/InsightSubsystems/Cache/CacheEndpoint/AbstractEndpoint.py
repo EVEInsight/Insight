@@ -21,11 +21,8 @@ class AbstractEndpoint(metaclass=InsightSingleton):
         self.db_sessions: DBSessions = DBSessions()
         self.config = self.cm.config
 
-    async def executor_thread(self, callback, *args, **kwargs):
+    async def executor(self, callback, *args, **kwargs):
         return await self.loop.run_in_executor(self.cm.tp, partial(callback, *args, **kwargs))
-
-    async def executor_proc(self, callback, *args, **kwargs):
-        return await self.loop.run_in_executor(self.cm.pool, partial(callback, *args, **kwargs))
 
     async def get_lock(self, key_str: str):
         return await self.key_locks.get_object(key=key_str)
@@ -43,7 +40,7 @@ class AbstractEndpoint(metaclass=InsightSingleton):
         raise NotImplementedError
 
     async def _get_unprefixed_key_hash(self, **kwargs) -> str:
-        return await self.executor_thread(self._get_unprefixed_key_hash_sync, **kwargs)
+        return await self.executor(self._get_unprefixed_key_hash_sync, **kwargs)
 
     async def _get_prefixed_key(self, unprefixed_key: str) -> str:
         if unprefixed_key is None:
@@ -92,7 +89,7 @@ class AbstractEndpoint(metaclass=InsightSingleton):
             print(ex)
 
     async def _do_endpoint_logic(self, **kwargs) -> dict:
-        return await self.executor_thread(self._do_endpoint_logic_sync, **kwargs)
+        return await self.executor(self._do_endpoint_logic_sync, **kwargs)
 
     def _do_endpoint_logic_sync(self, **kwargs) -> dict:
         raise NotImplementedError

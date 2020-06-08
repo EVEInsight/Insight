@@ -13,7 +13,7 @@ class BulkCharacterIDsToLastShip(AbstractNoCacheEndpoint):
 
     async def get(self, char_ids: list) -> dict:
         if isinstance(char_ids, list):
-            set_char_ids = await self.executor_thread(self.make_frozen_set, list_items=char_ids)
+            set_char_ids = await self.executor(self.make_frozen_set, list_items=char_ids)
         elif isinstance(char_ids, frozenset):
             set_char_ids = char_ids
         else:
@@ -42,6 +42,6 @@ class BulkCharacterIDsToLastShip(AbstractNoCacheEndpoint):
                 "totalUnknownIDs": len(unknown_ids),
             }
         }
-        min_ttl = await self.executor_thread(self.extract_min_ttl, *redis_times)
+        min_ttl = await self.executor(self.extract_min_ttl, *redis_times)
         self.set_min_ttl(return_dict, min_ttl)
         return return_dict

@@ -19,14 +19,14 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
         return "{}:{}:{}".format(seconds_ago_threshold, hash(char_names), server_prefix)
 
     async def get(self, char_names: list, server_prefix: str) -> discord.Embed:
-        set_char_names = await self.executor_thread(self.make_frozen_set, list_items=char_names)
+        set_char_names = await self.executor(self.make_frozen_set, list_items=char_names)
         seconds_ago_threshold = int(1e+10)
         return await super().get(char_names=set_char_names, seconds_ago_threshold=seconds_ago_threshold,
                                  server_prefix=server_prefix)
 
     async def _do_endpoint_logic(self, char_names: frozenset, seconds_ago_threshold: int, server_prefix: str) -> dict:
         local_scan = await self.LocalScan.get(char_names=char_names, seconds_ago_threshold=seconds_ago_threshold)
-        return await self.executor_proc(self._do_endpoint_logic_sync, scan=local_scan, server_prefix=server_prefix)
+        return await self.executor(self._do_endpoint_logic_sync, scan=local_scan, server_prefix=server_prefix)
 
     @classmethod
     def _add_pilot_ship(cls, e: EmbedLimitedHelper, scan: dict, char_id: int):

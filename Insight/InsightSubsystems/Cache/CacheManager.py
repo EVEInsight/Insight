@@ -11,11 +11,7 @@ class CacheManager(SubsystemBase):
         super().__init__(subsystemloader)
         self.lg_cache = InsightLogger.InsightLogger.get_logger('Cache.Manager', 'Cache.log', child=True)
         self.tp = ThreadPoolExecutor(max_workers=self.config.get("SUBSYSTEM_CACHE_THREADS"))
-        self.pool = self.tp  # can be reference to existing thread pool or a new multiproc pool if enabled
-        if self.config.get("SUBSYSTEM_CACHE_MULTIPROCESS"):
-            self.pool = ProcessPoolExecutor(max_workers=self.config.get("SUBSYSTEM_CACHE_PROCESSES"))
-            print("Cache manager multiprocess support is enabled.")
-        self.client = NoRedisClient.NoRedisClient(self.config, self.pool)
+        self.client = NoRedisClient.NoRedisClient(self.config, self.tp)
         self.MostExpensiveKMs = CacheEndpoint.MostExpensiveKMs(cache_manager=self)
         self.KMStats = CacheEndpoint.KMStats(cache_manager=self)
         self.MostExpensiveKMsEmbed = CacheEndpoint.MostExpensiveKMsEmbed(cache_manager=self)
@@ -29,7 +25,7 @@ class CacheManager(SubsystemBase):
 
     async def start_subsystem(self):
         try:
-            redis = RedisClient.RedisClient(self.config, self.pool)
+            redis = RedisClient.RedisClient(self.config, self.tp)
             if await redis.establish_connection():
                 self.client = redis
                 print("Redis connection established.")
@@ -43,8 +39,6 @@ class CacheManager(SubsystemBase):
 
     async def stop_subsystem(self):
         self.tp.shutdown(wait=True)
-        if isinstance(self.pool, ProcessPoolExecutor):
-            self.pool.shutdown(wait=True)
 
     async def get_cache(self, key_str: str) -> dict:
         st = InsightLogger.InsightLogger.time_start()

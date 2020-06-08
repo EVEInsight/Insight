@@ -17,7 +17,6 @@ class Main(object):
         warnings.filterwarnings(action='ignore', category=SAWarning,
                                 message='Dialect sqlite\+pysqlite does \*not\* support Decimal objects natively,[\s\S]+')  # SDE price conversion error which can be ignored
         warnings.filterwarnings(action='ignore', category=RuntimeWarning, message='[\s\S]+ was never awaited')  # async option coroutines that are created but never used
-        multiprocessing.set_start_method("spawn")
         service_mod = service_module()
         lg.info('Insight has completed service loading and setup.')
         Discord_Insight_Client.start_bot(service_mod)
@@ -25,4 +24,5 @@ class Main(object):
 
 
 if __name__ == "__main__":
+    multiprocessing.set_start_method("spawn")
     Main.main()

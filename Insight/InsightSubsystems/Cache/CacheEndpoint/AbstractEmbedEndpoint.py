@@ -19,4 +19,4 @@ class AbstractEmbedEndpoint(AbstractEndpoint):
 
     async def get(self, **kwargs) -> discord.Embed:
         response = await super().get(**kwargs)
-        return await self.executor_thread(self.make_embed, response)
+        return await self.executor(self.make_embed, response)

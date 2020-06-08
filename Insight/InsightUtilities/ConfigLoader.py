@@ -135,7 +135,6 @@ class ConfigLoader(metaclass=InsightSingleton):
         self.parse_int("REDIS_CONNECTIONS_MAX", "NULL", "NULL", False, 100, True)
         self.parse_int("SUBSYSTEM_CACHE_THREADS", "NULL", "NULL", False, 8, True)
         self.parse_int("SUBSYSTEM_CACHE_PROCESSES", "NULL", "NULL", False, max(os.cpu_count(), 8), True)
-        self.parse_bool("SUBSYSTEM_CACHE_MULTIPROCESS", "NULL", "NULL", False, "FALSE", True)
         self.parse_bool("SUBSYSTEM_CACHE_LASTSHIP_PRECACHE", "NULL", "NULL", False, "FALSE", True)
         self.parse_int("SUBSYSTEM_CACHE_LASTSHIP_TTL", "NULL", "NULL", False, 7200, True)
         self.parse_int("CRON_SYNCCONTACTS", "NULL", "NULL", False, 32400, True)

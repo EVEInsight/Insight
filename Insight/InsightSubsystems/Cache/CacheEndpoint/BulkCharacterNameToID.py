@@ -13,7 +13,7 @@ class BulkCharacterNameToID(AbstractNoCacheEndpoint):
 
     async def get(self, char_names: list) -> dict:
         if isinstance(char_names, list):
-            set_char_names = await self.executor_thread(self.make_frozen_set, char_names=char_names)
+            set_char_names = await self.executor(self.make_frozen_set, char_names=char_names)
         elif isinstance(char_names, frozenset):
             set_char_names = char_names
         else:
@@ -22,8 +22,8 @@ class BulkCharacterNameToID(AbstractNoCacheEndpoint):
 
     async def _do_endpoint_logic(self, char_names: frozenset) -> dict:
         dict_result = await self.CharacterNameToId.get(char_names=char_names)
-        values_list_result = await self.executor_thread(list, dict_result.values())
-        return await self.executor_thread(self.make_return_dict, values_list_result)
+        values_list_result = await self.executor(list, dict_result.values())
+        return await self.executor(self.make_return_dict, values_list_result)
 
     @classmethod
     def make_return_dict(cls, char_data: list) -> dict:

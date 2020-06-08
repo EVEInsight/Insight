@@ -18,12 +18,12 @@ class LocalScan(AbstractNoCacheEndpoint):
         return "{}:{}".format(seconds_ago_threshold, hash(char_names))
 
     async def get(self, char_names: list, seconds_ago_threshold: int = 30) -> dict:
-        set_char_names = await self.executor_thread(self.make_frozen_set, list_items=char_names)
+        set_char_names = await self.executor(self.make_frozen_set, list_items=char_names)
         return await super().get(char_names=set_char_names, seconds_ago_threshold=seconds_ago_threshold)
 
     async def _do_endpoint_logic(self, char_names: frozenset, seconds_ago_threshold: int) -> dict:
         d = await self.BulkCharacterNamesToLastShip.get(char_names=char_names)
-        return await self.executor_proc(self._do_endpoint_logic_sync, char_names=char_names, data_dict=d,
+        return await self.executor(self._do_endpoint_logic_sync, char_names=char_names, data_dict=d,
                                        seconds_ago_threshold=seconds_ago_threshold)
 
     @classmethod

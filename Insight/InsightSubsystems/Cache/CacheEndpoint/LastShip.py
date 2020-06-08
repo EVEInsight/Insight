@@ -224,7 +224,7 @@ class LastShip(AbstractMultiEndpoint):
         self.loop.create_task(self._reset_last_ship(new_km))
 
     async def _reset_last_ship(self, new_km: tb_kills):
-        pilot_ids = await self.executor_thread(self._extract_characters, new_km)
+        pilot_ids = await self.executor(self._extract_characters, new_km)
         for pilot_id in pilot_ids:
             await self.delete_no_fail(char_id=pilot_id)
             async with self.lock_char_ids_recent_activity:

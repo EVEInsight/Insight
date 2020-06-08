@@ -27,7 +27,7 @@ class MostExpensiveKMsEmbed(AbstractEmbedEndpoint):
     async def _do_endpoint_logic(self, last_hours: int, server_prefix: str) -> dict:
         top_kms = await self.MostExpensiveKMs.get(batch_limit=25, last_hours=last_hours)
         km_stats = await self.KMStats.get(last_hours=last_hours)
-        return await self.executor_proc(self._do_endpoint_logic_sync, last_hours=last_hours,
+        return await self.executor(self._do_endpoint_logic_sync, last_hours=last_hours,
                                         server_prefix=server_prefix, topkms_dict=top_kms, km_stats=km_stats)
 
     @classmethod
