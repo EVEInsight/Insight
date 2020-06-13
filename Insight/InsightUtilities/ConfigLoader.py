@@ -57,6 +57,14 @@ class ConfigLoader(metaclass=InsightSingleton):
                                             fallback_val, nonotify)
         self.config_mapping[config_key] = config_val
 
+    def parse_list(self, ref_key, cfile_section, cfile_option, fail_if_empty=False, fallback_val="",
+                  nonotify=False):
+        config_key = ref_key.upper()
+        config_val: str = self._parse_config_val(ref_key, cfile_section, cfile_option, fail_if_empty,
+                                            fallback_val, nonotify)
+        parsed_items = (config_val.replace(";", ",")).split(",")
+        self.config_mapping[config_key] = parsed_items
+
     def parse_int(self, ref_key, cfile_section, cfile_option, fail_if_empty=False, fallback_val=0,
                   nonotify=False):
         config_key = ref_key.upper()
@@ -138,3 +146,4 @@ class ConfigLoader(metaclass=InsightSingleton):
         self.parse_bool("SUBSYSTEM_CACHE_LASTSHIP_PRECACHE", "NULL", "NULL", False, "FALSE", True)
         self.parse_int("SUBSYSTEM_CACHE_LASTSHIP_TTL", "NULL", "NULL", False, 7200, True)
         self.parse_int("CRON_SYNCCONTACTS", "NULL", "NULL", False, 32400, True)
+        self.parse_list("INSIGHT_ADMINS", "NULL", "NULL", False, "", False)

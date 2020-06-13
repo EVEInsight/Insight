@@ -1,38 +1,26 @@
-import re
 import traceback
 import InsightLogger
+import InsightUtilities
 
 
 class InsightAdmins(object):
     def __init__(self):
+        self.config = InsightUtilities.ConfigLoader()
         self.logger = InsightLogger.InsightLogger.get_logger('AdminModule', 'AdminModule.log')
         self._admins = set()
         self.top_admin = None
-        self._file_name = "InsightAdmins.txt"
         self._read_admins()
         self.print_admins()
 
     def _read_admins(self):
-        try:
-            with open(self._file_name, 'r') as f:
-                reg = re.compile('#.*?#', re.DOTALL)
-                text = re.sub(reg, '', f.read())
-                for i in text.split():
-                    try:
-                        self._admins.add(int(i))
-                        if self.top_admin is None:
-                            self.top_admin = int(i)
-                    except ValueError:
-                        print("'{}' - is not a valid Discord user id in the '{}' file.".format(i, self._file_name))
-        except FileNotFoundError:
-            with open(self._file_name, 'w') as f:
-                comment = "# This is a list of Discord user IDs that can access Insight admin functionality. " \
-                          "(!quit, etc commands). To make a user an admin, copy their user ID from Discord and add " \
-                          "it to this file, restarting the bot if it's running. Multiple admins can exist, but be " \
-                          "sure to separate IDs with spaces or newlines. #\n\n"
-                f.write(comment)
-                print("Created a new '{}' file. Add Discord user ids to this file to allow certain users to access"
-                      " Insight administrator functionality commands.".format(self._file_name))
+        admins_parsed: list = self.config.get("INSIGHT_ADMINS")
+        for i in admins_parsed:
+            try:
+                self._admins.add(int(i))
+                if self.top_admin is None:
+                    self.top_admin = int(i)
+            except ValueError:
+                print("'{}' - is not a valid Discord user id.".format(i))
 
     def print_admins(self):
         if len(self._admins) > 0:

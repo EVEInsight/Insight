@@ -50,9 +50,8 @@ class LackChannelPermission(InsightException):
 class LackInsightAdmin(InsightException):
     def __init__(self, user_id=None):
         msg = "You are unauthorized to execute this command as you are not an Insight super admin. Execution of this " \
-              "command requires your Discord user ID: '{}' to be in the 'InsightAdmins.txt' file. This file is " \
-              "located next to your 'config.ini' file. You may execute this command after editing the file " \
-              "and restarting Insight.".format(str(user_id))
+              "command requires your Discord user ID: '{}' to be in the 'INSIGHT_ADMINS' environmental variable. " \
+              "You may execute this command after editing the variable and restarting Insight.".format(str(user_id))
         super().__init__(msg)
 
 
