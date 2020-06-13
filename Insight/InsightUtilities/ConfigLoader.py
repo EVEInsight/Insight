@@ -62,7 +62,7 @@ class ConfigLoader(metaclass=InsightSingleton):
         config_key = ref_key.upper()
         config_val: str = self._parse_config_val(ref_key, cfile_section, cfile_option, fail_if_empty,
                                             fallback_val, nonotify)
-        parsed_items = (config_val.replace(";", ",")).split(",")
+        parsed_items = (config_val.replace(":", ";")).split(";")
         self.config_mapping[config_key] = parsed_items
 
     def parse_int(self, ref_key, cfile_section, cfile_option, fail_if_empty=False, fallback_val=0,
@@ -132,6 +132,8 @@ class ConfigLoader(metaclass=InsightSingleton):
         self.parse_str("REDIS_PASSWORD", "NULL", "NULL", False, "", True)
         self.parse_int("REDIS_DB", "NULL", "NULL", False, 0, True)
         self.parse_bool("REDIS_PURGE", "NULL", "NULL", False, "TRUE", True)
+        self.parse_int("REDIS_CONNECTIONS_MIN", "NULL", "NULL", False, 50, True)
+        self.parse_int("REDIS_CONNECTIONS_MAX", "NULL", "NULL", False, 100, True)
         self.parse_str("POSTGRES_HOST", "NULL", "NULL", fail_if_empty=False, nonotify=True)
         self.parse_int("POSTGRES_PORT", "NULL", "NULL", fail_if_empty=False, fallback_val=5432, nonotify=True)
         self.parse_str("POSTGRES_USER", "NULL", "NULL", fail_if_empty=False, nonotify=True)
@@ -139,11 +141,10 @@ class ConfigLoader(metaclass=InsightSingleton):
         self.parse_str("POSTGRES_DB", "NULL", "NULL", fail_if_empty=False, nonotify=True)
         self.parse_int("POSTGRES_POOLSIZE", "NULL", "NULL", fail_if_empty=False, fallback_val=25, nonotify=True)
         self.parse_int("POSTGRES_POOLOVERFLOW", "NULL", "NULL", fail_if_empty=False, fallback_val=10, nonotify=True)
-        self.parse_int("REDIS_CONNECTIONS_MIN", "NULL", "NULL", False, 50, True)
-        self.parse_int("REDIS_CONNECTIONS_MAX", "NULL", "NULL", False, 100, True)
         self.parse_int("SUBSYSTEM_CACHE_THREADS", "NULL", "NULL", False, 8, True)
         self.parse_int("SUBSYSTEM_CACHE_PROCESSES", "NULL", "NULL", False, max(os.cpu_count(), 8), True)
         self.parse_bool("SUBSYSTEM_CACHE_LASTSHIP_PRECACHE", "NULL", "NULL", False, "FALSE", True)
         self.parse_int("SUBSYSTEM_CACHE_LASTSHIP_TTL", "NULL", "NULL", False, 7200, True)
         self.parse_int("CRON_SYNCCONTACTS", "NULL", "NULL", False, 32400, True)
         self.parse_list("INSIGHT_ADMINS", "NULL", "NULL", False, "", False)
+        self.parse_list("8BALL_RESPONSES", "NULL", "NULL", False, "Yes;No;Maybe", True)

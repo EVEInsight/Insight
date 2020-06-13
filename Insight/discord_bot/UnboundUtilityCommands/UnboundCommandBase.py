@@ -7,6 +7,7 @@ import asyncio
 from discord_bot import discord_options as dOpt
 import InsightExc
 from InsightUtilities import DiscordPermissionCheck, LimitManager
+import InsightUtilities
 
 
 class UnboundCommandBase(object):
@@ -17,6 +18,7 @@ class UnboundCommandBase(object):
         self.embed_only = False
         self.loop = self.client.loop
         self.serverManager = self.unbound.serverManager
+        self.config = InsightUtilities.ConfigLoader()
 
     @classmethod
     def mention(cls):
