@@ -62,7 +62,10 @@ class ConfigLoader(metaclass=InsightSingleton):
         config_key = ref_key.upper()
         config_val: str = self._parse_config_val(ref_key, cfile_section, cfile_option, fail_if_empty,
                                             fallback_val, nonotify)
-        parsed_items = (config_val.replace(":", ";")).split(";")
+        if len(config_val) > 0:
+            parsed_items = (config_val.replace(":", ";")).split(";")
+        else:
+            parsed_items = []
         self.config_mapping[config_key] = parsed_items
 
     def parse_int(self, ref_key, cfile_section, cfile_option, fail_if_empty=False, fallback_val=0,

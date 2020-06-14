@@ -15,3 +15,4 @@ from .mass_id_resolve import id_resolve as id_resolver
 from .SearchHelper import SearchHelper
 from .locations import Locations as tb_locations
 from .stargates import Stargates as tb_stargates
+from .InsightMeta import InsightMeta as tb_meta

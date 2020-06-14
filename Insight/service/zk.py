@@ -1,10 +1,11 @@
-import random
-import string
+import sys
 import queue
 import datetime
 import service
 from sqlalchemy.orm import Session
 import database.db_tables as dbRow
+from database.db_tables import tb_meta
+import os
 import statistics
 import traceback
 import aiohttp
@@ -15,6 +16,7 @@ from concurrent.futures import ThreadPoolExecutor
 import InsightLogger
 import time
 from InsightSubsystems.Cache.CacheEndpoint import LastShip
+from InsightUtilities.StaticHelpers import Helpers
 
 
 class zk(object):
@@ -76,20 +78,36 @@ class zk(object):
     def generate_identifier():
         filename = 'zk_identifier.txt'
         try:
-            with open(filename, 'r') as f:
+            with open(filename, 'r') as f:  # legacy check. Import the id to the database and then delete the file.
                 text = f.read()
-                return text
+                if tb_meta.set("zk_identifier", {"value": text}):
+                    print("Successfully imported the ZK identifier into the database. "
+                          "It is safe to remove the legacy '{}' file".format(filename))
+                else:
+                    print("Error importing legacy identifier for ZK. Stopping...")
+                    sys.exit(1)
+            try:
+                os.remove(filename)
+            except Exception as ex:
+                print(ex)
+                print("Error removing legacy ZK identifier file. You can remove the file '{}' as it has been "
+                      "imported to the database and no longer needed.".format(filename))
+            return text
         except FileNotFoundError:
-            with open(filename, 'w') as f:
-                random_s = ''.join(random.choice(string.ascii_lowercase) for x in range(8))
-                f.write(random_s)
-                return random_s
+            d = tb_meta.get("zk_identifier")
+            zk_id = Helpers.get_nested_value(d, "", "data", "value")
+            if len(zk_id) <= 5:
+                print("ZK id error - too short or not set")
+                sys.exit(1)
+            else:
+                return zk_id
 
     def generate_redisq_url(self, no_identifier=False):
-        if no_identifier:
+        identifier = self.generate_identifier()
+        if no_identifier or identifier is None:
             return "https://redisq.zkillboard.com/listen.php"
         else:
-            return "https://redisq.zkillboard.com/listen.php?queueID={}".format(self.generate_identifier())
+            return "https://redisq.zkillboard.com/listen.php?queueID={}".format(identifier)
 
     def url_stream(self):
         return self.zk_stream_url
