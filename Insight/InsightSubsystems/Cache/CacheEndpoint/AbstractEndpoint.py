@@ -63,30 +63,40 @@ class AbstractEndpoint(metaclass=InsightSingleton):
         data_object.pop("redis", None)
         return await self.cm.set_and_get_cache(key_str, ttl, data_dict=data_object)
 
+    def sync_process_before_return(self, data_dict: dict) -> dict:
+        """"Do any final processing before handing back the result. Example: convert string times to datetime objects"""
+        return data_dict
+
+    async def process_before_return(self, data_dict: dict) -> dict:
+        return await self.executor(self.sync_process_before_return, data_dict)
+
     async def get(self, **kwargs) -> dict:
         try:
             cache_key = await self._get_prefixed_key(await self._get_unprefixed_key_hash(**kwargs))
             async with (await self.get_lock(cache_key)):
                 try:
-                    return await self.cm.get_cache(cache_key)
+                    return await self.process_before_return(await self.cm.get_cache(cache_key))
                 except InsightExc.Subsystem.KeyDoesNotExist:
                     st = InsightLogger.InsightLogger.time_start()
                     result = await self._do_endpoint_logic(**kwargs)
                     InsightLogger.InsightLogger.time_log(self.lg, st, 'entirety - key: "{}"'.format(cache_key),
                                                          warn_higher=5000, seconds=False)
-                    return await self._set(cache_key, result)
+                    return await self.process_before_return(await self._set(cache_key, result))
         except Exception as ex:
             self.lg.exception(ex)
             raise ex
 
-    async def delete_no_fail(self, **kwargs):
+    async def delete_no_fail(self, **kwargs) -> bool:
+        """Returns True if no error when deleting key"""
         try:
             cache_key = await self._get_prefixed_key(await self._get_unprefixed_key_hash(**kwargs))
             async with (await self.key_locks.get_object(cache_key)):
-                return await self.cm.delete_key(cache_key)
+                await self.cm.delete_key(cache_key)
+                return True
         except Exception as ex:
             self.lg.exception(ex)
             print(ex)
+            return False
 
     async def _do_endpoint_logic(self, **kwargs) -> dict:
         return await self.executor(self._do_endpoint_logic_sync, **kwargs)

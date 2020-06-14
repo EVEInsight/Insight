@@ -64,7 +64,7 @@ class AbstractMultiEndpoint(AbstractEndpoint):
             InsightLogger.InsightLogger.time_log(self.lg, st, 'entirety - hit: {} - miss: {} queried keys: "{}"'.
                                                  format(cache_hit, len(query_set), query_set),
                                                  warn_higher=5000, seconds=False)
-            return cached_dict
+            return await self.process_before_return(cached_dict)
         except Exception as ex:
             self.lg.exception(ex)
             raise ex

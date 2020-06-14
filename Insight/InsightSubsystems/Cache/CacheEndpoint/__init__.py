@@ -8,3 +8,4 @@ from InsightSubsystems.Cache.CacheEndpoint.BulkCharacterIDsToLastShip import Bul
 from InsightSubsystems.Cache.CacheEndpoint.BulkCharacterNamesToLastShip import BulkCharacterNamesToLastShip
 from InsightSubsystems.Cache.CacheEndpoint.LocalScan import LocalScan
 from InsightSubsystems.Cache.CacheEndpoint.LocalScanEmbeds.LocalScanEmbedBase import LocalScanEmbedBase
+from InsightSubsystems.Cache.CacheEndpoint.InsightMeta import InsightMeta
