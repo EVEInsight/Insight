@@ -86,7 +86,8 @@ RUN apt-get update && apt-get install -y \
  build-essential \
  zip \
  libpq-dev \
- pgloader
+ pgloader \
+ sqlite3
 RUN rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /InsightDocker /app /home/insight
