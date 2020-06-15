@@ -68,7 +68,6 @@ class Discord_Insight_Client(discord.Client):
         await self.service.zk_obj.make_queues()
         self.loop.create_task(self.service.zk_obj.pull_kms_ws())
         await self.channel_manager.load_channels()
-        await self.post_motd()
         self.loop.create_task(self.service.zk_obj.pull_kms_redisq())
         self.loop.create_task(self.service.zk_obj.coroutine_filters(self.threadpool_zk))
         await self.loop.run_in_executor(None, self.service.zk_obj.debug_simulate)
@@ -76,13 +75,6 @@ class Discord_Insight_Client(discord.Client):
         self.loop.create_task(self.channel_manager.auto_refresh())
         self.loop.create_task(self.channel_manager.auto_channel_refresh())
         self.insight_ready_event.set()
-
-    async def post_motd(self):
-        div = '================================='
-        motd = (div + '\nInsight server message of the day:\n\n{}\n'.format(str(self.service.motd)) + div)
-        print(motd)
-        if self.service.motd:
-            await self.loop.run_in_executor(None, partial(self.channel_manager.post_message, motd))
 
     async def close(self):
         try:

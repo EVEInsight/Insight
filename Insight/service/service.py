@@ -35,7 +35,6 @@ class service_module(object):
         self.channel_manager = cm.Channel_manager(self)
         self.zk_obj = zk.zk(self)
         self._admin_module = InsightAdmins.InsightAdmins()
-        self.motd = self._read_motd()
 
     def get_headers(self, lib_requests=False) ->dict:
         key = 'requests' if lib_requests else 'aiohttp'
@@ -57,23 +56,6 @@ class service_module(object):
                 traceback.print_exc()
                 sys.exit(1)
         return self._header_dict[key]
-
-    def _read_motd(self):
-        filename = 'motd.txt'
-        print('Edit the message of the day file "{}" to send a message to all '
-              'feeds on Insight startup. Edit the file to be blank to prevent Insight from sending '
-              'a message of the day to all active feeds.'.format(filename))
-        try:
-            with open(filename, 'r') as f:
-                text = f.read()
-                if text.strip():
-                    return text
-                else:
-                    return None
-        except FileNotFoundError:
-            with open(filename, 'w'):
-                print('Creating empty motd file: "{}"'.format(filename))
-                return None
 
     def _import_check(self):
         if self.config.get("DB_DRIVER") == "sqlite3":
