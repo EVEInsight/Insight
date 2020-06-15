@@ -56,6 +56,7 @@ class AbstractCronTask(metaclass=InsightSingleton):
                 await self._run_task()
                 InsightLogger.InsightLogger.time_log(self.lg, st, "Execute cron task {}".
                                                      format(self.__class__.__name__), seconds=False)
+                await asyncio.sleep(2)
             except Exception as ex:
                 self.lg.exception(ex)
                 print("Error when running cron task. {} - EX: {}".format(self.__class__.__name__, ex))

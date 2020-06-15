@@ -22,7 +22,6 @@ class service_module(object):
         self.welcome()
         self.config = InsightUtilities.ConfigLoader()
         self._header_dict = {}
-        self.update_available()
         self._import_everything_flag = False
         self._import_check()
         self._db_manager = database.setup_database(self)
