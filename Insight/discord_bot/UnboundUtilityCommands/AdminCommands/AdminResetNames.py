@@ -1,4 +1,4 @@
-from .UnboundCommandBase import *
+from ..UnboundCommandBase import *
 from sqlalchemy.orm import Session
 from database.db_tables import tb_characters, tb_corporations, tb_alliances, tb_types, \
     tb_systems, tb_constellations, tb_regions, name_resolver

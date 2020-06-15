@@ -1,4 +1,4 @@
-from .UnboundCommandBase import *
+from ..UnboundCommandBase import *
 from database.db_tables.eve import tb_kills
 import json
 import os

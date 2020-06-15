@@ -1,5 +1,5 @@
-from . import LocalScan, EightBall, Quit, Admin, AdminResetNames, Backup, MemoryDiagnostic, Prefix, About, \
-    Help, MailExport, Limits, Roll, Top, Motd
+from . import LocalScan, EightBall, Prefix, About, Help, Limits, Roll, Top, Motd
+from .AdminCommands import Quit, Admin
 import discord
 import discord_bot
 from functools import partial
@@ -20,10 +20,6 @@ class UnboundUtilityCommands(object):
         self.help = Help.Help(self)
         self.quit = Quit.Quit(self)
         self.admin = Admin.Admin(self)
-        self.admin_resetnames = AdminResetNames.AdminResetNames(self)
-        self.admin_backup = Backup.Backup(self)
-        self.admin_mem = MemoryDiagnostic.MemoryDiagnostic(self)
-        self.admin_mail_export = MailExport.MailExport(self)
         self.limits = Limits.Limits(self)
         self.randomroll = Roll.Roll(self)
         self.top = Top.Top(self)

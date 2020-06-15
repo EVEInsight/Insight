@@ -1,4 +1,4 @@
-from .UnboundCommandBase import *
+from ..UnboundCommandBase import *
 import InsightUtilities
 import shutil
 import os

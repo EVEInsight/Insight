@@ -1,4 +1,4 @@
-from .UnboundCommandBase import *
+from ..UnboundCommandBase import *
 from InsightUtilities import MemTracker
 
 
