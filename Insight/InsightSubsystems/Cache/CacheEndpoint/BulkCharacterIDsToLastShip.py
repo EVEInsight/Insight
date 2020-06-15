@@ -26,12 +26,11 @@ class BulkCharacterIDsToLastShip(AbstractNoCacheEndpoint):
         known_ship_data = []
         unknown_ids = []
         for char_id, last_ship_d in last_ships.items():
-            if not await Helpers.async_get_nested_value(last_ship_d, True, self.pool, "data", "known"):
+            if not await Helpers.async_get_nested_value(last_ship_d, True, "data", "known"):
                 unknown_ids.append(char_id)
             else:
-                known_ship_data.append(await Helpers.async_get_nested_value(last_ship_d, {}, self.pool,
-                                                                            "data"))
-            redis_val = {"redis": await Helpers.async_get_nested_value(last_ship_d, {}, self.pool, "redis")}
+                known_ship_data.append(await Helpers.async_get_nested_value(last_ship_d, {}, "data"))
+            redis_val = {"redis": await Helpers.async_get_nested_value(last_ship_d, {}, "redis")}
             redis_times.append(redis_val)
         return_dict = {
             "data": {

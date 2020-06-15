@@ -22,16 +22,13 @@ class BulkCharacterNamesToLastShip(AbstractNoCacheEndpoint):
 
     async def _do_endpoint_logic(self, char_names: frozenset) -> dict:
         char_ids_resolved = await self.BulkCharacterNameToID.get(char_names=char_names)
-        valid_char_ids_packed = await Helpers.async_get_nested_value(char_ids_resolved, [], self.pool,
-                                                                     "data", "characters")
-        valid_char_ids = [await Helpers.async_get_nested_value(i, None, self.pool, "id")
-                          for i in valid_char_ids_packed]
+        valid_char_ids_packed = await Helpers.async_get_nested_value(char_ids_resolved, [], "data", "characters")
+        valid_char_ids = [await Helpers.async_get_nested_value(i, None, "id") for i in valid_char_ids_packed]
         bulk_ships_d = await self.BulkCharacterIDsToLastShip.get(char_ids=valid_char_ids)
-        known = await Helpers.async_get_nested_value(bulk_ships_d, [], self.pool, "data", "known")
+        known = await Helpers.async_get_nested_value(bulk_ships_d, [], "data", "known")
         unknown_char_names: set = await self.executor(self.frozenset_to_set, char_names)
         for k in known:
-            known_char_name = await Helpers.async_get_nested_value(k, "", self.pool, "character",
-                                                                   "character_name")
+            known_char_name = await Helpers.async_get_nested_value(k, "", "character", "character_name")
             unknown_char_names.remove(known_char_name)
         return_dict = {
             "data": {
@@ -42,8 +39,7 @@ class BulkCharacterNamesToLastShip(AbstractNoCacheEndpoint):
                 "totalUnknownNames": len(unknown_char_names)
             }
         }
-        self.set_min_ttl(return_dict, await Helpers.async_get_nested_value(bulk_ships_d, self.default_ttl(),
-                                                                           self.pool, "redis", "ttl"))
+        self.set_min_ttl(return_dict, await Helpers.async_get_nested_value(bulk_ships_d, self.default_ttl(), "redis", "ttl"))
         return return_dict
 
 
