@@ -8,14 +8,14 @@ import time
 
 class AbstractCronTask(metaclass=InsightSingleton):
     def __init__(self, cron_manager):
-        self.cm: CronManager.CronManager = cron_manager
-        self.insight_ready_event = self.cm.insight_ready_event
+        self.cron_manager: CronManager.CronManager = cron_manager
+        self.insight_ready_event = self.cron_manager.insight_ready_event
         self.lg = InsightLogger.InsightLogger.get_logger('Cron.{}'.format(self.__class__.__name__),
                                                          'Cron.log', child=True)
-        self.client = self.cm.client
-        self.loop = self.cm.loop
-        self.service = self.cm.service
-        self.zk = self.cm.zk
+        self.client = self.cron_manager.client
+        self.loop = self.cron_manager.loop
+        self.service = self.cron_manager.service
+        self.zk = self.cron_manager.zk
         self.channel_manager = self.client.channel_manager
         self.config = self.service.config
         self.task: asyncio.Task = None
@@ -63,4 +63,4 @@ class AbstractCronTask(metaclass=InsightSingleton):
                 await asyncio.sleep(self.get_wait_time())
 
     async def start_loop(self):
-        self.task = self.cm.loop.create_task(self.cron_loop())
+        self.task = self.cron_manager.loop.create_task(self.cron_loop())

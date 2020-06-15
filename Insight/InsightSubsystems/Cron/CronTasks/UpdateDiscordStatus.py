@@ -8,6 +8,7 @@ class UpdateDiscordStatus(AbstractCronTask):
     def __init__(self, cron_manager):
         super().__init__(cron_manager)
         self.lg_status = InsightLogger.InsightLogger.get_logger('Insight.status', 'Insight_status.log')
+        self.status = discord.Status.dnd
 
     def loop_iteration(self) -> int:
         return 300
@@ -20,6 +21,9 @@ class UpdateDiscordStatus(AbstractCronTask):
 
     def call_now(self) -> bool:
         return True
+
+    def current_status(self):
+        return self.status
 
     async def _run_task(self):
         update = await self.loop.run_in_executor(None, self.service.update_available)
@@ -46,4 +50,5 @@ class UpdateDiscordStatus(AbstractCronTask):
                                                                    str(stats_feeds[1]))
         game_act = discord.Activity(name=status_str, type=discord.ActivityType.watching)
         await self.client.change_presence(activity=game_act, status=d_status)
+        self.status = d_status
         self.lg_status.info(status_str)
