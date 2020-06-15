@@ -59,6 +59,7 @@ class AbstractCronTask(metaclass=InsightSingleton):
             except Exception as ex:
                 self.lg.exception(ex)
                 print("Error when running cron task. {} - EX: {}".format(self.__class__.__name__, ex))
+                await asyncio.sleep(55)
             finally:
                 await asyncio.sleep(self.get_wait_time())
 

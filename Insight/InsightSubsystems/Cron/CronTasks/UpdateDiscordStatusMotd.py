@@ -30,7 +30,7 @@ class UpdateDiscordStatusMotd(AbstractCronTask):
         if (datetime.utcnow() - timedelta(hours=24)) >= last_modified:
             return
         else:
-            status_str = "MOTD has been updated. Run '!motd' to see the latest message of the day for " \
-                         "announcements and updates. This status is cleared after 1 day."
+            status_str = "MOTD has been updated. Run '!motd' to see the message of the day for " \
+                         "announcements and updates. Status is cleared after 1 day."
             game_act = discord.Activity(name=status_str, type=discord.ActivityType.watching)
             await self.client.change_presence(activity=game_act, status=self.DiscordStatus.current_status())
