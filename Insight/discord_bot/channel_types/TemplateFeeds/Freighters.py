@@ -14,8 +14,6 @@ class Freighters(enFeed):
         try:
             row = db.query(self.linked_table()).filter(self.linked_table().channel_id == self.channel_id).one()
             row.show_mode = dbRow.enum_kmType.show_both
-            for r in db.query(dbRow.tb_systems).filter(dbRow.tb_systems.security_status >= .45).all():
-                db.add(dbRow.tb_Filter_systems(r.system_id, self.channel_id, load_fk=False))
             db.add(dbRow.tb_Filter_groups(513, self.channel_id, load_fk=False))
             db.add(dbRow.tb_Filter_groups(902, self.channel_id, load_fk=False))
             db.commit()
@@ -44,7 +42,18 @@ class Freighters(enFeed):
             def internal_list_options(self):
                 super(visual_enfeed, self).internal_list_options()
                 self.in_victim_ship_group = internal_options.use_whitelist.value
-                self.in_system_nonly = internal_options.use_whitelist.value
+
+            def run_filter(self):
+                if (datetime.datetime.utcnow() - self.max_delta()) >= self.km.killmail_time:
+                    return False
+                if self.feed_options.minValue > self.km.totalValue:
+                    return False
+                if not self.km.filter_system_security(.45, 1.0):
+                    return False
+                if not self.km.filter_loss(self.filters.object_filter_groups, self.in_victim_ship_group):  # if false/ not contained in cat whitelist ignore posting
+                    return False
+                self.set_kill()
+                return True
 
             def set_frame_color(self):
                 self.embed.color = discord.Color(5857901)

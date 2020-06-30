@@ -195,6 +195,14 @@ class Kills(dec_Base.Base, table_row):
                     __return_item = victim
         return __return_item
 
+    def filter_system_security(self, min_bound: float, max_bound: float = 1.0):
+        """returns true if km system security status is between min_bound and max_bound or is equal to either bound"""
+        s = self.get_system()
+        try:
+            return min_bound <= s.security_status <= max_bound
+        except:
+            return False
+
     def is_npc(self)->bool:
         return self.npc
 
