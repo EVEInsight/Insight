@@ -1,5 +1,6 @@
-from . import LocalScan, EightBall, Prefix, About, Help, Limits, Roll, Top, Motd
+from . import EightBall, Prefix, About, Help, Limits, Roll, Top, Motd
 from .AdminCommands import Quit, Admin
+from .LocalScan import LocalScan, LocalScanHelp
 import discord
 import discord_bot
 from functools import partial
@@ -13,7 +14,8 @@ class UnboundUtilityCommands(object):
         self.serverManager = self.client.serverManager
         self.commandParser = self.client.commandLookup
         self.threadpool_unbound = self.client.threadpool_unbound
-        self.localscan = LocalScan.LocalScan(self)
+        self.localscan_help = LocalScanHelp.LocalScanHelp(self)
+        self.localscan = LocalScan.LocalScan(self, is_main_command=True)
         self.eightBall = EightBall.EightBall(self)
         self.prefix = Prefix.Prefix(self)
         self.about = About.About(self)
@@ -36,34 +38,34 @@ class UnboundUtilityCommands(object):
         return await self.client.loop.run_in_executor(None, partial(self._do_split, input_str))
 
     async def command_localscan(self, message_object: discord.Message):
-        await self.localscan.run_command(message_object, await self.strip_command(message_object))
+        await self.localscan.run_command_proxy(message_object, await self.strip_command(message_object))
 
     async def command_8ball(self, message_object: discord.Message):
-        await self.eightBall.run_command(message_object, await self.strip_command(message_object))
+        await self.eightBall.run_command_proxy(message_object, await self.strip_command(message_object))
 
     async def command_quit(self, message_object: discord.Message):
-        await self.quit.run_command(message_object, await self.strip_command(message_object))
+        await self.quit.run_command_proxy(message_object, await self.strip_command(message_object))
 
     async def command_admin(self, message_object: discord.Message):
-        await self.admin.run_command(message_object, await self.strip_command(message_object))
+        await self.admin.run_command_proxy(message_object, await self.strip_command(message_object))
 
     async def command_prefix(self, message_object: discord.Message):
-        await self.prefix.run_command(message_object, await self.strip_command(message_object))
+        await self.prefix.run_command_proxy(message_object, await self.strip_command(message_object))
 
     async def command_about(self, message_object: discord.Message):
-        await self.about.run_command(message_object, await self.strip_command(message_object))
+        await self.about.run_command_proxy(message_object, await self.strip_command(message_object))
 
     async def command_help(self, message_object: discord.Message):
-        await self.help.run_command(message_object, await self.strip_command(message_object))
+        await self.help.run_command_proxy(message_object, await self.strip_command(message_object))
 
     async def command_limits(self, message_object: discord.Message):
-        await self.limits.run_command(message_object, await self.strip_command(message_object))
+        await self.limits.run_command_proxy(message_object, await self.strip_command(message_object))
 
     async def command_roll(self, message_object: discord.Message):
-        await self.randomroll.run_command(message_object, await self.strip_command(message_object))
+        await self.randomroll.run_command_proxy(message_object, await self.strip_command(message_object))
 
     async def command_top(self, message_object: discord.Message):
-        await self.top.run_command(message_object, await self.strip_command(message_object))
+        await self.top.run_command_proxy(message_object, await self.strip_command(message_object))
 
     async def command_motd(self, message_object: discord.Message):
-        await self.motd.run_command(message_object, await self.strip_command(message_object))
+        await self.motd.run_command_proxy(message_object, await self.strip_command(message_object))

@@ -1,13 +1,16 @@
-from .UnboundCommandBase import *
+from ..UnboundCommandBase import *
 from InsightSubsystems.Cache.CacheEndpoint.LocalScanEmbeds.LocalScanEmbedBase import LocalScanEmbedBase
 from InsightUtilities.StaticHelpers import RegexCheck
 from functools import partial
 
 
 class LocalScan(UnboundCommandBase):
-    def __init__(self, unbound_service):
-        super().__init__(unbound_service)
+    def __init__(self, unbound_service, is_main_command=False):
+        super().__init__(unbound_service, is_main_command)
         self.LocalScanEmbedBase = LocalScanEmbedBase()
+
+    def yield_subcommands(self):
+        yield ["help", "h"], self.unbound.localscan_help.run_command
 
     @classmethod
     def mention(cls):

@@ -8,10 +8,11 @@ from discord_bot import discord_options as dOpt
 import InsightExc
 from InsightUtilities import DiscordPermissionCheck, LimitManager
 import InsightUtilities
+from functools import partial
 
 
 class UnboundCommandBase(object):
-    def __init__(self, unbound_service):
+    def __init__(self, unbound_service, is_main_command=False):
         self.unbound: UnboundUtilityCommands = unbound_service
         self.client = self.unbound.client
         self.service = self.client.service
@@ -19,6 +20,41 @@ class UnboundCommandBase(object):
         self.loop = self.client.loop
         self.serverManager = self.unbound.serverManager
         self.config = InsightUtilities.ConfigLoader()
+        self.subcommands = {}
+        if is_main_command:
+            self.load_subcommands()
+
+    def load_subcommands(self):
+        prefix = ["", "-", "--", ".", "!", "?"]
+        for f in self.yield_subcommands():
+            for subc in f[0]:
+                for p in prefix:
+                    self.subcommands["{}{}".format(p, subc)] = f[1]
+
+    def yield_subcommands(self):
+        # yield ["help", "h"], self.unbound.localscan_help.run_command # ex
+        return
+        yield
+
+    def get_subcommand_sync(self, m_text: str = ""):
+        split_text = m_text.split(" ", 1)
+        potential_subcommand = split_text[0]
+        if len(potential_subcommand) == 0:
+            return None, m_text
+        else:
+            matched_coro = self.subcommands.get(potential_subcommand.lower())
+            if matched_coro is None:
+                return None, m_text
+            else:
+                if len(split_text) == 2:
+                    return matched_coro, split_text[1]
+                else:
+                    return matched_coro, ""
+
+    async def get_subcommand_coro(self, m_text: str = ""):
+        """returns the coro matching the subcommand and the string stripped of the subcommand.
+        Returns None and the original string if no subcommand match."""
+        return await self.loop.run_in_executor(None, partial(self.get_subcommand_sync, m_text))
 
     @classmethod
     def mention(cls):
@@ -86,4 +122,12 @@ class UnboundCommandBase(object):
                 await d_message.channel.send(content=response_text)
         else:  # permissions error
             return
+
+    async def run_command_proxy(self, d_message: discord.Message, m_text: str = ""):
+        """Change function to do subcommand processing if any to change called command"""
+        coro_subcommand, text_without_subcommand = await self.get_subcommand_coro(m_text)
+        if coro_subcommand is None:
+            await self.run_command(d_message, text_without_subcommand)
+        else:
+            await coro_subcommand(d_message, text_without_subcommand)
 
