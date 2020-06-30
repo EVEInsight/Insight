@@ -78,16 +78,15 @@ RUN apt-get update && apt-get install -y \
  apt-utils \
  curl \
  ca-certificates \
- gnupg
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+ gnupg \
+ lsb-release
+RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN apt-get update && apt-get install -y \
  git \
  build-essential \
  zip \
- libpq-dev \
- pgloader \
- sqlite3
+ libpq-dev
 RUN rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /InsightDocker /app /home/insight
