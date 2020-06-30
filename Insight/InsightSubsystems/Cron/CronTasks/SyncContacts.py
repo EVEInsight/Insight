@@ -16,6 +16,9 @@ class SyncContacts(AbstractCronTask):
     def run_at_intervals(self) -> bool:
         return False
 
+    def call_now(self) -> bool:
+        return False
+
     async def __helper_update_contacts_channels(self):
         st = InsightLogger.InsightLogger.time_start()
         async for channel in self.channel_manager.get_all_channels():

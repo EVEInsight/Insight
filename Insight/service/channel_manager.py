@@ -80,35 +80,59 @@ class Channel_manager(object):
         except AssertionError:
             sys.exit(1)
 
+    def get_channel_ids_with_feeds(self):
+        db = self.service.get_session()
+        try:
+            ids = [i[0] for i in db.query(tb_channels.channel_id).all()]
+            return ids
+        except Exception as ex:
+            print(ex)
+            return None
+        finally:
+            db.close()
+
     async def load_channels(self, load_message=True):
-
-        def get_ids():
-            db = self.service.get_session()
-            try:
-                ids = [i.channel_id for i in db.query(tb_channels).all()]
-                return ids
-            except Exception as ex:
-                print(ex)
-                return None
-            finally:
-                db.close()
-
         if load_message:
             print('Loading feed services... This could take some time depending on the number of feeds.')
         start = datetime.datetime.utcnow()
-        existing_ids = await self._discord_client.loop.run_in_executor(None, get_ids)
+        existing_ids = await self._discord_client.loop.run_in_executor(None, self.get_channel_ids_with_feeds)
         get_channel_tasks = []
-        async for i in self.__get_text_channels():
-            try:
-                if existing_ids is not None:
-                    if i.id in existing_ids and self._channel_feed_container.get(i.id) is None:
-                        get_channel_tasks.append(self.get_channel_feed(i))
-                else:
+        try:
+            if existing_ids is not None:
+                for channel_id_with_feed in existing_ids:
+                    if self.service.cli_args.startup_debug:  # mock a channel and change it to a valid id to test load
+                        c_data = {"id": channel_id_with_feed, "type": None, "name": "Startup DEBUG Feed", "position": 1}
+                        g_data = {"id": 1, "type": None, "name": "Startup DEBUG Feed Guild", "position": 1}
+                        g = discord.Guild(data=g_data, state=None)
+                        channel_obj = discord.TextChannel(state=None, data=c_data, guild=g)
+                        get_channel_tasks.append(self.get_channel_feed(channel_obj))
+                    else:
+                        channel_obj = self._discord_client.get_channel(channel_id_with_feed)
+                        if channel_obj is not None:
+                            get_channel_tasks.append(self.get_channel_feed(channel_obj))
+            else:
+                async for i in self.__get_text_channels():
                     get_channel_tasks.append(self.get_channel_feed(i))
-            except Exception as ex:
-                print(ex)
+        except Exception as ex:
+            traceback.print_exc()
+            print(ex)
+        ratio_print = .25
+        loaded_count = 0
+        total_load = len(get_channel_tasks)
         if len(get_channel_tasks) > 0:
-            await asyncio.gather(*get_channel_tasks, return_exceptions=True)
+            if load_message:
+                print("Started loading {} feeds.".format(total_load))
+            for f in asyncio.as_completed(get_channel_tasks):
+                loaded_count += 1
+                try:
+                    await f
+                except Exception as ex:
+                    traceback.print_exc()
+                    print("Error when loading a channel feed: Ex: {}".format(ex))
+                if load_message:
+                    if loaded_count > (total_load * ratio_print):
+                        print("Loaded {} feeds of {}. {}% done".format(loaded_count, total_load, int(ratio_print * 100)))
+                        ratio_print += .25
             print("Loaded {} feeds in {:.1f} seconds".format(len(get_channel_tasks),
                                                              (datetime.datetime.utcnow() - start).total_seconds()))
 
@@ -207,16 +231,6 @@ class Channel_manager(object):
                     print(ex)
         except Exception as ex:
             print(ex)
-
-    async def auto_refresh(self):
-        while True:
-            await self.refresh_post_all_tasks()
-            await asyncio.sleep(60)
-
-    async def auto_channel_refresh(self):
-        while True:
-            await self.load_channels(load_message=False)
-            await asyncio.sleep(3600)
 
 
 from database.db_tables.eve import tb_kills

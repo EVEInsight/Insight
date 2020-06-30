@@ -18,6 +18,9 @@ class InsightArgumentParser(object):
         parser.add_argument("--debug-limit", "-l",
                             help="Sets the total limit of debug kms to push through feeds before exiting the program. Default is unlimited.",
                             type=int)
+        parser.add_argument("--startup-debug", action="store_true",
+                            help="Test startup and exit. This flag is mainly used for startup time testing.",
+                            default=False)
         parser.add_argument("--skip-api-import", "-n", action="store_true",
                             help="Skip startup API static data import check.", default=False)
         parser.add_argument("--websocket", "-w", action="store_true",

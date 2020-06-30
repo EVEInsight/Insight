@@ -4,3 +4,6 @@ from InsightSubsystems.Cron.CronTasks.UpdateDiscordStatus import UpdateDiscordSt
 from InsightSubsystems.Cron.CronTasks.UpdateDiscordStatusMotd import UpdateDiscordStatusMotd
 from InsightSubsystems.Cron.CronTasks.DiscordBots import DiscordBots
 from InsightSubsystems.Cron.CronTasks.SyncContacts import SyncContacts
+from InsightSubsystems.Cron.CronTasks.LoadAllChannelsRefresh import LoadAllChannelsRefresh
+from InsightSubsystems.Cron.CronTasks.ChannelAutoRefresh import ChannelAutoRefresh
+

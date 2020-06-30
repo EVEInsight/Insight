@@ -24,8 +24,9 @@ class Discord_Insight_Client(discord.Client):
         self.channel_manager: service.Channel_manager = self.service.channel_manager
         self.channel_manager.set_client(self)
         self.serverManager = service.ServerManager(self.service, self)
+        self.config = self.service.config
         self.commandLookup = InsightUtilities.InsightCommands()
-        self.threadpool_insight = ThreadPoolExecutor(max_workers=10)
+        self.threadpool_insight = ThreadPoolExecutor(max_workers=self.config.get("DEFAULT_THREAD_COUNT"))
         self.threadpool_zk = ThreadPoolExecutor(max_workers=2)
         self.threadpool_unbound = ThreadPoolExecutor(max_workers=1)
         self.subsystems = InsightSubsystems.SubsystemLoader(discord_client=self)
@@ -66,14 +67,16 @@ class Discord_Insight_Client(discord.Client):
             print(ex)
         await self.serverManager.loader()
         await self.service.zk_obj.make_queues()
-        self.loop.create_task(self.service.zk_obj.pull_kms_ws())
+        if not self.service.cli_args.startup_debug:
+            self.loop.create_task(self.service.zk_obj.pull_kms_ws())
         await self.channel_manager.load_channels()
+        if self.service.cli_args.startup_debug:
+            print("Done with --startup-debug. Exiting.")
+            sys.exit(0)
         self.loop.create_task(self.service.zk_obj.pull_kms_redisq())
         self.loop.create_task(self.service.zk_obj.coroutine_filters(self.threadpool_zk))
         await self.loop.run_in_executor(None, self.service.zk_obj.debug_simulate)
         self.loop.create_task(self.service.zk_obj.coroutine_process_json(self.threadpool_zk))
-        self.loop.create_task(self.channel_manager.auto_refresh())
-        self.loop.create_task(self.channel_manager.auto_channel_refresh())
         self.insight_ready_event.set()
 
     async def close(self):

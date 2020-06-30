@@ -151,3 +151,4 @@ class ConfigLoader(metaclass=InsightSingleton):
         self.parse_int("CRON_SYNCCONTACTS", "NULL", "NULL", False, 32400, True)
         self.parse_list("INSIGHT_ADMINS", "NULL", "NULL", False, "", False)
         self.parse_list("8BALL_RESPONSES", "NULL", "NULL", False, "Yes;No;Maybe", True)
+        self.parse_int("DEFAULT_THREAD_COUNT", "NULL", "NULL",  False, 25, True)
