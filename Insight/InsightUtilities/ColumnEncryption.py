@@ -33,10 +33,14 @@ class ColumnEncryption(metaclass=InsightSingleton):
                     cfile.write(cf)
             self._set_key(cfile.get("encryption", "secret_key"))
         except FileNotFoundError:
+            tmp_key = self._generate_new_key()
             print("The config file '{0}' could not be found. Rename file 'default-config.ini' to '{0}'. "
                   "If you are using Insight with Docker make sure to check your volume directory, rename the "
                   "'default-config.ini' to 'config.ini'.".format(self._config_file_path))
-            sys.exit(1)
+            print("WARNING: Generated a key in memory. This key will encrypt the token column but the encryption "
+                  "key will be wiped after the bot is stopped. Please copy the key down and place it in '{}' file "
+                  "under encryption -> secret_key.\n\nEncryption key: {}".format(self._config_file_path, tmp_key))
+            self._set_key(tmp_key)
 
     def get_key(self):
         if not isinstance(self._key, str):
