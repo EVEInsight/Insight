@@ -12,6 +12,7 @@ class LocalScan(UnboundCommandBase):
     def yield_subcommands(self):
         yield ["help", "h"], self.unbound.localscan_help.run_command
         yield ["aff", "a", "affiliations", "group", "overview", "groups", "g"], self.unbound.localscan_affiliations.run_command
+        yield ["ships", "pilots", "p"], self.run_command
 
     @classmethod
     def mention(cls):
@@ -29,3 +30,13 @@ class LocalScan(UnboundCommandBase):
         valid_names = await self.loop.run_in_executor(None, partial(self.process_character_names, message_text))
         prefix = await self.serverManager.get_min_prefix(d_message.channel)
         return await self.LocalScanEmbedBase.get(char_names=valid_names, server_prefix=prefix)
+
+    async def run_command_proxy(self, d_message: discord.Message, m_text: str = ""):
+        coro_subcommand, text_without_subcommand = await self.get_subcommand_coro(m_text)
+        if coro_subcommand is None:
+            if m_text.count("\n") > 25:  # auto use group sort for more than 25 lines if no subcommand
+                await self.unbound.localscan_affiliations.run_command(d_message, text_without_subcommand)
+            else:
+                await self.run_command(d_message, text_without_subcommand)
+        else:
+            await coro_subcommand(d_message, text_without_subcommand)
