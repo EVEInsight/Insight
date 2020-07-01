@@ -1,6 +1,6 @@
 from . import EightBall, Prefix, About, Help, Limits, Roll, Top, Motd
 from .AdminCommands import Quit, Admin
-from .LocalScan import LocalScan, LocalScanHelp
+from .LocalScan import LocalScan, LocalScanHelp, LocalScanAffiliations
 import discord
 import discord_bot
 from functools import partial
@@ -14,6 +14,7 @@ class UnboundUtilityCommands(object):
         self.serverManager = self.client.serverManager
         self.commandParser = self.client.commandLookup
         self.threadpool_unbound = self.client.threadpool_unbound
+        self.localscan_affiliations = LocalScanAffiliations.LocalScanAffiliations(self)
         self.localscan_help = LocalScanHelp.LocalScanHelp(self)
         self.localscan = LocalScan.LocalScan(self, is_main_command=True)
         self.eightBall = EightBall.EightBall(self)

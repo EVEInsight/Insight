@@ -72,22 +72,17 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
                                                             km_percent)
                 if km_ratios_added == 0:
                     e.field_buffer_end_bounds()
-                    header_str = "Involved KMs:"
-                    if e.check_remaining_lower_limits(len(header_str) + len(km_str) + 3, 2):
+                    header_str = "KMs:"
+                    if e.check_remaining_lower_limits(len(header_str) + len(km_str) + 30, 2):
                         break
-                    e.field_buffer_add("Involved KMs:")
-                if e.check_remaining_lower_limits(len(km_str) + 3, 2):
+                    e.field_buffer_add(header_str)
+                if e.check_remaining_lower_limits(len(km_str) + 30, 2):
                     break
                 e.field_buffer_add(km_str)
                 km_ratios_added += 1
 
     @classmethod
-    def _do_endpoint_logic_sync(cls, scan: dict, server_prefix: str) -> dict:
-        list_all_character_ids = Helpers.get_nested_value(scan, {}, "characters").keys()
-        set_all_character_ids = set(list_all_character_ids)
-        e = EmbedLimitedHelper()
-        e.set_color(cls.default_color())
-        e.set_timestamp(datetime.utcnow())
+    def get_header_str(cls, scan: dict):
         total_alive = Helpers.get_nested_value(scan, 0, "totalAlive")
         total_dead = Helpers.get_nested_value(scan, 0, "totalDead")
         total_unknown = Helpers.get_nested_value(scan, 0, "totalUnknown")
@@ -97,11 +92,22 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
         str_stats += "" if not total_dead else "Dead: {}\n".format(total_dead)
         str_stats += "" if not total_unknown else "Unknown: {}\n".format(total_unknown)
         str_stats += "" if not total_unknown_names else "Unknown Name / No KB Activity: {}\n".format(total_unknown_names)
+        return str_stats
+
+
+    @classmethod
+    def _do_endpoint_logic_sync(cls, scan: dict, server_prefix: str) -> dict:
+        list_all_character_ids = Helpers.get_nested_value(scan, {}, "characters").keys()
+        set_all_character_ids = set(list_all_character_ids)
+        e = EmbedLimitedHelper()
+        e.set_color(cls.default_color())
+        e.set_timestamp(datetime.utcnow())
+        str_stats = cls.get_header_str(scan)
         e.set_description("Pilots are listed with the most recent ship used, a timestamp and if their last activity "
                           "was a loss (DEAD).\n\n{}".format(str_stats))
         e.set_author(name="Scan of {} pilots".format(Helpers.get_nested_value(scan, 0, "totalQueried")),
                      icon_url=URLHelper.type_image(1952, 64))
-        e.set_footer(text="Run '{}s help' for additional help and usage.".format(server_prefix))
+        e.set_footer(text="Run '{}s .help' for additional help and usage.".format(server_prefix))
         alliances = Helpers.get_nested_value(scan, [], "alliances")
         corporations = Helpers.get_nested_value(scan, [], "corporations")
         global_tabbed_grps = 0

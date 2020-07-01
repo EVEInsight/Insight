@@ -11,6 +11,7 @@ class LocalScan(UnboundCommandBase):
 
     def yield_subcommands(self):
         yield ["help", "h"], self.unbound.localscan_help.run_command
+        yield ["aff", "a", "affiliations", "group", "overview", "groups", "g"], self.unbound.localscan_affiliations.run_command
 
     @classmethod
     def mention(cls):

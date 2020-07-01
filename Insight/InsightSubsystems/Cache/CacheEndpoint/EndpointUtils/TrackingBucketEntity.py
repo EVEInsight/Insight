@@ -54,10 +54,11 @@ class TrackingBucketEntity(object):
             self.mails.add_item(km_id, km_id)
             self.mails.append_item_unique(km_id, "characterIDs", character_id)
 
-    def ships_calc_get_dict(self):
+    def ships_calc_get_sorted_list(self):
         for k, v in self.ships.items():
             avg_delay = mean(self.ship_delays[k]) if len(self.ship_delays[k]) else 0
             v["avgSeconds"] = avg_delay
+        return OrderedDict(sorted(self.ships.items(), key=lambda x: x[1]["total"], reverse=True))
 
     def get_sorted_list(self, count_tracking_dict, sort_key="total"):
         return sorted(count_tracking_dict.items(), key=lambda x: x[1][sort_key], reverse=True)
@@ -70,7 +71,7 @@ class TrackingBucketEntity(object):
             "isAlliance": self.is_alliance,
             "isCorporation": self.is_corporation,
             "characters": self.characters,
-            "ships": self.ships_calc_get_dict(),
+            "ships": self.ships_calc_get_sorted_list(),
             "systemHighestRatio": self.systems.get_top_dict(),
             "systems": self.systems.get_sorted_dict(),
             "locationHighestRatio": self.locations.get_top_dict(),
