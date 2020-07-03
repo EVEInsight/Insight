@@ -47,7 +47,7 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
             ship_name_str += "❕"
         else:
             pass
-        ship_name_str += (ship_name if is_attacker else "(DEAD){}".format(ship_name))[:14]
+        ship_name_str += (ship_name if is_attacker else "(L){}".format(ship_name))[:14]
         field_line = "{:<15}{:<16}{}".format(char_name, ship_name_str, delta_str)
         e.field_buffer_add(field_line)
 
@@ -104,7 +104,8 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
         e.set_timestamp(datetime.utcnow())
         str_stats = cls.get_header_str(scan)
         e.set_description("Pilots are listed with the most recent ship used, a timestamp and if their last activity "
-                          "was a loss (DEAD).\n\n{}".format(str_stats))
+                          "was a loss (L). Nearest location may range wildly and should not be read as a guaranteed "
+                          "location.\n\n{}".format(str_stats))
         e.set_author(name="Scan of {} pilots".format(Helpers.get_nested_value(scan, 0, "totalQueried")),
                      icon_url=URLHelper.type_image(1952, 64))
         e.set_footer(text="Run '{}s .help' for additional help and usage.".format(server_prefix))
@@ -176,12 +177,14 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
             e.field_buffer_start_bounds("```\n", "\n```")
             for character_id in list_all_character_ids:
                 if character_id in set_all_character_ids:
-                    if e.check_remaining_lower_limits(350, 2):
+                    if e.check_remaining_lower_limits(75, 1):
                         break
                     cls._add_pilot_ship(e, scan, character_id)
                     set_all_character_ids.remove(character_id)
             if len(set_all_character_ids) > 0:
                 e.field_buffer_add("----Truncated {}".format(len(set_all_character_ids)))
+                if len(set_all_character_ids) > 15:
+                    line_subc = "Note: Use \"!s -g\" to display ship counts grouped by alliances/corps."
             e.field_buffer_end_bounds()
             km_ratios = Helpers.get_nested_value(scan, {}, "kms").values()
             cls._add_summary_involved_mails(e, scan, km_ratios, max_to_post=3, ratio_threshold=.35)

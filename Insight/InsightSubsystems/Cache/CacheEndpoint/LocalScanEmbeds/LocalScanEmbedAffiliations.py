@@ -33,7 +33,7 @@ class LocalScanEmbedAffiliations(LocalScanEmbedBase):
             avg_seconds = float(Helpers.get_nested_value(ship_id_dict, "", "avgSeconds"))
             avg_delay_str = "{}".format(MathHelper.str_min_seconds_convert(avg_seconds))
             field_line = "{:<15}{}{:<4}{}".format(ship_name_str, alive, lost_str, avg_delay_str)
-            if e.check_remaining_lower_limits(len(field_line) + 60, 2):
+            if e.check_remaining_lower_limits(len(field_line) + 90, 1):
                 return total_proc
             e.field_buffer_add(field_line)
             total_proc += alive + lost
@@ -64,11 +64,19 @@ class LocalScanEmbedAffiliations(LocalScanEmbedBase):
             if total_pilot_notrunc > 0:
                 totalNonTruncPilots += total_pilot_notrunc
                 totalNonTruncGroups += 1
+            else:
+                break  # too many chars break
         if totalNonTruncPilots < totalQueried:
-            e.field_buffer_start(name="Truncated", name_continued="Truncated -- Continued", inline=False)
+            trunc_pilot = totalQueried - totalNonTruncPilots
+            trunc_group = len(allGroups) - totalNonTruncGroups
+            e.field_buffer_start(name="TRUNCATED", name_continued="Truncated -- Continued", inline=False)
             e.field_buffer_start_bounds("```\n", "\n```")
             e.field_buffer_add("TRUNCATED PILOTS: {}\nTRUNCATED GROUPS: {}".format(
-                totalQueried - totalNonTruncPilots, len(allGroups) - totalNonTruncGroups))
+                trunc_pilot, trunc_group))
+            if trunc_group >= 10:
+                c_line = "Note: Use \"!s -p\" to display pilot names linked to ships."
+                if e.check_line_fits(c_line):
+                    e.field_buffer_add(c_line)
             e.field_buffer_end()
         return_result = {
             "embed": e.to_dict(),

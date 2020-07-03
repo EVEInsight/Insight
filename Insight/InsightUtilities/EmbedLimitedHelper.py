@@ -30,9 +30,14 @@ class EmbedLimitedHelper(discord.Embed):
         self.field_buffer_inline = False
 
     def _increment_counter(self, increment_length):
-        if (self.count_total_chars + increment_length >= self.limit_total_char) or \
-                ((len(self) + increment_length) >= self.limit_total_char):
-            raise Utilities.EmbedMaxTotalCharLimit
+        if self.count_total_chars + increment_length >= self.limit_total_char:
+            raise Utilities.EmbedMaxTotalCharLimit(
+                message="Char limit exceeded (Modified Embed). Total chars in embed: '{}'. Limit is '{}'".format(
+                    self.count_total_chars + increment_length, self.limit_total_char))
+        if (len(self) + increment_length) >= self.limit_total_char:
+            raise Utilities.EmbedMaxTotalCharLimit(
+                message="Char limit exceeded (Base Embed). Total chars in embed: '{}'. Limit is '{}'".format(
+                    self.count_total_chars + increment_length, self.limit_total_char))
         else:
             self.count_total_chars += increment_length
 
@@ -198,4 +203,7 @@ class EmbedLimitedHelper(discord.Embed):
         if self.ratio_remaining_characters() <= ceiling_characters or self.ratio_remaining_fields() <= ceiling_fields:
             return True
         return False
+
+    def check_line_fits(self, input_line: str) -> bool:
+        return not self.check_remaining_lower_limits(len(input_line) + 1)
 
