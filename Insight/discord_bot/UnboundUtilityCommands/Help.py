@@ -28,7 +28,7 @@ class Help(UnboundCommandBase):
             "**{p}help** - Display command information and prefixes.",
             "**{p}limits** - Display channel / server rate limits and usage stats.",
             "**{p}lock** - Lock a feed service from being modified by users without certain Discord channel roles.",
-            "**{p}lscan** - Local scan. Copy and paste local pilots for a ship and affiliation overview.",
+            "**{p}scan** - Local scan. Copy and paste local pilots for a ship and affiliation overview.",
             "**{p}motd** - Display the current MOTD for Insight global announcements and updates.",
             "**{p}prefix** - Manage server-wide command prefixes for this bot.",
             "**{p}quit** - Close and shut down the Insight application service.",

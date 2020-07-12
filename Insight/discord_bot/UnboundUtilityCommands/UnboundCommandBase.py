@@ -16,7 +16,6 @@ class UnboundCommandBase(object):
         self.unbound: UnboundUtilityCommands = unbound_service
         self.client = self.unbound.client
         self.service = self.client.service
-        self.embed_only = False
         self.loop = self.client.loop
         self.serverManager = self.unbound.serverManager
         self.config = InsightUtilities.ConfigLoader()
@@ -60,6 +59,10 @@ class UnboundCommandBase(object):
     def mention(cls):
         return True
 
+    @classmethod
+    def embed_only(cls):
+        return False
+
     def command_description(self):
         return "Not implemented."
 
@@ -95,10 +98,10 @@ class UnboundCommandBase(object):
 
     def can_embed(self, d_message: discord.Message):
         can_embed = DiscordPermissionCheck.can_embed(d_message)
-        if self.embed_only and not can_embed:
+        if self.embed_only() and not can_embed:
             raise InsightExc.DiscordError.DiscordPermissions("Insight is lacking the **embed links** and **send "
                                                              "messages** roles in this channel. You must enable "
-                                                             "these roles to use this command.")
+                                                             "these roles before you can use this command.")
         return can_embed
 
     async def run_command(self, d_message: discord.Message, m_text: str = ""):

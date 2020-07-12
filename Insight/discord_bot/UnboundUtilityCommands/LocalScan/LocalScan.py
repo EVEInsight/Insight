@@ -18,6 +18,10 @@ class LocalScan(UnboundCommandBase):
     def mention(cls):
         return False
 
+    @classmethod
+    def embed_only(cls):
+        return True
+
     def process_character_names(self, message_chars: str):
         return_names = []
         input_names = message_chars.split("\n")
