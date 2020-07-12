@@ -13,8 +13,8 @@ install:
   - cd ..
   - rm swagger-python-client -R
   - pip install -r requirements.txt
-  - pip install codecov pytest-cov
+  - pip install codecov
 script:
-  - pytest --cov=./
+  - pytest
 after_success:
   - codecov
