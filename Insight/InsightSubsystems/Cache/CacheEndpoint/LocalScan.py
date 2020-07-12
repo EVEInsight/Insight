@@ -60,6 +60,7 @@ class LocalScan(AbstractNoCacheEndpoint):
             char_id = Helpers.get_nested_value(e, None, "character", "character_id")
             char_name = Helpers.get_nested_value(e, "UNKNOWN NAME", "character", "character_name")
             ship_data = Helpers.get_nested_value(e, {}, "ship")
+            ship_name = Helpers.get_nested_value(ship_data, "", "type_name")
             ship_id = Helpers.get_nested_value(ship_data, 0, "type_id")
             system_data = Helpers.get_nested_value(e, {}, "system")
             system_id = Helpers.get_nested_value(system_data, 0, "system_id")
@@ -77,12 +78,12 @@ class LocalScan(AbstractNoCacheEndpoint):
                 alliance_bucket = bucket_alliance.setdefault(
                     alliance_id, TrackingBucketEntity(alliance_id, alliance_name, True, alliance_data))
                 alliance_bucket.add_ship(seconds_ago, ship_id, char_id, system_id, location_id,
-                                         km_id, is_attacker, is_unknown)
+                                         km_id, is_attacker, is_unknown, len(ship_name), len(char_name))
             elif corp_id:
                 corp_bucket = bucket_corp.setdefault(
                     corp_id, TrackingBucketEntity(corp_id, corp_name, False, corp_data))
                 corp_bucket.add_ship(seconds_ago, ship_id, char_id, system_id, location_id,
-                                     km_id, is_attacker, is_unknown)
+                                     km_id, is_attacker, is_unknown, len(ship_name), len(char_name))
             else:
                 pass
             if char_id:

@@ -3,6 +3,8 @@ from InsightUtilities.StaticHelpers import *
 from InsightUtilities import EmbedLimitedHelper
 import discord
 from datetime import datetime
+from statistics import mean
+from math import floor
 
 
 class LocalScanEmbedBase(AbstractEmbedEndpoint):
@@ -13,6 +15,25 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
     @staticmethod
     def default_ttl() -> int:
         return 30
+
+    @classmethod
+    def buffer_character(cls):
+        return 15
+
+    @classmethod
+    def buffer_ship(cls):
+        return 20
+
+    @classmethod
+    def get_buffer_len(cls, avg_len, max_len, buffer_max):
+        if max_len <= buffer_max:
+            return max_len
+        else:
+            mid_len = int(avg_len + max_len / 2)
+            if mid_len <= buffer_max:
+                return mid_len
+            else:
+                return buffer_max
 
     @staticmethod
     def _get_unprefixed_key_hash_sync(char_names: frozenset, seconds_ago_threshold: int, server_prefix: str):
@@ -29,7 +50,7 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
         return await self.executor(self._do_endpoint_logic_sync, scan=local_scan, server_prefix=server_prefix)
 
     @classmethod
-    def _add_pilot_ship(cls, e: EmbedLimitedHelper, scan: dict, char_id: int):
+    def _add_pilot_ship(cls, e: EmbedLimitedHelper, scan: dict, char_id: int, buffer_char, buffer_ship):
         char_data = Helpers.get_nested_value(scan, {}, "characters", char_id)
         char_name = Helpers.get_nested_value(char_data, "", "characterName")[:14]
         is_attacker = Helpers.get_nested_value(char_data, True, "attacker")
@@ -47,8 +68,9 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
             ship_name_str += "❕"
         else:
             pass
-        ship_name_str += (ship_name if is_attacker else "(L){}".format(ship_name))[:14]
-        field_line = "{:<15}{:<16}{}".format(char_name, ship_name_str, delta_str)
+        ship_name_str += (ship_name if is_attacker else "(L){}".format(ship_name))
+        field_line = "{:<{len_char}} {:<{len_ship}} {}".format(char_name[:buffer_char], ship_name_str[:buffer_ship],
+                                                               delta_str, len_char=buffer_char, len_ship=buffer_ship)
         e.field_buffer_add(field_line)
 
     @classmethod
@@ -103,7 +125,9 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
         e.set_color(cls.default_color())
         e.set_timestamp(datetime.utcnow())
         str_stats = cls.get_header_str(scan)
-        e.set_description("Pilots are listed with the most recent ship used, a timestamp and if their last activity "
+        char_str_buffer_totals = []
+        ship_str_buffer_totals = []
+        e.set_description("Pilots are listed based on recent ship activity, a timestamp and if the last activity "
                           "was a loss (L). Nearest location may range wildly and should not be read as a guaranteed "
                           "location.\n\n{}".format(str_stats))
         e.set_author(name="Scan of {} pilots".format(Helpers.get_nested_value(scan, 0, "totalQueried")),
@@ -113,6 +137,14 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
         corporations = Helpers.get_nested_value(scan, [], "corporations")
         global_tabbed_grps = 0
         for grp in list(alliances.values()) + list(corporations.values()):
+            strShipAvg = Helpers.get_nested_value(grp, 0, "strShipAvg")
+            strShipMax = Helpers.get_nested_value(grp, 0, "strShipMax")
+            ship_str_buffer = cls.get_buffer_len(avg_len=strShipAvg, max_len=strShipMax, buffer_max=cls.buffer_ship())
+            ship_str_buffer_totals.append(ship_str_buffer)
+            strCharAvg = Helpers.get_nested_value(grp, 0, "strCharNameAvg")
+            strCharMax = Helpers.get_nested_value(grp, 0, "strCharNameMax")
+            char_str_buffer = cls.get_buffer_len(avg_len=strCharAvg, max_len=strCharMax, buffer_max=cls.buffer_character())
+            char_str_buffer_totals.append(char_str_buffer)
             if global_tabbed_grps >= 5:
                 break
             if e.check_remaining_lower_limits_ratio(.15, .15):
@@ -152,7 +184,7 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
                     for character_id in character_ids_location:
                         if e.check_remaining_lower_limits_ratio(.10, .10):
                             break
-                        cls._add_pilot_ship(e, scan, character_id)
+                        cls._add_pilot_ship(e, scan, character_id, char_str_buffer, ship_str_buffer)
                         set_grp_character_ids.remove(character_id)
                         set_all_character_ids.remove(character_id)
                     e.field_buffer_add("")
@@ -162,7 +194,7 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
                     if character_id in set_grp_character_ids:
                         if e.check_remaining_lower_limits_ratio(.10, .10):
                             break
-                        cls._add_pilot_ship(e, scan, character_id)
+                        cls._add_pilot_ship(e, scan, character_id, char_str_buffer, ship_str_buffer)
                         set_grp_character_ids.remove(character_id)
                         set_all_character_ids.remove(character_id)
                 e.field_buffer_end_bounds()
@@ -170,6 +202,8 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
             cls._add_summary_involved_mails(e, scan, km_ratios, max_to_post=3, ratio_threshold=.25)
             e.field_buffer_end()
         if len(set_all_character_ids) > 0:
+            char_str_buffer = floor(mean(char_str_buffer_totals))
+            ship_str_buffer = floor(mean(ship_str_buffer_totals))
             e.field_buffer_start("Misc Affiliation", name_continued="Misc Affiliation", inline=False)
             e.field_buffer_start_bounds("", "")
             e.field_buffer_add("Pilots not in highest concentration of alliances or corporations.")
@@ -179,7 +213,7 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
                 if character_id in set_all_character_ids:
                     if e.check_remaining_lower_limits(75, 1):
                         break
-                    cls._add_pilot_ship(e, scan, character_id)
+                    cls._add_pilot_ship(e, scan, character_id, char_str_buffer, ship_str_buffer)
                     set_all_character_ids.remove(character_id)
             if len(set_all_character_ids) > 0:
                 e.field_buffer_add("----Truncated {}".format(len(set_all_character_ids)))

@@ -1,6 +1,7 @@
 from InsightSubsystems.Cache.CacheEndpoint.EndpointUtils.TrackingBucket import TrackingBucket, TrackingBucketDual
 from statistics import mean
 from collections import OrderedDict
+from math import ceil
 
 
 class TrackingBucketEntity(object):
@@ -16,16 +17,22 @@ class TrackingBucketEntity(object):
         self.systems = TrackingBucket("systemID", "systemID")
         self.mails = TrackingBucket("kmID", "kmID")
         self.characters = OrderedDict()
+        self.strShipMax = 0
+        self.strCharNameMax = 0
+        self.strShipMaxTotals = []
+        self.strCharNameMaxTotals = []
         self.total = 0
         self.alive = 0
         self.unknown = 0
         self.dead = 0
 
     def add_ship(self, seconds_ago: float, ship_id: int, character_id: int, system_id: int, location_id: int,
-                 km_id: int, is_attacker: bool, is_unknown: bool):
+                 km_id: int, is_attacker: bool, is_unknown: bool, ship_name_len: int, char_name_len: int):
         if is_unknown:
             ship_id = 0
         ship_counts = self.ships.setdefault(ship_id, {"shipID": ship_id, "alive": 0, "dead": 0, "total": 0, "avgSeconds": 0})
+        if ship_counts["total"] == 0:
+            self.strShipMaxTotals.append(ship_name_len)
         ship_delays: list = self.ship_delays.setdefault(ship_id, [])
         ship_delays.append(seconds_ago)
         if is_attacker:
@@ -53,6 +60,11 @@ class TrackingBucketEntity(object):
         if km_id:
             self.mails.add_item(km_id, km_id)
             self.mails.append_item_unique(km_id, "characterIDs", character_id)
+        if ship_name_len > self.strShipMax:
+            self.strShipMax = ship_name_len
+        if char_name_len > self.strCharNameMax:
+            self.strCharNameMax = char_name_len
+        self.strCharNameMaxTotals.append(char_name_len)
 
     def ships_calc_get_sorted_list(self):
         for k, v in self.ships.items():
@@ -72,6 +84,10 @@ class TrackingBucketEntity(object):
             "isCorporation": self.is_corporation,
             "characters": self.characters,
             "ships": self.ships_calc_get_sorted_list(),
+            "strShipAvg": ceil(mean(self.strShipMaxTotals) if len(self.strShipMaxTotals) > 0 else 0),
+            "strCharNameAvg": ceil(mean(self.strCharNameMaxTotals)) if len(self.strCharNameMaxTotals) > 0 else 0,
+            "strShipMax": self.strShipMax,
+            "strCharNameMax": self.strCharNameMax,
             "systemHighestRatio": self.systems.get_top_dict(),
             "systems": self.systems.get_sorted_dict(),
             "locationHighestRatio": self.locations.get_top_dict(),

@@ -6,11 +6,18 @@ from datetime import datetime
 
 class LocalScanEmbedAffiliations(LocalScanEmbedBase):
     @classmethod
+    def buffer_ship(cls):
+        return 25
+
+    @classmethod
     def _add_grouping(cls, e: EmbedLimitedHelper, scan: dict, grp: dict):
         total_proc = 0
         alive = Helpers.get_nested_value(grp, 0, "totalAlive")
         dead = Helpers.get_nested_value(grp, 0, "totalDead")
         name = Helpers.get_nested_value(grp, "", "name")[:75]
+        strShipAvg = Helpers.get_nested_value(grp, 0, "strShipAvg")
+        strShipMax = Helpers.get_nested_value(grp, 0, "strShipMax")
+        ship_str_buffer = cls.get_buffer_len(avg_len=strShipAvg, max_len=strShipMax, buffer_max=cls.buffer_ship())
         header = "**{} -- Alive:{} Dead:{}**".format(name, alive, dead)
         e.field_buffer_start(name=header, name_continued="{} -- Continued".format(name), inline=False)
         e.field_buffer_start_bounds("```\n", "\n```")
@@ -30,9 +37,10 @@ class LocalScanEmbedAffiliations(LocalScanEmbedBase):
             alive = Helpers.get_nested_value(ship_id_dict, 0, "alive")
             lost = Helpers.get_nested_value(ship_id_dict, 0, "dead")
             lost_str = ":-{}".format(lost) if lost > 0 else ""
+            al_str = "{}{}".format(alive, lost_str)
             avg_seconds = float(Helpers.get_nested_value(ship_id_dict, "", "avgSeconds"))
             avg_delay_str = "{}".format(MathHelper.str_min_seconds_convert(avg_seconds))
-            field_line = "{:<15}{}{:<4}{}".format(ship_name_str, alive, lost_str, avg_delay_str)
+            field_line = "{:<{ship_len}} {:<2} {}".format(ship_name_str[:ship_str_buffer], al_str, avg_delay_str, ship_len=ship_str_buffer)
             if e.check_remaining_lower_limits(len(field_line) + 90, 1):
                 return total_proc
             e.field_buffer_add(field_line)
@@ -53,11 +61,11 @@ class LocalScanEmbedAffiliations(LocalScanEmbedBase):
         allGroups = list(Helpers.get_nested_value(scan, {}, "alliances").values()) + list(Helpers.get_nested_value(scan, {}, "corporations").values())
         totalNonTruncPilots = 0
         totalNonTruncGroups = 0
-        e.set_description("Ships are grouped by corps and alliances. The delay represents the average "
-                          "delay among all ship types for a group.\n\n{}".format(str_stats))
+        e.set_description("Ships are grouped by corps and alliances. Time represents the average "
+                          "last activity among all ship types for a group.\n\n{}".format(str_stats))
         e.set_author(name="Scan of {} pilots".format(totalQueried),
                      icon_url=URLHelper.type_image(1952, 64))
-        e.set_footer(text="Run '{}s .help' for additional help and usage.".format(server_prefix))
+        e.set_footer(text="Run '{}s .help' for additional help and usages.".format(server_prefix))
 
         for grp in allGroups:
             total_pilot_notrunc = cls._add_grouping(e, scan, grp)
