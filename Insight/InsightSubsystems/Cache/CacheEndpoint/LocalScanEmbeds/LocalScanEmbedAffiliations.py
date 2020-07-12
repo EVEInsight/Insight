@@ -25,22 +25,17 @@ class LocalScanEmbedAffiliations(LocalScanEmbedBase):
             shipId = Helpers.get_nested_value(ship_id_dict, 0, "shipID")
             ship_d = Helpers.get_nested_value(scan, {}, "ships", shipId, "ship")
             base_ship_value = Helpers.get_nested_value(ship_d, 0, "basePrice")
-            # is_super_titan = Helpers.get_nested_value(char_data, False, "isSuperTitan")
-            # is_regular_cap = Helpers.get_nested_value(char_data, False, "isRegularCap") # todo cap check
+            is_super_titan = Helpers.get_nested_value(ship_d, False, "isSuperTitan")
+            is_regular_cap = Helpers.get_nested_value(ship_d, False, "isCap")
             ship_name = Helpers.get_nested_value(ship_d, "", "type_name")
-            if base_ship_value >= 15e+9:  # alert if super or ship hull is 10b+
-                ship_name_str = "❗" + ship_name
-            elif base_ship_value >= 7.5e+9:
-                ship_name_str = "❕" + ship_name
-            else:
-                ship_name_str = ship_name
+            ship_name_str = cls.get_alert_prefixed_ship(is_super_titan, is_regular_cap, base_ship_value) + ship_name
             alive = Helpers.get_nested_value(ship_id_dict, 0, "alive")
             lost = Helpers.get_nested_value(ship_id_dict, 0, "dead")
             lost_str = ":-{}".format(lost) if lost > 0 else ""
             al_str = "{}{}".format(alive, lost_str)
             avg_seconds = float(Helpers.get_nested_value(ship_id_dict, "", "avgSeconds"))
             avg_delay_str = "{}".format(MathHelper.str_min_seconds_convert(avg_seconds))
-            field_line = "{:<{ship_len}} {:<2} {}".format(ship_name_str[:ship_str_buffer], al_str, avg_delay_str, ship_len=ship_str_buffer)
+            field_line = "{:<{ship_len}} {:<5} {}".format(ship_name_str[:ship_str_buffer], al_str, avg_delay_str, ship_len=ship_str_buffer)
             if e.check_remaining_lower_limits(len(field_line) + 90, 1):
                 return total_proc
             e.field_buffer_add(field_line)
@@ -65,7 +60,7 @@ class LocalScanEmbedAffiliations(LocalScanEmbedBase):
                           "last activity among all ship types for a group.\n\n{}".format(str_stats))
         e.set_author(name="Scan of {} pilots".format(totalQueried),
                      icon_url=URLHelper.type_image(1952, 64))
-        e.set_footer(text="Run '{}s .help' for additional help and usages.".format(server_prefix))
+        e.set_footer(text="Run '{}s -h' for additional help and usages.".format(server_prefix))
 
         for grp in allGroups:
             total_pilot_notrunc = cls._add_grouping(e, scan, grp)
@@ -82,7 +77,7 @@ class LocalScanEmbedAffiliations(LocalScanEmbedBase):
             e.field_buffer_add("TRUNCATED PILOTS: {}\nTRUNCATED GROUPS: {}".format(
                 trunc_pilot, trunc_group))
             if trunc_group >= 10:
-                c_line = "Note: Use \"!s -p\" to display pilot names linked to ships."
+                c_line = "Note: Use \"{}s -s\" to display pilot names linked to ships.".format(server_prefix)
                 if e.check_line_fits(c_line):
                     e.field_buffer_add(c_line)
             e.field_buffer_end()

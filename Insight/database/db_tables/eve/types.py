@@ -135,9 +135,22 @@ class Types(dec_Base.Base,name_only,index_api_updating,sde_impoter):
             print(ex)
 
     def to_jsonDictionary(self) -> dict:
-        return {
-            "type_id": self.type_id,
-            "type_name": self.type_name,
-            "basePrice": float(self.basePrice) if self.basePrice else None,
-            "group": self.object_group.to_jsonDictionary() if self.object_group else None
-        }
+        d = {}
+        category_id = self.get_category()
+        if isinstance(category_id, int) and category_id == 6:
+            group_id = self.group_id
+            if isinstance(group_id, int):
+                if group_id in [30, 659]:
+                    d["isSuperTitan"] = True
+                    d["isCap"] = True
+                else:
+                    d["isSuperTitan"] = False
+                if group_id in [547, 485, 1538, 883]:
+                    d["isCap"] = True
+                else:
+                    d["isCap"] = False
+        d["type_id"] = self.type_id
+        d["type_name"] = self.type_name
+        d["basePrice"] = float(self.basePrice) if self.basePrice else None
+        d["group"] = self.object_group.to_jsonDictionary() if self.object_group else None
+        return d

@@ -26,8 +26,8 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
 
     @classmethod
     def get_buffer_len(cls, avg_len, max_len, buffer_max):
-        if max_len <= buffer_max:
-            return max_len
+        if max_len + 1 <= buffer_max:
+            return max_len + 1
         else:
             mid_len = int(avg_len + max_len / 2)
             if mid_len <= buffer_max:
@@ -50,6 +50,15 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
         return await self.executor(self._do_endpoint_logic_sync, scan=local_scan, server_prefix=server_prefix)
 
     @classmethod
+    def get_alert_prefixed_ship(cls, is_super_titan, is_cap, base_ship_value):
+        if is_super_titan or base_ship_value >= 15e+9:  # alert if super or ship hull is 10b+
+            return "❗"
+        elif is_cap or base_ship_value >= 7.5e+9:
+            return "❕"
+        else:
+            return ""
+
+    @classmethod
     def _add_pilot_ship(cls, e: EmbedLimitedHelper, scan: dict, char_id: int, buffer_char, buffer_ship):
         char_data = Helpers.get_nested_value(scan, {}, "characters", char_id)
         char_name = Helpers.get_nested_value(char_data, "", "characterName")[:14]
@@ -61,13 +70,7 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
         base_ship_value = Helpers.get_nested_value(scan, 0, "ships", ship_id, "ship", "basePrice")
         delta_seconds = Helpers.get_nested_value(char_data, 0, "seconds")
         delta_str = MathHelper.str_min_seconds_convert(delta_seconds)
-        ship_name_str = ""
-        if is_super_titan or base_ship_value >= 15e+9:  # alert if super or ship hull is 10b+
-            ship_name_str += "❗"
-        elif is_regular_cap or base_ship_value >= 7.5e+9:
-            ship_name_str += "❕"
-        else:
-            pass
+        ship_name_str = cls.get_alert_prefixed_ship(is_super_titan, is_regular_cap, base_ship_value)
         ship_name_str += (ship_name if is_attacker else "(L){}".format(ship_name))
         field_line = "{:<{len_char}} {:<{len_ship}} {}".format(char_name[:buffer_char], ship_name_str[:buffer_ship],
                                                                delta_str, len_char=buffer_char, len_ship=buffer_ship)
@@ -132,7 +135,7 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
                           "location.\n\n{}".format(str_stats))
         e.set_author(name="Scan of {} pilots".format(Helpers.get_nested_value(scan, 0, "totalQueried")),
                      icon_url=URLHelper.type_image(1952, 64))
-        e.set_footer(text="Run '{}s .help' for additional help and usage.".format(server_prefix))
+        e.set_footer(text="Run '{}s -h' for additional help and usage.".format(server_prefix))
         alliances = Helpers.get_nested_value(scan, [], "alliances")
         corporations = Helpers.get_nested_value(scan, [], "corporations")
         global_tabbed_grps = 0
@@ -218,7 +221,10 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
             if len(set_all_character_ids) > 0:
                 e.field_buffer_add("----Truncated {}".format(len(set_all_character_ids)))
                 if len(set_all_character_ids) > 15:
-                    line_subc = "Note: Use \"!s -g\" to display ship counts grouped by alliances/corps."
+                    line_subc = "Note: Use \"{}s -a\" to display ship counts grouped by alliances/corps.".\
+                        format(server_prefix)
+                    if e.check_line_fits(line_subc):
+                        e.field_buffer_add(line_subc)
             e.field_buffer_end_bounds()
             km_ratios = Helpers.get_nested_value(scan, {}, "kms").values()
             cls._add_summary_involved_mails(e, scan, km_ratios, max_to_post=3, ratio_threshold=.35)
