@@ -20,6 +20,10 @@ class Top(UnboundCommandBase):
     def mention(cls):
         return False
 
+    @classmethod
+    def embed_only(cls):
+        return True
+
     async def get_top_embed(self, hour_range, d_message):
         prefix = await self.serverManager.get_min_prefix(d_message.channel)
         return await self.mostexpensive.get(last_hours=hour_range, server_prefix=prefix)
