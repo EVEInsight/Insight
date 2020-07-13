@@ -18,11 +18,11 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
 
     @classmethod
     def buffer_character(cls):
-        return 15
+        return 20
 
     @classmethod
     def buffer_ship(cls):
-        return 20
+        return 25
 
     @classmethod
     def get_buffer_len(cls, avg_len, max_len, buffer_max):
@@ -134,7 +134,7 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
                           "was a loss (L). Nearest location may range wildly and should not be read as a guaranteed "
                           "location.\n\n{}".format(str_stats))
         e.set_author(name="Scan of {} pilots".format(Helpers.get_nested_value(scan, 0, "totalQueried")),
-                     icon_url=URLHelper.type_image(1952, 64))
+                     icon_url=URLHelper.type_image(1973, 64))
         e.set_footer(text="Run '{}s -h' for additional help and usage.".format(server_prefix))
         alliances = Helpers.get_nested_value(scan, [], "alliances")
         corporations = Helpers.get_nested_value(scan, [], "corporations")
@@ -142,11 +142,11 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
         for grp in list(alliances.values()) + list(corporations.values()):
             strShipAvg = Helpers.get_nested_value(grp, 0, "strShipAvg")
             strShipMax = Helpers.get_nested_value(grp, 0, "strShipMax")
-            ship_str_buffer = cls.get_buffer_len(avg_len=strShipAvg, max_len=strShipMax, buffer_max=cls.buffer_ship())
+            ship_str_buffer = cls.get_buffer_len(avg_len=strShipAvg, max_len=strShipMax+2, buffer_max=cls.buffer_ship())
             ship_str_buffer_totals.append(ship_str_buffer)
             strCharAvg = Helpers.get_nested_value(grp, 0, "strCharNameAvg")
             strCharMax = Helpers.get_nested_value(grp, 0, "strCharNameMax")
-            char_str_buffer = cls.get_buffer_len(avg_len=strCharAvg, max_len=strCharMax, buffer_max=cls.buffer_character())
+            char_str_buffer = cls.get_buffer_len(avg_len=strCharAvg, max_len=strCharMax+2, buffer_max=cls.buffer_character())
             char_str_buffer_totals.append(char_str_buffer)
             if global_tabbed_grps >= 5:
                 break

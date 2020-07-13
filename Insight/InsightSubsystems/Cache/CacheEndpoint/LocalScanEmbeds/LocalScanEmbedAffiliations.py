@@ -59,7 +59,7 @@ class LocalScanEmbedAffiliations(LocalScanEmbedBase):
         e.set_description("Ships are grouped by corps and alliances. Time represents the average "
                           "last activity among all ship types for a group.\n\n{}".format(str_stats))
         e.set_author(name="Scan of {} pilots".format(totalQueried),
-                     icon_url=URLHelper.type_image(1952, 64))
+                     icon_url=URLHelper.type_image(1973, 64))
         e.set_footer(text="Run '{}s -h' for additional help and usages.".format(server_prefix))
 
         for grp in allGroups:

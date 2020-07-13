@@ -10,7 +10,7 @@ class LocalScanHelp(LocalScan):
         e = EmbedLimitedHelper()
         e.set_color(discord.Color(659493))
         e.set_timestamp(datetime.datetime.utcnow())
-        e.set_author(name="Command Overview for Local Scan", icon_url=URLHelper.type_image(1952, 64))
+        e.set_author(name="Command Overview for Local Scan", icon_url=URLHelper.type_image(1973, 64))
         e.set_description(description="Local scan is an Insight utility that estimates the current ships for pilots "
                                       "in local. This tool looks at the previous kills and losses activity for pilots "
                                       "and displays the last active ship along with the time delay from last "
@@ -44,9 +44,9 @@ class LocalScanHelp(LocalScan):
         e.field_buffer_add("\t\tUsage: !scan -s LOCAL_SCAN\n\n")
         e.field_buffer_add("\n\n")
         e.field_buffer_add("\t-a\tDisplay affiliations grouped by ship types. This mode displays a ship count overview "
-                           "for every corp or alliance in the local scan amd is automatically selected "
+                           "for every corp or alliance in the local scan and is automatically selected "
                            "for larger local scans unless another flag is specified.")
-        e.field_buffer_add("\t\tAliases: 'aff', 'a', 'affiliations', 'affiliations', 'group', 'overview', 'groups', "
+        e.field_buffer_add("\t\tAliases: 'affiliations', 'affiliation', 'groups', 'group', "
                            "'g', 'a'")
         e.field_buffer_add("\t\tUsage: !scan -a LOCAL_SCAN\n\n")
         e.field_buffer_add("\t-h\tDisplay this help command embed.")
