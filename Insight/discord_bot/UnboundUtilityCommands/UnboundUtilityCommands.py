@@ -1,6 +1,7 @@
 from . import EightBall, Prefix, About, Help, Limits, Roll, Top, Motd
 from .AdminCommands import Quit, Admin
 from .LocalScan import LocalScan, LocalScanHelp, LocalScanAffiliations
+from .Top import Top, TopHelp, TopHour, TopDay, TopWeek, TopMonth, TopYear
 import discord
 import discord_bot
 from functools import partial
@@ -25,7 +26,13 @@ class UnboundUtilityCommands(object):
         self.admin = Admin.Admin(self)
         self.limits = Limits.Limits(self)
         self.randomroll = Roll.Roll(self)
-        self.top = Top.Top(self)
+        self.top_year = TopYear.TopYear(self)
+        self.top_month = TopMonth.TopMonth(self)
+        self.top_week = TopWeek.TopWeek(self)
+        self.top_day = TopDay.TopDay(self)
+        self.top_hour = TopHour.TopHour(self)
+        self.top_help = TopHelp.TopHelp(self)
+        self.top = Top.Top(self, is_main_command=True)
         self.motd = Motd.Motd(self)
 
     async def strip_command(self, message_object: discord.Message):

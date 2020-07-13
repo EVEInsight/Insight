@@ -142,11 +142,11 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
         for grp in list(alliances.values()) + list(corporations.values()):
             strShipAvg = Helpers.get_nested_value(grp, 0, "strShipAvg")
             strShipMax = Helpers.get_nested_value(grp, 0, "strShipMax")
-            ship_str_buffer = cls.get_buffer_len(avg_len=strShipAvg, max_len=strShipMax+2, buffer_max=cls.buffer_ship())
+            ship_str_buffer = cls.get_buffer_len(avg_len=strShipAvg, max_len=strShipMax+3, buffer_max=cls.buffer_ship())
             ship_str_buffer_totals.append(ship_str_buffer)
             strCharAvg = Helpers.get_nested_value(grp, 0, "strCharNameAvg")
             strCharMax = Helpers.get_nested_value(grp, 0, "strCharNameMax")
-            char_str_buffer = cls.get_buffer_len(avg_len=strCharAvg, max_len=strCharMax+2, buffer_max=cls.buffer_character())
+            char_str_buffer = cls.get_buffer_len(avg_len=strCharAvg, max_len=strCharMax+3, buffer_max=cls.buffer_character())
             char_str_buffer_totals.append(char_str_buffer)
             if global_tabbed_grps >= 5:
                 break
