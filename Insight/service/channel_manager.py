@@ -133,8 +133,9 @@ class Channel_manager(object):
                     if loaded_count > (total_load * ratio_print):
                         print("Loaded {} feeds of {}. {}% done".format(loaded_count, total_load, int(ratio_print * 100)))
                         ratio_print += .25
-            print("Loaded {} feeds in {:.1f} seconds".format(len(get_channel_tasks),
-                                                             (datetime.datetime.utcnow() - start).total_seconds()))
+            if load_message:
+                print("Loaded {} feeds in {:.1f} seconds".format(len(get_channel_tasks),
+                                                                 (datetime.datetime.utcnow() - start).total_seconds()))
 
     async def add_feed_object(self,ch_feed_object):
         self._channel_feed_container[ch_feed_object.channel_id] = ch_feed_object
