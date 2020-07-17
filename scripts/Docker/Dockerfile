@@ -113,9 +113,9 @@ RUN rm /InsightDocker/python-client-2 -R
 RUN find /InsightDocker/ -maxdepth 1 -name "*.sh" -type f -exec chmod 500 {} \;
 RUN find /InsightDocker/ -maxdepth 1 -name "*.sh" -type f -exec chown insight:insight {} \;
 RUN chown insight:insight /InsightDocker/python-client /InsightDocker/sqlite-latest.sqlite -R
-RUN chown root:insight /InsightDocker/PermissionSet.sh
+RUN chown insight:insight /InsightDocker/PermissionSet.sh
 RUN chmod 600 /InsightDocker/sqlite-latest.sqlite
-RUN echo "insight ALL=(root) NOPASSWD: /bin/chown -R insight\:insight /app,/bin/chmod 0600 /app/config.ini" > /etc/sudoers.d/InsightPermissionSet
+RUN echo "insight ALL=(root) NOPASSWD: /bin/chown -R insight\:insight /app,/bin/chmod 750 /app,/bin/chmod 0600 /app/config.ini" > /etc/sudoers.d/InsightPermissionSet
 RUN chmod 0440 /etc/sudoers.d/InsightPermissionSet
 USER insight
 WORKDIR /app
