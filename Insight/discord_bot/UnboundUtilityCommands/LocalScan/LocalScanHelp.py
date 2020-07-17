@@ -12,7 +12,7 @@ class LocalScanHelp(LocalScan):
         e.set_timestamp(datetime.datetime.utcnow())
         e.set_author(name="Command Overview for Local Scan", icon_url=URLHelper.type_image(1973, 64))
         e.set_description(description="Local scan is an Insight utility that estimates the current ships for pilots "
-                                      "in local. This tool looks at the previous kills and losses activity for pilots "
+                                      "in local. This tool looks up the previous kill and loss activity for pilots "
                                       "and displays the last active ship along with the time delay from last "
                                       "activity. \nPilots where last activity was a loss are noted.")
         e.field_buffer_start("Usage Instructions", "Usage Instructions")

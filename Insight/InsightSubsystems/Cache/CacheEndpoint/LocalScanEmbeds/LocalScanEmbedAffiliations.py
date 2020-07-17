@@ -53,10 +53,12 @@ class LocalScanEmbedAffiliations(LocalScanEmbedBase):
         e.set_timestamp(datetime.utcnow())
         str_stats = cls.get_header_str(scan)
         totalQueried = Helpers.get_nested_value(scan, 0, "totalQueried")
+        totalUnknownNames = Helpers.get_nested_value(scan, 0, "totalUnknownNames")
+        totalKnown = Helpers.get_nested_value(scan, 0, "totalAlive") + Helpers.get_nested_value(scan, 0, "totalDead")
         allGroups = list(Helpers.get_nested_value(scan, {}, "alliances").values()) + list(Helpers.get_nested_value(scan, {}, "corporations").values())
         totalNonTruncPilots = 0
         totalNonTruncGroups = 0
-        e.set_description("Ships are grouped by corps and alliances. Time represents the average "
+        e.set_description("Affiliations are grouped by ship types. Time represents the average "
                           "last activity among all ship types for a group.\n\n{}".format(str_stats))
         e.set_author(name="Scan of {} pilots".format(totalQueried),
                      icon_url=URLHelper.type_image(1973, 64))
@@ -69,8 +71,8 @@ class LocalScanEmbedAffiliations(LocalScanEmbedBase):
                 totalNonTruncGroups += 1
             else:
                 break  # too many chars break
-        if totalNonTruncPilots < totalQueried:
-            trunc_pilot = totalQueried - totalNonTruncPilots
+        if totalQueried - totalNonTruncPilots - totalUnknownNames > 0:
+            trunc_pilot = totalKnown - totalNonTruncPilots - totalUnknownNames
             trunc_group = len(allGroups) - totalNonTruncGroups
             e.field_buffer_start(name="TRUNCATED", name_continued="Truncated -- Continued", inline=False)
             e.field_buffer_start_bounds("```\n", "\n```")

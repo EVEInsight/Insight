@@ -130,9 +130,9 @@ class LocalScanEmbedBase(AbstractEmbedEndpoint):
         str_stats = cls.get_header_str(scan)
         char_str_buffer_totals = []
         ship_str_buffer_totals = []
-        e.set_description("Pilots are listed based on recent ship activity, a timestamp and if the last activity "
-                          "was a loss (L). Nearest location may range wildly and should not be read as a guaranteed "
-                          "location.\n\n{}".format(str_stats))
+        e.set_description("Pilots are listed based on recent activity, a timestamp and if the last activity "
+                          "was a loss (L). Location refers to nearest celestial and may not represent where activity "
+                          "occurred (AU distances are omitted). \n\n{}".format(str_stats))
         e.set_author(name="Scan of {} pilots".format(Helpers.get_nested_value(scan, 0, "totalQueried")),
                      icon_url=URLHelper.type_image(1973, 64))
         e.set_footer(text="Run '{}s -h' for additional help and usage.".format(server_prefix))
