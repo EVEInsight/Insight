@@ -4,7 +4,7 @@ function permissionError() {
     echo "An error occurred when trying to set permissions on existing files in the Docker volume. Exiting..."
     exit 1
 }
-/InsightDocker/PermissionSet.sh || exit permissionError
+/InsightDocker/PermissionSet.sh || permissionError
 cd /app
 for a in "$@"
 do
