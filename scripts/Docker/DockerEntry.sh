@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # This file should only be ran inside the Insight Docker container. This script copies the config file into the volume at run time and starts the bot with any param$
-/InsightDocker/PermissionSet.sh || exit 1
+function permissionError() {
+    echo "An error occurred when trying to set permissions on existing files in the Docker volume. Exiting..."
+    exit 1
+}
+/InsightDocker/PermissionSet.sh || exit permissionError
 cd /app
 for a in "$@"
 do

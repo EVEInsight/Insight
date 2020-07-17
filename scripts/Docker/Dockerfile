@@ -62,10 +62,11 @@ ENV POSTGRES_PORT=5432
 ENV POSTGRES_USER=""
 ENV POSTGRES_PASSWORD=""
 ENV POSTGRES_DB=""
+ENV REDIS_TIMEOUT=""
+ENV REDIS_SSL=""
 ENV POSTGRES_POOLSIZE=""
 ENV POSTGRES_POOLOVERFLOW=""
 ENV SUBSYSTEM_CACHE_THREADS=""
-ENV SUBSYSTEM_CACHE_MULTIPROCESS=""
 ENV SUBSYSTEM_CACHE_LASTSHIP_PRECACHE=""
 ENV SUBSYSTEM_CACHE_LASTSHIP_TTL=""
 ENV CRON_SYNCCONTACTS=""
@@ -86,7 +87,8 @@ RUN apt-get update && apt-get install -y \
  git \
  build-essential \
  zip \
- libpq-dev
+ libpq-dev \
+ sudo
 RUN rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /InsightDocker /app /home/insight
@@ -97,7 +99,8 @@ USER insight
 WORKDIR /InsightDocker
 COPY --from=SwaggerRunner /python-client ./python-client
 COPY --from=SDE /sqlite-latest.sqlite ./sqlite-latest.sqlite
-RUN git clone -b $INSIGHT_BRANCH --single-branch $INSIGHT_REPO
+RUN git clone -b $INSIGHT_BRANCH --single-branch $INSIGHT_REPO --depth 1
+RUN rm -rf /InsightDocker/Insight/tests
 RUN cp /InsightDocker/python-client /InsightDocker/python-client-2 -R
 USER root
 RUN pip3 install wheel setuptools
@@ -111,8 +114,9 @@ RUN find /InsightDocker/ -maxdepth 1 -name "*.sh" -type f -exec chmod 500 {} \;
 RUN find /InsightDocker/ -maxdepth 1 -name "*.sh" -type f -exec chown insight:insight {} \;
 RUN chown insight:insight /InsightDocker/python-client /InsightDocker/sqlite-latest.sqlite -R
 RUN chown root:insight /InsightDocker/PermissionSet.sh
-RUN chmod 2750 /InsightDocker/PermissionSet.sh
 RUN chmod 600 /InsightDocker/sqlite-latest.sqlite
+RUN echo "insight ALL=(root) NOPASSWD: /bin/chown -R insight\:insight /app,/bin/chmod 0600 /app/config.ini" > /etc/sudoers.d/InsightPermissionSet
+RUN chmod 0440 /etc/sudoers.d/InsightPermissionSet
 USER insight
 WORKDIR /app
 ENTRYPOINT ["/InsightDocker/DockerEntry.sh", "python3", "/InsightDocker/Insight/Insight", "--sde-db", "/InsightDocker/sqlite-latest.sqlite"]
