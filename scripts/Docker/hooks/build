@@ -1,6 +1,10 @@
 #!/bin/bash
 INSIGHT_VERSION_PATCH="1.6.0"
 INSIGHT_VERSION_MINOR=$(echo "$INSIGHT_VERSION_PATCH" | sed 's/.[0-9]$//')
+echo "Current directory: '$(pwd)'"
+echo "Dockerfile path: '${$DOCKERFILE_PATH}'"
+echo "Directory contents:"
+ls -l
 docker build -f $DOCKERFILE_PATH -t $IMAGE_NAME .
 
 if [[ "$SOURCE_BRANCH" == "master" ]]; then
