@@ -1,4 +1,4 @@
-FROM swaggerapi/swagger-codegen-cli:latest as SwaggerBuilder
+FROM swaggerapi/swagger-codegen-cli:2.4.13 as SwaggerBuilder
 
 FROM openjdk:12-jdk-alpine as SwaggerRunner
 COPY --from=SwaggerBuilder /opt/swagger-codegen-cli/swagger-codegen-cli.jar ./swagger-codegen-cli.jar
@@ -26,8 +26,6 @@ RUN bunzip2 sqlite-latest.sqlite.bz2
 FROM python:3.6-slim-stretch
 LABEL maintainer="nathan@nathan-s.com"
 LABEL url="https://github.com/Nathan-LS/Insight"
-ARG INSIGHT_BRANCH=master
-ARG INSIGHT_REPO=https://github.com/Nathan-LS/Insight.git
 RUN apt-get update && apt-get install -y \
  git \
  build-essential \
@@ -42,9 +40,19 @@ USER insight
 WORKDIR /InsightDocker
 COPY --from=SwaggerRunner /python-client ./python-client
 COPY --from=SDE /sqlite-latest.sqlite ./sqlite-latest.sqlite
-RUN git clone -b $INSIGHT_BRANCH --single-branch $INSIGHT_REPO
+WORKDIR /InsightDocker/Insight
+COPY ./Insight ./Insight
+COPY ./scripts ./scripts
+COPY ./docs ./docs
+COPY ./*.md ./
+COPY ./*.txt ./
+COPY ./default-config.ini ./
+WORKDIR /InsightDocker
 RUN cp /InsightDocker/python-client /InsightDocker/python-client-2 -R
 USER root
+RUN chown -R insight:insight /InsightDocker/Insight
+RUN find /InsightDocker/Insight -type f -exec chmod 0644 {} \;
+RUN find /InsightDocker/Insight -type d -exec chmod 0755 {} \;
 RUN pip3 install wheel setuptools
 WORKDIR /InsightDocker/python-client-2
 RUN python3 setup.py install

@@ -1,4 +1,4 @@
-# Insight v1.5.1 Installation Guide
+# Insight v1.5.2 Installation Guide
 This guide is for users who downloaded an Insight binary package from [releases.](https://github.com/Nathan-LS/Insight/releases)
 If you are running Insight from source, see [source installation guide.](https://wiki.eveinsight.net/install/source)
 If you are using Docker, please see [Docker setup guide](https://hub.docker.com/r/nathanls/insight)

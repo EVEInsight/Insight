@@ -1,6 +1,6 @@
 # Supported tags and ```Dockerfile``` links
-* ```latest``` ([master/Dockerfile](https://github.com/Nathan-LS/Insight/blob/master/scripts/Docker/Dockerfile))
-* ```development``` ([development/Dockerfile](https://github.com/Nathan-LS/Insight/blob/master/scripts/Docker/Dockerfile))
+* [```1.5.2```, ```1.5```, ```stable```, ```latest```](https://github.com/Nathan-LS/Insight/blob/master/scripts/Docker/Dockerfile)
+* [```1.6.0-dev```, ```1.6-dev```, ```unstable```, ```development```](https://github.com/Nathan-LS/Insight/blob/development/scripts/Docker/Dockerfile)
 
 # Quick reference
 * **Where to get help:**
@@ -48,7 +48,7 @@ Example ```stack.yml``` for ```insight```:
 version: '3.1'
 services:
   insight:
-    image: nathanls/insight
+    image: nathanls/insight:stable
     restart: always
     volumes:
       - ./:/app
@@ -75,7 +75,7 @@ like this:
         * esi-characters.read_contacts.v1
         * esi-corporations.read_contacts.v1
         * esi-alliances.read_contacts.v1
-    * **Callback** = ```https://insight.nathan-s.com/Insight/callback``` if you don't plan on personally hosting a callback landing page.
+    * **Callback** = ```https://github.eveinsight.net/Insight/callback``` if you don't plan on personally hosting a callback landing page.
         * Insight does not utilize a callback listener for simplicity so the user must manually copy their returned callback URL into Discord.
     Feel free to host the contents of /callback/index.html and modify the callback to point to your own landing page. The above URL is hosted on Github and directs users to the contents of ```Insight/callback/index.html```.
 5. Create your new CCP App and copy the **Client ID**, **Secret Key**, and **Callback URL** into the appropriate sections in your **config** file.

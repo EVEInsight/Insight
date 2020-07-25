@@ -1,2 +1,33 @@
 #!/bin/bash
-docker build --build-arg INSIGHT_BRANCH=$SOURCE_BRANCH -f $DOCKERFILE_PATH -t $IMAGE_NAME .
+INSIGHT_VERSION_PATCH="1.5.2"
+INSIGHT_VERSION_MINOR=$(echo "$INSIGHT_VERSION_PATCH" | sed 's/.[0-9]$//')
+cd ../../
+echo "Current directory: '$(pwd)'"
+echo "Dockerfile path: '${DOCKERFILE_PATH}'"
+echo "Directory contents: "
+ls -l
+docker build -f $DOCKERFILE_PATH -t $IMAGE_NAME .
+
+if [[ "$SOURCE_BRANCH" == "master" ]]; then
+  docker tag $IMAGE_NAME $DOCKER_REPO:stable
+  docker push $DOCKER_REPO:stable
+
+  docker tag $IMAGE_NAME $DOCKER_REPO:$INSIGHT_VERSION_PATCH
+  docker push $DOCKER_REPO:$INSIGHT_VERSION_PATCH
+
+  docker tag $IMAGE_NAME $DOCKER_REPO:$INSIGHT_VERSION_MINOR
+  docker push $DOCKER_REPO:$INSIGHT_VERSION_MINOR
+fi
+
+if [[ "$SOURCE_BRANCH" == "development" ]]; then
+  docker tag $IMAGE_NAME $DOCKER_REPO:unstable
+  docker push $DOCKER_REPO:unstable
+
+  docker tag $IMAGE_NAME $DOCKER_REPO:"$INSIGHT_VERSION_PATCH-dev"
+  docker push $DOCKER_REPO:"$INSIGHT_VERSION_PATCH-dev"
+
+  docker tag $IMAGE_NAME $DOCKER_REPO:"$INSIGHT_VERSION_MINOR-dev"
+  docker push $DOCKER_REPO:"$INSIGHT_VERSION_MINOR-dev"
+fi
+
+

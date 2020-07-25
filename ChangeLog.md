@@ -1,3 +1,11 @@
+# v1.5.2
+## Fixes
+* Bumped the discord.py version to 1.3.4 to fix the "deny_new" error. Reference: [discord.py deny new bug](https://github.com/Rapptz/discord.py/issues/5109)
+* Locked versions of packages to prevent errors that are fixed in 1.6 due to newer third-party packages.
+## Backports
+* Docker hub automated build will create additional tags for versions.
+* Updated Docker readme.
+* Dockerfile no longer clones the repo from Github and instead copies files from the Docker hub build context. This should make local debugging and building easier.
 # v1.5.1
 ## Fixes
 * Fixed an issue where the MailError log file was not being properly rotated. Retry attempts are now logged as info.
