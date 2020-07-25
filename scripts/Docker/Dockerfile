@@ -26,8 +26,6 @@ RUN bunzip2 sqlite-latest.sqlite.bz2
 FROM python:3.6-buster
 LABEL maintainer="nathan@nathan-s.com"
 LABEL url="https://github.com/Nathan-LS/Insight"
-ARG INSIGHT_BRANCH=master
-ARG INSIGHT_REPO=https://github.com/Nathan-LS/Insight.git
 
 ENV DB_DRIVER="sqlite3"
 ENV SQLITE_DB_PATH="Database.db"
@@ -99,10 +97,19 @@ USER insight
 WORKDIR /InsightDocker
 COPY --from=SwaggerRunner /python-client ./python-client
 COPY --from=SDE /sqlite-latest.sqlite ./sqlite-latest.sqlite
-RUN git clone -b $INSIGHT_BRANCH --single-branch $INSIGHT_REPO --depth 1
-RUN rm -rf /InsightDocker/Insight/tests
+WORKDIR /InsightDocker/Insight
+COPY ./Insight ./Insight
+COPY ./scripts ./scripts
+COPY ./docs ./docs
+COPY ./*.md ./
+COPY ./*.txt ./
+COPY ./default-config.ini ./
+WORKDIR /InsightDocker
 RUN cp /InsightDocker/python-client /InsightDocker/python-client-2 -R
 USER root
+RUN chown -R insight:insight /InsightDocker/Insight
+RUN find /InsightDocker/Insight -type f -exec chmod 0644 {} \;
+RUN find /InsightDocker/Insight -type d -exec chmod 0755 {} \;
 RUN pip3 install wheel setuptools
 WORKDIR /InsightDocker/python-client-2
 RUN python3 setup.py install
@@ -110,11 +117,11 @@ WORKDIR /InsightDocker/Insight
 RUN pip3 install --upgrade -r requirements.txt
 RUN find /InsightDocker/Insight/scripts/Docker/ -maxdepth 1 -name "*.sh" -type f -exec cp {} /InsightDocker/ \;
 RUN rm /InsightDocker/python-client-2 -R
-RUN find /InsightDocker/ -maxdepth 1 -name "*.sh" -type f -exec chmod 500 {} \;
+RUN find /InsightDocker/ -maxdepth 1 -name "*.sh" -type f -exec chmod 0500 {} \;
 RUN find /InsightDocker/ -maxdepth 1 -name "*.sh" -type f -exec chown insight:insight {} \;
 RUN chown insight:insight /InsightDocker/python-client /InsightDocker/sqlite-latest.sqlite -R
 RUN chown insight:insight /InsightDocker/PermissionSet.sh
-RUN chmod 600 /InsightDocker/sqlite-latest.sqlite
+RUN chmod 0600 /InsightDocker/sqlite-latest.sqlite
 RUN echo "insight ALL=(root) NOPASSWD: /bin/chown -R insight\:insight /app,/bin/chmod 750 /app,/bin/chmod 0600 /app/config.ini" > /etc/sudoers.d/InsightPermissionSet
 RUN chmod 0440 /etc/sudoers.d/InsightPermissionSet
 USER insight
