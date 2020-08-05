@@ -12,7 +12,7 @@ class ServerManager(object):
         self.client: discord.Client = discord_client
         self.lock = asyncio.Lock(loop=self.client.loop)
         self.default_prefixes = ['?', '!']
-        self.prefix_self = None
+        self.prefix_self = []
         self.guild_prefixes = {}
         self.lg = InsightLogger.InsightLogger.get_logger('Insight.command', 'Insight_command.log')
 
@@ -28,8 +28,8 @@ class ServerManager(object):
         return "" if len(pref) == 0 else min(pref, key=len)
 
     def _get_append_self_prefix(self, prefix_list: list):
-        if self.prefix_self is not None:
-            return [self.prefix_self] + prefix_list
+        if len(self.prefix_self) != 0:
+            return self.prefix_self + prefix_list
         else:
             return prefix_list
 
@@ -110,5 +110,5 @@ class ServerManager(object):
             await self.get_server_prefixes(channel)
 
     async def loader(self):
-        self.prefix_self = self.client.user.mention
+        self.prefix_self = [self.client.user.mention, "<@!{}>".format(self.client.user.id)]
         await self.populate_guilds()
