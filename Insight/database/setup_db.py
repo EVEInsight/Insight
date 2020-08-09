@@ -33,6 +33,9 @@ class setup_database(object):
             self.engine = create_engine(self.connection_str, connect_args={'check_same_thread': False, 'timeout': 3000},
                                         echo=False)
         DB.Base.Base.metadata.create_all(self.engine)
+        if self.service.cli_args.schema_import:
+            print("Database schema was successfully imported. Exiting...")
+            sys.exit(0)
         self._dbSession = sessionmaker(bind=self.engine)
         self.sc_session = scoped_session(self._dbSession)
         self.verify_tokens()

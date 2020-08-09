@@ -21,6 +21,9 @@ class InsightArgumentParser(object):
         parser.add_argument("--startup-debug", action="store_true",
                             help="Test startup and exit. This flag is mainly used for startup time testing.",
                             default=False)
+        parser.add_argument("--schema-import", action="store_true",
+                            help="Import the current Insight database schema to the database and exit.",
+                            default=False)
         parser.add_argument("--skip-api-import", "-n", action="store_true",
                             help="Skip startup API static data import check.", default=False)
         parser.add_argument("--websocket", "-w", action="store_true",
