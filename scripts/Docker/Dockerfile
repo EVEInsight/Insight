@@ -70,6 +70,8 @@ ENV SUBSYSTEM_CACHE_LASTSHIP_TTL=""
 ENV CRON_SYNCCONTACTS=""
 ENV INSIGHT_ADMINS=""
 ENV 8BALL_RESPONSES=""
+ENV ZK_REDISQ_URL="https://redisq.zkillboard.com/listen.php"
+ENV ZK_WS_URL="wss://zkillboard.com/websocket/"
 
 ENV PYTHONUNBUFFERED=1
 

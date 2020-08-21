@@ -24,6 +24,9 @@ class zk(object):
         assert isinstance(service_module, service.ServiceModule)
         self.logger = InsightLogger.InsightLogger.get_logger('ZK', 'ZK.log')
         self.service = service_module
+        self.config = self.service.config
+        self.ws_url = self.config.get("ZK_WS_URL")
+        self.redisq_base_url = self.config.get("ZK_REDISQ_URL")
         self.zk_stream_url = self.generate_redisq_url()
         self.run = True
         self.error_ids = []
@@ -104,16 +107,17 @@ class zk(object):
 
     def generate_redisq_url(self, no_identifier=False):
         identifier = self.generate_identifier()
+        base_url = self.config.get("ZK_REDISQ_URL")
         if no_identifier or identifier is None:
-            return "https://redisq.zkillboard.com/listen.php"
+            return base_url
         else:
-            return "https://redisq.zkillboard.com/listen.php?queueID={}".format(identifier)
+            return "{}?queueID={}".format(base_url, identifier)
 
     def url_stream(self):
         return self.zk_stream_url
 
     def url_websocket(self):
-        return "wss://zkillboard.com:2096"
+        return self.ws_url
 
     def _make_km(self, km_json):
         """returns the cached km object if it does not exist, returns none if error or already exists"""
