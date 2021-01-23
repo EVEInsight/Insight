@@ -36,7 +36,7 @@ class RedisClient(AbstractBaseClient):
                 return False
         except Exception as ex:
             traceback.print_exc()
-            print("Error when attempting to establish a connection to the Redis host: redis://{}:{}. Insight will"
+            print("Error when attempting to establish a connection to the Redis host: redis://{}:{}. Insight will "
                   "operate without Redis and all functions that require Redis will not work.".format(self.host,
                                                                                                      self.port))
             return False
