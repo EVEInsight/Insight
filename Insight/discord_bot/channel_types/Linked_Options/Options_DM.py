@@ -144,7 +144,7 @@ class Options_DM(options_base.Options_Base):
         async with (await LimitManager.cm_hp(self.cfeed.channel_discord_object)):
             message_object = await self.cfeed.channel_discord_object.send(
                 "This tool will assist in adding a token to a channel")
-        message_object.author = self.cfeed.discord_client.get_user(self.cfeed.user_id)
+        message_object.author = self.cfeed.author
 
         def make_options():
             _options = dOpt.mapper_index_withAdditional(self.cfeed.discord_client, message_object)

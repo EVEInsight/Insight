@@ -4,9 +4,10 @@ import discord
 
 
 class direct_message(inCh.discord_feed_service):
-    def __init__(self,channel_discord_object:discord.DMChannel, service_object):
+    def __init__(self, channel_discord_object: discord.DMChannel, service_object, author_object=None):
         assert isinstance(channel_discord_object, discord.DMChannel)
         self.user_id = channel_discord_object.recipient.id
+        self.author = author_object
         super(direct_message, self).__init__(channel_discord_object, service_object)
 
     def get_linked_options(self):

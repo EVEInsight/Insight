@@ -16,7 +16,10 @@ import InsightSubsystems
 
 class Discord_Insight_Client(discord.Client):
     def __init__(self, service_module):
-        super().__init__(fetch_offline_members=True, heartbeat_timeout=20)
+        intents = discord.Intents.default()
+        intents.members = False
+        intents.presences = False
+        super().__init__(heartbeat_timeout=30, intents=intents)
         self.logger = InsightLogger.InsightLogger.get_logger('Insight.main', 'Insight_main.log', console_print=True,
                                                              console_level=logging.INFO)
         self.insight_ready_event = asyncio.Event()
@@ -49,9 +52,7 @@ class Discord_Insight_Client(discord.Client):
         print('Logged in as: {}'.format(str(self.user.name)))
         print('Invite Link: {}'.format(self.get_invite_url()))
         print('This bot is a member of {} servers.'.format(str(len(self.guilds))))
-        print('Loaded Discord cache with: {} servers, {} channels, {} users.'.format(len(self.guilds),
-                                                                        len(list(self.get_all_channels())),
-                                                                        len(self.users)))
+        print('Insight can see: {} servers and {} channels'.format(len(self.guilds), len(list(self.get_all_channels()))))
         print("Use 'CTRL-C' to shut down Insight from the console or run the '!quit' command from any Discord channel. "
               "Alternative options: Send SIGINT signal to the Insight process or run 'docker stop ContainerID' for a "
               "graceful shutdown.".format(os.getpid()))
@@ -59,6 +60,7 @@ class Discord_Insight_Client(discord.Client):
 
     async def setup_tasks(self):
         self.loop.create_task(self.subsystems.start_tasks())
+        print("Waiting for Discord connection on ready...")
         await self.wait_until_ready()
         try:
             game_act = discord.Activity(name="Starting...", type=discord.ActivityType.watching)

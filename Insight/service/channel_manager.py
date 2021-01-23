@@ -191,9 +191,10 @@ class Channel_manager(object):
     async def get_user_dm(self, message_object: discord.Message):
         assert isinstance(message_object, discord.Message)
         async with (await LimitManager.cm_hp(message_object.channel)):
-            await message_object.author.send("Opening a new conversation! Hello!")
+            await message_object.author.send("--- Hello! ---")
         dm = message_object.author.dm_channel
-        return cType.insight_directMessage(dm, self.service)
+        author_object = message_object.author
+        return cType.insight_directMessage(dm, self.service, author_object=author_object)
 
     async def delete_feed(self,channel):
         ch_obj = None

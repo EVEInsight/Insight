@@ -46,7 +46,10 @@ class mapper_index(object):
         self.message = message_object
         self._option_container = []
         self._printout_format = []
-        self._mention = "{}".format(self.message.author.mention)
+        try:  # remove mention if author is not filled
+            self._mention = "{}".format(self.message.author.mention)
+        except AttributeError:
+            self._mention = ""
         self._header_text = ""
         self._footer_text = "Select an option by entering its number:"
         self._timeout_seconds = int(timeout_seconds)
