@@ -202,6 +202,10 @@ class discord_feed_service(object):
         """!motd - Get message of the day."""
         await self.discord_client.unbound_commands.command_motd(message_object)
 
+    async def command_time(self, message_object):
+        """!time - Get the current time."""
+        await self.discord_client.unbound_commands.command_time(message_object)
+
     def can_prune_queue(self):
         """check if the last prune was over 30 minutes ago and thus able to be pruned"""
         return ((datetime.datetime.utcnow() - self.last_prune).total_seconds()) >= 1800

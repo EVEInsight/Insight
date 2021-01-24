@@ -40,6 +40,7 @@ class Help(UnboundCommandBase):
             "**{p}stop** - Pause a channel feed.",
             "**{p}sync** - Manage contact EVE tokens for a radar or proximity watch feed. Contact token syncing "
             "allows you to ignore allies in tracked ships from appearing as potential targets.",
+            "**{p}time** - Get the current EVE time.",
             "**{p}top** - List the most expensive kills over the last week.",
             "**{p}unlock** - Unlock a feed service to allow any Discord channel user to modify feed configuration."
         ]

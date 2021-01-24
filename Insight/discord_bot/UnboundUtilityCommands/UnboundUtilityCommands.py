@@ -2,6 +2,7 @@ from . import EightBall, Prefix, About, Help, Limits, Roll, Top, Motd
 from .AdminCommands import Quit, Admin
 from .LocalScan import LocalScan, LocalScanHelp, LocalScanAffiliations
 from .Top import Top, TopHelp, TopHour, TopDay, TopWeek, TopMonth, TopYear
+from .Time import Time, TimeWorld, TimeHelp
 import discord
 import discord_bot
 from functools import partial
@@ -34,6 +35,9 @@ class UnboundUtilityCommands(object):
         self.top_help = TopHelp.TopHelp(self)
         self.top = Top.Top(self, is_main_command=True)
         self.motd = Motd.Motd(self)
+        self.time_world = TimeWorld.TimeWorld(self)
+        self.time_help = TimeHelp.TimeHelp(self)
+        self.time = Time.Time(self, is_main_command=True)
 
     async def strip_command(self, message_object: discord.Message):
         prefixes = await self.serverManager.get_server_prefixes(message_object.channel)
@@ -77,3 +81,6 @@ class UnboundUtilityCommands(object):
 
     async def command_motd(self, message_object: discord.Message):
         await self.motd.run_command_proxy(message_object, await self.strip_command(message_object))
+
+    async def command_time(self, message_object: discord.Message):
+        await self.time.run_command_proxy(message_object, await self.strip_command(message_object))
