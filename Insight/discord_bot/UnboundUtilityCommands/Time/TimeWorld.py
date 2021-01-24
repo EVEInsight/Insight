@@ -63,7 +63,7 @@ class TimeWorld(Time):
             dt_str = self.format_time(dt_tz, "%Y-%m-%d %H:%M")
             tz_name = self.format_time(dt_tz, "%Z") if not tz_abbreviation_override else tz_abbreviation_override
             str_tz_info = "{} ({})".format(tz_desc, tz_name)
-            s = "{:<32} {} ".format(str_tz_info, dt_str)
+            s = "{:<32} {} \n".format(str_tz_info, dt_str)
             e.field_buffer_add(s)
         e.field_buffer_end_bounds()
         e.field_buffer_end()
