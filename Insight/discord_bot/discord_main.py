@@ -115,23 +115,26 @@ class Discord_Insight_Client(discord.Client):
         channel: discord.TextChannel = guild.system_channel
         if channel is not None:
             permissions: discord.Permissions = channel.permissions_for(channel.guild.me)
-            message = "Hi!\n\nI am an EVE Online killmail streaming bot offering various feed types and " \
-                      "utilities. Run the **!create** command in a Discord channel to quickly begin setting up a feed." \
+            message = "Hi!\n\nI am an EVE Online killmail streaming bot offering various feed types and utilities. " \
+                      "Run the **!create** command in a Discord channel to quickly get started with a new feed." \
                       " Run the **!help** command to see all of my available commands. Use the **!prefix** " \
-                      "command to configure server-wide command prefixes. You can read more about my " \
-                      "functionality and follow development on [GitHub](https://github.com/Nathan-LS/Insight).\n\n" \
+                      "command to configure server-wide command prefixes to avoid command collision conflicts. " \
+                      "\n\nYou can read more about my " \
+                      "functionality and follow development on the [wiki](https://wiki.eveinsight.net) and " \
+                      "[GitHub](https://github.eveinsight.net).\n\n" \
                       "Thank you for choosing Insight!"
             if permissions.embed_links and permissions.send_messages:
                 embed = discord.Embed()
                 embed.title = ""
                 embed.color = discord.Color(659493)
-                embed.set_author(name='Insight welcome message')
+                embed.set_author(name='Insight Welcome Message')
                 embed.description = message
                 async with (await LimitManager.cm(channel)):
                     await channel.send(embed=embed)
             elif permissions.send_messages:
                 message = message.replace('**', "'")
                 message = message.replace('[GitHub]', " ")
+                message = message.replace('[wiki]', " ")
                 async with (await LimitManager.cm(channel)):
                     await channel.send(content=message)
             else:

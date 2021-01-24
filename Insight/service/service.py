@@ -91,7 +91,7 @@ class service_module(object):
                                                                                       platform.platform(aliased=True, terse=True),
                                                                                       platform.python_version()))
         print("Insight is released under the GNU General Public License v3.0. See the included 'License.md' file.")
-        print("Additional support is available at https://wiki.eveinsight.net")
+        print("Additional information and code source are available at https://eveinsight.net")
         print(div)
 
     def update_available(self):
