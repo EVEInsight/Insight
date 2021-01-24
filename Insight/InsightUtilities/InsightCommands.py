@@ -21,7 +21,7 @@ class InsightCommands(metaclass=InsightSingleton):
             'remove':   ['remove', 'delete'],
             'status':   ['status'],
             'eightball':['ball', '8ball', 'magic', '8'],
-            'lscan':    ['dscan', 'localscan', 'shipscan', 'scan', "lscan", "l", "s", "ships", "local", "ship"],
+            'lscan':    ['dscan', 'localscan', 'shipscan', 'scan', "lscan", "ships", "local", "ship", "l", "s"],
             'lock':     ['lock'],
             'unlock':   ['unlock'],
             'quit':     ['quit'],
@@ -34,6 +34,7 @@ class InsightCommands(metaclass=InsightSingleton):
             'time':     ["time", "et", "date", "datetime", "clock", "evetime"]
         }
         self.all_commands = [c for i in self.commands.values() for c in i]
+        self.all_commands.sort(key=len, reverse=True)
         self.notfound_timers = {}
         self.loop = asyncio.get_event_loop()
         self.lock = asyncio.Lock(loop=self.loop)
