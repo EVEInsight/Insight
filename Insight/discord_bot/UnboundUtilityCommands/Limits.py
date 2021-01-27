@@ -38,7 +38,8 @@ class Limits(UnboundCommandBase):
             f_body = "Tickets remaining: {} ({}%)\n".format(l.get("available"), l.get("remaining_ratio"))
             f_body += "Tickets used: {} ({}%)\n".format(l.get("used_tickets"), l.get("usage_ratio"))
             f_body += "Tickets allocated: {}\n".format(l.get("allocation"))
-            f_body += "Tickets cooldown interval: {} seconds".format(l.get("interval"))
+            f_body += "Tickets cooldown interval: {} seconds\n".format(l.get("interval"))
+            f_body += "Queue Length: {} tickets".format(l.get("queue_length"))
             e.add_field(name=limiter_name, value=f_body, inline=False)
         e.set_footer(text='Utility command')
         return e
@@ -51,7 +52,8 @@ class Limits(UnboundCommandBase):
             t += "Tickets remaining: {} ({}%)\n".format(l.get("available"), l.get("remaining_ratio"))
             t += "Tickets used: {} ({}%)\n".format(l.get("used_tickets"), l.get("usage_ratio"))
             t += "Tickets allocated: {}\n".format(l.get("allocation"))
-            t += "Tickets cooldown interval: {} seconds\n\n".format(l.get("interval"))
+            t += "Tickets cooldown interval: {} seconds\n".format(l.get("interval"))
+            t += "Queue Length: {} tickets\n\n".format(l.get("queue_length"))
         return t
 
 

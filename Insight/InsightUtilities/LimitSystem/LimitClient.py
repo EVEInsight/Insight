@@ -17,12 +17,17 @@ class LimitClient(object):
         self.process_queue = self.loop.create_task(self._process_queue())
         self.identifier = id_name
         self.redact = redact
+        self.pending_lock_max = 1000000000
+        self.pending_lock_semaphores = asyncio.Semaphore(value=self.pending_lock_max, loop=self.loop)
 
     def limited(self) -> bool:
         return self.semaphores.locked()
 
     def remaining(self) -> int:
         return self.semaphores._value
+
+    def get_pending_count(self) -> int:
+        return self.pending_lock_max - self.pending_lock_semaphores._value
 
     def used_tickets(self):
         return self.provisioned_amount - self.remaining()
@@ -48,10 +53,11 @@ class LimitClient(object):
         if self.redact and not no_redact:
             return {"usage_ratio": round(self.usage_ratio() * 100, 1), "allocation": "REDACTED", "interval": "REDACTED",
                     "used_tickets": "REDACTED", "available": "REDACTED", "name": self.identifier,
-                    "remaining_ratio": round((1 - self.usage_ratio()) * 100, 1)}
+                    "remaining_ratio": round((1 - self.usage_ratio()) * 100, 1), "queue_length": "REDACTED"}
         return {"usage_ratio": round(self.usage_ratio() * 100, 1), "allocation": self.provisioned_amount,
                 "interval": self.interval, "used_tickets": self.used_tickets(), "available": self.remaining(),
-                "name": self.identifier, "remaining_ratio": round((1 - self.usage_ratio()) * 100, 1)}
+                "name": self.identifier, "remaining_ratio": round((1 - self.usage_ratio()) * 100, 1),
+                "queue_length": self.get_pending_count()}
 
     async def _process_queue(self):
         while True:
@@ -72,9 +78,10 @@ class LimitClient(object):
         await f
 
     async def _consume_ticket(self):
-        await self.semaphores.acquire()
-        if self.parent_limiter:
-            await self.parent_limiter._consume_ticket_future_task(self.priority_value())
+        async with self.pending_lock_semaphores:
+            await self.semaphores.acquire()
+            if self.parent_limiter:
+                await self.parent_limiter._consume_ticket_future_task(self.priority_value())
 
     async def _release_ticket(self):
         if self.parent_limiter:
