@@ -43,6 +43,9 @@ class discord_feed_service(object):
         self.lock = asyncio.Lock(loop=self.discord_client.loop)
         InsightLogger.InsightLogger.time_log(self.logger, st, 'Feed loading and setup')
 
+    async def get_queue_length(self) -> int:
+        return self.kmQueue.async_q.qsize()
+
     def can_mention(self):
         return (self.last_mention + datetime.timedelta(minutes=self.mention_next())) <= datetime.datetime.utcnow()
 

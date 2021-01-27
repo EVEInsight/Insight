@@ -73,6 +73,16 @@ class Channel_manager(object):
             for channel in guild.text_channels:
                 yield channel
 
+    async def get_active_message_queue_length(self) -> int:
+        try:
+            c = 0
+            async for f in self.get_all_channels():
+                c += await f.get_queue_length()
+            return c
+        except Exception as ex:
+            print(ex)
+            return -1
+
     def set_client(self, client_object):
         try:
             assert isinstance(client_object,discord_bot.Discord_Insight_Client)
