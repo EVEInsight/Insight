@@ -46,8 +46,10 @@ class UpdateDiscordStatus(AbstractCronTask):
             stats_feeds = await self.client.channel_manager.avg_delay()
             if stats_feeds[1] >= 25:
                 d_status = discord.Status.dnd
-            status_str += '[Insight] Sent: {}, Delay: {}s, Queue: {}'.format(str(stats_feeds[0]), str(stats_feeds[1]),
-                                                                             await self.channel_manager.get_active_message_queue_length())
+            status_str += '[Insight] Sent: {}, Delay: {}s'.format(str(stats_feeds[0]), str(stats_feeds[1]))
+            queue_length = await self.channel_manager.get_active_message_queue_length()
+            if queue_length > 0:
+                status_str += ", Queue: {}".format(queue_length)
         game_act = discord.Activity(name=status_str, type=discord.ActivityType.watching)
         await self.client.change_presence(activity=game_act, status=d_status)
         self.status = d_status
