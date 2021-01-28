@@ -58,6 +58,15 @@ class Channel_manager(object):
         for channel in self.__get_active_channels():
             yield channel
 
+    async def get_running_channels(self):
+        """all channels that are set as running"""
+        for channel in self.__get_active_channels():
+            if channel.check_feed_running():
+                yield channel
+            else:
+                continue
+        return
+
     async def get_all_capRadar(self):
         async for channel in self.get_all_channels():
             if isinstance(channel, cType.insight_capRadar):
@@ -76,7 +85,7 @@ class Channel_manager(object):
     async def get_active_message_queue_length(self) -> int:
         try:
             c = 0
-            async for f in self.get_all_channels():
+            async for f in self.get_running_channels():
                 c += await f.get_queue_length()
             return c
         except Exception as ex:

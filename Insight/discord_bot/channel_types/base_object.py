@@ -46,6 +46,12 @@ class discord_feed_service(object):
     async def get_queue_length(self) -> int:
         return self.kmQueue.async_q.qsize()
 
+    def check_feed_running(self) -> bool:
+        try:
+            return self.cached_feed_table.feed_running
+        except:
+            return False
+
     def can_mention(self):
         return (self.last_mention + datetime.timedelta(minutes=self.mention_next())) <= datetime.datetime.utcnow()
 
