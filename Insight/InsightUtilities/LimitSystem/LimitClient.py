@@ -72,16 +72,16 @@ class LimitClient(object):
                 await asyncio.sleep(5)
 
     async def _consume_ticket_future_task(self, priority_level):
-        cf = ComparableFuture(asyncio.Future())
-        f = cf.get_future()
-        await self.task_queue.put((priority_level, cf))
-        await f
+        async with self.pending_lock_semaphores:
+            cf = ComparableFuture(asyncio.Future())
+            f = cf.get_future()
+            await self.task_queue.put((priority_level, cf))
+            await f
 
     async def _consume_ticket(self):
-        async with self.pending_lock_semaphores:
-            await self.semaphores.acquire()
-            if self.parent_limiter:
-                await self.parent_limiter._consume_ticket_future_task(self.priority_value())
+        await self.semaphores.acquire()
+        if self.parent_limiter:
+            await self.parent_limiter._consume_ticket_future_task(self.priority_value())
 
     async def _release_ticket(self):
         if self.parent_limiter:
