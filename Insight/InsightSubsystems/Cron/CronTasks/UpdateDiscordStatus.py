@@ -34,9 +34,8 @@ class UpdateDiscordStatus(AbstractCronTask):
             if self.service.config.get("INSIGHT_STATUS_CPUMEM"):
                 status_str += "CPU:{}% MEM:{:.1f}GB ".format(str(int(psutil.cpu_percent())),
                                                              psutil.virtual_memory()[3] / 2. ** 30)
-            if self.service.config.get("INSIGHT_STATUS_VERSION_FEEDCOUNT"):
-                status_str += "{} Feeds: {} ".format(str(self.service.get_version()),
-                                                     self.channel_manager.feed_count())
+            if self.service.config.get("INSIGHT_STATUS_FEEDCOUNT"):
+                status_str += "Feeds: {} ".format(self.channel_manager.feed_count())
         stats_zk = await self.loop.run_in_executor(None, self.zk.get_stats)
         d_status = discord.Status.online
         if self.service.config.get("INSIGHT_STATUS_TIME"):

@@ -118,7 +118,7 @@ class ConfigLoader(metaclass=InsightSingleton):
                        "https://github.eveinsight.net/Insight/callback")
         self.parse_str("DISCORDBOTS_APIKEY", "discordbots.org", "discordbots_apikey", False, "", True)
         self.parse_bool("INSIGHT_STATUS_CPUMEM", "NULL", "NULL", False, "TRUE", True)
-        self.parse_bool("INSIGHT_STATUS_VERSION_FEEDCOUNT", "NULL", "NULL", False, "TRUE", True)
+        self.parse_bool("INSIGHT_STATUS_FEEDCOUNT", "NULL", "NULL", False, "TRUE", True)
         self.parse_bool("INSIGHT_STATUS_TIME", "NULL", "NULL", False, "TRUE", True)
         self.parse_int("LIMITER_GLOBAL_TICKETS", "NULL", "NULL", False, 25, True)
         self.parse_int("LIMITER_GLOBAL_INTERVAL", "NULL", "NULL", False, 10, True)
