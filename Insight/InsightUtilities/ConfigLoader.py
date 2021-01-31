@@ -140,6 +140,7 @@ class ConfigLoader(metaclass=InsightSingleton):
         self.parse_int("LIMITER_USER_SUSTAIN_INTERVAL", "NULL", "NULL", False, 3600, True)
         self.parse_int("LIMITER_USER_BURST_TICKETS", "NULL", "NULL", False, 4, True)
         self.parse_int("LIMITER_USER_BURST_INTERVAL", "NULL", "NULL", False, 45, True)
+        self.parse_int("METRIC_LIMITER_MAX", "NULL", "NULL", False, 10, True)
         self.parse_str("REDIS_HOST", "NULL", "NULL", False, "", True)
         self.parse_int("REDIS_PORT", "NULL", "NULL", False, 6379, True)
         self.parse_str("REDIS_PASSWORD", "NULL", "NULL", False, "", True)

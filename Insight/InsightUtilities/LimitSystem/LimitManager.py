@@ -5,6 +5,7 @@ import asyncio
 import discord
 import InsightExc
 import traceback
+from functools import partial
 
 
 class LimitManager(metaclass=InsightSingleton):
@@ -108,6 +109,26 @@ class LimitManager(metaclass=InsightSingleton):
             else:
                 print("Unknown object type when getting limit manager. {}".format(type(discord_object)))
                 raise InsightExc.userInput.InsightProgrammingError("Unknown object type when getting limit manager.")
+
+    def _get_sorted_tickets_consumed(self, limiters_d: dict):
+        r = [l for l in limiters_d.values()]
+        return sorted(r, key=lambda limiter: limiter.used_tickets(), reverse=True)
+
+    async def _sorted_tickets_consumed(self, limiters_d: dict):
+        return await asyncio.get_event_loop().run_in_executor(None, partial(self._get_sorted_tickets_consumed,
+                                                                            limiters_d))
+
+    def get_server_sustained_limiter(self):
+        return self.limiter_global_sustain
+
+    async def sorted_servers_consumed(self):
+        return await self._sorted_tickets_consumed(self.servers_sustain)
+
+    async def sorted_channels_consumed(self):
+        return await self._sorted_tickets_consumed(self.channels_sustain)
+
+    async def sorted_users_consumed(self):
+        return await self._sorted_tickets_consumed(self.users_sustain)
 
     @classmethod
     async def cm(cls, discord_object) -> LimitClient:
