@@ -2,7 +2,9 @@ from tests.abstract import DatabaseTesting, AsyncTesting
 from service import zk
 import asyncio
 from database.db_tables.eve import tb_kills
+from database.db_tables import tb_meta
 from tests.mocks import ServiceModule
+from InsightUtilities import DBSessions
 import time
 import queue
 import janus
@@ -42,7 +44,8 @@ class TestZk(DatabaseTesting.DatabaseTesting, AsyncTesting.AsyncTesting):
         AsyncTesting.AsyncTesting.setUp(self)
         self.resources = None
         DatabaseTesting.DatabaseTesting.setUp(self)
-        sys.argv.extend(['-km', "74647898", "-fc", "-limit", "1"])
+        DBSessions(sc_session=self.scoped_session)
+        sys.argv.extend(['--debug-km', "74647898", "--force-ctime", "--debug-limit", "1"])
         self.service = ServiceModule.ServiceModule(self.scoped_session)
         self.set_resource_path("db_tables", "eve", "mails")
         self.zk = zk.zk(self.service)

@@ -4,6 +4,7 @@ import platform
 import requests
 import aiohttp
 from tests.mocks import ChannelManager
+from tests.mocks.ConfigLoader import ConfigLoader
 import os
 import InsightUtilities
 import configparser
@@ -14,6 +15,7 @@ class ServiceModule(service_module):
         self.session = db_session
         self.cli_args = InsightUtilities.InsightArgumentParser.get_cli_args()
         self.channel_manager = ChannelManager.ChannelManager(self)
+        self.config: ConfigLoader = ConfigLoader()
 
     def get_session(self):
         if isinstance(self.session, scoped_session):

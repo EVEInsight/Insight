@@ -14,6 +14,7 @@ class TestKills(DatabaseTesting.DatabaseTesting):
         self.data = self.file_json("74647898.json")
         tb_kills.make_row(self.data.get("package"), self.service)
         self.km: tb_kills = tb_kills.get_row(self.data.get("package"), self.service)
+        self.maxDiff = None
 
     def test_load_fk_objects(self):
         self.tearDown()
@@ -389,8 +390,8 @@ class TestKills(DatabaseTesting.DatabaseTesting):
         d = self.km.to_jsonDictionary()
         self.tearDown()
         DatabaseTesting.DatabaseTesting.setUp(self)
-        new = tb_kills.make_row(d.get("package"), self.service)
-        self.assertEqual(d, new.to_jsonDictionary())
+        new = tb_kills.make_row(d.get("package"), self.service).to_jsonDictionary()
+        self.assertEqual(d, new)
 
     def test_top_damage(self):
         td: tb_attackers = self.km.get_top_damage()

@@ -2,11 +2,13 @@ import asyncio
 from tests.abstract import InsightTestBase
 from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
+from tests.mocks.ConfigLoader import ConfigLoader
 
 
 class AsyncTesting(InsightTestBase.InsightTestBase):
     def setUp(self):
         super().setUp()
+        self.config: ConfigLoader = ConfigLoader()
         self.loop = asyncio.new_event_loop()
         self.thread_Pool = ThreadPoolExecutor(max_workers=1)
         self.loop.set_default_executor(self.thread_Pool)

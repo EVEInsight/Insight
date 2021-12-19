@@ -8,6 +8,7 @@ class TextChannel(discord.TextChannel):
         self.id = channel_id
         self.guild_id = gulid_id
         self.guild_object = guild_obj
+        self.name = "Test TextChannel"
 
     @property
     def guild(self):

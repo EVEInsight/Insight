@@ -3,6 +3,7 @@ from service import RouteMapper
 from tests.mocks import ServiceModule
 import unittest
 import datetime
+import networkx as nx
 
 
 class TestRouteMapper(DatabaseTesting.DatabaseTesting):
@@ -47,14 +48,14 @@ class TestRouteMapper(DatabaseTesting.DatabaseTesting):
         self.route_mapper._load_vertices()
         self.assertEqual(8285, self.route_mapper.graph.number_of_nodes())  # number of systems
         self.assertEqual(0, self.route_mapper.graph.number_of_edges())  # number of actual stargates
-        self.assertEqual(0, self.route_mapper.graph.number_of_selfloops())
+        self.assertEqual(0, nx.number_of_selfloops(self.route_mapper.graph))
 
     def test_02_load_edges(self):
         self.route_mapper._load_vertices()
         self.route_mapper._load_edges()
         self.assertEqual(8285, self.route_mapper.graph.number_of_nodes())
         self.assertEqual(6913, self.route_mapper.graph.number_of_edges())  # after edges are loaded
-        self.assertEqual(0, self.route_mapper.graph.number_of_selfloops())
+        self.assertEqual(0, nx.number_of_selfloops(self.route_mapper.graph))
 
     def test_03_total_jumps(self):
         """this function tests the distances between multiple systems found in the assert files"""

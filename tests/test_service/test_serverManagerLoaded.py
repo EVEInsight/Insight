@@ -65,14 +65,14 @@ class TestServerManagerLoaded(AsyncTesting.AsyncTesting, DatabaseTesting.Databas
                 resp = self.serverManager._get_append_self_prefix(prefixes)
                 for a in prefixes:
                     self.assertTrue(a in resp)
-                if self.serverManager.prefix_self is not None:
+                if len(self.serverManager.prefix_self) != 0:
                     self.assertTrue("@Insight" in resp)
                     self.assertEqual(len(prefixes) + 1, len(resp))
                 else:
                     self.assertEqual(len(prefixes), len(resp))
 
     def test__get_append_self_prefix_set(self):
-        self.serverManager.prefix_self = "@Insight"
+        self.serverManager.prefix_self = ["@Insight"]
         self.test__get_append_self_prefix_unset()
 
     def test_get_server_prefixes_textChannel_loaded(self):
@@ -82,9 +82,9 @@ class TestServerManagerLoaded(AsyncTesting.AsyncTesting, DatabaseTesting.Databas
                 resp = self.loop.run_until_complete(self.serverManager.get_server_prefixes(tc))
                 for p in assert_prefixes:
                     self.assertTrue(p in resp)
-                if self.serverManager.prefix_self is not None:
+                if len(self.serverManager.prefix_self) != 0:
                     self.assertTrue("@Insight" in resp)
-                    self.assertEqual(len(assert_prefixes) + 1, len(resp))
+                    self.assertEqual(len(assert_prefixes) + 2, len(resp))
                 else:
                     self.assertEqual(len(assert_prefixes), len(resp))
 
@@ -93,12 +93,12 @@ class TestServerManagerLoaded(AsyncTesting.AsyncTesting, DatabaseTesting.Databas
         self.test_get_server_prefixes_textChannel_loaded()
 
     def test_get_server_prefixes_DM_unloaded(self):
-        self.serverManager.prefix_self = None
+        self.serverManager.prefix_self = []
         for d in self.directMessages:
             with self.subTest(id=d.id):
                 resp = self.loop.run_until_complete(self.serverManager.get_server_prefixes(d))
                 self.assertEqual(self.serverManager.default_prefixes, resp)
-        self.serverManager.prefix_self = self.client.user.mention
+        self.serverManager.prefix_self = [self.client.user.mention]
         for d in self.directMessages:
             with self.subTest(id=d.id):
                 resp = self.loop.run_until_complete(self.serverManager.get_server_prefixes(d))

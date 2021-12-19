@@ -225,7 +225,7 @@ class Systems(dec_Base.Base, name_only, individual_api_pulling, index_api_updati
             "system_id": self.system_id,
             "system_name": self.name,
             "security_class": self.security_class,
-            "security_status": self.security_status,
+            "security_status": self.security_status if self.security_class else 0.0,
             "star_id": self.star_id,
             "pos_x": self.pos_x,
             "pos_y": self.pos_y,

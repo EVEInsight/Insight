@@ -1,11 +1,14 @@
 from tests.abstract import InsightTestBase
 from service import InsightAdmins
 import os
+from tests.mocks.ConfigLoader import ConfigLoader
 
 
-class TestInsightAdminsNewFile(InsightTestBase.InsightTestBase):
+class TestInsightAdminsNone(InsightTestBase.InsightTestBase):
     def setUp(self):
         super().setUp()
+        self.config: ConfigLoader = ConfigLoader()
+        self.config.config_mapping["INSIGHT_ADMINS"] = []
         self.admins = InsightAdmins.InsightAdmins()
 
     def tearDown(self):
@@ -14,7 +17,6 @@ class TestInsightAdminsNewFile(InsightTestBase.InsightTestBase):
             os.remove("InsightAdmins.txt")
 
     def test__read_admins(self):
-        self.assertTrue(os.path.exists("InsightAdmins.txt"))
         self.assertEqual(0, len(self.admins._admins))
 
     def test_is_admin(self):
@@ -25,16 +27,13 @@ class TestInsightAdminsNewFile(InsightTestBase.InsightTestBase):
         self.assertEqual(None, self.admins.get_default_admin())
 
 
-class TestInsightAdminsExistingFile(TestInsightAdminsNewFile):
+class TestInsightAdminsMulti(TestInsightAdminsNone):
     def setUp(self):
         super().setUp()
-        with open("InsightAdmins.txt", 'a') as f:
-            f.write("100000000000000\n")
-            f.write("100000000000001")
+        self.config.config_mapping["INSIGHT_ADMINS"] = [100000000000000, 100000000000001]
         self.admins = InsightAdmins.InsightAdmins()
 
     def test__read_admins(self):
-        self.assertTrue(os.path.exists("InsightAdmins.txt"))
         self.assertEqual(2, len(self.admins._admins))
 
     def test_is_admin(self):
