@@ -1,21 +1,12 @@
-FROM swaggerapi/swagger-codegen-cli:2.4.13 as SwaggerBuilder
+ARG PythonTag="3.6.15-buster"
 
-FROM openjdk:12-jdk-alpine as SwaggerRunner
-COPY --from=SwaggerBuilder /opt/swagger-codegen-cli/swagger-codegen-cli.jar ./swagger-codegen-cli.jar
+FROM openjdk:11 as SwaggerRunner
+ARG CodegenVersion="2.4.24"
+RUN wget https://repo1.maven.org/maven2/io/swagger/swagger-codegen-cli/$CodegenVersion/swagger-codegen-cli-$CodegenVersion.jar -O swagger-codegen-cli.jar
 RUN java -jar ./swagger-codegen-cli.jar generate \
  -i "https://esi.evetech.net/_latest/swagger.json" \
  -l python \
  -o /python-client
-
-#FROM maven:3-jdk-8-alpine as SwaggerRunner #newest Docker but there are issues so use old one for now
-#RUN apk add --no-cache git
-#RUN git clone https://github.com/swagger-api/swagger-codegen.git
-#WORKDIR /swagger-codegen
-#RUN mvn clean package
-#RUN java -jar modules/swagger-codegen-cli/target/swagger-codegen-cli.jar generate \
-# -i "https://esi.tech.ccp.is/_latest/swagger.json" \
-# -l python \
-# -o /python-client
 
 FROM alpine:latest as SDE
 RUN wget https://www.fuzzwork.co.uk/dump/sqlite-latest.sqlite.bz2
@@ -23,7 +14,7 @@ RUN wget https://www.fuzzwork.co.uk/dump/sqlite-latest.sqlite.bz2.md5
 RUN md5sum -c sqlite-latest.sqlite.bz2.md5
 RUN bunzip2 sqlite-latest.sqlite.bz2
 
-FROM python:3.6-buster
+FROM python:$PythonTag
 LABEL maintainer="nathan@nathan-s.com"
 LABEL url="https://github.com/Nathan-LS/Insight"
 
