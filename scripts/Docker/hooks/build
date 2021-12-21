@@ -8,9 +8,6 @@ ls -l
 docker build -f $DOCKERFILE_PATH -t $IMAGE_NAME ../../
 
 if [[ "$SOURCE_BRANCH" == "master" ]]; then
-  docker tag $IMAGE_NAME $DOCKER_REPO:stable
-  docker push $DOCKER_REPO:stable
-
   docker tag $IMAGE_NAME $DOCKER_REPO:$INSIGHT_VERSION_PATCH
   docker push $DOCKER_REPO:$INSIGHT_VERSION_PATCH
 
@@ -19,9 +16,6 @@ if [[ "$SOURCE_BRANCH" == "master" ]]; then
 fi
 
 if [[ "$SOURCE_BRANCH" == "development" ]]; then
-  docker tag $IMAGE_NAME $DOCKER_REPO:unstable
-  docker push $DOCKER_REPO:unstable
-
   docker tag $IMAGE_NAME $DOCKER_REPO:"$INSIGHT_VERSION_PATCH-dev"
   docker push $DOCKER_REPO:"$INSIGHT_VERSION_PATCH-dev"
 
