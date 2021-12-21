@@ -25,8 +25,8 @@ RUN apt-get update && apt-get install -y \
  build-essential \
  zip \
  && rm -rf /var/lib/apt/lists/*
-RUN pip3 install wheel
-RUN pip3 install setuptools
+RUN pip3 install --upgrade wheel
+RUN pip3 install --upgrade setuptools
 COPY --from=SwaggerRunner /python-client ./python-client
 WORKDIR /InsightDocker/python-client
 RUN python3 setup.py install
