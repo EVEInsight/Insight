@@ -1,0 +1,47 @@
+# dev testing deployment - ensure you are at root of git repo.
+# deployment windows:   docker stack deploy -c .\scripts\Docker\dev\stacks\standard.yaml insightdev-standard
+# deployment linux:     docker stack deploy -c ./scripts/Docker/dev/stacks/standard.yaml insightdev-standard
+
+version: '3.8'
+services:
+  postgres:
+    image: postgres:14.1
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+    environment:
+      POSTGRES_DB: "insight"
+      POSTGRES_USER: "insight"
+      POSTGRES_PASSWORD: "insightdev"
+    command: -c "shared_buffers=1024MB" -c "effective_cache_size=2024MB" -c "max_connections=100" -c "work_mem=8MB" -c "maintenance_work_mem=256MB" -c "max_wal_size=1GB"
+    volumes:
+      - type: bind
+        source: ../volumes/standard/postgres
+        target: /var/lib/postgresql/data
+    networks:
+      - insightdev
+    ports:
+      - target: 5432
+        published: 5432
+        protocol: tcp
+        mode: host
+  redis:
+    image: redis:6.2.6
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+    networks:
+      - insightdev
+    ports:
+      - target: 6379
+        published: 6379
+        protocol: tcp
+        mode: host
+    command: --requirepass "insightdev"
+networks:
+  insightdev:
+    driver: overlay
