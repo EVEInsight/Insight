@@ -1,22 +1,43 @@
 # Release Notes
 # v1.6.0
-> In Development
-{.is-danger}
+> Released on December 21, 2021
+{.is-info}
 
-Version 1.6 will bring about various new features and improvements to Insight.
+Version 1.6 brings about extensive new features and improvements to Insight.
 ## New Features
+* Added postgres support. Insight can now run on either a SQLite or PostgreSQL database. See the migration [repo](https://github.com/Nathan-LS/InsightPostgresMigrator) for moving from SQLite.
 * A new configuration loader that will read ENV vars and fall back to the config file if missing.
     * Notes: New Docker user no longer have to start Insight with ```--docker-init``` or edit config files as they can simply pass all config options as ENV variables through compose / stack files.
+* Added multiple environmental variables to replace configuration file functionality. See the DockerFile for a list of supported arguments.
+  * Config values currently existing in a config.ini file will be read for the moment.
+  * All configuration values in the config file except the column encryption key can be passed as variables. 
+    * The encryption key must exist within config.ini and persisted but Insight Version 1.7 will remove this requirement and allow passing the key as a variable.
 * Customizable rate limiting through the rate limiter. Server administrators can configure per-channel, server, DM, and global rate limits for Insight. See the [wiki article](https://wiki.eveinsight.net/user/limits) for more information on how this works.
-* The ```!limit``` command was added for end-users to track their channel and server rate usage.
-* The ```!roll``` command which returns a random number between 0 and 100.
+* Multiple new commands!
+  * ```!limit``` command was added for end-users to track their channel and server rate usage.
+  * ```!motd``` command to display recent messages of the day set by the Insight admin. When the motd is updated the bot status will show that the motd has been updated for 24 hours.
+    * The MOTD / announcement functionality file has been removed.
+  * ```!roll``` command which returns a random number between 0 and 100.
+  * ```!scan``` command for estimating the current ship types from a local chat scan / copy-paste.
+  * ```!time``` command which displays the current UTC time with a world clock to show popular timezones.
+  * ```!top``` command which returns the most expensive recent mails.
+* Added support for subcommands / arguments for commands. Ex: ```!top -help``` for displaying additional command info.
 * Insight's status that normally displays the CPU/MEM and feed stats can be adjusted to selectively exclude parts of the status. The ```Currently Watching:``` status can be blank / disabled through the use of new Insight ENV variables.
+* A subsystem manager currently used for caching and timed tasks.
+* Insight admins can now modify the motd through the ```!admin``` command. On edits the bot status will change to show that the motd was updated. Edits to the motd will not result in a global message / announcement.
+* Updated Insight to work without privileged intents.
 ## Changes
 * Removed the Git self-updating feature.
 * Removed the multiprocessing/forking architecture of Insight. These features allowed Insight to be rebooted automatically or via commands for non-Docker variants.
 * Added new tags on Docker hub which should make it easier to switch between point releases on Insight.
-* Reworked the Docker image so that Insight does't need a pseudo-tty for console output. Docker users can remove ```stdin_open: true``` and ```tty: true``` from their compose / stack files.
+* Reworked the Docker image so that Insight doesn't need a pseudo-tty for console output. Docker users can remove ```stdin_open: true``` and ```tty: true``` from their compose / stack files.
 * The Docker variant now uses unbuffered output for Python.
+* Reworked CLI argument flags for consistency.
+* Numerous package updates to underlying dependencies.
+* Data that was normally persisted in text files (motd, zk_identifier) now uses the insight_meta table.
+  * On startup, the existing zk_identifier.txt file is imported into the new table and the file is removed.
+* 8 ball responses are now only supported from env vars and support from reading 8ball_responses.txt has been removed. 
+* Insight admins are no longer read from the InsightAdmins.txt file and are now passed through the "INSIGHT_ADMINS" variable.
 ### Feeds
 * Pending mails for a channel will have their filters rechecked if they have been queued for longer than 25 seconds.
 Mails failing their checks due to queue delays will be dropped from the queue.
@@ -26,10 +47,20 @@ Mails failing their checks due to queue delays will be dropped from the queue.
 ### Radar, proximity, and related feeds
 * Adjusted the text on the max delta setting for easier clarification.
 * Setting max time delta option to 0 on new feeds now sets the delta to pseudo-infinite (1 year). Existing feeds that have this option to 0 will not be modified and thus won't likely post mails.
+### Subsystems
+* Added a new subsystem module to support caching and future subsystems.
+* Added a redis cache subsystem that caches commonly accessed data.
+* Added a timer subsystem which better organizes tasks that run on timed intervals. Misc tasks were organized into the new timer / cron subsystem such as MOTD update, bot status update, and token / contact updates.
 ## Fixes
 * Fixed some issues with Insight's shutdown code and reworked the signal listeners so that Insight will actually shut down when receiving ```SIGTERM``` or ```SIGINT```.
 * Fixed Docker code to properly start Insight so that it receives shutdown signals.
-* Fixed an issue where log messages would fail and print a traceback if the channel or server name contained emojis. 
+* Fixed an issue where log messages would fail and print a traceback if the channel or server name contained emojis.
+* Fixed an issue where websocket connections would need to be restarted after not receiving data for a period of time.
+* Fix @ mentions not triggering a command in servers where the bot has had a nickname.
+* Bump cryptography to 3.2+ for RSA decryption vulnerability.
+* Fixed an issue where users could not add a new token through the !sync command.
+## Known Issues
+* When deleting a token from Insight with the !sync command the delete request to ESI fails. The token is still deleted from the Insight database but users must manually revoke their token on the EVE support website.
 # v1.5.1
 > Released on March 2, 2020
 {.is-info}
