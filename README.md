@@ -1,33 +1,41 @@
 # Insight v1.6.0
-[![](https://img.shields.io/docker/pulls/nathanls/insight.svg)](https://hub.docker.com/r/nathanls/insight) 
-[![](https://img.shields.io/travis/Nathan-LS/Insight/master.svg?label=master)](https://travis-ci.org/Nathan-LS/Insight) 
-[![](https://img.shields.io/travis/Nathan-LS/Insight/development.svg?label=development)](https://travis-ci.org/Nathan-LS/Insight) 
+[![](https://img.shields.io/badge/-EVEInsight.net-154360)](https://eveinsight.net)
+[![](https://img.shields.io/docker/pulls/nathanls/insight.svg)](https://hub.docker.com/r/nathanls/insight)
 [![Build status](https://ci.appveyor.com/api/projects/status/8il5or4sw7x6sa8n?svg=true)](https://ci.appveyor.com/project/Nathan-LS/insight)
 [![codecov](https://codecov.io/gh/Nathan-LS/Insight/branch/development/graph/badge.svg)](https://codecov.io/gh/Nathan-LS/Insight)
 [![](https://img.shields.io/github/license/Nathan-LS/Insight.svg)](https://github.com/Nathan-LS/Insight/blob/master/LICENSE.md)
 [![](https://img.shields.io/discord/379777846144532480.svg)](https://discord.gg/Np3FCUn)
 [![](https://img.shields.io/badge/-Wiki-blueviolet)](https://wiki.eveinsight.net)
 
-Insight provides EVE Online killmail streaming for Discord. Insight can stream personal or corporate killboards, detect supercapitals with a proximity radar, and more!
+Insight provides [EVE Online](https://www.eveonline.com/) killmail streaming and utility commands for Discord. Insight can stream personal or corporate killboards, detect supercapitals with a proximity radar, estimate ship composition from local chat scans, and more!
 Killmails and intel are presented in Discord rich embeds containing relevant links and images to quickly identify important information.
 
-This bot features an intuitive interface for creating, modifying, and managing isolated feed configurations through simple commands and text dialog. All bot functionality is accessible through [documented commands](#commands) with no hardcoding or complicated configuration steps.
+This bot features an intuitive interface for creating, modifying, and managing independent feed configurations through simple commands and text dialog. All bot functionality is accessible through [documented commands](#commands) with no hardcoding or complicated configuration steps.
 
-[Invite Insight](#links) to your Discord server and run ```!create``` to begin setting up a feed!
+[Invite Insight](#invite-links) to your Discord server and run ```!create``` to begin setting up a feed!
 
-# Links
+# Invite Links
+Insight is available publicly hosted for invites directly to Discord servers. These bots are maintained and hosted by the Insight developer.
+
+See [hosting Insight](#hosting-insight) if you are interested in hosting your own private instance of Insight.
+## Public Insight Bot
 [![Discord Bots](https://discordbots.org/api/widget/463952393206497290.svg)](https://discordbots.org/bot/463952393206497290)
 * **Insight** (with preconfigured role): [Insight Bot Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=463952393206497290&permissions=149504&scope=bot)
 * **Insight** (without preconfigured role): [Insight Bot Invite Link](https://discordapp.com/api/oauth2/authorize?client_id=463952393206497290&permissions=0&scope=bot)
 
-Insight is available publicly hosted for invites directly to Discord servers.
- 
-See [hosting Insight](#hosting-insight) if you are interested in hosting your own copy of Insight.
+## Test Bot
+* [Insight Test Bot Invite](https://discordapp.com/api/oauth2/authorize?client_id=477314845608378369&permissions=149504&scope=bot)
+  * This test bot normally runs the latest development branch build. There are no guarantees of uptime or stability. Data from this test bot is often wiped.
 
+## Support Discord
 If you have questions, suggestions, or bug reports feel free to drop by the [project support server.](https://discord.gg/Np3FCUn)
 
+# Donate
+If you enjoy Insight, please consider donating ISK to [Natuli](https://evewho.com/character/1326083433) in-game.
+
 # Table of contents
-- [Links](#links)
+- [Invite Links](#invite-links)
+- [Donate](#donate)
 - [Table of contents](#table-of-contents)
 - [Feature Overview](#feature-overview)
 - [Gallery](#gallery)
@@ -44,7 +52,6 @@ If you have questions, suggestions, or bug reports feel free to drop by the [pro
 - [FAQ](#frequently-asked-questions)
 - [Credits](#credits)
 - [Licenses](#licenses)
-- [Rewrite and project history](#rewrite-and-project-history)
     
 
 # Feature Overview
@@ -52,6 +59,7 @@ If you have questions, suggestions, or bug reports feel free to drop by the [pro
 * Radar feeds ideal for tracking hostile incursions into friendly space, hunting expensive targets within jump range, or detecting capital escalations in real time.
 * Proximity watches ideal for finding potential fleets to fight, tracking hostile fleet movement within your region, or alerting you of nearby hostiles within a few jumps of your base systems.
 * Preconfigured feeds offering custom spins such as: Alliance Tournament system feed, npc officer hunter, AT ship radar, and more!
+* Utility commands such as: local chat scanning with estimated ship composition, top kills, and more! 
 * Rich embeds to present mails with color indicating sidebars, hyperlinks, and images.
 * Multiple embed appearance styles varying in size and verbosity.
 * Optional mention system to be alerted of activity in radar feeds.
@@ -75,29 +83,64 @@ When in doubt, run ```!help```. The ```!help``` command guides you to every poss
 
 Commands can be prefixed with either ```!```, ```?```, or ```@Insight``` by default. You can add or remove server-wide command prefixes via the ```!prefix``` command.
 
+## Bot Administration
+These commands are only available to users listed in the "INSIGHT_ADMINS" environmental variable.
+
 | Command | Description |
 |---|---|
-| !about | Display Insight credits, version information, and bot invite links. |
 | !admin | Access the Insight admin console to execute administrator functionality. |
-| !create | Begin setting up a new feed service in this channel. Alias: **!new** |
-| !dscan | Coming soon! |
-| !8ball | Shake the 8ball. |
-| !help | Display command information and prefixes. |
-| !lock | Lock a feed service from being modified by users without certain Discord channel roles. |
-| !prefix | Manage server-wide command prefixes for this bot. |
 | !quit | Close and shut down the Insight application service. |
-| !remove | Delete the currently configured feed service in this channel. |
-| !settings | Modify feed settings and behavior. Alias: **!config** |
-| !start | Start/resume a channel feed from being paused. |
-| !status | Display information about the currently running feed. |
-| !stop | Pause a channel feed. |
-| !sync | Manage contact EVE tokens for a radar or proximity watch feed. Contact token syncing allows you to ignore allies in tracked ships from appearing as potential targets. |
-| !unlock | Unlock a feed service to allow any Discord channel user to modify feed configuration. |
+
+## Server Administration
+These commands are available to users that have moderation or owner permissions on a Discord server.
+
+| Command | Description                                      |
+|---|--------------------------------------------------|
+| !prefix | Manage server-wide command prefixes for the bot. |
+
+## Feeds
+These commands are available for users to use in a text channel located in a Discord server.
+
+| Command | Description                                                                                                                                                            |
+|---|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| !create | Begin setting up a new feed service in this channel. Alias: **!new**                                                                                                   |
+| !lock | Lock a feed service from being modified by users without certain Discord channel roles.                                                                                |
+| !remove | Delete the currently configured feed service in this channel.                                                                                                          |
+| !settings | Modify feed settings and behavior. Alias: !config                                                                                                                      |
+| !start | Start/resume a channel feed from being paused.                                                                                                                         |
+| !status | Display information about the currently running feed.                                                                                                                  |
+| !stop | Pause a channel feed.                                                                                                                                                  |
+| !unlock | Unlock a feed service to allow any Discord channel user to modify feed configuration.                                                                                  |
+
+## SSO
+These commands are available in channels containing radar or proximity feeds. In a private message to the bot these commands allow for management of personal SSO tokens.
+
+| Command | Description                                                                                                             |
+|---|-------------------------------------------------------------------------------------------------------------------------|
+| !sync | Manage SSO tokens for a feed or for the Discord user (when in a private message) to add, delete, and revoke SSO tokens. |
+
+## Utility
+These commands can be used by anyone in any channel (including private messages with the bot).
+
+| Command | Description                                                                                   |
+|---------|-----------------------------------------------------------------------------------------------|
+| !about  | Display Insight credits, version information, and bot invite links.                           |
+| !8ball  | Shake the 8ball for answers to your questions.                                                |
+| !help   | Display command information and prefixes.                                                     |
+| !limits | Display channel / server rate limits and usage stats.                                         |
+| !motd   | Display the current MOTD for Insight global announcements and updates.                        |
+| !roll | Roll a random number between 0 and 100.                                                       |
+| !scan   | Perform a local scan. Copy and paste local pilots for a recent ship and affiliation overview. |
+| !time   | Get the current EVE time. Subcommands provide an overview of various world timezones.         |
+| !top | List the most expensive mails over the last hour, week, month, or year. |
+
+
+
 
 More detailed command information is available in the [commands wiki.](https://wiki.eveinsight.net/user/commands)
 
 # Permissions
-The preconfigured role invite [link](#links) creates a server role with necessary permissions already assigned. Using the invite [link](#links) without preconfigured roles requires manual permission configuration.
+The preconfigured role invite [link](#invite-links) creates a server role with necessary permissions already assigned. Using the invite [link](#invite-links) without preconfigured roles requires manual permission configuration.
 
 In intended feed channels the bot requires the following permissions:
 
@@ -111,7 +154,7 @@ In intended feed channels the bot requires the following permissions:
 # Getting started
 ## Entity Feed
 This quick start guide will help you set up an alliance killboard tracking feed.
-1. Begin by inviting Insight to your Discord server using one of the provided [links](#links).
+1. Begin by inviting Insight to your Discord server using one of the provided [links](#invite-links).
 2. Ensure Insight has the correct [permissions](#permissions) in the intended feed channel.
 3. Run the command:
 ``` !create``` and select 'Entity Feed'.
@@ -125,7 +168,7 @@ in your feed. If you wish to remove the feed, run ```!remove```.
 
 ## Radar Feed
 This quick start guide will help you set up a radar feed for tracking supercapital activity within 12 light-years of our base system, Jita.
-1. Begin by inviting Insight to your Discord server using one of the provided [links](#links).
+1. Begin by inviting Insight to your Discord server using one of the provided [links](#invite-links).
 2. Ensure Insight has the correct [permissions](#permissions) in the intended feed channel.
 3. Run the command:
 ``` !create``` and select 'Radar'.
@@ -141,38 +184,28 @@ by running the ```!settings``` command. Radar feeds feature an optional API sync
 to blacklist from appearing on the radar, accessible by the ```!sync``` command.
 
 # Branch overview
-| Branch | Purpose |
-|---|---|
-| master | Stable with latest features. The [public bot](#links) runs this branch. |
-| development | Latest unstable features. You can invite the [public experimental bot](https://discordapp.com/api/oauth2/authorize?client_id=477314845608378369&permissions=149504&scope=bot), but there are no guarantees of uptime or stability. |
-| dev | Deprecated branch. |
-| experimental | Deprecated branch. |
+| Branch | Purpose                             |
+|---|-------------------------------------|
+| master | Stable with latest stable features. |
+| development | Latest features in development.     |
+| dev | Deprecated branch.                  |
+| experimental | Deprecated branch.                  |
 
 # Hosting Insight
-There are two ways to run and host Insight yourself if you do not wish to use the [public bot](#links).
+There are two ways to run and host Insight yourself if you do not wish to use the [public bot](#invite-links).
 #### [Docker](https://hub.docker.com/r/nathanls/insight/)
 The recommended and easiest method to host Insight. Images are automatically built on new commits.
-1. Create and navigate to a directory where you wish to store Insight configuration, logs, and database.
-2. Pull and run the image. This command will pull the stable Docker Insight image and initialize the config files in your current directory.
-    ```
-    $ docker run --name insight-container-name -it --rm -v ${PWD}:/app nathanls/insight --docker-init
-    ```
-3. Edit ```default-config.ini``` and populate your configuration values in accordance with the [Configuring Insight](https://hub.docker.com/r/nathanls/insight/) section. Rename this file to ```config.ini```.
-4. Keep the image up to date by checking for updates and then starting Insight: 
-    ```
-    $ docker pull nathanls/insight && docker run --name insight-container-name -it --rm -v ${PWD}:/app nathanls/insight
-    ```
-See [Insight on Docker Hub](https://hub.docker.com/r/nathanls/insight/) and [Docker docs](https://docs.docker.com/) for more information about using Docker.
+
+See [Insight on Docker Hub](https://hub.docker.com/r/nathanls/insight/) for Insight container usage and [Docker docs](https://docs.docker.com/) for getting started with Docker.
 
 #### [Source](https://wiki.eveinsight.net/install/source)
-Requires a Python 3.6 interpreter (<=3.5 and >=3.7 not supported).
-The [wiki](https://wiki.eveinsight.net/install/source) contains a detailed guide for 
-source installation using a Linux operating system.
+The [wiki](https://wiki.eveinsight.net/install/source) contains a guide for 
+source installation using a Linux operating system. Running Insight from source is not recommended unless you plan on Insight development.
 
 # Frequently asked questions
 **How do I invite Insight to my Discord server?**
 
-You can invite Insight to any server where you have the **Manage Server** role. Follow the [link](#links), select the server, and Insight will be invited. If you are hosting Insight yourself, the invite link will be printed in the program console on program startup. 
+You can invite Insight to any server where you have the **Manage Server** role. Follow the [link](#invite-links), select the server, and Insight will be invited. If you are hosting Insight yourself, the invite link will be printed in the program console on program startup. 
 
 **What Discord permissions does Insight require?**
 
@@ -231,7 +264,7 @@ Insight's ```Watching CPU:15% MEM:1.0GB``` status will change to ```Watching Upd
 
 **I have an unanswered question, want to request a feature, need help with installation, or report a bug.** 
 
-Check out the public Discord server listed in the [links section.](#links)
+Check out the public Discord server listed in the [links section.](#invite-links)
 # Credits
 * [Fuzzwork](https://www.fuzzwork.co.uk/) - Provides SQLite database conversions of CCP's SDE referenced on initial loading.
 * [zKillboard](https://github.com/zKillboard/zKillboard) - Provides a centralized database of killmails for the game EVE Online.
@@ -245,12 +278,3 @@ Insight is released under the GNU General Public License v3.0 and the full licen
 is available in the file ```LICENSE```. This project utilizes various Python libraries, each with their
 own licensing. Insight uses data and names from the game EVE Online subject to its license
 included in the file ```CCP.md```.
-
-# Rewrite and project history
-Insight development initially began in January 2018 as an introductory project in asynchronous Python programming. Originally, the bot was meant
-to fill various roles such as: ship dscan intel, killmail feeds, route planning/calculations, and more. The original Insight lacked a clear focus, features were programmed in 
-randomly, and the code base became bulky and confusing. The first writeup of Insight should be taken as a clear example of how not to code with Python asyncio.
-
-Over the last few months I gained a better understanding of asynchronous programming and decided to rewrite the Insight project. This rewrite would have the only goal to provide better, simpler killmail feed streaming/intel.
-
-I present the Insight rewrite project in the hopes that it's useful and enjoyed by the EVE community.
