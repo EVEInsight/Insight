@@ -114,11 +114,11 @@ USER root
 RUN chown -R insight:insight /InsightDocker/Insight
 RUN find /InsightDocker/Insight -type f -exec chmod 0644 {} \;
 RUN find /InsightDocker/Insight -type d -exec chmod 0755 {} \;
-RUN pip3 install wheel setuptools
+RUN pip3 install --no-cache-dir wheel setuptools
 WORKDIR /InsightDocker/python-client-2
 RUN python3 setup.py install
 WORKDIR /InsightDocker/Insight
-RUN pip3 install --upgrade -r requirements.txt
+RUN pip3 install --no-cache-dir --upgrade -r requirements.txt
 RUN find /InsightDocker/Insight/scripts/Docker/ -maxdepth 1 -name "*.sh" -type f -exec cp {} /InsightDocker/ \;
 RUN rm /InsightDocker/python-client-2 -R
 RUN find /InsightDocker/ -maxdepth 1 -name "*.sh" -type f -exec chmod 0500 {} \;

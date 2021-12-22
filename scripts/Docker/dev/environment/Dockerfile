@@ -25,13 +25,12 @@ RUN apt-get update && apt-get install -y \
  build-essential \
  zip \
  && rm -rf /var/lib/apt/lists/*
-RUN pip3 install --upgrade wheel
-RUN pip3 install --upgrade setuptools
+RUN pip3 install --no-cache-dir wheel setuptools
 COPY --from=SwaggerRunner /python-client ./python-client
 WORKDIR /InsightDocker/python-client
 RUN python3 setup.py install
 WORKDIR /InsightDocker
 COPY ./requirements.txt .
-RUN pip3 install --upgrade -r requirements.txt
+RUN pip3 install --no-cache-dir --upgrade -r requirements.txt
 COPY --from=SDE /sqlite-latest.sqlite ./sqlite-latest.sqlite
 WORKDIR /app/Insight
