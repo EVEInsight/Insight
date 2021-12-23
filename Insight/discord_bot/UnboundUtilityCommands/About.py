@@ -23,6 +23,9 @@ class About(UnboundCommandBase):
             "[Join Insight support Discord for additional help](https://discord.gg/Np3FCUn)"
         ]:
             s += "{}\n".format(l)
+        s += "\n**Donate**\n" \
+             "If you enjoy Insight, please consider donating ISK to [Natuli](https://evewho.com/character/1326083433) " \
+             "in-game.\n"
         s += "\n**Insight utilizes the following third-party libraries:**\n"
         for l in[
             "[discord.py](https://github.com/Rapptz/discord.py/tree/rewrite)",
