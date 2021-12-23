@@ -106,6 +106,12 @@ class zk(object):
                 return zk_id
 
     def generate_redisq_url(self, no_identifier=False):
+        if self.config.get("ZK_ID_RESET"):
+            if not tb_meta.delete("zk_identifier"):
+                print("Error resetting zk identifier")
+                sys.exit(1)
+            else:
+                print("ZK identifier was reset.")
         identifier = self.generate_identifier()
         base_url = self.config.get("ZK_REDISQ_URL")
         if no_identifier or identifier is None:

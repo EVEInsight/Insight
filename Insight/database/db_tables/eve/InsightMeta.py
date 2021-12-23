@@ -88,6 +88,25 @@ class InsightMeta(dec_Base.Base):
             db.close()
 
     @classmethod
+    def delete(cls, key_value: str) -> bool:
+        """deletes the key"""
+        db: Session = DBSessions().get_session()
+        try:
+            row = db.query(cls).filter(cls.key == key_value).one_or_none()
+            if row is None:
+                return True
+            else:
+                db.delete(row)
+            db.commit()
+            return True
+        except Exception as ex:
+            print(ex)
+            traceback.print_exc()
+            return False
+        finally:
+            db.close()
+
+    @classmethod
     def default_key_pairs(cls) -> dict:
         return {
             "motd": {"value": ""},
