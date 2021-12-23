@@ -35,6 +35,14 @@ class Locations(dec_Base.Base,table_row,sde_impoter):
     def primary_key_row(cls):
         return cls.location_id
 
+    @hybrid_property
+    def need_api(self):
+        return self.name is None
+
+    @need_api.expression
+    def need_api(cls):
+        return cls.name.is_(None)
+
     @classmethod
     def make_from_sde(cls,__row):
         new_row = cls(__row.itemID)
@@ -50,7 +58,7 @@ class Locations(dec_Base.Base,table_row,sde_impoter):
     @classmethod
     def get_missing_ids(cls, service_module, sde_session, sde_base):
         existing_ids = [i.location_id for i in
-                        service_module.get_session().query(cls.location_id).all()]
+                        service_module.get_session().query(cls.location_id).filter(not_(cls.need_api)).all()]
         importing_ids = [i.itemID for i in sde_session.query(sde_base.itemID).all()]
         return list(set(importing_ids) - set(existing_ids))
 

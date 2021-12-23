@@ -85,7 +85,7 @@ class static_data_import(object):
                 return
 
         print("\n\nResetting some data on the {} table for reimport. Resets are scheduled to reimport data into "
-              "this table every {} hours. \nThe reset schedule can be adjusted by setting the \"{}\" environmental "
+              "this table every {} minutes. \nThe reset schedule can be adjusted by setting the \"{}\" environmental "
               "variable. Setting this variable to -1 disables the reimport."
               "\nExecuting SQL query: \"{}\"".format(table, m, threshold_config_key, query))
         db: Session = self.service.get_session()
@@ -108,7 +108,7 @@ class static_data_import(object):
     def reimport_static_data(self):
         """clears potentially invalid data from database for a reimport from the SDE"""
         self._query_reimport("locations", "REIMPORT_LOCATIONS_MINUTES", "last_reimport_locations",
-                             "TRUNCATE locations;")
+                             "UPDATE locations SET name = NULL;")
         self._query_reimport("types", "REIMPORT_TYPES_MINUTES", "last_reimport_types",
                              "UPDATE types SET type_name = NULL, group_id = NULL;")
         self._query_reimport("groups", "REIMPORT_GROUPS_MINUTES", "last_reimport_groups",
