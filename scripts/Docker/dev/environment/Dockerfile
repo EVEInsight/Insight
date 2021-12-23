@@ -32,5 +32,6 @@ RUN python3 setup.py install
 WORKDIR /InsightDocker
 COPY ./requirements.txt .
 RUN pip3 install --no-cache-dir --upgrade -r requirements.txt
+RUN pip3 install --upgrade bump2version
 COPY --from=SDE /sqlite-latest.sqlite ./sqlite-latest.sqlite
 WORKDIR /app/Insight
