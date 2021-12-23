@@ -21,6 +21,7 @@ class Channel_manager(object):
         self._discord_client: discord_bot.Discord_Insight_Client = None
         self.id_locks = InsightUtilities.AsyncLockManager()
         self._delay_post = queue.Queue()
+        self.load_channels_lock = asyncio.Lock(loop=asyncio.get_event_loop())
 
     async def add_delay(self, other_time):
         zk_module.add_delay(self._delay_post, other_time)
@@ -111,49 +112,50 @@ class Channel_manager(object):
             db.close()
 
     async def load_channels(self, load_message=True):
-        if load_message:
-            print('Loading feed services... This could take some time depending on the number of feeds.')
-        start = datetime.datetime.utcnow()
-        existing_ids = await self._discord_client.loop.run_in_executor(None, self.get_channel_ids_with_feeds)
-        get_channel_tasks = []
-        try:
-            if existing_ids is not None:
-                for channel_id_with_feed in existing_ids:
-                    if self.service.cli_args.startup_debug:  # mock a channel and change it to a valid id to test load
-                        c_data = {"id": channel_id_with_feed, "type": None, "name": "Startup DEBUG Feed", "position": 1}
-                        first_guild = self._discord_client.guilds[0] # pick out the first guild in the list for state population
-                        channel_obj = discord.TextChannel(state=None, data=c_data, guild=first_guild)
-                        get_channel_tasks.append(self.get_channel_feed(channel_obj))
-                    else:
-                        channel_obj = self._discord_client.get_channel(channel_id_with_feed)
-                        if channel_obj is not None:
+        async with self.load_channels_lock:
+            if load_message:
+                print('Loading feed services... This could take some time depending on the number of feeds.')
+            start = datetime.datetime.utcnow()
+            existing_ids = await self._discord_client.loop.run_in_executor(None, self.get_channel_ids_with_feeds)
+            get_channel_tasks = []
+            try:
+                if existing_ids is not None:
+                    for channel_id_with_feed in existing_ids:
+                        if self.service.cli_args.startup_debug:  # mock a channel and change it to a valid id to test load
+                            c_data = {"id": channel_id_with_feed, "type": None, "name": "Startup DEBUG Feed", "position": 1}
+                            first_guild = self._discord_client.guilds[0] # pick out the first guild in the list for state population
+                            channel_obj = discord.TextChannel(state=None, data=c_data, guild=first_guild)
                             get_channel_tasks.append(self.get_channel_feed(channel_obj))
-            else:
-                async for i in self.__get_text_channels():
-                    get_channel_tasks.append(self.get_channel_feed(i))
-        except Exception as ex:
-            traceback.print_exc()
-            print(ex)
-        ratio_print = .25
-        loaded_count = 0
-        total_load = len(get_channel_tasks)
-        if len(get_channel_tasks) > 0:
-            if load_message:
-                print("Started loading {} feeds.".format(total_load))
-            for f in asyncio.as_completed(get_channel_tasks):
-                loaded_count += 1
-                try:
-                    await f
-                except Exception as ex:
-                    traceback.print_exc()
-                    print("Error when loading a channel feed: Ex: {}".format(ex))
+                        else:
+                            channel_obj = self._discord_client.get_channel(channel_id_with_feed)
+                            if channel_obj is not None:
+                                get_channel_tasks.append(self.get_channel_feed(channel_obj))
+                else:
+                    async for i in self.__get_text_channels():
+                        get_channel_tasks.append(self.get_channel_feed(i))
+            except Exception as ex:
+                traceback.print_exc()
+                print(ex)
+            ratio_print = .25
+            loaded_count = 0
+            total_load = len(get_channel_tasks)
+            if len(get_channel_tasks) > 0:
                 if load_message:
-                    if loaded_count > (total_load * ratio_print):
-                        print("Loaded {} feeds of {}. {}% done".format(loaded_count, total_load, int(ratio_print * 100)))
-                        ratio_print += .25
-            if load_message:
-                print("Loaded {} feeds in {:.1f} seconds".format(len(get_channel_tasks),
-                                                                 (datetime.datetime.utcnow() - start).total_seconds()))
+                    print("Started loading {} feeds.".format(total_load))
+                for f in asyncio.as_completed(get_channel_tasks):
+                    loaded_count += 1
+                    try:
+                        await f
+                    except Exception as ex:
+                        traceback.print_exc()
+                        print("Error when loading a channel feed: Ex: {}".format(ex))
+                    if load_message:
+                        if loaded_count > (total_load * ratio_print):
+                            print("Loaded {} feeds of {}. {}% done".format(loaded_count, total_load, int(ratio_print * 100)))
+                            ratio_print += .25
+                if load_message:
+                    print("Loaded {} feeds in {:.1f} seconds".format(len(get_channel_tasks),
+                                                                     (datetime.datetime.utcnow() - start).total_seconds()))
 
     async def add_feed_object(self,ch_feed_object):
         self._channel_feed_container[ch_feed_object.channel_id] = ch_feed_object
