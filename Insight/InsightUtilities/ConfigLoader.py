@@ -116,6 +116,7 @@ class ConfigLoader(metaclass=InsightSingleton):
         self.parse_str("CCP_SECRET_KEY", "ccp_developer", "secret_key", True)
         self.parse_str("CCP_CALLBACK_URL", "ccp_developer", "callback_url", False,
                        "https://github.eveinsight.net/Insight/callback")
+        self.parse_bool("CLEAR_TOKEN_TABLE_ON_ERROR", "NULL", "NULL", False, "FALSE", True)
         self.parse_str("DISCORDBOTS_APIKEY", "discordbots.org", "discordbots_apikey", False, "", True)
         self.parse_bool("INSIGHT_STATUS_CPUMEM", "NULL", "NULL", False, "TRUE", True)
         self.parse_bool("INSIGHT_STATUS_FEEDCOUNT", "NULL", "NULL", False, "TRUE", True)

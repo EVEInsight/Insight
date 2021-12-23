@@ -60,11 +60,16 @@ class ColumnEncryption(metaclass=InsightSingleton):
 
     def reset_key(self):
         """overwrite the currently configured key in the config file and install a new token"""
-        cfile = configparser.ConfigParser()
-        cfile.read(self._config_file_path)
-        cfile.set("encryption", "secret_key", "")
-        with open(self._config_file_path, 'w') as cf:
-            cfile.write(cf)
+        try:
+            with open(self._config_file_path, 'r'):
+                pass
+            cfile = configparser.ConfigParser()
+            cfile.read(self._config_file_path)
+            cfile.set("encryption", "secret_key", "")
+            with open(self._config_file_path, 'w') as cf:
+                cfile.write(cf)
+        except FileNotFoundError:
+            pass
         self._set_key(None)
         self.get_key()
 

@@ -58,25 +58,27 @@ class setup_database(object):
         return self.sc_session
 
     def verify_tokens(self):
+        db: Session = self.sc_session()
         try:
-            db: Session = self.sc_session()
             tokens = db.query(tb_tokens).all()
             db.close()
         except:
+            db.close()
+            env_auto_purge_on_error = self.service.config.get("CLEAR_TOKEN_TABLE_ON_ERROR")
             print("The token table is corrupted. If you modified your database encryption secret key located in your "
                   "config file all existing tokens become invalid. Insight will not work until this issue is resolved. "
                   "You must either restore your previous encryption key or delete all existing tokens.")
-            with open(0) as i:
-                sys.stdin = i
-                resp = input(
-                    "\n\nReset all tokens? Note: You will be unable to use Insight until this error goes away. "
-                    "[Y/n]: ").lower()
+            if not env_auto_purge_on_error:
+                with open(0) as i:
+                    sys.stdin = i
+                    resp = input(
+                        "\n\nReset all tokens? Note: You will be unable to use Insight until this error goes away. "
+                        "[Y/n]: ").lower()
+            else:
+                print("Auto purging token table as env var \"CLEAR_TOKEN_TABLE_ON_ERROR\" is TRUE.")
+                resp = "y"
             if resp.startswith('y'):
-                tb_contacts_alliances.__table__.drop(self.engine)
-                tb_contacts_corps.__table__.drop(self.engine)
-                tb_contacts_pilots.__table__.drop(self.engine)
-                tb_discord_tokens.__table__.drop(self.engine)
-                tb_tokens.__table__.drop(self.engine)
+                self.engine.execute("TRUNCATE TABLE tokens CASCADE;")
                 ColumnEncryption().reset_key()
                 print("Issue resolved. You must restart Insight.")
                 sys.exit(0)
