@@ -121,9 +121,8 @@ class Channel_manager(object):
                 for channel_id_with_feed in existing_ids:
                     if self.service.cli_args.startup_debug:  # mock a channel and change it to a valid id to test load
                         c_data = {"id": channel_id_with_feed, "type": None, "name": "Startup DEBUG Feed", "position": 1}
-                        g_data = {"id": 1, "type": None, "name": "Startup DEBUG Feed Guild", "position": 1}
-                        g = discord.Guild(data=g_data, state=None)
-                        channel_obj = discord.TextChannel(state=None, data=c_data, guild=g)
+                        first_guild = self._discord_client.guilds[0] # pick out the first guild in the list for state population
+                        channel_obj = discord.TextChannel(state=None, data=c_data, guild=first_guild)
                         get_channel_tasks.append(self.get_channel_feed(channel_obj))
                     else:
                         channel_obj = self._discord_client.get_channel(channel_id_with_feed)
