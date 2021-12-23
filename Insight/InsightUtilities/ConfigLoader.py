@@ -167,3 +167,14 @@ class ConfigLoader(metaclass=InsightSingleton):
         self.parse_int("DEFAULT_THREAD_COUNT", "NULL", "NULL",  False, 25, True)
         self.parse_str("ZK_REDISQ_URL", "NULL", "NULL", False, "https://redisq.zkillboard.com/listen.php", True)
         self.parse_str("ZK_WS_URL", "NULL", "NULL", False, "wss://zkillboard.com/websocket/", True)
+        self.parse_int("REIMPORT_LOCATIONS_MINUTES", "NULL", "NULL", False, 43200, True)  # 30 days
+        self.parse_int("REIMPORT_TYPES_MINUTES", "NULL", "NULL", False, 21600, True) #15 days
+        self.parse_int("REIMPORT_GROUPS_MINUTES", "NULL", "NULL", False, 14400, True) #10 days
+        self.parse_int("REIMPORT_CATEGORIES_MINUTES", "NULL", "NULL", False, 14400, True) #10 days
+        self.parse_int("REIMPORT_STARGATES_MINUTES", "NULL", "NULL", False, 7200, True) #5 days
+        self.parse_int("REIMPORT_SYSTEMS_MINUTES", "NULL", "NULL", False, 21600, True)  # 15 days
+        self.parse_int("REIMPORT_CONSTELLATIONS_MINUTES", "NULL", "NULL", False, 14400, True)  # 10 days
+        self.parse_int("REIMPORT_REGIONS_MINUTES", "NULL", "NULL", False, 14400, True)  # 10 days
+        self.parse_int("REIMPORT_CHARACTERS_MINUTES", "NULL", "NULL", False, 43200, True)  # 30 days
+        self.parse_int("REIMPORT_CORPORATIONS_MINUTES", "NULL", "NULL", False, 21600, True)  # 15 days
+        self.parse_int("REIMPORT_ALLIANCES_MINUTES", "NULL", "NULL", False, 21600, True)  # 15 days

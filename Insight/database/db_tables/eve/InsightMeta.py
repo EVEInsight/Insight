@@ -91,6 +91,17 @@ class InsightMeta(dec_Base.Base):
     def default_key_pairs(cls) -> dict:
         return {
             "motd": {"value": ""},
-            "zk_identifier": {"value": "".join(random.choice(string.ascii_lowercase) for x in range(15))}
+            "zk_identifier": {"value": "".join(random.choice(string.ascii_lowercase) for x in range(15))},
+            "last_reimport_locations":      {"value": str(datetime.datetime.utcnow())},
+            "last_reimport_types":          {"value": str(datetime.datetime.utcnow())},
+            "last_reimport_groups":         {"value": str(datetime.datetime.utcnow())},
+            "last_reimport_categories":     {"value": str(datetime.datetime.utcnow())},
+            "last_reimport_stargates":      {"value": str(datetime.datetime.utcnow())},
+            "last_reimport_systems":        {"value": str(datetime.datetime.utcnow())},
+            "last_reimport_constellations": {"value": str(datetime.datetime.utcnow())},
+            "last_reimport_regions":        {"value": str(datetime.datetime.utcnow())},
+            "last_reimport_characters":     {"value": str(datetime.datetime.utcnow())},
+            "last_reimport_corporations":   {"value": str(datetime.datetime.utcnow())},
+            "last_reimport_alliances":      {"value": str(datetime.datetime.utcnow())}
         }
 

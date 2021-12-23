@@ -144,7 +144,7 @@ class Systems(dec_Base.Base, name_only, individual_api_pulling, index_api_updati
 
     @hybrid_property
     def need_api(self):
-        return self.name is None or self.constellation_id is None or self.pos_x is None or self.pos_y is None or self.pos_y is None
+        return self.name is None or self.constellation_id is None or self.pos_x is None or self.pos_y is None or self.pos_z is None
 
     @need_api.expression
     def need_api(cls):

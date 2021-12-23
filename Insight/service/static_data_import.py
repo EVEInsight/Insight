@@ -4,6 +4,10 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 import sys
+from InsightUtilities.StaticHelpers import Helpers
+from datetime import datetime, timedelta
+from dateutil.parser import parse as dateTimeParser
+import traceback
 
 
 class static_data_import(object):
@@ -11,6 +15,7 @@ class static_data_import(object):
         assert isinstance(service_module,service.ServiceModule)
         self.service = service_module
         if import_all:
+            self.reimport_static_data()
             self.sde_importer()
             self.load_data_sde()
             self.load_indexes()
@@ -65,5 +70,64 @@ class static_data_import(object):
         dbRow.tb_groups.api_mass_data_resolve(self.service)
         dbRow.tb_types.update_prices(self.service)
 
+    def _query_reimport(self, table, threshold_config_key, meta_key, query):
+        last_modified = dateTimeParser(Helpers.get_nested_value(tb_meta.get(meta_key),
+                                                 str(datetime.utcnow()), "data", "value"))
+        m = int(self.service.config.get(threshold_config_key))
+        if m < 0:
+            print("Skipping reimport on {} as it is disabled. This is not recommended as there can be outdated SDE "
+                  "data and it's good practice to reimport SDE data at regular intervals.".format(table))
+            return
+
+        if m > 0:
+            next_modify = last_modified + timedelta(minutes=m)
+            if datetime.utcnow() < next_modify:
+                return
+
+        print("\n\nResetting some data on the {} table for reimport. Resets are scheduled to reimport data into "
+              "this table every {} hours. \nThe reset schedule can be adjusted by setting the \"{}\" environmental "
+              "variable. Setting this variable to -1 disables the reimport."
+              "\nExecuting SQL query: \"{}\"".format(table, m, threshold_config_key, query))
+        db: Session = self.service.get_session()
+        try:
+            db.execute(query)
+            db.commit()
+        except Exception as ex:
+            traceback.print_exc()
+            print(ex)
+            raise ex
+        finally:
+            db.close()
+
+        if tb_meta.set(meta_key, {"value": str(datetime.utcnow())}):
+            print("Cleaning table {} done!".format(table))
+        else:
+            print("Error when updating meta_key for {}".format(meta_key))
+            sys.exit(1)
+
+    def reimport_static_data(self):
+        """clears potentially invalid data from database for a reimport from the SDE"""
+        self._query_reimport("locations", "REIMPORT_LOCATIONS_MINUTES", "last_reimport_locations",
+                             "TRUNCATE locations;")
+        self._query_reimport("types", "REIMPORT_TYPES_MINUTES", "last_reimport_types",
+                             "UPDATE types SET type_name = NULL, group_id = NULL;")
+        self._query_reimport("groups", "REIMPORT_GROUPS_MINUTES", "last_reimport_groups",
+                             "UPDATE groups SET name = NULL, category_id = NULL;")
+        self._query_reimport("categories", "REIMPORT_CATEGORIES_MINUTES", "last_reimport_categories",
+                             "UPDATE categories SET name = NULL;")
+        self._query_reimport("stargates", "REIMPORT_STARGATES_MINUTES", "last_reimport_stargates",
+                             "TRUNCATE stargates;")
+        self._query_reimport("systems", "REIMPORT_SYSTEMS_MINUTES", "last_reimport_systems",
+                             "UPDATE systems SET name = NULL, constellation_id = NULL, pos_x = NULL, pos_y = NULL, pos_z = NULL;")
+        self._query_reimport("constellations", "REIMPORT_CONSTELLATIONS_MINUTES", "last_reimport_constellations",
+                             "UPDATE constellations SET name = NULL, region_id = NULL;")
+        self._query_reimport("regions", "REIMPORT_REGIONS_MINUTES", "last_reimport_regions",
+                             "UPDATE regions SET name = NULL;")
+        self._query_reimport("characters", "REIMPORT_CHARACTERS_MINUTES", "last_reimport_characters",
+                             "UPDATE characters SET character_name = NULL;")
+        self._query_reimport("corporations", "REIMPORT_CORPORATIONS_MINUTES", "last_reimport_corporations",
+                             "UPDATE corporations SET corporation_name = NULL;")
+        self._query_reimport("alliances", "REIMPORT_ALLIANCES_MINUTES", "last_reimport_alliances",
+                             "UPDATE alliances SET alliance_name = NULL;")
 
 from database.db_tables import *
