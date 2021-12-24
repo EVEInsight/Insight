@@ -54,7 +54,7 @@ class Stargates(dec_Base.Base, sde_impoter, individual_api_pulling):
                 print("Imported {} {} from the SDE in {} seconds".format(str(add_count), cls.__name__, str(
                     (datetime.datetime.utcnow() - start).total_seconds())))
             else:
-                print("No stargates to import.")
+                print("No stargates to import")
             # for existing in db.query(cls).all():
             #     if not any(existing.compare_sde(g) for g in gates):
             #         print("Deleting gate from: {} to: {}".format(str(existing.system_from), str(existing.system_to)))
