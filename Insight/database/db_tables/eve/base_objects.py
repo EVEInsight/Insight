@@ -230,9 +230,9 @@ class name_only(table_row):
         return 1000
 
     @classmethod
-    def missing_name_objects(cls, service_module):
+    def missing_name_objects(cls, service_module, count_limit):
         db: Session = service_module.get_session()
-        return db.query(cls).filter(cls.need_name == True).all()
+        return db.query(cls).filter(cls.need_name == True).order_by(func.random()).limit(count_limit).all()
 
     @staticmethod
     def split_lists(list_item, chunk_size):

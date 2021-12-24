@@ -13,13 +13,13 @@ class name_resolve(name_only):
     @classmethod
     def __get_objects_with_missing_names(cls, service_module):
         __missing_objects = []
-        __missing_objects += characters.Characters.missing_name_objects(service_module)
-        __missing_objects += corporations.Corporations.missing_name_objects(service_module)
-        __missing_objects += alliances.Alliances.missing_name_objects(service_module)
-        __missing_objects += types.Types.missing_name_objects(service_module)
-        __missing_objects += systems.Systems.missing_name_objects(service_module)
-        __missing_objects += constellations.Constellations.missing_name_objects(service_module)
-        __missing_objects += regions.Regions.missing_name_objects(service_module)
+        __missing_objects += alliances.Alliances.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
+        __missing_objects += types.Types.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
+        __missing_objects += systems.Systems.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
+        __missing_objects += constellations.Constellations.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
+        __missing_objects += regions.Regions.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
+        __missing_objects += corporations.Corporations.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
+        __missing_objects += characters.Characters.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
         return __missing_objects
 
     @classmethod
@@ -34,53 +34,90 @@ class name_resolve(name_only):
             db.close()
 
     @classmethod
-    def api_mass_name_resolve(cls, service_module, error_ids=[]):
-        ids_404 = []
-        db: Session = service_module.get_session()
-        try:
-            missing_object_dict = {}
-            for row in cls.__get_objects_with_missing_names(service_module):
-                missing_object_dict[row.get_id()] = row
-            id_keys = list(missing_object_dict.keys())
-            id_keys = list(set(id_keys) - set(error_ids))
-            commit_pending_buffer = 0
-            completed_count = 0
-            for id_list in cls.split_lists(id_keys, cls.missing_id_chunk_size()):
-                completed_count += len(id_list)
-                lg = InsightLogger.InsightLogger.get_logger('ZK.names', 'ZK.log', child=True)
-                lg.info('Processing name chunk of size {} from {}/{} total missing names.'.format(len(id_list),
-                                                                                                  completed_count,
-                                                                                                  len(id_keys)))
-                try:
-                    response = requests.post(url=cls.post_url(), headers=service_module.get_headers(lib_requests=True),
-                                             json=id_list, timeout=3)
-                    if response.status_code == 200:
-                        commit_pending_buffer += len(id_list)
-                        for search_result in response.json():
-                            selected_item = missing_object_dict.get(search_result.get('id'))
-                            if selected_item is not None:
-                                selected_item.set_name(search_result.get('name'))
-                        if commit_pending_buffer >= 25000:
-                            db.commit()
-                            commit_pending_buffer = 0
-                    else:
-                        lg.warning('Response {} Headers: {} IDs: {}'.format(response.status_code,
-                                                                            response.headers, str(id_list)))
-                        ids_404.extend(id_list)
-                except requests.exceptions.Timeout:
-                    lg.info('Timeout.')
-                    ids_404.extend(id_list)
-                except Exception as ex:
-                    lg.exception(ex)
-                    lg.info('Error IDs: {}'.format(str(id_list)))
-                    print('Error: {} when resolving char names.'.format(ex))
-                    ids_404.extend(id_list)
-            if commit_pending_buffer > 0:
-                db.commit()
-        except Exception as ex:
-            print(ex)
-            traceback.print_exc()
-        finally:
-            db.close()
-            ids_404.extend(error_ids)
-            return ids_404
+    def commit_batch_rows_max(cls):
+        return 50000
+
+    @classmethod
+    def get_remaining_limit(cls, missing_object_len):
+        if missing_object_len >= cls.commit_batch_rows_max():
+            return 0
+        else:
+            return cls.commit_batch_rows_max() - missing_object_len
+
+    @classmethod
+    def api_mass_name_resolve(cls, service_module, error_ids_4xx=[], error_ids_5xx=[]):
+        ids_4xx = []
+        ids_4xx.extend(error_ids_4xx)
+        ids_5xx = []
+        ids_5xx.extend(error_ids_5xx)
+        error_count = 0
+        while True:
+            if error_count >= 3: #infinite loop prevention
+                break
+            db: Session = service_module.get_session()
+            try:
+                missing_object_dict = {}
+                for row in cls.__get_objects_with_missing_names(service_module):
+                    missing_object_dict[row.get_id()] = row
+                id_keys = list(set(list(missing_object_dict.keys())) - set(ids_4xx + ids_5xx))
+                commit_pending_buffer = 0
+                completed_count = 0
+                if len(id_keys) == 0:
+                    break
+                if len(id_keys) >= cls.commit_batch_rows_max():
+                    print("Mass name resolve needs to resolve {} names.".format(len(id_keys)))
+                for id_list in cls.split_lists(id_keys, cls.missing_id_chunk_size()):
+                    completed_count += len(id_list)
+                    lg = InsightLogger.InsightLogger.get_logger('ZK.names', 'ZK.log', child=True)
+                    lg.info('Processing name chunk of size {} from {}/{} total missing names.'.format(len(id_list),
+                                                                                                      completed_count,
+                                                                                                      len(id_keys)))
+                    try:
+                        response = requests.post(url=cls.post_url(), headers=service_module.get_headers(lib_requests=True),
+                                                 json=id_list, timeout=3)
+                        if response.status_code == 200:
+                            commit_pending_buffer += len(id_list)
+                            for search_result in response.json():
+                                selected_item = missing_object_dict.get(search_result.get('id'))
+                                if selected_item is not None:
+                                    selected_item.set_name(search_result.get('name'))
+                            if commit_pending_buffer >= cls.commit_batch_rows_max():
+                                db.commit()
+                                print("Completed batch of {} names.".format(commit_pending_buffer))
+                                commit_pending_buffer = 0
+                        elif 400 <= response.status_code < 500:
+                            lg.warning('Response {} Headers: {} IDs: {}'.format(response.status_code,
+                                                                                response.headers, str(id_list)))
+                            ids_4xx.extend(id_list)
+                            error_count += 1
+                        elif 500 <= response.status_code < 600:
+                            lg.warning('Response {} Headers: {} IDs: {}'.format(response.status_code,
+                                                                                response.headers, str(id_list)))
+                            ids_5xx.extend(id_list)
+                            error_count += 1
+                        else:
+                            lg.warning('Response {} Headers: {} IDs: {}'.format(response.status_code,
+                                                                                response.headers, str(id_list)))
+                            ids_5xx.extend(id_list)
+                            error_count += 1
+                    except requests.exceptions.Timeout:
+                        lg.info('Timeout.')
+                        ids_5xx.extend(id_list)
+                        error_count += 1
+                    except Exception as ex:
+                        lg.exception(ex)
+                        lg.info('Error IDs: {}'.format(str(id_list)))
+                        print('Error: {} when resolving names.'.format(ex))
+                        ids_5xx.extend(id_list)
+                        error_count += 1
+                if commit_pending_buffer > 0:
+                    db.commit()
+                    if len(id_keys) >= cls.commit_batch_rows_max():
+                        print("Completed batch of {} names.".format(commit_pending_buffer))
+            except Exception as ex:
+                print(ex)
+                traceback.print_exc()
+                error_count += 1
+            finally:
+                db.close()
+        return ids_4xx, ids_5xx
