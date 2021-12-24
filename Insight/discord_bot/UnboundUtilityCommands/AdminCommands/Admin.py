@@ -1,12 +1,11 @@
 from ..UnboundCommandBase import *
-from . import Backup, MemoryDiagnostic, MailExport, SetMotd
+from . import MemoryDiagnostic, MailExport, SetMotd
 
 
 class Admin(UnboundCommandBase):
     def __init__(self, unbound_service):
         super().__init__(unbound_service)
         self.cLock = asyncio.Lock(loop=self.client.loop)
-        self.admin_backup = Backup.Backup(self.unbound)
         self.admin_mem = MemoryDiagnostic.MemoryDiagnostic(self.unbound)
         self.admin_mail_export = MailExport.MailExport(self.unbound)
         self.set_motd = SetMotd.SetMotd(self.unbound)
@@ -17,8 +16,6 @@ class Admin(UnboundCommandBase):
             options.set_main_header("Select an Insight administrator function to execute.")
             options.add_option(dOpt.option_calls_coroutine(self.admin_mem.command_description(), "",
                                                            self.admin_mem.run_command(d_message)))
-            options.add_option(dOpt.option_calls_coroutine(self.admin_backup.command_description(), "",
-                                                           self.admin_backup.run_command(d_message)))
             options.add_option(dOpt.option_calls_coroutine(self.unbound.quit.command_description(), "",
                                                            self.unbound.quit.run_command(d_message)))
             options.add_option(dOpt.option_calls_coroutine(self.admin_mail_export.command_description(), "",
