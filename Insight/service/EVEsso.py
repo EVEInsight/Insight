@@ -19,7 +19,7 @@ class EVEsso(object):
         self._callback = ""
         self._token_url = "https://login.eveonline.com/oauth/token"
         self._verify_url = "https://login.eveonline.com/oauth/verify"
-        self._revoke_url = "https://login.eveonline.com/oauth/revoke"
+        self._revoke_url = "https://login.eveonline.com/v2/oauth/revoke"
         self._login_url = ""
         self._get_config()
         if self.service.cli_args.auth:
@@ -128,9 +128,9 @@ class EVEsso(object):
             try:
                 auth_header = (
                     HTTPBasicAuth(self._client_id, self._client_secret))
-                headers = {"Content-Type": "application/json", **self.service.get_headers(lib_requests=True)}
+                headers = {"Content-Type": "application/x-www-form-urlencoded", **self.service.get_headers(lib_requests=True)}
                 payload = {"token_type_hint": "refresh_token", "token": ref_token}
-                response = requests.post(url=self._revoke_url, auth=auth_header, data=json.dumps(payload),
+                response = requests.post(url=self._revoke_url, auth=auth_header, data=payload,
                                          headers=headers, timeout=60, verify=True)
                 if response.status_code != 200:
                     raise InsightExc.SSO.SSOerror
