@@ -29,10 +29,8 @@ class zk(object):
         self.redisq_base_url = self.config.get("ZK_REDISQ_URL")
         self.zk_stream_url = self.generate_redisq_url()
         self.run = True
-        self.error_ids_4xx = []
-        self.error_ids_4xx_next_reset = datetime.datetime.utcnow()
-        self.error_ids_5xx = []
-        self.error_ids_5xx_next_reset = datetime.datetime.utcnow()
+        self.error_ids_4xx = {}
+        self.error_ids_5xx = {}
         self._km_preProcess: janus.Queue = None  # raw json, before insertion to database
         self._km_postProcess: janus.Queue = None  # fully finished sqlalchemy objects with names resolved
         self.delay_km = queue.Queue()  # delay from occurrence to load
@@ -133,15 +131,8 @@ class zk(object):
         pull_start_time = datetime.datetime.utcnow()
         try:
             if dbRow.tb_kills.make_row(km_json, self.service) is not None:
-                if datetime.datetime.utcnow() >= self.error_ids_4xx_next_reset:  # clear error ids every 45 minutes
-                    self.error_ids_4xx = []
-                    self.error_ids_4xx_next_reset = (datetime.datetime.utcnow() + datetime.timedelta(minutes=45))
-                if datetime.datetime.utcnow() >= self.error_ids_5xx_next_reset:  # clear error ids every 15 minutes
-                    self.error_ids_5xx = []
-                    self.error_ids_5xx_next_reset = (datetime.datetime.utcnow() + datetime.timedelta(minutes=15))
-                self.error_ids_4xx, self.error_ids_5xx = dbRow.name_resolver.api_mass_name_resolve(self.service,
-                                                                               error_ids_4xx=self.error_ids_4xx, 
-                                                                               error_ids_5xx=self.error_ids_5xx)
+                dbRow.name_resolver.api_mass_name_resolve(self.service, error_ids_4xx=self.error_ids_4xx,
+                                                          error_ids_5xx=self.error_ids_5xx)
                 db: Session = self.service.get_session()
                 try:
                     result = dbRow.tb_kills.get_row(km_json, self.service)
