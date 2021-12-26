@@ -77,8 +77,11 @@ class Locations(dec_Base.Base,table_row,sde_impoter):
                 try:
                     for item in chunk:
                         try:
-                            __row = sde_session.query(sde_base).filter(sde_base.itemID == item.location_id).one()
-                            item.name = __row.itemName
+                            __row = sde_session.query(sde_base).filter(sde_base.itemID == item.location_id).one_or_none()
+                            if __row is None: # does not exist in SDE
+                                item.name = "UNKNOWN LOCATION"
+                            else:
+                                item.name = __row.itemName
                             db.merge(item)
                         except Exception as ex:
                             print(ex)

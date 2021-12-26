@@ -108,7 +108,7 @@ class static_data_import(object):
     def reimport_static_data(self):
         """clears potentially invalid data from database for a reimport from the SDE"""
         self._query_reimport("locations", "REIMPORT_LOCATIONS_MINUTES", "last_reimport_locations",
-                             "UPDATE locations SET name = NULL;")
+                             "UPDATE locations SET name = NULL, \"typeID\" = NULL, \"groupID\" = NULL, pos_x = NULL, pos_y = NULL, pos_z = NULL, radius = NULL;")
         self._query_reimport("types", "REIMPORT_TYPES_MINUTES", "last_reimport_types",
                              "UPDATE types SET type_name = NULL, group_id = NULL;")
         self._query_reimport("groups", "REIMPORT_GROUPS_MINUTES", "last_reimport_groups",
