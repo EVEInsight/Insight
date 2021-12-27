@@ -75,6 +75,8 @@ class InsightLogger(object):
 
     @classmethod
     def logger_init(cls):
+        cls.get_logger('aiohttp.access', 'http_access.log', level=logging.INFO)
+        cls.get_logger('aiohttp.server', 'http_error.log', level=logging.INFO)
         cls.get_logger('urllib3', 'urllib3_requests.log', level=logging.DEBUG)
         cls.get_logger('discord', 'discord_asnycio.log', level=logging.INFO)
         cls.get_logger('sqlalchemy.engine', 'sqlalchemy_engine.log', level=logging.WARNING)

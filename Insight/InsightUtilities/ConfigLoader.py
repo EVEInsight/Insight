@@ -179,3 +179,6 @@ class ConfigLoader(metaclass=InsightSingleton):
         self.parse_int("REIMPORT_CHARACTERS_MINUTES", "NULL", "NULL", False, 43200, True)  # 30 days
         self.parse_int("REIMPORT_CORPORATIONS_MINUTES", "NULL", "NULL", False, 21600, True)  # 15 days
         self.parse_int("REIMPORT_ALLIANCES_MINUTES", "NULL", "NULL", False, 21600, True)  # 15 days
+        self.parse_bool("WEBSERVER_ENABLED", "NULL", "NULL", False, "FALSE", True)
+        self.parse_str("WEBSERVER_INTERFACE", "NULL", "NULL", False, "127.0.0.1", True)
+        self.parse_int("WEBSERVER_PORT", "NULL", "NULL", False, 8080, True)

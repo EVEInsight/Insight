@@ -88,6 +88,9 @@ ENV REIMPORT_REGIONS_MINUTES=""
 ENV REIMPORT_CHARACTERS_MINUTES=""
 ENV REIMPORT_CORPORATIONS_MINUTES=""
 ENV REIMPORT_ALLIANCES_MINUTES=""
+ENV WEBSERVER_ENABLED="FALSE"
+ENV WEBSERVER_INTERFACE="0.0.0.0"
+ENV WEBSERVER_PORT="8080"
 
 ENV PYTHONUNBUFFERED=1
 
@@ -144,4 +147,5 @@ RUN echo "insight ALL=(root) NOPASSWD: /bin/chown -R insight\:insight /app,/bin/
 RUN chmod 0440 /etc/sudoers.d/InsightPermissionSet
 USER insight
 WORKDIR /app
+EXPOSE 8080/tcp
 ENTRYPOINT ["/InsightDocker/DockerEntry.sh", "python3", "/InsightDocker/Insight/Insight", "--sde-db", "/InsightDocker/sqlite-latest.sqlite"]
