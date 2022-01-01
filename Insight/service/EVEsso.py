@@ -42,7 +42,7 @@ class EVEsso(object):
         print("Client ID: ****{}".format(self._client_id[-4:]))
         print("Client Secret: ****{}".format(self._client_secret[-4:]))
         print("Navigate to this URL:\n\n{}\n\nSign in, and paste the callback URL into this console prompt:"
-              "".format(self.get_sso_login(secrets.token_urlsafe(12))))
+              "".format(self.get_sso_login(secrets.token_urlsafe(16))))
         with open(0) as i:
             sys.stdin = i
             auth_input = input().strip()
@@ -86,7 +86,7 @@ class EVEsso(object):
         loop_count = 0
         while True:
             async with self.callback_states_lock:
-                s = secrets.token_urlsafe(12)
+                s = secrets.token_urlsafe(16)
                 if self.callback_states.get(s) is None:
                     self.callback_states[s] = asyncio.Event()
                     return s
@@ -117,11 +117,16 @@ class EVEsso(object):
                 return e
 
     async def get_state_code(self, state_str):
+        """gets the callback code and deletes the code and async event"""
         async with self.callback_states_lock:
             e = self.callback_codes.get(state_str, None)
             if not e:
                 raise KeyError
             else:
+                if state_str in self.callback_states:
+                    self.callback_states.pop(state_str)
+                if state_str in self.callback_codes:
+                    self.callback_codes.pop(state_str)
                 return e
 
     async def set_state_code(self, state_str, state_code):
@@ -138,6 +143,9 @@ class EVEsso(object):
 
     def get_callback_example(self):
         return "{}{}".format(self._callback, "?code=ExampleCallbackAuthCode")
+
+    def get_callback_url(self):
+        return self._callback
 
     def clean_auth_code(self, auth_str):
         parsed_str = urlparse.urlparse(auth_str)

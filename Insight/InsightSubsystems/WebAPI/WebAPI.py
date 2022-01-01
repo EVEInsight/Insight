@@ -39,13 +39,14 @@ class WebAPI(SubsystemBase):
 
             if not await self.sso.validate_state(state):
                 raise web.HTTPNotFound(text="Invalid 'state' parameter. There are no states open with the provided "
-                                            "state code.", headers=self.headers)
+                                            "state code.\nIt is likely that the SSO link provided expired. "
+                                            "Please run the !sync command again.", headers=self.headers)
             else:
                 await self.sso.set_state_code(state_str=state, state_code=code)
                 if self.callback_redirect_success:
                     raise web.HTTPFound(self.callback_redirect_success, headers=self.headers)
                 else:
-                    return web.Response(text="EVE ESO login success. Your token is now linked to your "
+                    return web.Response(text="EVE SSO login success. Your token is now linked to your "
                                              "Discord user and you may close this window. \nYour EVE Insight admin "
                                              "can change this page by setting the 'CALLBACK_REDIRECT_SUCCESS' variable "
                                              "to redirect to a different landing page on successful SSO callback.",

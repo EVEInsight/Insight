@@ -1,3 +1,5 @@
+import asyncio
+
 from . import options_base
 from .. import direct_message
 import discord
@@ -24,7 +26,7 @@ class Options_DM(options_base.Options_Base):
         db: Session = self.cfeed.service.get_session()
         return_str = "My Tokens:\n\n"
         try:
-            for t in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).all():
+            for t in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).order_by(tb_tokens.token_id).all():
                 return_str += t.str_wChcount() + '\n\n'
             return return_str
         except Exception as ex:
@@ -44,15 +46,39 @@ class Options_DM(options_base.Options_Base):
                 return await track()
             return False
 
-        _options = dOpt.mapper_return_noOptions(self.cfeed.discord_client, message_object, timeout_seconds=400)
-        _options.set_main_header(
-            "Open this link and login to EVE's SSO system. After clicking 'Authorize' and being redirected to a blank webpage, copy the content of your browser "
-            "address bar into this conversation: \n{}"
-            "\n\nThe URL you paste should look similar to this:\n{}"
-            .format(self.cfeed.service.sso.get_sso_login(await self.cfeed.service.sso.generate_sso_state()), self.cfeed.service.sso.get_callback_example()))
-        _options.set_footer_text("Please copy the URL into this conversation: ")
-        response_auth_url = await _options()
-        auth_code = self.cfeed.service.sso.clean_auth_code(response_auth_url)
+        callback_state = await self.cfeed.service.sso.generate_sso_state()
+        if self.cfeed.service.config.get("WEBSERVER_ENABLED"):
+            msg_txt = "1. Open this link to sign in to EVE Single Sign On (SSO). \n{}\n\n" \
+                      "2. After clicking 'Authorize' on the character you wish to connect to Insight you will be redirected to: \n{}\n\n" \
+                      "3. On success, please check this conversation to select tracking filter combos (pilot, corporation, alliance).\n\n" \
+                      "For more information on Single Sign On (SSO) see this help article: \nhttps://support.eveonline.com/hc/en-us/articles/205381192-Single-Sign-On-SSO-\n" \
+                      "To revoke third party app access, delete the application from: \nhttps://community.eveonline.com/support/third-party-applications/\n\n" \
+                      "This link will expire in 2 minutes." \
+                .format(self.cfeed.service.sso.get_sso_login(callback_state), self.cfeed.service.sso.get_callback_url())
+            await message_object.author.send(msg_txt)
+            state_event: asyncio.Event = await self.cfeed.service.sso.get_state_event(callback_state)
+            try:
+                await asyncio.wait_for(state_event.wait(), timeout=120)
+                auth_code = await self.cfeed.service.sso.get_state_code(callback_state)
+            except asyncio.TimeoutError:
+                await self.cfeed.service.sso.invalidate_state(callback_state)
+                raise InsightExc.userInput.Cancel(message="The previous SSO login link is no longer valid as Insight "
+                                                          "did not receive a callback. Please rerun this command again "
+                                                          "to retry.")
+        else:
+            _options = dOpt.mapper_return_noOptions(self.cfeed.discord_client, message_object, timeout_seconds=400)
+            msg_txt = "1. Open this link to sign in to EVE Single Sign On (SSO). \n{}\n\n" \
+                      "2. After clicking 'Authorize' on the character you wish to connect to Insight you will be redirected to: \n{}\n\n" \
+                      "3. Copy the content of your browser address bar into this conversation."\
+                      "\nThe URL you paste should look similar to this:\n{}\n\n"\
+                      "For more information on Single Sign On (SSO) see this help article https://support.eveonline.com/hc/en-us/articles/205381192-Single-Sign-On-SSO-\n" \
+                      "To revoke third party app access, delete the application from https://community.eveonline.com/support/third-party-applications/"\
+                .format(self.cfeed.service.sso.get_sso_login(callback_state),self.cfeed.service.sso.get_callback_url(),
+                        self.cfeed.service.sso.get_callback_example())
+            _options.set_main_header(msg_txt)
+            _options.set_footer_text("Please copy the URL into this conversation: ")
+            response_auth_url = await _options()
+            auth_code = self.cfeed.service.sso.clean_auth_code(response_auth_url)
         funct_call = partial(tb_tokens.generate_from_auth, self.cfeed.user_id, auth_code, self.cfeed.service)
         __resp = await self.cfeed.discord_client.loop.run_in_executor(None, funct_call)
         try:
@@ -78,7 +104,7 @@ class Options_DM(options_base.Options_Base):
                 "These are all the tokens currently in the system. Selecting a token will delete and remove it from all channels.")
             db: Session = self.cfeed.service.get_session()
             try:
-                for token in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).all():
+                for token in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).order_by(tb_tokens.token_id).all():
                     _options.add_option(dOpt.option_returns_object(name=token.str_wChcount(), return_object=token))
                 return _options
             except Exception as ex:
@@ -101,7 +127,7 @@ class Options_DM(options_base.Options_Base):
             _options.set_main_header(
                 "These are your tokens used by Discord channels. Select a channel to remove your token.")
             try:
-                for t in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).all():
+                for t in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).order_by(tb_tokens.token_id).all():
                     if len(t.object_channels) > 0:
                         _options.add_header_row('Token ID: {}'.format(t.token_id))
                         for channel in t.object_channels:
@@ -157,7 +183,7 @@ class Options_DM(options_base.Options_Base):
             db: Session = self.cfeed.service.get_session()
             try:
                 _options.add_header_row("Your available tokens")
-                for token in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).all():
+                for token in db.query(tb_tokens).filter(tb_tokens.discord_user == self.cfeed.user_id).order_by(tb_tokens.token_id).all():
                     _options.add_option(dOpt.option_returns_object(name=token.str_wChcount(), return_object=token))
                 return _options
             except Exception as ex:
