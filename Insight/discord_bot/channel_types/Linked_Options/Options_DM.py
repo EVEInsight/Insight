@@ -49,9 +49,10 @@ class Options_DM(options_base.Options_Base):
             "Open this link and login to EVE's SSO system. After clicking 'Authorize' and being redirected to a blank webpage, copy the content of your browser "
             "address bar into this conversation: \n{}"
             "\n\nThe URL you paste should look similar to this:\n{}"
-            .format(self.cfeed.service.sso.get_sso_login(), self.cfeed.service.sso.get_callback_example()))
+            .format(self.cfeed.service.sso.get_sso_login(await self.cfeed.service.sso.generate_sso_state()), self.cfeed.service.sso.get_callback_example()))
         _options.set_footer_text("Please copy the URL into this conversation: ")
-        auth_code = await _options()
+        response_auth_url = await _options()
+        auth_code = self.cfeed.service.sso.clean_auth_code(response_auth_url)
         funct_call = partial(tb_tokens.generate_from_auth, self.cfeed.user_id, auth_code, self.cfeed.service)
         __resp = await self.cfeed.discord_client.loop.run_in_executor(None, funct_call)
         try:

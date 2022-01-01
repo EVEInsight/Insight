@@ -17,7 +17,7 @@ class Tokens(dec_Base.Base, sso_base):
     token_id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     discord_user = Column(BIGINT, ForeignKey("discord_users.user_id"), nullable=False)
     refresh_token = Column(StringEncryptedType(String, InsightUtilities.ColumnEncryption.helper_get_key(), AesEngine, 'pkcs5'), nullable=False)
-    token = Column(StringEncryptedType(String, InsightUtilities.ColumnEncryption.helper_get_key(), AesEngine, 'pkcs5'), nullable=True)
+    token = Column(StringEncryptedType(String, InsightUtilities.ColumnEncryption.helper_get_key(), AesEngine, 'pkcs5'), nullable=True) # JWT token
     character_id = Column(Integer, ForeignKey("characters.character_id"), nullable=True)
     corporation_id = Column(Integer, ForeignKey("corporations.corporation_id"), nullable=True)
     alliance_id = Column(Integer, ForeignKey("alliances.alliance_id"), nullable=True)
@@ -211,16 +211,13 @@ class Tokens(dec_Base.Base, sso_base):
     def generate_from_auth(cls, discord_user_id, auth_code, service_module):
         db: Session = service_module.get_session()
         try:
-            clean_auth = service_module.sso.clean_auth_code(auth_code)
-        except KeyError:
-            raise InsightExc.SSO.SSOerror("You entered an invalid URL. Please try again.")
-        try:
-            response = service_module.sso.get_token_from_auth(clean_auth)
+            response = service_module.sso.get_token_from_auth(auth_code)
         except:
             raise InsightExc.SSO.SSOerror(
                 "An error occurred when attempting to get a token from the auth code. Please try again later.")
         try:
             __row = cls(discord_user_id, response.get("refresh_token"))
+            service_module.sso.verify_jwt(response.get("access_token")) # verify the token. Raise exception if invalid and cancel transaction
             __row.get_affiliation(response.get("access_token"), service_module)
             db.merge(__row)
             db.commit()

@@ -9,6 +9,7 @@ python-dateutil>=2.8.2,<3
 psutil>=5.8.0,<6
 psycopg2>=2.9.2,<3
 Pympler>=1,<2
+python-jose[cryptography]>=3,<4
 requests>=2.26,<3
 SQLAlchemy>=1.4.28,<1.5
 SQLAlchemy-Utils>=0.38.0,<0.39
