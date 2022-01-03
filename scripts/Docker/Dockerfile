@@ -1,7 +1,7 @@
 ARG PythonTag="3.6.15-buster"
 
 FROM openjdk:11 as SwaggerRunner
-ARG CodegenVersion="2.4.24"
+ARG CodegenVersion="2.4.25"
 RUN wget https://repo1.maven.org/maven2/io/swagger/swagger-codegen-cli/$CodegenVersion/swagger-codegen-cli-$CodegenVersion.jar -O swagger-codegen-cli.jar
 RUN java -jar ./swagger-codegen-cli.jar generate \
  -i "https://esi.evetech.net/_latest/swagger.json" \
