@@ -105,7 +105,7 @@ class EVEsso(object):
         """return true if state is str has a valid event listener specified"""
         try:
             async with self.callback_states_lock:
-                    return state_str in self.callback_states
+                return state_str in self.callback_states
         except Exception as ex:
             print(ex)
             traceback.print_exc()
