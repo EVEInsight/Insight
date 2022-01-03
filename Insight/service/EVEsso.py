@@ -191,11 +191,26 @@ class EVEsso(object):
                 token_row.token = rjson.get("access_token")
                 token_row.error_count = 0
                 self.logger.info('Response 200 on token ID: {} when getting token.'.format(token_row.token_id))
-            elif response.status_code == 420:
+            elif response.status_code == 420: #rate limit
                 self.logger.warning('Response 420 on token ID: {} when getting token. Headers: {} Body: {}'.
                                     format(token_row.token_id, response.headers, response.json()))
+                print("SSO get tokens is being error rate limited.")
                 token_row.token = None
-            elif 400 <= response.status_code < 500:
+                time.sleep(90)
+            elif response.status_code == 400:
+                r = response.json()
+                if r.get("error", "") == "invalid_grant":
+                    db.delete(token_row)
+                    self.logger.info(
+                        'Token {} has been deleted as it was revoked.'.format(token_row.token_id, token_row.error_count))
+                    return
+                else:
+                    self.logger.warning('Response {} on token ID: {} when getting token. Headers: {} Body: {}'.
+                                        format(response.status_code, token_row.token_id, response.headers,
+                                               response.json()))
+                    token_row.token = None
+                    token_row.error_count += 1
+            elif 401 <= response.status_code < 500:
                 self.logger.warning('Response {} on token ID: {} when getting token. Headers: {} Body: {}'.
                                     format(response.status_code, token_row.token_id, response.headers, response.json()))
                 token_row.token = None
