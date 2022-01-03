@@ -180,7 +180,7 @@ class EVEsso(object):
         payload = {"grant_type": "refresh_token", "refresh_token": token_row.refresh_token}
         try:
             if token_row.error_count >= 4:
-                db.delete(token_row)
+                self.delete_token(token_row)
                 self.logger.info('Token {} has been deleted after {} errors.'.format(token_row.token_id, token_row.error_count))
                 return
             response = requests.post(url=self._token_url, data=payload, headers=headers, timeout=60, verify=True) # https://docs.esi.evetech.net/docs/sso/refreshing_access_tokens.html
