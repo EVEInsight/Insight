@@ -116,7 +116,7 @@ class static_data_import(object):
         self._query_reimport("categories", "REIMPORT_CATEGORIES_MINUTES", "last_reimport_categories",
                              "UPDATE categories SET name = NULL;")
         self._query_reimport("stargates", "REIMPORT_STARGATES_MINUTES", "last_reimport_stargates",
-                             "TRUNCATE stargates;")
+                             "DELETE FROM stargates;")
         self._query_reimport("systems", "REIMPORT_SYSTEMS_MINUTES", "last_reimport_systems",
                              "UPDATE systems SET name = NULL, constellation_id = NULL, pos_x = NULL, pos_y = NULL, pos_z = NULL;")
         self._query_reimport("constellations", "REIMPORT_CONSTELLATIONS_MINUTES", "last_reimport_constellations",

@@ -78,7 +78,11 @@ class setup_database(object):
                 print("Auto purging token table as env var \"CLEAR_TOKEN_TABLE_ON_ERROR\" is TRUE.")
                 resp = "y"
             if resp.startswith('y'):
-                self.engine.execute("TRUNCATE TABLE tokens CASCADE;")
+                self.engine.execute("DELETE FROM discord_tokens;")
+                self.engine.execute("DELETE FROM contacts_characters;")
+                self.engine.execute("DELETE FROM contacts_corporations;")
+                self.engine.execute("DELETE FROM contacts_alliances;")
+                self.engine.execute("DELETE FROM tokens;")
                 ColumnEncryption().reset_key()
                 print("Issue resolved. You must restart Insight.")
                 sys.exit(0)
