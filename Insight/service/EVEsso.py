@@ -76,10 +76,17 @@ class EVEsso(object):
                 print("Error when attempting to load jwt key sets.\n{}".format(ex))
                 time.sleep(3)
 
-    def _get_scopes(self):
-        _scopes = quote(
-            "esi-characters.read_contacts.v1 esi-corporations.read_contacts.v1 esi-alliances.read_contacts.v1")
-        return str(_scopes)
+    def _get_scopes(self, scope_pilot=True, scope_corp=True, scope_alliance=True):
+        s = []
+        if scope_pilot:
+            s.append("esi-characters.read_contacts.v1")
+        if scope_corp:
+            s.append("esi-corporations.read_contacts.v1")
+        if scope_alliance:
+            s.append("esi-alliances.read_contacts.v1")
+        if len(s) == 0:
+            raise InsightExc.SSO.SSOerror("There are no scopes selected. You must select at least one scope of either pilot, corp, or alliance.")
+        return str(quote(str.join(" ", s)))
 
     async def generate_sso_state(self):
         """returns a randomized unique state code that later retrieves an asyncio event object"""
@@ -136,9 +143,9 @@ class EVEsso(object):
             if isinstance(e, asyncio.Event):
                 e.set()
 
-    def get_sso_login(self, state):
+    def get_sso_login(self, state, scope_pilot=True, scope_corp=True, scope_alliance=True):
         s = "{auth_url}?response_type=code&redirect_uri={cb}&client_id={cid}&scope={scopes}&state={state}".format(auth_url=self._authorize_url,
-            cb=self._callback, cid=self._client_id, scopes=self._get_scopes(), state=state)
+            cb=self._callback, cid=self._client_id, scopes=self._get_scopes(scope_pilot, scope_corp, scope_alliance), state=state)
         return s
 
     def get_callback_example(self):

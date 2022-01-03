@@ -37,24 +37,29 @@ class Options_DM(options_base.Options_Base):
 
     async def InsightOption_addToken(self, message_object: discord.Message):
         """Add new token - Add a new token for syncing contact information related to pilots, corporations, or alliances."""
+        trackq = dOpt.mapper_return_yes_no(self.cfeed.discord_client, message_object)
+        trackq.set_main_header("Would you like the sync token to include contacts from your character contacts?")
+        track_pilot = await trackq()
 
-        async def track_this(row_object, type_str):
-            if row_object is not None:
-                track = dOpt.mapper_return_yes_no(self.cfeed.discord_client, message_object)
-                track.set_main_header(
-                    "Sync standings for {} {} with this token?".format(type_str, row_object.get_name()))
-                return await track()
-            return False
+        trackq = dOpt.mapper_return_yes_no(self.cfeed.discord_client, message_object)
+        trackq.set_main_header("Would you like the sync token to include contacts from corporation contacts?")
+        track_corp = await trackq()
+
+        trackq = dOpt.mapper_return_yes_no(self.cfeed.discord_client, message_object)
+        trackq.set_main_header("Would you like the sync token to include contacts from alliance (if applicable) contacts?")
+        track_alliance = await trackq()
 
         callback_state = await self.cfeed.service.sso.generate_sso_state()
+        sso_link = self.cfeed.service.sso.get_sso_login(callback_state, scope_pilot=track_pilot, scope_corp=track_corp,
+                                                        scope_alliance=track_alliance)
         if self.cfeed.service.config.get("WEBSERVER_ENABLED"):
             msg_txt = "1. Open this link to sign in to EVE Single Sign On (SSO). \n{}\n\n" \
                       "2. After clicking 'Authorize' on the character you wish to connect to Insight you will be redirected to: \n{}\n\n" \
-                      "3. On success, please check this conversation to select tracking filter combos (pilot, corporation, alliance).\n\n" \
+                      "3. On success, please check this conversation to verify the token was successfully added.\n\n" \
                       "For more information on Single Sign On (SSO) see this help article: \nhttps://support.eveonline.com/hc/en-us/articles/205381192-Single-Sign-On-SSO-\n" \
                       "To revoke third party app access, delete the application from: \nhttps://community.eveonline.com/support/third-party-applications/\n\n" \
                       "This link will expire in 2 minutes." \
-                .format(self.cfeed.service.sso.get_sso_login(callback_state), self.cfeed.service.sso.get_callback_url())
+                .format(sso_link, self.cfeed.service.sso.get_callback_url())
             await message_object.author.send(msg_txt)
             state_event: asyncio.Event = await self.cfeed.service.sso.get_state_event(callback_state)
             try:
@@ -73,7 +78,7 @@ class Options_DM(options_base.Options_Base):
                       "\nThe URL you paste should look similar to this:\n{}\n\n"\
                       "For more information on Single Sign On (SSO) see this help article https://support.eveonline.com/hc/en-us/articles/205381192-Single-Sign-On-SSO-\n" \
                       "To revoke third party app access, delete the application from https://community.eveonline.com/support/third-party-applications/"\
-                .format(self.cfeed.service.sso.get_sso_login(callback_state),self.cfeed.service.sso.get_callback_url(),
+                .format(sso_link,self.cfeed.service.sso.get_callback_url(),
                         self.cfeed.service.sso.get_callback_example())
             _options.set_main_header(msg_txt)
             _options.set_footer_text("Please copy the URL into this conversation: ")
@@ -82,11 +87,11 @@ class Options_DM(options_base.Options_Base):
         funct_call = partial(tb_tokens.generate_from_auth, self.cfeed.user_id, auth_code, self.cfeed.service)
         __resp = await self.cfeed.discord_client.loop.run_in_executor(None, funct_call)
         try:
-            if not await track_this(__resp.object_pilot, "pilot"):
+            if not track_pilot:
                 __resp.character_id = None
-            if not await track_this(__resp.object_corp, "corporation"):
+            if not track_corp:
                 __resp.corporation_id = None
-            if not await track_this(__resp.object_alliance, "alliance"):
+            if not track_alliance:
                 __resp.alliance_id = None
             await self.save_row(__resp)
             await self.reload(message_object)
