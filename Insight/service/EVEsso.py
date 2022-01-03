@@ -9,7 +9,6 @@ import InsightExc
 import InsightLogger
 import asyncio
 import secrets
-import base64
 from jose import jwt
 from jose.exceptions import JWTClaimsError
 import time
@@ -63,7 +62,7 @@ class EVEsso(object):
         while 10 >= error_count:
             error_count += 1
             try:
-                r = requests.get(url=self._jwk_set_url, timeout=5, verify=True)
+                r = requests.get(url=self._jwk_set_url, timeout=10, verify=True)
                 r.raise_for_status()
                 if r.status_code == 200:
                     d = r.json()
@@ -104,8 +103,13 @@ class EVEsso(object):
 
     async def validate_state(self, state_str):
         """return true if state is str has a valid event listener specified"""
-        async with self.callback_states_lock:
-            return state_str in self.callback_states
+        try:
+            async with self.callback_states_lock:
+                    return state_str in self.callback_states
+        except Exception as ex:
+            print(ex)
+            traceback.print_exc()
+            return False
 
     async def invalidate_state(self, state_str):
         """invalidate a state"""
@@ -137,11 +141,15 @@ class EVEsso(object):
                 return e
 
     async def set_state_code(self, state_str, state_code):
-        async with self.callback_states_lock:
-            self.callback_codes[state_str] = state_code
-            e: asyncio.Event = self.callback_states.get(state_str, None)
-            if isinstance(e, asyncio.Event):
-                e.set()
+        try:
+            async with self.callback_states_lock:
+                self.callback_codes[state_str] = state_code
+                e: asyncio.Event = self.callback_states.get(state_str, None)
+                if isinstance(e, asyncio.Event):
+                    e.set()
+        except Exception as ex:
+            print(ex)
+            traceback.print_exc()
 
     def get_sso_login(self, state, scope_pilot=True, scope_corp=True, scope_alliance=True):
         s = "{auth_url}?response_type=code&redirect_uri={cb}&client_id={cid}&scope={scopes}&state={state}".format(auth_url=self._authorize_url,
@@ -160,32 +168,33 @@ class EVEsso(object):
         return code[0]
 
     def get_token_from_auth(self, auth_code):
+        auth_basic = HTTPBasicAuth(self._client_id, self._client_secret)
         headers = {"Content-Type": "application/x-www-form-urlencoded", **self.service.get_headers(lib_requests=True),
-                   "Authorization": "Basic {}".format((base64.urlsafe_b64encode("{}:{}".format(self._client_id, self._client_secret).encode())).decode("utf-8")),
                    "Host": "login.eveonline.com"}
         payload = {"grant_type": "authorization_code", "code": auth_code}
-        response = requests.post(url=self._token_url, data=payload, headers=headers, timeout=60, verify=True)
+        response = requests.post(url=self._token_url, auth=auth_basic, data=payload, headers=headers, timeout=30, verify=True)
         if response.status_code == 200:
             return response.json()
         else:
-            raise Exception("Non 200 when getting token from auth.")
+            raise InsightExc.SSO.SSOerror("Non 200 when getting token from auth.")
 
     def get_token(self, token_row):
         """gets a refresh token"""
         assert isinstance(token_row, tb_tokens)
         db: Session = self.service.get_session()
-        headers = {"Content-Type": "application/x-www-form-urlencoded", **self.service.get_headers(lib_requests=True),
-                   "Authorization": "Basic {}".format((base64.urlsafe_b64encode("{}:{}".format(self._client_id, self._client_secret).encode())).decode("utf-8")),
-                   "Host": "login.eveonline.com"}
-        payload = {"grant_type": "refresh_token", "refresh_token": token_row.refresh_token}
         try:
+            auth_basic = HTTPBasicAuth(self._client_id, self._client_secret)
+            headers = {"Content-Type": "application/x-www-form-urlencoded",
+                       **self.service.get_headers(lib_requests=True), "Host": "login.eveonline.com"}
+            payload = {"grant_type": "refresh_token", "refresh_token": token_row.refresh_token}
             if token_row.error_count >= 4:
                 self.delete_token(token_row)
                 self.logger.info('Token {} has been deleted after {} errors.'.format(token_row.token_id, token_row.error_count))
                 return
-            response = requests.post(url=self._token_url, data=payload, headers=headers, timeout=60, verify=True) # https://docs.esi.evetech.net/docs/sso/refreshing_access_tokens.html
+            response = requests.post(url=self._token_url, auth=auth_basic, data=payload, headers=headers, timeout=30, verify=True) # https://docs.esi.evetech.net/docs/sso/refreshing_access_tokens.html
             if response.status_code == 200:
                 rjson = response.json()
+                self.verify_jwt(rjson.get("access_token"))
                 if token_row.refresh_token != rjson.get("refresh_token"):
                     token_row.refresh_token = rjson.get("refresh_token") # with v2 it's possible for this to change
                 token_row.token = rjson.get("access_token")
@@ -242,7 +251,7 @@ class EVEsso(object):
                 headers = {"Content-Type": "application/x-www-form-urlencoded", **self.service.get_headers(lib_requests=True)}
                 payload = {"token_type_hint": "refresh_token", "token": ref_token}
                 response = requests.post(url=self._revoke_url, auth=auth_header, data=payload,
-                                         headers=headers, timeout=60, verify=True)
+                                         headers=headers, timeout=30, verify=True)
                 if response.status_code != 200:
                     raise InsightExc.SSO.SSOerror
             except:

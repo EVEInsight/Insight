@@ -30,11 +30,11 @@ class WebAPI(SubsystemBase):
         else:
             code = request.query.get("code", None)
             state = request.query.get("state", None)
-            if not code:
-                raise web.HTTPBadRequest(text="Missing 'code' parameter",
-                                         headers=self.headers)
             if not state:
                 raise web.HTTPBadRequest(text="Missing 'state' parameter",
+                                         headers=self.headers)
+            if not code:
+                raise web.HTTPBadRequest(text="Missing 'code' parameter",
                                          headers=self.headers)
 
             if not await self.sso.validate_state(state):
