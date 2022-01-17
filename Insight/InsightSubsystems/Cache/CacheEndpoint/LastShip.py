@@ -267,7 +267,8 @@ class LastShip(AbstractMultiEndpoint):
                         lookup_char_names.add(s["data"]["character"]["character_name"])
                     except KeyError:
                         continue
-                await self.BulkCharacterNameToID.get(char_names=frozenset(lookup_char_names))
+                if len(lookup_char_names) > 0:
+                    await self.BulkCharacterNameToID.get(char_names=frozenset(lookup_char_names))
 
     def ttl_override(self) -> int:
         return self.ttl
