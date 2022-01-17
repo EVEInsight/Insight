@@ -226,7 +226,17 @@ class LastShip(AbstractMultiEndpoint):
     async def _reset_last_ship(self, new_km: tb_kills):
         pilot_ids = await self.executor(self._extract_characters, new_km)
         for pilot_id in pilot_ids:
-            await self.delete_no_fail(char_id=pilot_id)
+            delete_attempts = 0
+            while True:
+                if await self.delete_no_fail(char_id=pilot_id):
+                    break
+                else:
+                    if delete_attempts >= 10:
+                        print("Unable to delete the last ship for pilot id: {} from the cache. Is Redis connected?".format(pilot_id))
+                        break
+                    else:
+                        await asyncio.sleep(max(1, delete_attempts * 10))
+                        delete_attempts += 1
             async with self.lock_char_ids_recent_activity:
                 self.char_ids_recent_activity.add(pilot_id)
 
