@@ -34,8 +34,17 @@ class CacheManager(SubsystemBase):
                 if redis.purge_keys:
                     await redis.redis_purge_all_keys()
             else:
-                sys.stderr.write("Insight is operating without Redis. Please connect Insight to Redis for all functions"
-                                 " to properly work.")
+                if self.config.get("REDIS_HOST") != "":
+                    sys.stderr.write("Unable to connect to Redis host '{}'\n"
+                                     "Please ensure Insight can connect to the defined Redis host. Alternatively, "
+                                     "remove the 'REDIS_HOST' variable to disable Redis to allow Insight to start.\n"
+                                     "Exiting...\n".format(self.config.get("REDIS_HOST")))
+                    sys.exit(1)
+                else:
+                    sys.stderr.write("!! Insight is operating without Redis. \nPlease consider connecting Insight to a "
+                                     "Redis instance to enable all Insight functionality.\n"
+                                     "Functions requiring Redis such as local scan, motd, search, etc will not "
+                                     "function in the current state.\n")
         except Exception as ex:
             print(ex)
 
