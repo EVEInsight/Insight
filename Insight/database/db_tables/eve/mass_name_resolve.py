@@ -84,14 +84,16 @@ class name_resolve(name_only):
                 completed_count = 0
                 if len(id_keys) == 0 and len(ids_4xx_pending_recheck) == 0:
                     break
-                elif len(ids_4xx_pending_recheck) > 0:
+                elif len(ids_4xx_pending_recheck) > 0: # start processing ids in 4xx errors one by one to not mark entire batch as dirty
                     try:
                         id_keys = [ids_4xx_pending_recheck.pop()]
                     except IndexError:
                         break
                     api_chunk_size = 1
+                    processing_4xx = True
                 else:
                     api_chunk_size = cls.missing_id_chunk_size()
+                    processing_4xx = False
                 if len(id_keys) >= cls.missing_id_chunk_size():
                     print("Mass name resolve needs to resolve {} names.".format(len(id_keys)))
                 for id_list in cls.split_lists(id_keys, api_chunk_size):
@@ -115,9 +117,18 @@ class name_resolve(name_only):
                         elif 400 <= response.status_code < 500:
                             lg.warning('Response {} Headers: {} IDs: {}'.format(response.status_code,
                                                                                 response.headers, str(id_list)))
-                            for i in id_list:
-                                error_ids_4xx[i] = datetime.datetime.utcnow()
-                            error_count += 1
+                            if processing_4xx:
+                                commit_pending_buffer += 1
+                                sel_id = id_list[0]
+                                selected_item = missing_object_dict.get(sel_id) # we are calling one by one, no batch
+                                selected_item.set_name("!!UNKNOWN NAME!!")
+                                err_str = "Type: {} ID: {} is still returning response 4xx on retry. Setting to !!UNKNOWN NAME!!".format(type(selected_item),sel_id)
+                                print(err_str)
+                                lg.error(err_str)
+                            else:
+                                for i in id_list:
+                                    error_ids_4xx[i] = datetime.datetime.utcnow()
+                                error_count += 1
                         elif 500 <= response.status_code < 600:
                             lg.warning('Response {} Headers: {} IDs: {}'.format(response.status_code,
                                                                                 response.headers, str(id_list)))
