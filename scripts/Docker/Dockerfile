@@ -15,8 +15,8 @@ RUN md5sum -c sqlite-latest.sqlite.bz2.md5
 RUN bunzip2 sqlite-latest.sqlite.bz2
 
 FROM python:$PythonTag
-LABEL maintainer="nathan@nathan-s.com"
-LABEL url="https://github.com/Nathan-LS/Insight"
+LABEL maintainer="maintainers@eveinsight.net"
+LABEL url="https://git.eveinsight.net"
 
 ENV DB_DRIVER="sqlite3"
 ENV SQLITE_DB_PATH="Database.db"
@@ -95,20 +95,27 @@ ENV CALLBACK_REDIRECT_SUCCESS=""
 
 ENV PYTHONUNBUFFERED=1
 
+#packages for Insight and apt utils
 RUN apt-get update && apt-get install -y \
  apt-utils \
  curl \
  ca-certificates \
  gnupg \
- lsb-release
-RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
-RUN apt-get update && apt-get install -y \
- git \
+ lsb-release \
  build-essential \
+ git \
  zip \
- libpq-dev \
  sudo
+
+#https://www.postgresql.org/download/linux/debian/
+RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+
+#https://www.psycopg.org/docs/install.html#install-from-source avoid using pre-compiled binary for psycopg2 driver
+RUN apt-get update && apt-get install -y \
+ libpq-dev
+
+
 RUN rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /InsightDocker /app /home/insight
