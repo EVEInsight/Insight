@@ -29,6 +29,7 @@ class LastShip(AbstractMultiEndpoint):
         self.lock_char_ids_recent_activity = asyncio.Lock(loop=self.loop)
         self.char_ids_recent_activity = set()
         self.ttl = self.config.get("SUBSYSTEM_CACHE_LASTSHIP_TTL")
+        self.BulkCharacterNameToID = self.cm.BulkCharacterNameToID
 
     @staticmethod
     def default_ttl() -> int:
@@ -259,7 +260,14 @@ class LastShip(AbstractMultiEndpoint):
             if len(self.char_ids_recent_activity) > 0:
                 old_set = self.char_ids_recent_activity
                 self.char_ids_recent_activity = set()
-                await self.get(char_ids=old_set)  # safe for set does not have to be list
+                ships = await self.get(char_ids=old_set)  # safe for set does not have to be list
+                lookup_char_names = set()
+                for s in ships.values():
+                    try:
+                        lookup_char_names.add(s["data"]["character"]["character_name"])
+                    except KeyError:
+                        continue
+                await self.BulkCharacterNameToID.get(char_names=frozenset(lookup_char_names))
 
     def ttl_override(self) -> int:
         return self.ttl
