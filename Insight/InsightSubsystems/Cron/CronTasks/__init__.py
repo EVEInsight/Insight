@@ -9,3 +9,4 @@ from InsightSubsystems.Cron.CronTasks.ChannelAutoRefresh import ChannelAutoRefre
 from InsightSubsystems.Cron.CronTasks.TicketUtilizationMetrics import TicketUtilizationMetrics_Servers, \
     TicketUtilizationMetrics_Channels, TicketUtilizationMetrics_Users
 from InsightSubsystems.Cron.CronTasks.NamesDoomheim import NamesDoomheim
+from InsightSubsystems.Cron.CronTasks.ClearTmpTables import ClearTmpTables
