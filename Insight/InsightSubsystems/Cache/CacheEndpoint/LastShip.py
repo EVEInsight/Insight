@@ -25,7 +25,7 @@ class LastShip(AbstractMultiEndpoint):
             883 # cap industrial
         ]
         super().__init__(cache_manager)
-        self.precache: bool = self.config.get("SUBSYSTEM_CACHE_LASTSHIP_PRECACHE")
+        self.precache: int = self.config.get("SUBSYSTEM_CACHE_LASTSHIP_PRECACHE_SECONDS")
         self.lock_char_ids_recent_activity = asyncio.Lock(loop=self.loop)
         self.char_ids_recent_activity = set()
         self.ttl = self.config.get("SUBSYSTEM_CACHE_LASTSHIP_TTL")
@@ -243,10 +243,10 @@ class LastShip(AbstractMultiEndpoint):
 
     async def cron_precache_operation(self):
         async with self.lock_char_ids_recent_activity:
-            if not self.precache:
+            if self.precache <= 0: # disabled
                 self.char_ids_recent_activity = set()
+                return
             if len(self.char_ids_recent_activity) > 0:
-                self.lg.info("Starting precache of {} character IDs.".format(len(self.char_ids_recent_activity)))
                 old_set = self.char_ids_recent_activity
                 self.char_ids_recent_activity = set()
                 await self.get(char_ids=old_set)  # safe for set does not have to be list

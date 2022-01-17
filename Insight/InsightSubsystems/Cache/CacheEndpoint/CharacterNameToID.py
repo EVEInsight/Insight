@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, noload
 class CharacterNameToID(AbstractMultiEndpoint):
     @staticmethod
     def default_ttl() -> int:
-        return 172800  # 2 days
+        return 1296000  # 15 days
 
     @staticmethod
     def _get_unprefixed_key_hash_sync(query_item: str, **kwargs):
@@ -35,14 +35,14 @@ class CharacterNameToID(AbstractMultiEndpoint):
                 "id": row_character_name.character_id,
                 "found": True
             }
-            self.set_min_ttl(d, self.default_ttl())
+            self.set_min_ttl(d, self.default_ttl()) # default ttl for known char
         else:
             d["data"] = {
                 "name": query_name,
                 "id": None,
                 "found": False
             }
-            self.set_min_ttl(d, 10800)  # 3 hours
+            self.set_min_ttl(d, 10800)  # 3 hours for unknown char
         return d
 
     def _do_endpoint_logic_sync(self, lookup_dict: dict, **kwargs) -> dict:
