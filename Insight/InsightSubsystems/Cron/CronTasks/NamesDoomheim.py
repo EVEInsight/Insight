@@ -4,7 +4,7 @@ from database.db_tables import tb_characters, tb_corporations, tb_alliances
 
 class NamesDoomheim(AbstractCronTask):
     def call_now(self) -> bool:
-        return False
+        return True
 
     def run_at_intervals(self) -> bool:
         return False
@@ -19,6 +19,8 @@ class NamesDoomheim(AbstractCronTask):
             if len(duplicate_names) > 0:
                 for n in duplicate_names:
                     name = n[0]
+                    if "(!Doomheim!)" in name or "(!Closed!)" in name:
+                        continue
                     update_objects = db.query(table).filter(table_column_name == name).order_by(table_column_id.desc()).all()
                     row_iteration = 0
                     for row in update_objects:
@@ -37,7 +39,7 @@ class NamesDoomheim(AbstractCronTask):
     def _rename_duplicate_chars(self):
         self._rename_duplicates(tb_characters.character_name, tb_characters.character_id, tb_characters)
         self._rename_duplicates(tb_corporations.corporation_name, tb_corporations.corporation_id, tb_corporations)
-        self._rename_duplicates(tb_alliances.alliance_name, tb_alliances.alliance_name, tb_alliances)
+        self._rename_duplicates(tb_alliances.alliance_name, tb_alliances.alliance_id, tb_alliances)
 
     async def _run_task(self):
         await self.loop.run_in_executor(None, self._rename_duplicate_chars)
