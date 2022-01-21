@@ -4,13 +4,41 @@ from database.db_tables import tb_characters, tb_corporations, tb_alliances
 
 class NamesDoomheim(AbstractCronTask):
     def call_now(self) -> bool:
-        return True
+        return False
 
     def run_at_intervals(self) -> bool:
         return False
 
     def loop_iteration(self) -> int:
         return 900
+
+    def _sort_ids(self, row_list):
+        """sort ids for custom sort defined here to find the most recently created entity https://docs.esi.evetech.net/docs/id_ranges.html"""
+        return_list = []
+        for row in row_list:
+            if isinstance(row, tb_corporations) or isinstance(row, tb_alliances):
+                after_nov2010 = []
+                before_nov2010 = []
+                if int(100e6) <= row.get_id() < int(21e8): # 100,000,000 <= id < 2,100,000,000
+                    before_nov2010.append(row)
+                else: # 98,000,000 <= id < 100,000,000
+                    after_nov2010.append(row)
+                return_list += after_nov2010
+                return_list += before_nov2010
+            else: #characters
+                after_may2016 = []
+                nov2010_to_may2016 = []
+                before_nov2010 = []
+                if int(90e6) <= row.get_id() < int(98e6): # 90,000,000 <= id < 98,000,000
+                    nov2010_to_may2016.append(row)
+                elif int(100e6) <= row.get_id() < int(21e8): # 100,000,000 <= id < 2,100,000,000
+                    before_nov2010.append(row)
+                else: #2,100,000,000 to 2,147,483,647
+                    after_may2016.append(row)
+                return_list += after_may2016
+                return_list += nov2010_to_may2016
+                return_list += before_nov2010
+        return return_list
 
     def _rename_duplicates(self, table_column_name, table_column_id, table):
         db = self.service.get_session()
@@ -21,7 +49,7 @@ class NamesDoomheim(AbstractCronTask):
                     name = n[0]
                     if "(!Doomheim!)" in name or "(!Closed!)" in name:
                         continue
-                    update_objects = db.query(table).filter(table_column_name == name).order_by(table_column_id.desc()).all()
+                    update_objects = self._sort_ids(db.query(table).filter(table_column_name == name).order_by(table_column_id.desc()).all())
                     row_iteration = 0
                     for row in update_objects:
                         row_iteration += 1
