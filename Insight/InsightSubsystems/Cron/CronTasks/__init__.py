@@ -10,3 +10,4 @@ from InsightSubsystems.Cron.CronTasks.TicketUtilizationMetrics import TicketUtil
     TicketUtilizationMetrics_Channels, TicketUtilizationMetrics_Users
 from InsightSubsystems.Cron.CronTasks.NamesDoomheim import NamesDoomheim
 from InsightSubsystems.Cron.CronTasks.ClearTmpTables import ClearTmpTables
+from InsightSubsystems.Cron.CronTasks.ResolveNonEntityNames import ResolveNonEntityNames

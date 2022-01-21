@@ -23,6 +23,7 @@ class CronManager(SubsystemBase):
                                  CronTasks.TicketUtilizationMetrics_Users(cron_manager=self))
         await self.new_cron_task("NamesDoomheim", CronTasks.NamesDoomheim(cron_manager=self))
         await self.new_cron_task("ClearTmpTables", CronTasks.ClearTmpTables(cron_manager=self))
+        await self.new_cron_task("ResolveNonEntityNames", CronTasks.ResolveNonEntityNames(cron_manager=self))
 
     async def new_cron_task(self, t_name, cron_task_instance: CronTasks.AbstractCronTask):
         await cron_task_instance.start_loop()
