@@ -264,7 +264,9 @@ class LastShip(AbstractMultiEndpoint):
                 lookup_char_names = set()
                 for s in ships.values():
                     try:
-                        lookup_char_names.add(s["data"]["character"]["character_name"])
+                        name = s["data"]["character"]["character_name"]
+                        if name:
+                            lookup_char_names.add(name)
                     except KeyError:
                         continue
                 if len(lookup_char_names) > 0:
