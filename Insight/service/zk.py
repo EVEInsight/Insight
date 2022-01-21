@@ -29,8 +29,8 @@ class zk(object):
         self.redisq_base_url = self.config.get("ZK_REDISQ_URL")
         self.zk_stream_url = self.generate_redisq_url()
         self.run = True
-        self.error_ids_4xx = {}
-        self.error_ids_5xx = {}
+        self.error_ids_404 = {}
+        self.error_ids_non404 = {}
         self._km_preProcess: janus.Queue = None  # raw json, before insertion to database
         self._km_postProcess: janus.Queue = None  # fully finished sqlalchemy objects with names resolved
         self.delay_km = queue.Queue()  # delay from occurrence to load
@@ -131,8 +131,8 @@ class zk(object):
         pull_start_time = datetime.datetime.utcnow()
         try:
             if dbRow.tb_kills.make_row(km_json, self.service) is not None:
-                dbRow.name_resolver.api_mass_name_resolve(self.service, error_ids_4xx=self.error_ids_4xx,
-                                                          error_ids_5xx=self.error_ids_5xx)
+                dbRow.name_resolver.api_mass_name_resolve(self.service, error_ids_404=self.error_ids_404,
+                                                          error_ids_non404=self.error_ids_non404)
                 db: Session = self.service.get_session()
                 try:
                     result = dbRow.tb_kills.get_row(km_json, self.service)
