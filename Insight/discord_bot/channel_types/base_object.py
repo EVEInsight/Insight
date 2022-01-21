@@ -133,7 +133,7 @@ class discord_feed_service(object):
         async with self.lock:
             if not self.channel_manager.exists(self) and self.is_loadable_feed():
                 raise InsightExc.DiscordError.UnboundFeed
-            await awaitable_coro
+            await asyncio.wait_for(awaitable_coro, timeout=600)
 
     async def command_create(self, message_object):
         await self.command_not_supported_sendmessage(message_object)

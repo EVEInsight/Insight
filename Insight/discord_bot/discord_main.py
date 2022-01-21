@@ -207,6 +207,12 @@ class Discord_Insight_Client(discord.Client):
                                                    .format(message.author.mention))
                 except:
                     pass
+            except asyncio.TimeoutError:
+                try:
+                    async with (await LimitManager.cm(message)):
+                        await message.channel.send("The request has timed out. Please try running the command again.")
+                except:
+                    pass
             except Exception as ex:
                 lg.exception(ex)
                 try:
