@@ -14,22 +14,24 @@ class name_resolve(name_only):
         return "https://esi.evetech.net/latest/universe/names/?datasource=tranquility"
 
     @classmethod
-    def __get_objects_with_missing_names(cls, service_module):
+    def __get_objects_with_missing_names(cls, service_module, exclude_nonentity=False, exclude_entity=False):
         __missing_objects = []
-        __missing_objects += alliances.Alliances.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
-        __missing_objects += types.Types.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
-        __missing_objects += systems.Systems.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
-        __missing_objects += constellations.Constellations.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
-        __missing_objects += regions.Regions.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
-        __missing_objects += corporations.Corporations.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
-        __missing_objects += characters.Characters.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
+        if not exclude_nonentity:
+            __missing_objects += types.Types.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
+            __missing_objects += systems.Systems.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
+            __missing_objects += constellations.Constellations.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
+            __missing_objects += regions.Regions.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
+        if not exclude_entity:
+            __missing_objects += alliances.Alliances.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
+            __missing_objects += corporations.Corporations.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
+            __missing_objects += characters.Characters.missing_name_objects(service_module, cls.get_remaining_limit(len(__missing_objects)))
         return __missing_objects
 
     @classmethod
-    def missing_count(cls, service_module)->int:
+    def missing_count(cls, service_module, exclude_nonentity=False, exclude_entity=False)->int:
         db = service_module.get_session()
         try:
-            return len(cls.__get_objects_with_missing_names(service_module))
+            return len(cls.__get_objects_with_missing_names(service_module, exclude_nonentity=exclude_nonentity, exclude_entity=exclude_entity))
         except Exception as ex:
             print(ex)
             return -1
@@ -58,7 +60,8 @@ class name_resolve(name_only):
         return return_items
 
     @classmethod
-    def api_mass_name_resolve(cls, service_module, error_ids_404={}, error_ids_non404={}):
+    def api_mass_name_resolve(cls, service_module, error_ids_404={}, error_ids_non404={}, exclude_nonentity=False,
+                              exclude_entity=False):
         lg = InsightLogger.InsightLogger.get_logger('ZK.names', 'ZK.log', child=True)
 
         ids_404_pending_recheck = []
@@ -79,7 +82,7 @@ class name_resolve(name_only):
             db: Session = service_module.get_session()
             try:
                 missing_object_dict = {}
-                for row in cls.__get_objects_with_missing_names(service_module):
+                for row in cls.__get_objects_with_missing_names(service_module, exclude_nonentity=exclude_nonentity, exclude_entity=exclude_entity):
                     missing_object_dict[row.get_id()] = row
                 id_keys = list(set(list(missing_object_dict.keys())) - set(list(error_ids_404.keys()) + list(ids_404_pending_recheck) + list(error_ids_non404.keys())))
                 commit_pending_buffer = 0

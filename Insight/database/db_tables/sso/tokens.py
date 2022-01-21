@@ -221,7 +221,7 @@ class Tokens(dec_Base.Base, sso_base):
             __row.get_affiliation(response.get("access_token"), service_module)
             db.merge(__row)
             db.commit()
-            name_resolver.api_mass_name_resolve(service_module)
+            name_resolver.api_mass_name_resolve(service_module, exclude_nonentity=True)
             return db.query(cls).filter(cls.discord_user == discord_user_id,
                                         cls.refresh_token == response.get("refresh_token")).one()
         except Exception as ex:

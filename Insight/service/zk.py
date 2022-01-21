@@ -132,7 +132,7 @@ class zk(object):
         try:
             if dbRow.tb_kills.make_row(km_json, self.service) is not None:
                 dbRow.name_resolver.api_mass_name_resolve(self.service, error_ids_404=self.error_ids_404,
-                                                          error_ids_non404=self.error_ids_non404)
+                                                          error_ids_non404=self.error_ids_non404, exclude_nonentity=True)
                 db: Session = self.service.get_session()
                 try:
                     result = dbRow.tb_kills.get_row(km_json, self.service)
