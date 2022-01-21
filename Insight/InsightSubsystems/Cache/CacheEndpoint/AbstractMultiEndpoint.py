@@ -15,7 +15,7 @@ class AbstractMultiEndpoint(AbstractEndpoint):
         cache_key = await self._get_prefixed_key(await self._get_unprefixed_key_hash(query_item=query_item, **kwargs))
         d[query_item] = await self._set(cache_key, data_result)
 
-    async def get(self, query_list: list, **kwargs) -> dict:
+    async def _perform_get(self, query_list: list, **kwargs) -> dict:
         st = InsightLogger.InsightLogger.time_start()
         try:
             if isinstance(query_list, set):
@@ -68,6 +68,9 @@ class AbstractMultiEndpoint(AbstractEndpoint):
         except Exception as ex:
             self.lg.exception(ex)
             raise ex
+
+    async def get(self, query_list: list, **kwargs) -> dict:
+        return await asyncio.wait_for(self._perform_get(query_list=query_list, **kwargs), timeout=60)
 
     async def _do_endpoint_logic(self, lookup_dict: dict, **kwargs) -> dict:
         return await self.executor(self._do_endpoint_logic_sync, lookup_dict, **kwargs)

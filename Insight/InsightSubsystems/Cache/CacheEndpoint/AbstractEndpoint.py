@@ -70,7 +70,7 @@ class AbstractEndpoint(metaclass=InsightSingleton):
     async def process_before_return(self, data_dict: dict) -> dict:
         return await self.executor(self.sync_process_before_return, data_dict)
 
-    async def get(self, **kwargs) -> dict:
+    async def _perform_get(self, **kwargs) -> dict:
         try:
             cache_key = await self._get_prefixed_key(await self._get_unprefixed_key_hash(**kwargs))
             async with (await self.get_lock(cache_key)):
@@ -85,6 +85,9 @@ class AbstractEndpoint(metaclass=InsightSingleton):
         except Exception as ex:
             self.lg.exception(ex)
             raise ex
+
+    async def get(self, **kwargs) -> dict:
+        return await asyncio.wait_for(self._perform_get(**kwargs), timeout=60)
 
     async def delete_no_fail(self, **kwargs) -> bool:
         """Returns True if no error when deleting key"""
