@@ -43,6 +43,9 @@ class NamesDoomheim(AbstractCronTask):
     def _rename_duplicates(self, table_column_name, table_column_id, table):
         db = self.service.get_session()
         try:
+            if db.query(table).filter(table_column_name == None).count() > 0:
+                self.lg.warning("Skipping rename duplicates on table: {} as not all names are currently resolved".format(str(table.__name__)))
+                return
             duplicate_names = db.query(table_column_name).filter(table_column_name != None).group_by(table_column_name).having(func.count(table_column_name) > 1).all()
             if len(duplicate_names) > 0:
                 for n in duplicate_names:
@@ -54,6 +57,7 @@ class NamesDoomheim(AbstractCronTask):
                     for row in update_objects:
                         row_iteration += 1
                         if row_iteration == 1:
+                            self.lg.info("Found {} duplicates of name '{}'. ID of open / top entity is {}.".format(len(update_objects), row.get_name(), row.get_id()))
                             continue
                         else:
                             if isinstance(row, tb_characters):
