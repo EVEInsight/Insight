@@ -1,5 +1,5 @@
 from ..UnboundCommandBase import *
-from . import MemoryDiagnostic, MailExport, SetMotd
+from . import MemoryDiagnostic, MailExport, SetMotd, ResetCache
 
 
 class Admin(UnboundCommandBase):
@@ -9,6 +9,7 @@ class Admin(UnboundCommandBase):
         self.admin_mem = MemoryDiagnostic.MemoryDiagnostic(self.unbound)
         self.admin_mail_export = MailExport.MailExport(self.unbound)
         self.set_motd = SetMotd.SetMotd(self.unbound)
+        self.reset_cache = ResetCache.ResetCache(self.unbound)
 
     async def run_command(self, d_message: discord.Message, m_text: str = ""):
         async with self.cLock:
@@ -22,5 +23,7 @@ class Admin(UnboundCommandBase):
                                                            self.admin_mail_export.run_command(d_message)))
             options.add_option(dOpt.option_calls_coroutine(self.set_motd.command_description(), "",
                                                            self.set_motd.run_command(d_message)))
+            options.add_option(dOpt.option_calls_coroutine(self.reset_cache.command_description(), "",
+                                                           self.reset_cache.run_command(d_message)))
 
             await options()
