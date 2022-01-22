@@ -4,6 +4,7 @@ import InsightLogger
 import asyncio
 import InsightExc
 import time
+import traceback
 
 
 class AbstractCronTask(metaclass=InsightSingleton):
@@ -59,6 +60,7 @@ class AbstractCronTask(metaclass=InsightSingleton):
                 await asyncio.sleep(2)
             except Exception as ex:
                 self.lg.exception(ex)
+                traceback.print_exc()
                 print("Error when running cron task. {} - EX: {}".format(self.__class__.__name__, ex))
                 await asyncio.sleep(55)
             finally:
