@@ -100,7 +100,8 @@ class name_resolve(name_only):
                     api_chunk_size = cls.missing_id_chunk_size()
                     processing_404 = False
                 if len(id_keys) >= cls.missing_id_chunk_size():
-                    print("Mass name resolve needs to resolve {} names.".format(len(id_keys)))
+                    print("Mass name resolve needs to resolve {} names. Total current error 404s: {}, Total current error non404s: {}".
+                          format(len(id_keys), len(error_ids_404.keys()), len(error_ids_non404.keys())))
                 for id_list in cls.split_lists(id_keys, api_chunk_size):
                     completed_count += len(id_list)
                     lg.info('Processing name chunk of size {} from {}/{} total missing names.'.format(len(id_list),
