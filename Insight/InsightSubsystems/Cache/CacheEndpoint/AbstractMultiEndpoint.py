@@ -42,7 +42,7 @@ class AbstractMultiEndpoint(AbstractEndpoint):
                                                                                                  **kwargs))
                     cache_keys_to_query_item[cache_key] = query_item
                     awaitables.append(self.cm.get_cache_with_key(cache_key))
-                for f in asyncio.as_completed(awaitables, timeout=15):
+                for f in asyncio.as_completed(awaitables, timeout=90):
                     try:
                         key_queried, result = await f
                         query_item = cache_keys_to_query_item.get(key_queried)
@@ -59,7 +59,7 @@ class AbstractMultiEndpoint(AbstractEndpoint):
                     for query_item, result in completed_lookup_dict.items():
                         awaitables_completed.append(self.set_dict_value(cached_dict, query_item=query_item,
                                                                         data_result=result))
-                    for f in asyncio.as_completed(awaitables_completed, timeout=15):
+                    for f in asyncio.as_completed(awaitables_completed, timeout=90):
                         await f
             InsightLogger.InsightLogger.time_log(self.lg, st, 'entirety - hit: {} - miss: {} queried keys: "{}"'.
                                                  format(cache_hit, len(query_set), query_set),
@@ -70,7 +70,7 @@ class AbstractMultiEndpoint(AbstractEndpoint):
             raise ex
 
     async def get(self, query_list: list, **kwargs) -> dict:
-        return await asyncio.wait_for(self._perform_get(query_list=query_list, **kwargs), timeout=60)
+        return await asyncio.wait_for(self._perform_get(query_list=query_list, **kwargs), timeout=300)
 
     async def _do_endpoint_logic(self, lookup_dict: dict, **kwargs) -> dict:
         return await self.executor(self._do_endpoint_logic_sync, lookup_dict, **kwargs)

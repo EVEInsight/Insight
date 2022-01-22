@@ -87,7 +87,7 @@ class AbstractEndpoint(metaclass=InsightSingleton):
             raise ex
 
     async def get(self, **kwargs) -> dict:
-        return await asyncio.wait_for(self._perform_get(**kwargs), timeout=60)
+        return await asyncio.wait_for(self._perform_get(**kwargs), timeout=300)
 
     async def delete_no_fail(self, **kwargs) -> bool:
         """Returns True if no error when deleting key"""
