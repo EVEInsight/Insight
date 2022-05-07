@@ -36,12 +36,11 @@ Killmails and intel are presented in Discord rich embeds containing relevant lin
 
 # Start an ```Insight``` instance
 This Docker image uses volumes to persist the Database.db and config file. See [volumes](https://docs.docker.com/storage/volumes/) for information about Docker volumes.
-1. Create and navigate to a directory where you wish to store Insight configuration, logs, and database.
-2. Pull and run the image. This command will pull the stable Docker Insight image and initialize the config files in your current directory.
+1. Pull and run the image. This command will pull the latest Insight Docker image. Note: this command does not persist any Docker volume data.
     ```
     docker run --name insight -it --rm nathanls/insight
     ```
-3. Keep the image up to date by checking for updates and then starting Insight: 
+2. Keep the image up to date by checking for updates and then starting Insight: 
     ```
     docker pull nathanls/insight && docker run --name insight -it --rm nathanls/insight
     ```
@@ -86,11 +85,6 @@ services:
         condition: any
     networks:
       - insight-net
-    ports:
-      - target: 6379
-        published: 6379
-        protocol: tcp
-        mode: host
     command: --requirepass "pass"
 networks:
   insight-net:
@@ -105,7 +99,7 @@ volumes:
     * After creating a new app, edit your app and click **Create a Bot User**.
     * Ensure the **Public Bot** checkbox is enabled and the **Require OAuth2 Code Grant** is disabled.
 2. Copy your Discord application's **Token** and set the ```DISCORD_TOKEN``` environmental variable.
-3. Go to [CCP Developers](https://developers.eveonline.com/applications/create) and create a new app with the following settings:
+3. Go to [EVE App Developers](https://developers.eveonline.com/applications/create) and create a new app with the following settings:
     * **Connection Type** = Authentication & API Access
     * **Requested Scopes List:**
         * esi-characters.read_contacts.v1
@@ -151,16 +145,16 @@ Optional path to the SQLITE database if using the sqlite3 driver.
 Email address to include in request headers from Insight when contacting APIs. This should be an email of the bot admin for API managers to contact for service abuse or issues.
 
 ### ```DISCORD_TOKEN```
-This Discord bot token.
+The Discord bot token from [Discord Apps](https://discordapp.com/developers/applications/me).
 
 ### ```CCP_CLIENT_ID```
-The CCP application ID obtained from https://developers.eveonline.com
+The CCP application ID obtained from [EVE App Developers](https://developers.eveonline.com/applications/create).
 
 ### ```CCP_SECRET_KEY```
-The CCP application secret key obtained from https://developers.eveonline.com
+The CCP application secret key obtained from [EVE App Developers](https://developers.eveonline.com/applications/create).
 
 ### ```CCP_CALLBACK_URL```
-The CCP application callback URL obtained from https://developers.eveonline.com
+The CCP application callback URL obtained from [EVE App Developers](https://developers.eveonline.com/applications/create).
 
 ### ```CLEAR_TOKEN_TABLE_ON_ERROR```
 Set to ```TRUE``` to drop the token table if Insight is unable to read it with the stored encryption key. 
