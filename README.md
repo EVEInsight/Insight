@@ -1,3 +1,9 @@
+# Project Status
+This project and repository is no longer actively maintained or supported. See [The Future of Insight](https://github.com/EVEInsight/Insight/blob/master/the_future_of_Insight.md) document for reasoning and an FAQ.
+Thank you all for supporting and enjoying Insight over the years!
+
+Fly safe o7
+
 # Insight v1.7.0
 [![](https://img.shields.io/badge/-EVEInsight.net-154360)](https://eveinsight.net)
 [![](https://img.shields.io/docker/pulls/nathanls/insight.svg)](https://hub.docker.com/r/nathanls/insight)

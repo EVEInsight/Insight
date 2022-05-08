@@ -1,3 +1,10 @@
+# Project Status
+This project and Docker repository is no longer actively maintained or supported. See [The Future of Insight](https://github.com/EVEInsight/Insight/blob/master/the_future_of_Insight.md) document for reasoning and an FAQ.
+Thank you all for supporting and enjoying Insight over the years!
+
+Fly safe o7
+
+
 [![](https://img.shields.io/badge/-EVEInsight.net-154360)](https://eveinsight.net)
 
 [Insight](https://git.eveinsight.net) Discord bot for EVE Online.

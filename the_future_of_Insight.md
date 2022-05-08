@@ -18,7 +18,7 @@ I have an [FAQ](#FAQ) section detailing my reasoning and what happens next.
 
 
 # Project Backstory
-Back in 2018 I wanted to build a tool that would alert of nearby capitals and shiny ships in jump range given a system and provide notifications  if there was detected activity.
+Back in 2018 I wanted to build a tool that would alert of nearby capitals and shiny ships in jump range given a system and provide notifications if there was detected activity.
 Everyone was on Discord and there were solid wrapper libraries around the Discord API to build an asynchronous app to parse kills from the zKillboard.com API, enrich the data, and publish mails to Discord.
 
 The goal was to build a tool that could enhance the EVE experience by bringing EVE directly to Discord communities whether that be through showing off the latest activity or preparing insights into the fleet composition of nearby hostiles near your home systems to engage.
@@ -34,7 +34,7 @@ Since July 2018 there have been improvements including the switch to Docker / mi
 The current public Discord bot instance has over 4,200 active feeds streaming kills to Discord channels and is a member of over 2,000 Discord communities. During busy activity periods the number of successfully delivered messages to channels could reach 25,000+ per hour. 
 The database contains a historical 21 million killmail and 100 million attacker rows parsed since July 2018 and is nearly 30GB in size!
 
-A second rewrite was in the works through the [InsightCore](https://github.com/EVEInsight/InsightCore) project in response to 2022 [Discord API Message Content Privileged Intent](https://support-dev.discord.com/hc/en-us/articles/4404772028055-Message-Content-Privileged-Intent-FAQ) changes and technical debt of the current code. 
+A second rewrite was in the works through the [InsightCore](https://github.com/EVEInsight/InsightCore) project in response to the 2022 [Discord API Message Content Privileged Intent](https://support-dev.discord.com/hc/en-us/articles/4404772028055-Message-Content-Privileged-Intent-FAQ) changes and technical debt of the current code. 
 InsightCore was pretty cool and built around the Celery library using RabbitMQ to distribute tasks across multiple stateless containers where every attribute of mails could be filtered through a JSON configuration document. 
 The InsightCore project was designed to have streams configured through a web API and support multiple target platforms (including Slack) through webhooks to remove the reliance on a chat/Discord bot for posting messages.
 
@@ -48,7 +48,7 @@ Deciding to stop development and hosting of Insight is a decision not made in an
 I would summarize my reasoning to be a combination of three primary factors:
 * The previous and current lack of direction / vision CCP has for EVE
 * Discord API changes through the new [Message Content Privileged Intent](https://support-dev.discord.com/hc/en-us/articles/4404772028055-Message-Content-Privileged-Intent-FAQ) and the resulting changes required to operate the public Insight bot
-* Time and motivation for maintaining, testing, and debugging new features/improvements when a rewrite is necessary
+* Lack of time and motivation for maintaining, testing, and debugging new features/improvements when a rewrite is necessary
 
 In the past, Insight and other Discord bot projects would parse text messages for command indicators (!, /, ?, etc.) as there was no other functionality built into the Discord API to trigger a command.
 Discord is pushing for the adoption of their Interactions API (slash commands, buttons, menus, etc.) while many third party Discord API wrapper library developers were stressed to rewrite their libraries to suddenly support these new features.
@@ -58,11 +58,11 @@ The intent isn't provided if you only want to maintain the old way of reading co
 I understand Discord's reasoning to use messages intent and applaud them for taking steps to improve user privacy and design more interactive features.
 
 However, supporting the new Discord changes and requirements would require a significant amount of work on Insight. 
-Insight needed refactoring, and it was extremely difficult to make changes / build new features into the limiting architecture Insight was designed with.
+Insight needed refactoring, and it was extremely difficult to make changes or build new features into the limiting architecture Insight was designed with.
 
 
 Instead of writing code for Insight I decided to start work on the [InsightCore](https://github.com/EVEInsight/InsightCore) project to function as a replacement and complete rewrite that would be easier to maintain and collaborate on in place of Insight / this repo.
-InsightCore would use direct publishing to channel through webhooks and support far superior stream customization through a web API instead of Discord command menus. 
+InsightCore would directly publish to a channel through webhooks and support far superior stream customization through a web API instead of Discord command menus. 
 There would be no bot and Discord wouldn't be the only possible destination as the project was not designed around Discord like Insight was.
 
 The goal was to have InsightCore completed by the message intent cutoff but the recent changes in EVE have me concerned over the game's future and have killed off any remaining motivation I had left for developing EVE tools.
@@ -82,7 +82,7 @@ You are free to host an instance of Insight with a new fresh blank database.
 No. Maybe things will get better in the future and I decide to come back. Who knows?
 
 ## What happens to the Insight public bot on May 13th?
-The public Discord bot that is a member of over 2,000 servers will shut down and be deleted.
+The public Discord bot that is a member of 2,000 servers and streams to over 4,200 feeds will shut down and be deleted.
 The third-party EVE / ESI application used for accessing pilot contact information will also be deleted. 
 
 ## What happens to EVEInsight.net and the websites?
